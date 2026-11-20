@@ -1,0 +1,1267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>QUIC Sketchbook</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&family=Courier+Prime:wght@400;700&display=swap">
+<style>
+/* Layout: one long sketchbook. Each chapter is a taped-in paper sheet on a graph-paper desk,
+   with marker doodles and one hands-on toy per page. */
+:root{
+  --paper:#f6f7f2; --grid:rgba(47,91,211,.09); --sheet:#ffffff; --sheet-edge:rgba(35,38,58,.10);
+  --ink:#23263a; --ink-soft:#585d76;
+  --blue:#2f5bd3; --red:#e2483d; --yellow:#f5b800; --green:#23925a; --purple:#7a4fd0; --pink:#dd3f7f; --orange:#ea7a12;
+  --hl:rgba(255,212,59,.6); --hl-pink:rgba(255,120,170,.35); --hl-green:rgba(80,210,140,.35); --hl-blue:rgba(110,160,255,.35);
+  --note-y:#fff2a6; --note-p:#ffd5e4; --note-b:#d3e4ff; --note-g:#d3f3dc; --note-o:#ffe1c4; --note-v:#e7dcff; --note-ink:#23263a;
+  --tape:rgba(255,220,120,.55); --on-accent:#ffffff;
+  --f-display:"Caveat", "Segoe Print", "Bradley Hand", cursive;
+  --f-body:"Patrick Hand", "Comic Sans MS", "Chalkboard SE", system-ui, sans-serif;
+  --f-mono:"Courier Prime", "Courier New", ui-monospace, monospace;
+  --wobbly:255px 15px 225px 15px / 15px 225px 15px 255px;
+  --wobbly-2:15px 255px 15px 225px / 225px 15px 255px 15px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#1a1d26; --grid:rgba(140,165,255,.07); --sheet:#242836; --sheet-edge:rgba(0,0,0,.35);
+    --ink:#eeece4; --ink-soft:#b0b4c8;
+    --blue:#83a6ff; --red:#ff7d70; --yellow:#ffd25a; --green:#62d69d; --purple:#b597ff; --pink:#ff88b6; --orange:#ffab5e;
+    --hl:rgba(255,210,90,.30); --hl-pink:rgba(255,136,182,.28); --hl-green:rgba(98,214,157,.25); --hl-blue:rgba(131,166,255,.28);
+    --note-y:#efdf8c; --note-p:#f0bfd2; --note-b:#bcd2f5; --note-g:#bfe6cb; --note-o:#f3cfab; --note-v:#d4c6f5; --note-ink:#1d2030;
+    --tape:rgba(255,220,120,.30); --on-accent:#151821; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1a1d26; --grid:rgba(140,165,255,.07); --sheet:#242836; --sheet-edge:rgba(0,0,0,.35);
+  --ink:#eeece4; --ink-soft:#b0b4c8;
+  --blue:#83a6ff; --red:#ff7d70; --yellow:#ffd25a; --green:#62d69d; --purple:#b597ff; --pink:#ff88b6; --orange:#ffab5e;
+  --hl:rgba(255,210,90,.30); --hl-pink:rgba(255,136,182,.28); --hl-green:rgba(98,214,157,.25); --hl-blue:rgba(131,166,255,.28);
+  --note-y:#efdf8c; --note-p:#f0bfd2; --note-b:#bcd2f5; --note-g:#bfe6cb; --note-o:#f3cfab; --note-v:#d4c6f5; --note-ink:#1d2030;
+  --tape:rgba(255,220,120,.30); --on-accent:#151821; color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth; scroll-padding-top:84px}
+body{
+  margin:0; color:var(--ink); font-family:var(--f-body); font-size:1.2rem; line-height:1.55;
+  background-color:var(--paper);
+  background-image:
+    linear-gradient(var(--grid) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+  background-size:26px 26px;
+  -webkit-font-smoothing:antialiased;
+}
+body::before{content:""; position:fixed; inset:0 0 auto; height:env(safe-area-inset-top,0px); z-index:10; background:var(--paper)}
+img,svg{max-width:100%}
+a{color:var(--blue); text-decoration-thickness:2px; text-underline-offset:3px}
+a:hover{text-decoration-style:wavy}
+:focus-visible{outline:3px dashed var(--pink); outline-offset:3px}
+h1,h2,h3{font-family:var(--f-display); font-weight:700; line-height:1.05; text-wrap:balance; margin:0}
+h2{font-size:clamp(2.4rem, 5vw, 3.4rem)}
+h3{font-size:1.9rem}
+p{margin:0}
+strong{font-weight:400; background:linear-gradient(transparent 55%, var(--hl) 55%, var(--hl) 92%, transparent 92%); padding:0 2px}
+
+.wrap{max-width:1080px; margin:0 auto; padding-left:max(16px, env(safe-area-inset-left,0px)); padding-right:max(16px, env(safe-area-inset-right,0px))}
+
+/* ---------- tabs nav ---------- */
+.tabs{position:sticky; top:env(safe-area-inset-top,0px); z-index:20; background:var(--paper); border-bottom:2px dashed var(--sheet-edge)}
+.tabs .wrap{display:flex; gap:6px; overflow-x:auto; padding-block:10px 0; scrollbar-width:none}
+.tabs .wrap::-webkit-scrollbar{display:none}
+.home-tab{flex:0 0 auto; align-self:center; margin:0 6px 4px 0; font-family:var(--f-display); font-size:1.25rem; font-weight:700; color:var(--ink); text-decoration:none;
+  padding:2px 12px; border:2px dashed var(--ink); border-radius:var(--wobbly)}
+.home-tab:hover{background:var(--hl); text-decoration:none}
+.tab{flex:0 0 auto; font-family:var(--f-display); font-size:1.35rem; font-weight:700; color:var(--note-ink); text-decoration:none;
+  padding:4px 14px 6px; border-radius:12px 12px 0 0; border:2px solid var(--ink); border-bottom:none; transform:translateY(2px); transition:transform .15s}
+.tab:hover,.tab.active{transform:translateY(-3px); text-decoration:none}
+.tab:nth-child(6n+1){background:var(--note-y)} .tab:nth-child(6n+2){background:var(--note-p)} .tab:nth-child(6n+3){background:var(--note-b)}
+.tab:nth-child(6n+4){background:var(--note-g)} .tab:nth-child(6n+5){background:var(--note-o)} .tab:nth-child(6n+6){background:var(--note-v)}
+
+/* ---------- sheets ---------- */
+main{display:flex; flex-direction:column; gap:56px; padding-block:28px 64px}
+.sheet{position:relative; background:var(--sheet); border-radius:6px; padding:clamp(22px, 4vw, 48px);
+  box-shadow:0 1px 0 var(--sheet-edge), 6px 8px 0 var(--sheet-edge);
+  background-image:repeating-linear-gradient(transparent 0 37px, var(--grid) 37px 38px);
+}
+.sheet::before,.sheet::after{content:""; position:absolute; top:-14px; width:110px; height:30px; background:var(--tape); border-left:2px dotted rgba(0,0,0,.06); border-right:2px dotted rgba(0,0,0,.06)}
+.sheet::before{left:8%; transform:rotate(-4deg)}
+.sheet::after{right:8%; transform:rotate(5deg)}
+.sheet:nth-of-type(odd){transform:rotate(-.25deg)}
+.sheet:nth-of-type(even){transform:rotate(.25deg)}
+.sheet > * + *{margin-top:22px}
+.page-no{font-family:var(--f-display); font-size:1.5rem; color:var(--ink-soft); display:flex; align-items:center; gap:10px}
+.page-no::after{content:""; flex:1; height:2px; background:repeating-linear-gradient(90deg, var(--ink-soft) 0 8px, transparent 8px 14px); opacity:.5}
+.lede{font-size:1.35rem; max-width:62ch}
+.prose{max-width:66ch; display:flex; flex-direction:column; gap:14px}
+.ink-blue{color:var(--blue)} .ink-red{color:var(--red)} .ink-green{color:var(--green)} .ink-purple{color:var(--purple)} .ink-pink{color:var(--pink)} .ink-orange{color:var(--orange)}
+.hl-pink{background:linear-gradient(transparent 50%, var(--hl-pink) 50%, var(--hl-pink) 90%, transparent 90%)}
+.hl-green{background:linear-gradient(transparent 50%, var(--hl-green) 50%, var(--hl-green) 90%, transparent 90%)}
+.hl-blue{background:linear-gradient(transparent 50%, var(--hl-blue) 50%, var(--hl-blue) 90%, transparent 90%)}
+.scribble-title{position:relative; display:inline-block}
+.scribble-title svg.under{position:absolute; left:-2%; bottom:-14px; width:104%; height:18px; overflow:visible}
+
+.cols{display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap:28px; align-items:start}
+.cols > *{min-width:0}
+
+.box{border:2.5px solid var(--ink); border-radius:var(--wobbly); padding:18px 22px}
+.box.dashed{border-style:dashed}
+.callout{border:3px solid var(--purple); border-radius:var(--wobbly-2); padding:18px 22px; position:relative; background:color-mix(in srgb, var(--purple) 7%, transparent)}
+.callout .tag{font-family:var(--f-display); font-size:1.5rem; color:var(--purple); font-weight:700; display:block; margin-bottom:4px}
+
+ul.doodle{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px}
+ul.doodle li{padding-left:34px; position:relative}
+ul.doodle li::before{content:""; position:absolute; left:2px; top:.45em; width:20px; height:14px; border:2.5px solid var(--c, var(--blue)); border-radius:50% 40% 55% 45%; transform:rotate(-8deg)}
+ul.doodle.x li::before{content:"✗"; border:none; width:auto; height:auto; top:-.05em; font-family:var(--f-display); font-size:1.6rem; color:var(--red); transform:none}
+
+/* buttons & controls */
+.btn{font-family:var(--f-display); font-size:1.45rem; font-weight:700; line-height:1; padding:10px 18px 12px; cursor:pointer;
+  border:2.5px solid var(--ink); border-radius:var(--wobbly); background:var(--yellow); color:var(--note-ink);
+  box-shadow:3px 3px 0 var(--ink); transition:transform .1s, box-shadow .1s}
+.btn:hover{transform:translate(-1px,-1px); box-shadow:4px 4px 0 var(--ink)}
+.btn:active{transform:translate(2px,2px); box-shadow:1px 1px 0 var(--ink)}
+.btn.alt{background:var(--note-b)} .btn.pink{background:var(--note-p)} .btn.green{background:var(--note-g)}
+.btn:disabled{opacity:.45; cursor:not-allowed; transform:none; box-shadow:3px 3px 0 var(--ink)}
+.controls{display:flex; flex-wrap:wrap; gap:12px 16px; align-items:center}
+.check{display:inline-flex; align-items:center; gap:8px; cursor:pointer; font-size:1.15rem}
+.check input{appearance:none; width:24px; height:24px; border:2.5px solid var(--ink); border-radius:5px 8px 4px 7px; margin:0; display:grid; place-items:center; cursor:pointer; background:var(--sheet)}
+.check input:checked::after{content:"✓"; font-family:var(--f-display); font-weight:700; font-size:1.6rem; color:var(--green); line-height:0; transform:translate(1px,-1px)}
+.toy{border:2.5px dashed var(--ink-soft); border-radius:18px; padding:18px; display:flex; flex-direction:column; gap:16px; background:color-mix(in srgb, var(--paper) 60%, transparent)}
+.toy-label{font-family:var(--f-display); font-size:1.5rem; font-weight:700; color:var(--pink); display:flex; align-items:center; gap:8px}
+.toy-label svg{width:30px; height:30px; flex:0 0 auto}
+.status{font-size:1.15rem; min-height:1.6em; color:var(--ink-soft)}
+.status b{font-weight:400; color:var(--ink)}
+
+/* rough svg strokes */
+.rough{filter:url(#rough)}
+.st{fill:none; stroke:var(--ink); stroke-width:2.5; stroke-linecap:round; stroke-linejoin:round}
+.st-blue{stroke:var(--blue)} .st-red{stroke:var(--red)} .st-green{stroke:var(--green)} .st-purple{stroke:var(--purple)} .st-pink{stroke:var(--pink)} .st-orange{stroke:var(--orange)} .st-soft{stroke:var(--ink-soft)}
+.fl-sheet{fill:var(--sheet)} .fl-y{fill:var(--note-y)} .fl-p{fill:var(--note-p)} .fl-b{fill:var(--note-b)} .fl-g{fill:var(--note-g)} .fl-o{fill:var(--note-o)} .fl-v{fill:var(--note-v)} .fl-ink{fill:var(--ink)}
+.svg-txt{font-family:var(--f-display); font-weight:700; fill:var(--ink)}
+.svg-txt.soft{fill:var(--ink-soft)} .svg-txt.blue{fill:var(--blue)} .svg-txt.red{fill:var(--red)} .svg-txt.green{fill:var(--green)} .svg-txt.purple{fill:var(--purple)} .svg-txt.pink{fill:var(--pink)} .svg-txt.note{fill:var(--note-ink)}
+.ladder .svg-txt{paint-order:stroke; stroke:var(--sheet); stroke-width:6px; stroke-linejoin:round}
+.svg-mono{font-family:var(--f-mono); fill:var(--ink-soft)}
+
+/* tables */
+.table-wrap{overflow-x:auto; padding:4px}
+table.sk{border-collapse:separate; border-spacing:0; width:100%; min-width:620px; font-size:1.1rem}
+table.sk th{font-family:var(--f-display); font-size:1.45rem; text-align:left; padding:8px 14px; border-bottom:3px solid var(--ink)}
+table.sk td{padding:10px 14px; border-bottom:2px dashed var(--sheet-edge); vertical-align:top}
+table.sk tr:last-child td{border-bottom:none}
+table.sk td:first-child{font-family:var(--f-display); font-weight:700; font-size:1.4rem; color:var(--blue); white-space:nowrap}
+table.sk.compare td:first-child{color:var(--ink); white-space:normal}
+table.sk.compare th:nth-child(2){color:var(--blue)} table.sk.compare th:nth-child(3){color:var(--orange)} table.sk.compare th:nth-child(4){color:var(--pink)}
+table.sk.compare td:nth-child(4){background:color-mix(in srgb, var(--pink) 8%, transparent)}
+
+/* ---------- hero ---------- */
+.hero{display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,1fr); gap:24px; align-items:center; padding-block:34px 6px}
+.hero h1{font-size:clamp(4.4rem, 13vw, 9rem); letter-spacing:-1px; color:var(--ink); white-space:nowrap; text-wrap:nowrap}
+.hero h1 .q{color:var(--blue)} .hero h1 .u{color:var(--pink)} .hero h1 .i{color:var(--green)} .hero h1 .c{color:var(--orange)}
+.hero .kicker{font-family:var(--f-display); font-size:1.7rem; color:var(--purple); font-weight:700}
+.hero .hook{font-size:1.45rem; max-width:34ch; margin-top:14px}
+.hero .who{margin-top:18px; font-size:1.05rem; color:var(--ink-soft)}
+.hero-art{width:100%; height:auto}
+@media (max-width:760px){ .hero{grid-template-columns:1fr} }
+
+/* ---------- ch1: courier ---------- */
+.scene{position:relative; width:100%; overflow:hidden}
+.scene svg{display:block; width:100%; height:auto}
+.mover{position:absolute; top:var(--top,52%); left:0; transform:translate(-50%,-50%); width:38px; height:30px; display:grid; place-items:center;
+  font-family:var(--f-display); font-weight:700; font-size:1.3rem; color:var(--note-ink); background:var(--note-y); border:2.5px solid var(--ink); border-radius:4px 6px 3px 5px; pointer-events:none}
+.mover.c2{background:var(--note-p)} .mover.c3{background:var(--note-g)} .mover.c4{background:var(--note-b)} .mover.c5{background:var(--note-o)} .mover.c6{background:var(--note-v)}
+.tray{display:flex; flex-wrap:wrap; gap:8px; align-items:center; min-height:44px}
+.tray .lbl{font-family:var(--f-display); font-size:1.4rem; font-weight:700; margin-right:4px}
+.chip{font-family:var(--f-display); font-weight:700; font-size:1.3rem; min-width:38px; height:34px; padding:0 8px; display:inline-grid; place-items:center; border:2.5px solid var(--ink); border-radius:6px 4px 7px 3px; background:var(--note-g); color:var(--note-ink)}
+.chip.lost{background:transparent; border-style:dashed; color:var(--red); border-color:var(--red)}
+.chip.late{background:var(--note-o); text-decoration:line-through}
+
+.stack{display:flex; flex-direction:column; gap:8px; position:relative}
+.layer{display:flex; justify-content:space-between; gap:12px; align-items:baseline; padding:8px 16px; border:2.5px solid var(--ink); border-radius:var(--wobbly); color:var(--note-ink)}
+.layer b{font-family:var(--f-display); font-size:1.5rem; font-weight:700}
+.layer span{font-size:1rem; text-align:right}
+.layer.quic{outline:3px dashed var(--pink); outline-offset:4px}
+.stack-note{font-family:var(--f-display); font-size:1.35rem; color:var(--pink); font-weight:700}
+
+/* ---------- ch2: till ---------- */
+.till-row{display:flex; align-items:flex-end; gap:10px; overflow-x:auto; padding:10px 4px 4px; min-height:150px}
+.till{flex:0 0 auto; width:96px; text-align:center}
+.cust{flex:0 0 auto; width:70px; display:flex; flex-direction:column; align-items:center; gap:2px; position:relative; transition:transform .3s}
+.cust svg{width:46px; height:70px}
+.cust .bag{font-family:var(--f-display); font-weight:700; font-size:1.05rem; padding:0 6px; border:2px solid var(--ink); border-radius:5px; color:var(--note-ink); white-space:nowrap}
+.cust.waiting svg{animation:tap .5s ease-in-out infinite alternate}
+.cust .bubble{position:absolute; top:-30px; left:30px; white-space:nowrap; font-family:var(--f-display); font-size:1.2rem; font-weight:700; color:var(--red); background:var(--sheet); border:2px solid var(--red); border-radius:14px 14px 14px 2px; padding:0 8px}
+@keyframes tap{to{transform:translateY(-4px) rotate(2deg)}}
+
+/* ---------- ch3: udp header ---------- */
+.hdr{display:flex; flex-direction:column; gap:14px; min-width:560px}
+.hdr-row{display:flex; flex-direction:column; gap:4px}
+.hdr-row .name{font-family:var(--f-display); font-size:1.4rem; font-weight:700}
+.bytes{display:grid; gap:0; border:2.5px solid var(--ink); border-radius:4px 7px 5px 3px; overflow:hidden}
+.bytes > div{padding:6px 4px; font-size:.95rem; line-height:1.15; text-align:center; border-right:2px solid var(--ink); color:var(--note-ink); display:grid; place-items:center; min-height:52px}
+.bytes > div:last-child{border-right:none}
+.bytes small{display:block; font-family:var(--f-mono); font-size:.75rem; opacity:.75}
+.ruler{font-family:var(--f-mono); font-size:.8rem; color:var(--ink-soft)}
+
+.envelope-wrap{display:grid; grid-template-columns:minmax(0,300px) minmax(0,1fr); gap:28px; align-items:center}
+@media (max-width:700px){ .envelope-wrap{grid-template-columns:1fr} }
+.env{position:relative; width:100%; max-width:300px; aspect-ratio:3/2.2; cursor:pointer; background:none; border:none; padding:0; margin:60px auto 0; display:block}
+.env .body{position:absolute; inset:0; background:var(--note-o); border:3px solid var(--ink); border-radius:6px; z-index:2;
+  clip-path:polygon(0 0, 50% 52%, 100% 0, 100% 100%, 0 100%)}
+.env .back{position:absolute; inset:0; background:color-mix(in srgb, var(--note-o) 80%, var(--ink) 20%); border:3px solid var(--ink); border-radius:6px}
+.env .flap{position:absolute; left:0; right:0; top:0; height:56%; background:var(--note-o); border:3px solid var(--ink); clip-path:polygon(0 0, 100% 0, 50% 100%); transform-origin:top; transition:transform .5s ease .0s; z-index:3}
+.env .stampmark{position:absolute; right:10px; bottom:10px; z-index:4; font-family:var(--f-display); font-weight:700; font-size:1.4rem; color:var(--note-ink); background:var(--sheet); border:2.5px dashed var(--ink); border-radius:4px; padding:0 8px; transform:rotate(-6deg)}
+.env .label{position:absolute; left:12px; bottom:10px; z-index:4; font-family:var(--f-mono); font-size:.8rem; color:var(--note-ink); text-align:left; line-height:1.2}
+.env .letter{position:absolute; left:8%; right:8%; top:8%; height:84%; background:var(--note-v); border:2.5px solid var(--ink); border-radius:4px; z-index:1; transition:transform .5s ease .35s;
+  padding:8px 10px; font-family:var(--f-display); font-size:1.15rem; font-weight:700; color:var(--note-ink); text-align:left; line-height:1.15}
+.env.open .flap{transform:rotateX(180deg); z-index:0}
+.env.open .letter{transform:translateY(-62%)}
+.env-hint{font-family:var(--f-display); font-size:1.3rem; color:var(--ink-soft); text-align:center}
+
+/* ---------- ch4 ---------- */
+.timeline{overflow-x:auto; padding-bottom:6px}
+.timeline-inner{min-width:720px; position:relative; display:grid; grid-template-columns:repeat(5,1fr); gap:14px; padding-top:44px}
+.timeline-inner::before{content:""; position:absolute; left:0; right:0; top:20px; height:4px; background:var(--ink); border-radius:4px; clip-path:polygon(0 30%,20% 0,45% 60%,70% 10%,100% 40%,100% 100%,0 100%)}
+.tl{position:relative; display:flex; flex-direction:column; gap:6px}
+.tl::before{content:""; position:absolute; top:-34px; left:10px; width:22px; height:22px; border-radius:50% 45% 52% 48%; border:3px solid var(--ink); background:var(--c)}
+.tl .yr{font-family:var(--f-display); font-size:1.8rem; font-weight:700; color:var(--c2, var(--ink))}
+.tl p{font-size:1.05rem}
+.ideas{display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 190px), 1fr)); gap:18px}
+.note{background:var(--c, var(--note-y)); color:var(--note-ink); padding:16px 16px 18px; border-radius:2px 2px 18px 2px; box-shadow:2px 4px 0 var(--sheet-edge); position:relative}
+.note:nth-child(odd){transform:rotate(-1.4deg)} .note:nth-child(even){transform:rotate(1.2deg)}
+.note h3{font-size:1.65rem; margin-bottom:4px}
+.note .n{font-family:var(--f-display); font-size:2.6rem; line-height:1; font-weight:700; opacity:.35; position:absolute; right:12px; top:6px}
+.note p{font-size:1.05rem}
+
+/* ---------- ch5: flip cards ---------- */
+.flips{display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 290px), 1fr)); gap:22px}
+.flip{perspective:1400px; cursor:pointer; display:grid}
+.flip-inner{display:grid; transition:transform .6s cubic-bezier(.3,1.3,.5,1); transform-style:preserve-3d}
+.face{grid-area:1/1; backface-visibility:hidden; -webkit-backface-visibility:hidden; padding:20px 20px 46px; border:2.5px solid var(--ink); border-radius:var(--wobbly); display:flex; flex-direction:column; gap:10px; color:var(--note-ink); position:relative}
+.face.front{background:var(--c)}
+.face.back{background:var(--sheet); color:var(--ink); transform:rotateY(180deg)}
+.flip.flipped .flip-inner{transform:rotateY(180deg)}
+.face .num{font-family:var(--f-display); font-weight:700; font-size:1.3rem; opacity:.7}
+.face h3{font-size:1.85rem}
+.face .k{font-family:var(--f-display); font-weight:700; font-size:1.35rem}
+.face p{font-size:1.05rem}
+.face .turn{position:absolute; right:16px; bottom:10px; font-family:var(--f-display); font-size:1.2rem; font-weight:700; opacity:.75}
+.face.back .ex{border-top:2px dashed var(--sheet-edge); padding-top:8px}
+.face.back .warn{color:var(--red)}
+
+/* ---------- ch6: race ---------- */
+.ladder{display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 300px), 1fr)); gap:24px}
+.ladder figure{margin:0}
+.ladder figcaption{font-family:var(--f-display); font-size:1.5rem; font-weight:700; text-align:center}
+.race{display:grid; grid-template-columns:repeat(auto-fit, minmax(min(100%, 250px), 1fr)); gap:26px; justify-items:center}
+.phone{width:100%; max-width:270px; border:3px solid var(--ink); border-radius:34px 30px 36px 28px; padding:16px 12px 22px; background:var(--sheet); position:relative}
+.phone::before{content:""; display:block; width:60px; height:6px; border-radius:4px; background:var(--ink); margin:0 auto 10px; opacity:.6}
+.phone h3{font-size:1.6rem; text-align:center}
+.phone h3 small{display:block; font-family:var(--f-body); font-size:.95rem; font-weight:400; color:var(--ink-soft)}
+.net{display:flex; justify-content:space-between; font-family:var(--f-mono); font-size:.8rem; color:var(--ink-soft); margin:6px 2px}
+.screen{border:2px solid var(--ink-soft); border-radius:8px; padding:10px; display:flex; flex-direction:column; gap:7px; min-height:260px; position:relative}
+.blk{height:14px; border:2px solid var(--ink-soft); border-radius:3px; position:relative; overflow:hidden}
+.blk i{position:absolute; inset:0 auto 0 0; width:0; background:var(--fillc, var(--blue)); transition:width .08s linear}
+.blk.headline{height:22px} .blk.headline i{--fillc:var(--ink)}
+.blk.styles i{--fillc:var(--purple)} .blk.text i{--fillc:var(--ink-soft)}
+.photos{display:grid; grid-template-columns:repeat(5,1fr); gap:5px}
+.photos .blk{height:auto; aspect-ratio:1}
+.photos .blk i{inset:auto 0 0 0; width:100% !important; height:0; transition:height .08s linear; --fillc:var(--green)}
+.blk.stalled{border-color:var(--red); border-style:dashed; animation:shake .25s linear infinite}
+@keyframes shake{50%{transform:translateX(1.5px)}}
+.phone .pstatus{font-family:var(--f-display); font-weight:700; font-size:1.25rem; text-align:center; min-height:2.6em; line-height:1.1; margin-top:8px}
+.phone .clock{font-family:var(--f-mono); font-size:1rem; text-align:center; color:var(--ink-soft)}
+.phone.done{border-color:var(--green)}
+.winner{position:absolute; top:-18px; right:-12px; font-family:var(--f-display); font-weight:700; font-size:1.4rem; background:var(--yellow); color:var(--note-ink); border:2.5px solid var(--ink); border-radius:50%; width:72px; height:72px; display:grid; place-items:center; transform:rotate(12deg); line-height:1; text-align:center}
+
+/* ---------- ch7 ---------- */
+.bars{display:flex; flex-direction:column; gap:14px}
+.bar{display:grid; grid-template-columns:150px minmax(0,1fr) 64px; gap:12px; align-items:center}
+.bar .bl{font-family:var(--f-display); font-weight:700; font-size:1.35rem; line-height:1.05}
+.bar .track{height:28px; border:2.5px solid var(--ink); border-radius:4px 9px 5px 8px; position:relative; overflow:hidden}
+.bar .track i{position:absolute; inset:0 auto 0 0; background:repeating-linear-gradient(-45deg, var(--c) 0 7px, color-mix(in srgb, var(--c) 55%, transparent) 7px 12px)}
+.bar .bv{font-family:var(--f-display); font-weight:700; font-size:1.55rem; font-variant-numeric:tabular-nums}
+.src{font-size:.95rem; color:var(--ink-soft)}
+@media (max-width:520px){ .bar{grid-template-columns:96px minmax(0,1fr) 56px} .bar .bl{font-size:1.15rem} }
+.limits{display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap:20px}
+.limit{border:2.5px solid var(--ink); border-radius:var(--wobbly-2); padding:16px 18px; display:flex; flex-direction:column; gap:8px}
+.limit h3{font-size:1.6rem; color:var(--red)}
+.limit p{font-size:1.05rem}
+.who-tag{align-self:flex-start; font-size:.95rem; background:var(--note-b); color:var(--note-ink); padding:1px 10px; border-radius:20px 18px 22px 16px; border:2px solid var(--ink)}
+.gate-scene .mover{width:auto; padding:0 8px; height:32px; font-size:1.1rem; white-space:nowrap}
+.mover.udp{background:var(--note-v)} .mover.tcp{background:var(--note-b)}
+
+/* ---------- ch8 fixes ---------- */
+.fixes{display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 300px), 1fr)); gap:20px}
+.fix{border:2.5px solid var(--ink); border-radius:var(--wobbly); padding:14px 18px 18px; display:flex; flex-direction:column; gap:10px}
+.seg{display:inline-flex; align-self:flex-start; border:2.5px solid var(--ink); border-radius:20px; overflow:hidden}
+.seg button{font-family:var(--f-display); font-weight:700; font-size:1.2rem; padding:2px 14px; border:none; background:transparent; color:var(--ink); cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--c, var(--note-p)); color:var(--note-ink)}
+.fix h3{font-size:1.55rem}
+.fix .pane{font-size:1.05rem}
+.fix .acts{font-size:.95rem; color:var(--ink-soft)}
+
+/* ---------- glossary & quiz ---------- */
+.gloss{display:grid; grid-template-columns:repeat(auto-fill, minmax(min(100%, 210px), 1fr)); gap:18px}
+.gloss .note h3{font-size:1.5rem}
+.quiz{display:flex; flex-direction:column; gap:22px}
+.qz{border:none; padding:0; margin:0; display:flex; flex-direction:column; gap:10px}
+.qz legend{font-family:var(--f-display); font-size:1.65rem; font-weight:700; padding:0; margin-bottom:8px; line-height:1.15}
+.opts{display:flex; flex-wrap:wrap; gap:10px}
+.opt{font-family:var(--f-body); font-size:1.08rem; text-align:left; padding:8px 14px; border:2.5px solid var(--ink); border-radius:var(--wobbly-2); background:var(--sheet); color:var(--ink); cursor:pointer}
+.opt:hover{background:color-mix(in srgb, var(--yellow) 18%, var(--sheet))}
+.opt.right{background:var(--note-g); color:var(--note-ink); border-color:var(--green)}
+.opt.wrong{background:var(--note-p); color:var(--note-ink); border-color:var(--red); text-decoration:line-through}
+.qz .why{font-size:1.08rem; color:var(--ink-soft)}
+.score{font-family:var(--f-display); font-size:2rem; font-weight:700; color:var(--pink)}
+.sources{display:flex; flex-direction:column; gap:6px; padding-left:20px; margin:0}
+footer{text-align:center; font-family:var(--f-display); font-size:1.35rem; color:var(--ink-soft); padding-block:0 40px}
+
+@media (prefers-reduced-motion: reduce){
+  *,*::before,*::after{animation-duration:.01ms !important; animation-iteration-count:1 !important; transition-duration:.01ms !important; scroll-behavior:auto !important}
+}
+</style>
+</head>
+<body>
+
+<!-- shared SVG defs: the wobble filter gives every drawing a hand-drawn edge -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="7" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2" xChannelSelector="R" yChannelSelector="G"/>
+    </filter>
+    <marker id="arr" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M1 1 L9 5 L1 9" fill="none" stroke="context-stroke" stroke-width="2" stroke-linecap="round"/>
+    </marker>
+    <symbol id="pencil" viewBox="0 0 32 32"><path d="M6 26 L8 19 L22 5 L27 10 L13 24 Z M8 19 L13 24 M19 8 L24 13" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/></symbol>
+  </defs>
+</svg>
+
+<nav class="tabs" aria-label="Chapters">
+  <div class="wrap" id="tabs">
+    <a class="home-tab" href="../index.html" title="All explainers">&larr; all</a>
+    <a class="tab" href="#home">Home</a>
+    <a class="tab" href="#basics">Basics</a>
+    <a class="tab" href="#tcp">TCP</a>
+    <a class="tab" href="#udp">UDP</a>
+    <a class="tab" href="#what">What is QUIC</a>
+    <a class="tab" href="#how">How it works</a>
+    <a class="tab" href="#race">Train race</a>
+    <a class="tab" href="#limits">Limits</a>
+    <a class="tab" href="#fixes">Fixes</a>
+    <a class="tab" href="#glossary">Glossary</a>
+    <a class="tab" href="#quiz">Quiz</a>
+  </div>
+</nav>
+
+<div class="wrap">
+<main>
+
+<!-- ================= HOME ================= -->
+<section class="hero" id="home">
+  <div>
+    <div class="kicker">a sketchbook guide to</div>
+    <h1 class="scribble-title"><span class="q">Q</span><span class="u">U</span><span class="i">I</span><span class="c">C</span>
+      <svg class="under rough" viewBox="0 0 300 18" preserveAspectRatio="none" aria-hidden="true"><path class="st st-orange" style="stroke-width:5" d="M4 12 C 60 2, 120 16, 180 7 S 270 4, 296 10"/></svg>
+    </h1>
+    <p class="hook">A newer, faster way for your phone or laptop to talk to websites. It <span class="hl-green">keeps working when your network changes</span>, and it <span class="hl-pink">locks every message by default</span>.</p>
+    <p class="who">For curious people, students and junior developers. No networking background needed. We'll explain everything with one picture: <b>sending parcels by courier</b>.</p>
+  </div>
+  <svg class="hero-art" id="heroArt" viewBox="0 0 520 330" role="img" aria-label="Doodle of a phone sending locked parcels along a dashed road to a web server">
+    <g class="rough">
+      <!-- phone -->
+      <rect class="st fl-sheet" x="28" y="110" width="96" height="170" rx="16"/>
+      <rect class="st st-soft" x="40" y="132" width="72" height="118" rx="4"/>
+      <circle class="st" cx="76" cy="265" r="6"/>
+      <path class="st st-blue" d="M50 150 h52 M50 166 h40 M50 182 h48"/>
+      <rect class="st st-green fl-g" x="50" y="196" width="24" height="22"/>
+      <rect class="st st-pink fl-p" x="80" y="196" width="22" height="22"/>
+      <!-- server -->
+      <rect class="st fl-sheet" x="396" y="80" width="98" height="200" rx="8"/>
+      <path class="st" d="M396 130 h98 M396 180 h98 M396 230 h98"/>
+      <circle class="fl-ink" cx="412" cy="105" r="4"/><circle class="fl-ink" cx="412" cy="155" r="4"/><circle class="fl-ink" cx="412" cy="205" r="4"/><circle class="fl-ink" cx="412" cy="255" r="4"/>
+      <path class="st st-soft" d="M432 105 h46 M432 155 h46 M432 205 h46 M432 255 h46"/>
+      <!-- road -->
+      <path id="road" class="st st-blue" style="stroke-dasharray:10 9" d="M128 190 C 210 70, 300 300, 392 175"/>
+      <!-- scribbles -->
+      <path class="st st-orange" d="M232 52 l8 -22 l8 22 l-20 -14 h24 z"/>
+      <path class="st st-pink" d="M462 46 c 10 -18, 30 -6, 16 8 c -10 10, -26 -4, -16 -8"/>
+      <path class="st st-green" d="M168 290 q 20 -18 40 0 t 40 0"/>
+      <path class="st st-soft" style="marker-end:url(#arr)" d="M150 74 C 168 92, 186 102, 206 110"/>
+    </g>
+    <text class="svg-txt purple" x="96" y="66" font-size="26">parcels!</text>
+    <text class="svg-txt pink" x="300" y="300" font-size="24" transform="rotate(-6 300 300)">every box is locked</text>
+    <text class="svg-txt soft" x="26" y="306" font-size="20">your phone</text>
+    <text class="svg-txt soft" x="402" y="306" font-size="20">a website</text>
+    <!-- moving parcels -->
+    <g>
+      <g><rect class="st fl-y" x="-13" y="-11" width="26" height="22" rx="3"/><path class="st" style="stroke-width:2" d="M-13 -2 h26 M0 -11 v22"/>
+        <animateMotion dur="4.5s" repeatCount="indefinite" rotate="auto"><mpath href="#road"/></animateMotion></g>
+      <g><rect class="st fl-p" x="-13" y="-11" width="26" height="22" rx="3"/><path class="st" style="stroke-width:2" d="M-5 -1 v-4 a5 5 0 0 1 10 0 v4"/><rect class="st" style="stroke-width:2" x="-7" y="-1" width="14" height="9"/>
+        <animateMotion dur="4.5s" begin="-1.5s" repeatCount="indefinite" rotate="auto"><mpath href="#road"/></animateMotion></g>
+      <g><rect class="st fl-g" x="-13" y="-11" width="26" height="22" rx="3"/><path class="st" style="stroke-width:2" d="M-13 -2 h26 M0 -11 v22"/>
+        <animateMotion dur="4.5s" begin="-3s" repeatCount="indefinite" rotate="auto"><mpath href="#road"/></animateMotion></g>
+    </g>
+  </svg>
+</section>
+
+<!-- ================= 1 BASICS ================= -->
+<section class="sheet" id="basics">
+  <div class="page-no">Page 1 of 8</div>
+  <h2>Internet basics: <span class="ink-blue">parcels, addresses</span> &amp; <span class="ink-pink">couriers</span></h2>
+  <p class="lede">Everything on the internet travels as small chunks called <strong>packets</strong>, the way a big order ships as many small parcels.</p>
+
+  <div class="table-wrap">
+    <table class="sk">
+      <thead><tr><th>Internet idea</th><th>Courier analogy</th><th>What it does</th></tr></thead>
+      <tbody>
+        <tr><td>Packet</td><td>One parcel</td><td>A small chunk of data, usually around 1,200–1,500 bytes</td></tr>
+        <tr><td>IP address</td><td>The building's street address</td><td>Says which computer the packet goes to</td></tr>
+        <tr><td>Port</td><td>The flat number inside the building</td><td>Says which app on that computer gets it (web, games, video call)</td></tr>
+        <tr><td>IP</td><td>The road network</td><td>Moves parcels from building to building, with no promise they arrive</td></tr>
+        <tr><td>TCP, UDP, QUIC</td><td>The courier company's rules</td><td>Decide whether parcels are tracked, re-sent, kept in order, or just thrown over the fence</td></tr>
+        <tr><td>TLS</td><td>A locked box only the receiver can open</td><td>Stops anyone on the road from reading or changing the parcel</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="toy">
+    <div class="toy-label"><svg aria-hidden="true"><use href="#pencil"/></svg>Try it: send parcels down the road</div>
+    <div class="scene" id="roadScene">
+      <svg viewBox="0 0 700 170" aria-hidden="true">
+        <g class="rough">
+          <path class="st" d="M20 140 V70 L60 40 L100 70 V140 Z"/><rect class="st st-blue fl-b" x="46" y="98" width="28" height="42"/>
+          <path class="st" d="M600 140 V50 H680 V140 Z"/><path class="st st-soft" d="M612 66 h18 M646 66 h18 M612 88 h18 M646 88 h18 M612 110 h18 M646 110 h18"/>
+          <path class="st st-soft" d="M110 120 C 260 100, 440 140, 590 118"/><path class="st st-soft" d="M110 150 C 260 130, 440 168, 590 148"/>
+          <path class="st st-yellow" style="stroke:var(--yellow); stroke-dasharray:12 12" d="M116 135 C 260 115, 440 155, 586 133"/>
+        </g>
+        <text class="svg-txt" x="12" y="30" font-size="20">your laptop</text>
+        <text class="svg-mono" x="12" y="162" font-size="11">192.168.1.20 : 51000</text>
+        <text class="svg-txt" x="596" y="40" font-size="20">website</text>
+        <text class="svg-mono" x="568" y="162" font-size="11">93.184.216.34 : 443</text>
+        <text class="svg-txt soft" x="300" y="96" font-size="20">IP: the roads</text>
+      </svg>
+    </div>
+    <div class="controls">
+      <button class="btn" id="sendBtn">Send 6 parcels</button>
+      <label class="check"><input type="checkbox" id="loseToggle" checked> Bumpy road (lose a parcel)</label>
+    </div>
+    <div class="tray" id="tray" aria-live="polite"><span class="lbl">Arrived:</span><span class="status">nothing yet</span></div>
+    <p class="status" id="roadMsg">The road makes no promises. Parcels can get lost, arrive late, or arrive out of order.</p>
+  </div>
+
+  <div class="cols">
+    <div class="prose">
+      <h3>The key idea</h3>
+      <p>The road (IP) is <span class="hl-pink">unreliable</span>. The <strong>transport protocol</strong> is the layer that decides how to deal with that.</p>
+      <p>TCP, UDP and QUIC are three different answers to the same question: <em>what do we do about lost and jumbled parcels?</em></p>
+    </div>
+    <div class="stack" aria-label="The layer stack, top to bottom">
+      <div class="layer" style="background:var(--note-y)"><b>Your app</b><span>browser, game, video call</span></div>
+      <div class="layer" style="background:var(--note-o)"><b>HTTP</b><span>the language of web pages</span></div>
+      <div class="layer quic" style="background:var(--note-p)"><b>Security · TLS</b><span>the locked box</span></div>
+      <div class="layer quic" style="background:var(--note-v)"><b>Transport</b><span>TCP or UDP (QUIC rides on UDP)</span></div>
+      <div class="layer" style="background:var(--note-b)"><b>IP</b><span>the roads</span></div>
+      <div class="layer" style="background:var(--note-g)"><b>Wi‑Fi · mobile · cable</b><span>the vehicles</span></div>
+      <div class="stack-note">↑ the pink dashed layers: QUIC does both jobs at once</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 2 TCP ================= -->
+<section class="sheet" id="tcp">
+  <div class="page-no">Page 2 of 8</div>
+  <h2><span class="ink-blue">TCP</span>: the careful registered-post courier</h2>
+  <p class="lede">TCP (1981) guarantees every parcel arrives, in the right order. It has carried most web traffic for over 40 years.</p>
+
+  <div class="cols">
+    <ul class="doodle prose">
+      <li style="--c:var(--blue)"><b class="ink-blue">It phones ahead first (the handshake).</b> "Hello, are you there?" → "Yes, I'm here" → "Great, starting now." One full round trip before any real data moves.</li>
+      <li style="--c:var(--purple)"><b class="ink-purple">Then a second chat for the lock (TLS).</b> Both sides agree on keys. With TLS 1.3 that costs another round trip; older TLS cost two.</li>
+      <li style="--c:var(--green)"><b class="ink-green">Every parcel is numbered and signed for.</b> If parcel 5 goes missing, the sender re-sends it.</li>
+      <li style="--c:var(--red)"><b class="ink-red">Strict order.</b> Parcels 6, 7 and 8 wait until parcel 5 arrives. This is called <strong>head-of-line blocking</strong>.</li>
+      <li style="--c:var(--orange)"><b class="ink-orange">Tied to your address.</b> Change from Wi‑Fi to mobile data, your IP address changes, and the connection breaks and starts over.</li>
+    </ul>
+    <div class="box dashed prose">
+      <h3 class="ink-pink">Why that matters</h3>
+      <p>A web page is many files: HTML, CSS, images, scripts. HTTP/2 sends them all down <em>one</em> TCP connection.</p>
+      <p>On a perfect network that's efficient. On a lossy mobile network, <span class="hl-pink">one lost packet freezes all of them</span>.</p>
+    </div>
+  </div>
+
+  <div class="toy">
+    <div class="toy-label"><svg aria-hidden="true"><use href="#pencil"/></svg>The supermarket with one till</div>
+    <p>One till, one queue. Each shopper carries one file of your web page. If the person at the front can't find their wallet, everyone behind waits, even people buying one item.</p>
+    <div class="till-row" id="tillRow" aria-live="polite"></div>
+    <div class="controls">
+      <button class="btn" id="tillBtn">Open the till</button>
+      <label class="check"><input type="checkbox" id="slowToggle" checked> Front shopper can't find their wallet (a lost packet)</label>
+    </div>
+    <p class="status" id="tillMsg">Press the button to start serving.</p>
+  </div>
+</section>
+
+<!-- ================= 3 UDP ================= -->
+<section class="sheet" id="udp">
+  <div class="page-no">Page 3 of 8</div>
+  <h2><span class="ink-orange">UDP</span>: the postcard <span style="font-size:.6em" class="ink-soft">(and why QUIC is built on it)</span></h2>
+  <p class="lede">UDP (1980) is the simplest courier on the internet. It writes an address on a postcard and drops it in the post box. No phone call first, no tracking, no re-sending, no ordering.</p>
+
+  <div class="prose"><h3>What a UDP packet carries, drawn to scale</h3>
+    <p>The UDP header is only <strong>8 bytes</strong>: four fields of 2 bytes each. TCP's header is at least 20 bytes and comes with a whole tracking system around it.</p></div>
+  <div class="table-wrap">
+    <div class="hdr">
+      <div class="hdr-row">
+        <span class="name ink-orange">UDP header · 8 bytes</span>
+        <div class="bytes" style="grid-template-columns:repeat(4,1fr); width:40%">
+          <div style="background:var(--note-y)">Source port<small>return flat no.</small></div>
+          <div style="background:var(--note-p)">Dest. port<small>recipient's flat</small></div>
+          <div style="background:var(--note-g)">Length<small>card size</small></div>
+          <div style="background:var(--note-b)">Checksum<small>smudge check</small></div>
+        </div>
+      </div>
+      <div class="hdr-row">
+        <span class="name ink-blue">TCP header · 20 bytes minimum</span>
+        <div class="bytes" style="grid-template-columns:2fr 2fr 4fr 4fr 2fr 2fr 2fr 2fr; width:100%">
+          <div style="background:var(--note-y)">Src port</div>
+          <div style="background:var(--note-p)">Dst port</div>
+          <div style="background:var(--note-o)">Sequence number<small>parcel numbering</small></div>
+          <div style="background:var(--note-v)">Ack number<small>"got it" receipts</small></div>
+          <div style="background:var(--note-b)">Flags</div>
+          <div style="background:var(--note-g)">Window<small>speed</small></div>
+          <div style="background:var(--note-b)">Checksum</div>
+          <div style="background:var(--note-y)">Urgent</div>
+        </div>
+        <span class="ruler">each 2-byte slice = 5% of the width · UDP stops at 8 bytes</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="cols">
+    <div class="prose">
+      <h3 class="ink-red">What UDP does NOT do</h3>
+      <ul class="doodle x">
+        <li>No handshake. It just sends.</li>
+        <li>No guarantee of delivery. A lost postcard is simply gone.</li>
+        <li>No order. Postcard 3 may arrive before postcard 1.</li>
+        <li>No speed control. It doesn't slow down when the network is crowded.</li>
+        <li>No encryption. Anyone handling it can read it.</li>
+      </ul>
+    </div>
+    <div class="prose">
+      <h3 class="ink-green">Why would anyone want that?</h3>
+      <p>Because sometimes <span class="hl-green">late is worse than lost</span>.</p>
+      <ul class="doodle">
+        <li style="--c:var(--green)"><b>Live video call:</b> a frame from half a second ago is useless now. Skip it and show the current one.</li>
+        <li style="--c:var(--green)"><b>Online games:</b> where a player is <em>right now</em> matters more than 200 ms ago.</li>
+        <li style="--c:var(--green)"><b>DNS:</b> one tiny question, one tiny answer. A full handshake would take longer than the question.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="toy">
+    <div class="toy-label"><svg aria-hidden="true"><use href="#pencil"/></svg>Video call over postcards</div>
+    <p>Each postcard is one video frame. Some get lost, some overtake others. The call never waits: an old frame that turns up late is thrown away.</p>
+    <div class="scene" id="cardScene">
+      <svg viewBox="0 0 700 120" aria-hidden="true">
+        <g class="rough">
+          <rect class="st st-red" x="16" y="30" width="64" height="76" rx="8" style="fill:color-mix(in srgb, var(--red) 25%, transparent)"/>
+          <path class="st" d="M28 52 h40"/>
+          <rect class="st fl-sheet" x="604" y="24" width="84" height="64" rx="6"/><path class="st" d="M630 88 v14 M616 104 h44"/>
+          <circle class="st st-blue" cx="646" cy="50" r="12"/><path class="st st-blue" d="M626 82 c 6 -16, 34 -16, 40 0"/>
+        </g>
+        <text class="svg-txt soft" x="14" y="22" font-size="18">post box</text>
+        <text class="svg-txt soft" x="608" y="17" font-size="18">friend's screen</text>
+      </svg>
+    </div>
+    <div class="controls"><button class="btn alt" id="cardBtn">Drop 8 postcards in the box</button></div>
+    <div class="tray" id="cardTray" aria-live="polite"><span class="lbl">Screen shows:</span><span class="status">waiting for frames</span></div>
+    <p class="status" id="cardMsg">Green = shown, orange = arrived too late, dashed red = lost.</p>
+  </div>
+
+  <div class="box prose" style="max-width:none">
+    <h3 class="ink-purple">Why QUIC is built on top of UDP</h3>
+    <div class="cols" style="margin-top:6px">
+      <p><b class="ink-blue">1. Only two couriers get through.</b> Routers, firewalls and home Wi‑Fi boxes understand TCP and UDP. A brand-new protocol would be blocked. This is called <strong>ossification</strong>: the network has set like concrete.</p>
+      <p><b class="ink-pink">2. TCP lives inside the operating system.</b> Changing it means updating Windows, Android, iOS and Linux on billions of devices. That takes decades.</p>
+      <p><b class="ink-green">3. UDP is a blank postcard.</b> It adds almost nothing, so QUIC can write its own rules inside it: numbering, re-sending, per-stream order, speed control and encryption.</p>
+      <p><b class="ink-orange">4. QUIC ships inside the app.</b> Google, Mozilla or Apple can improve it with a normal browser update.</p>
+    </div>
+  </div>
+
+  <div class="envelope-wrap">
+    <div>
+      <button class="env" id="env" aria-pressed="false" aria-label="Open the UDP envelope to see QUIC inside">
+        <span class="back"></span>
+        <span class="letter">Inside: QUIC!<br><span style="font-size:.95rem; font-weight:500">✓ packet numbers<br>✓ re-sending<br>✓ streams<br>✓ speed control<br>✓ locked</span></span>
+        <span class="body"></span>
+        <span class="flap"></span>
+        <span class="label">UDP · port 443<br>to: website</span>
+        <span class="stampmark">UDP</span>
+      </button>
+      <p class="env-hint" id="envHint">tap the envelope</p>
+    </div>
+    <div class="callout">
+      <span class="tag">The picture to keep</span>
+      <p>UDP is a plain envelope that every post office accepts. QUIC puts a smart, locked, tracked package system <em>inside</em> that envelope. Post offices just see an ordinary envelope and let it through.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 4 WHAT ================= -->
+<section class="sheet" id="what">
+  <div class="page-no">Page 4 of 8</div>
+  <h2>So what <span class="ink-pink">is</span> QUIC?</h2>
+  <p class="lede">QUIC is a transport protocol that does <span class="hl-blue">TCP's job</span> (reliable, ordered delivery) plus <span class="hl-pink">TLS's job</span> (encryption) in one layer, carried inside UDP packets.</p>
+
+  <div class="timeline">
+    <div class="timeline-inner">
+      <div class="tl" style="--c:var(--note-y); --c2:var(--orange)"><span class="yr">2012</span><p>Google starts experimenting with QUIC in Chrome and its own servers.</p></div>
+      <div class="tl" style="--c:var(--note-b); --c2:var(--blue)"><span class="yr">2016</span><p>The IETF, the body that standardises internet protocols, takes it over and redesigns it.</p></div>
+      <div class="tl" style="--c:var(--note-g); --c2:var(--green)"><span class="yr">May 2021</span><p>QUIC becomes an official standard: <a href="https://www.rfc-editor.org/rfc/rfc9000">RFC 9000</a>.</p></div>
+      <div class="tl" style="--c:var(--note-v); --c2:var(--purple)"><span class="yr">June 2022</span><p>HTTP/3, the web on QUIC, is published as <a href="https://www.rfc-editor.org/rfc/rfc9114">RFC 9114</a>.</p></div>
+      <div class="tl" style="--c:var(--note-p); --c2:var(--pink)"><span class="yr">Today</span><p>About 41% of websites support HTTP/3 (<a href="https://w3techs.com/technologies/details/ce-http3">W3Techs</a>, Nov 2026). All major browsers do.</p></div>
+    </div>
+  </div>
+
+  <p class="prose"><span><b class="ink-purple">About the name:</b> it started as "Quick UDP Internet Connections". The standard now treats QUIC as just a name, not an acronym.</span></p>
+
+  <h3>QUIC's five big ideas</h3>
+  <div class="ideas">
+    <div class="note" style="--c:var(--note-y)"><span class="n">1</span><h3>Faster start</h3><p>The hello and the lock happen in one conversation, not two.</p></div>
+    <div class="note" style="--c:var(--note-p)"><span class="n">2</span><h3>Many lanes</h3><p>Each file gets its own stream, so one lost packet only delays its own file.</p></div>
+    <div class="note" style="--c:var(--note-g)"><span class="n">3</span><h3>Survives moves</h3><p>Connections wear an ID badge, so switching Wi‑Fi to mobile doesn't break them.</p></div>
+    <div class="note" style="--c:var(--note-b)"><span class="n">4</span><h3>Always locked</h3><p>There is no unencrypted QUIC. Even most control info is hidden.</p></div>
+    <div class="note" style="--c:var(--note-v)"><span class="n">5</span><h3>Lives in the app</h3><p>Improved by updating the browser or server, not the operating system.</p></div>
+  </div>
+
+  <div class="cols">
+    <div class="prose">
+      <h3>QUIC and HTTP/3</h3>
+      <p>QUIC is the <b class="ink-pink">courier</b>. HTTP/3 is the <b class="ink-blue">language</b> the web page is written in when it travels with that courier.</p>
+      <p>HTTP/1.1 and HTTP/2 use TCP. HTTP/3 uses QUIC.</p>
+    </div>
+    <svg viewBox="0 0 420 190" role="img" aria-label="HTTP/1.1 and HTTP/2 run on TCP; HTTP/3 runs on QUIC, which runs on UDP; all run on IP">
+      <g class="rough">
+        <rect class="st fl-o" x="10" y="10" width="120" height="44" rx="6"/><rect class="st fl-o" x="146" y="10" width="120" height="44" rx="6"/><rect class="st fl-p" x="286" y="10" width="124" height="44" rx="6"/>
+        <rect class="st fl-b" x="10" y="72" width="256" height="44" rx="6"/>
+        <rect class="st fl-v" x="286" y="72" width="124" height="22" rx="4"/><rect class="st fl-y" x="286" y="96" width="124" height="20" rx="4"/>
+        <rect class="st fl-g" x="10" y="134" width="400" height="44" rx="6"/>
+      </g>
+      <text class="svg-txt note" x="34" y="40" font-size="22">HTTP/1.1</text><text class="svg-txt note" x="178" y="40" font-size="22">HTTP/2</text><text class="svg-txt note" x="316" y="40" font-size="22">HTTP/3</text>
+      <text class="svg-txt note" x="118" y="101" font-size="22">TCP</text>
+      <text class="svg-txt note" x="322" y="89" font-size="17">QUIC</text><text class="svg-txt note" x="328" y="112" font-size="16">UDP</text>
+      <text class="svg-txt note" x="196" y="163" font-size="22">IP</text>
+    </svg>
+  </div>
+</section>
+
+<!-- ================= 5 HOW ================= -->
+<section class="sheet" id="how">
+  <div class="page-no">Page 5 of 8</div>
+  <h2>How QUIC works, <span class="ink-green">one idea at a time</span></h2>
+  <p class="lede">Each card shows a problem. Flip it to see QUIC's fix and an everyday example.</p>
+  <div class="flips" id="flips">
+    <div class="flip" role="button" tabindex="0" aria-pressed="false"><div class="flip-inner">
+      <div class="face front" style="--c:var(--note-y)"><span class="num">idea 1</span><h3>The combined handshake</h3><p><span class="k">Problem:</span> TCP + TLS 1.3 needs two round trips (hello, then lock) before the first byte of a web page.</p><span class="turn">flip ↻</span></div>
+      <div class="face back"><span class="k ink-green">QUIC fix · 1 round trip</span><p>The hello and the TLS 1.3 key exchange travel in the <em>same</em> first packets. One round trip and the connection is ready and encrypted.</p><p class="ex"><b class="ink-pink">Like:</b> instead of calling a restaurant to check it's open, then calling again to order, you ring once: "Are you open? I'd like a pizza."</p><span class="turn">↺</span></div>
+    </div></div>
+    <div class="flip" role="button" tabindex="0" aria-pressed="false"><div class="flip-inner">
+      <div class="face front" style="--c:var(--note-p)"><span class="num">idea 2</span><h3>0-RTT resumption</h3><p><span class="k">Problem:</span> even one round trip is slow on a far-away or mobile connection (100–300 ms each).</p><span class="turn">flip ↻</span></div>
+      <div class="face back"><span class="k ink-green">QUIC fix · zero round trips</span><p>If you've talked to this server before, your device keeps a ticket. Next time it sends the request <em>with</em> the first packet.</p><p class="ex"><b class="ink-pink">Like:</b> a regular at the café. The barista starts the usual coffee before they say a word.</p><p class="warn"><b>Careful:</b> an attacker can replay 0-RTT data, so it's only safe for harmless requests like loading a page, never "transfer money".</p><span class="turn">↺</span></div>
+    </div></div>
+    <div class="flip" role="button" tabindex="0" aria-pressed="false"><div class="flip-inner">
+      <div class="face front" style="--c:var(--note-g)"><span class="num">idea 3</span><h3>Streams</h3><p><span class="k">Problem:</span> in TCP, one lost packet freezes every file on the connection.</p><span class="turn">flip ↻</span></div>
+      <div class="face back"><span class="k ink-green">QUIC fix · no more head-of-line blocking</span><p>One connection carries many independent <b>streams</b>. A lost packet for the image delays only the image; text and CSS keep flowing.</p><p class="ex"><b class="ink-pink">Like:</b> a supermarket with many tills. A slow shopper only holds up their own queue.</p><span class="turn">↺</span></div>
+    </div></div>
+    <div class="flip" role="button" tabindex="0" aria-pressed="false"><div class="flip-inner">
+      <div class="face front" style="--c:var(--note-b)"><span class="num">idea 4</span><h3>Connection IDs</h3><p><span class="k">Problem:</span> TCP knows you by IP address and port. Phone hops from Wi‑Fi to 5G, address changes, download breaks.</p><span class="turn">flip ↻</span></div>
+      <div class="face back"><span class="k ink-green">QUIC fix · connection migration</span><p>Each connection has a <b>connection ID</b>, like a tracking number. The server recognises it from a new address and the transfer continues.</p><p class="ex"><b class="ink-pink">Like:</b> you move house mid-subscription. The magazine still finds you, because it's tied to your subscriber number, not your street.</p><span class="turn">↺</span></div>
+    </div></div>
+    <div class="flip" role="button" tabindex="0" aria-pressed="false"><div class="flip-inner">
+      <div class="face front" style="--c:var(--note-o)"><span class="num">idea 5</span><h3>Smarter loss recovery</h3><p><span class="k">Problem:</span> TCP re-sends a packet with the same number, so it can't tell which copy got the reply. Its timing gets muddled.</p><span class="turn">flip ↻</span></div>
+      <div class="face back"><span class="k ink-green">QUIC fix · fresh numbers</span><p>Every packet gets a new, ever-increasing number, even re-sends. Acks also say how long the receiver held the packet, so the sender measures the network better.</p><p class="ex"><b class="ink-pink">Like:</b> re-sending a lost letter with a new reference number, so you know which letter the reply is about.</p><span class="turn">↺</span></div>
+    </div></div>
+    <div class="flip" role="button" tabindex="0" aria-pressed="false"><div class="flip-inner">
+      <div class="face front" style="--c:var(--note-v)"><span class="num">idea 6</span><h3>Encryption built in</h3><p><span class="k">Problem:</span> in TCP, TLS is optional and sits on top. TCP's own headers stay visible and can be tampered with.</p><span class="turn">flip ↻</span></div>
+      <div class="face back"><span class="k ink-green">QUIC fix · always on</span><p>The payload <em>and</em> most control info (packet numbers, acks) are encrypted. Only a small part of the header stays readable.</p><p class="ex"><b class="ink-pink">Like:</b> sealing the parcel and the delivery notes in a locked box. The courier only sees the address label.</p><span class="turn">↺</span></div>
+    </div></div>
+    <div class="flip" role="button" tabindex="0" aria-pressed="false"><div class="flip-inner">
+      <div class="face front" style="--c:var(--note-y)"><span class="num">idea 7</span><h3>Congestion control in the app</h3><p><span class="k">Problem:</span> improving TCP's speed rules needs operating-system updates.</p><span class="turn">flip ↻</span></div>
+      <div class="face back"><span class="k ink-green">QUIC fix · upgradeable</span><p>QUIC still slows down when the network is busy, like TCP. But the algorithm (such as Cubic or BBR) lives in the app, so it can be tuned and upgraded quickly.</p><span class="turn">↺</span></div>
+    </div></div>
+  </div>
+</section>
+
+<!-- ================= 6 RACE ================= -->
+<section class="sheet" id="race">
+  <div class="page-no">Page 6 of 8</div>
+  <h2>Example: loading the news <span class="ink-orange">on a train</span></h2>
+  <p class="lede">Priya opens a news site on her phone as her train leaves the station. The page has a headline, text, a stylesheet and 10 photos. Halfway through, her phone switches from station Wi‑Fi to 4G, and the 4G drops a few packets in a tunnel.</p>
+
+  <div class="ladder">
+    <figure>
+      <svg viewBox="0 0 320 300" role="img" aria-label="TCP plus TLS: four setup messages, two round trips, before the page request">
+        <g class="rough">
+          <path class="st" d="M60 30 V285 M260 30 V285"/>
+          <path class="st st-blue" style="marker-end:url(#arr)" d="M62 50 L258 80"/>
+          <path class="st st-blue" style="marker-end:url(#arr)" d="M258 92 L62 122"/>
+          <path class="st st-purple" style="marker-end:url(#arr)" d="M62 134 L258 164"/>
+          <path class="st st-purple" style="marker-end:url(#arr)" d="M258 176 L62 206"/>
+          <path class="st st-green" style="stroke-width:4; marker-end:url(#arr)" d="M62 222 L258 252"/>
+          <path class="st st-red" d="M28 50 q -10 36 0 72 M28 134 q -10 36 0 72"/>
+        </g>
+        <text class="svg-txt" x="36" y="22" font-size="19">phone</text><text class="svg-txt" x="232" y="22" font-size="19">server</text>
+        <text class="svg-txt blue" x="110" y="58" font-size="16">hello? (SYN)</text>
+        <text class="svg-txt blue" x="120" y="102" font-size="16">yes, here!</text>
+        <text class="svg-txt purple" x="100" y="142" font-size="16">ok + let's lock (TLS)</text>
+        <text class="svg-txt purple" x="120" y="186" font-size="16">here are keys</text>
+        <text class="svg-txt green" x="110" y="230" font-size="17">GET the news page</text>
+        <text class="svg-txt red" x="4" y="94" font-size="15">RTT 1</text><text class="svg-txt red" x="4" y="178" font-size="15">RTT 2</text>
+      </svg>
+      <figcaption class="ink-blue">TCP + TLS 1.3: 2 round trips</figcaption>
+    </figure>
+    <figure>
+      <svg viewBox="0 0 320 300" role="img" aria-label="QUIC: hello and keys in the same packets, one round trip, then the page request">
+        <g class="rough">
+          <path class="st" d="M60 30 V285 M260 30 V285"/>
+          <path class="st st-pink" style="marker-end:url(#arr)" d="M62 50 L258 80"/>
+          <path class="st st-pink" style="marker-end:url(#arr)" d="M258 92 L62 122"/>
+          <path class="st st-green" style="stroke-width:4; marker-end:url(#arr)" d="M62 138 L258 168"/>
+          <path class="st st-red" d="M28 50 q -10 36 0 72"/>
+          <path class="st st-soft" style="stroke-dasharray:6 6; marker-end:url(#arr)" d="M62 220 L258 250"/>
+        </g>
+        <text class="svg-txt" x="36" y="22" font-size="19">phone</text><text class="svg-txt" x="232" y="22" font-size="19">server</text>
+        <text class="svg-txt pink" x="92" y="58" font-size="16">hello + let's lock</text>
+        <text class="svg-txt pink" x="104" y="102" font-size="16">here + keys</text>
+        <text class="svg-txt green" x="110" y="146" font-size="17">GET the news page</text>
+        <text class="svg-txt red" x="4" y="94" font-size="15">RTT 1</text>
+        <text class="svg-txt soft" x="84" y="212" font-size="16">return visit (0-RTT):</text>
+        <text class="svg-txt soft" x="84" y="282" font-size="16">GET rides on packet one</text>
+      </svg>
+      <figcaption class="ink-pink">QUIC: 1 round trip (0 if she visited yesterday)</figcaption>
+    </figure>
+  </div>
+
+  <div class="toy">
+    <div class="toy-label"><svg aria-hidden="true"><use href="#pencil"/></svg>Two phones, same train, same page</div>
+    <div class="race">
+      <div class="phone" id="phoneTcp">
+        <h3 class="ink-blue">TCP + TLS<small>HTTP/2 · one queue</small></h3>
+        <div class="net"><span class="netname">Station Wi‑Fi</span><span class="clock">0.00 s</span></div>
+        <div class="screen"></div>
+        <div class="pstatus">Ready</div>
+      </div>
+      <div class="phone" id="phoneQuic">
+        <h3 class="ink-pink">QUIC<small>HTTP/3 · many streams</small></h3>
+        <div class="net"><span class="netname">Station Wi‑Fi</span><span class="clock">0.00 s</span></div>
+        <div class="screen"></div>
+        <div class="pstatus">Ready</div>
+      </div>
+    </div>
+    <div class="controls">
+      <button class="btn" id="raceStart">Leave the station</button>
+      <button class="btn pink" id="raceTunnel" disabled>Tunnel! (lose a packet)</button>
+      <button class="btn alt" id="raceSwitch" disabled>Switch Wi‑Fi → 4G</button>
+      <label class="check"><input type="checkbox" id="raceAuto" checked> Tunnel and 4G switch happen on their own</label>
+      <label class="check"><input type="checkbox" id="raceZero"> She read this site yesterday (0-RTT)</label>
+    </div>
+    <p class="status">Times are simulated with a 0.3 s round trip. Watch what freezes and what keeps going.</p>
+  </div>
+
+  <div class="cols">
+    <div class="box prose">
+      <h3 class="ink-blue">With TCP + TLS (HTTP/2)</h3>
+      <ol style="margin:0; padding-left:22px; display:flex; flex-direction:column; gap:6px">
+        <li>Two round trips of setup before the first byte.</li>
+        <li>A packet from photo 3 is lost in a tunnel. Text and other photos already received are held back until it's re-sent. The whole page stalls.</li>
+        <li>The phone moves to 4G. Her IP address changes, the connection dies, and the browser starts over with a fresh handshake.</li>
+      </ol>
+    </div>
+    <div class="box prose" style="border-color:var(--pink)">
+      <h3 class="ink-pink">With QUIC (HTTP/3)</h3>
+      <ol style="margin:0; padding-left:22px; display:flex; flex-direction:column; gap:6px">
+        <li>One round trip of setup, or zero if she read this site yesterday.</li>
+        <li>The packet from photo 3 is lost. Only photo 3 waits; headline, text and other photos keep appearing.</li>
+        <li>The phone moves to 4G. The server recognises the connection ID from the new address and the download carries on.</li>
+      </ol>
+    </div>
+  </div>
+
+  <h3>Side by side</h3>
+  <div class="table-wrap">
+    <table class="sk compare">
+      <thead><tr><th></th><th>TCP (+ TLS)</th><th>UDP</th><th>QUIC</th></tr></thead>
+      <tbody>
+        <tr><td>Setup before data</td><td>2 round trips (TLS 1.3)</td><td>None</td><td>1 round trip, or 0 on return visits</td></tr>
+        <tr><td>Delivery guaranteed</td><td>Yes</td><td>No</td><td>Yes</td></tr>
+        <tr><td>Ordering</td><td>One order for everything</td><td>None</td><td>Per stream</td></tr>
+        <tr><td>One lost packet blocks</td><td>Everything on the connection</td><td>Nothing (it's just lost)</td><td>Only its own stream</td></tr>
+        <tr><td>Encryption</td><td>Optional, added by TLS</td><td>None</td><td>Always on, built in</td></tr>
+        <tr><td>Survives Wi‑Fi → mobile</td><td>No</td><td>Not applicable</td><td>Yes (connection IDs)</td></tr>
+        <tr><td>Where it runs</td><td>Operating system</td><td>Operating system</td><td>Inside the app or browser</td></tr>
+        <tr><td>Typical use</td><td>Web (HTTP/1.1, HTTP/2), email, file transfer</td><td>DNS, games, live calls</td><td>Web (HTTP/3), video streaming, newer apps</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- ================= 7 LIMITS ================= -->
+<section class="sheet" id="limits">
+  <div class="page-no">Page 7 of 8</div>
+  <h2>Limitations: why not <span class="ink-red">everyone</span> uses QUIC yet</h2>
+  <p class="lede">About 41% of websites offer HTTP/3, so most of the web still runs on TCP. Support is lopsided: big CDNs switch it on by default, while self-hosted servers often don't.</p>
+
+  <div class="bars" role="img" aria-label="Share of websites supporting HTTP/3: all sites 41 percent, sites on Cloudflare 87 percent, sites on Nginx 13.5 percent">
+    <div class="bar" style="--c:var(--purple)"><span class="bl">All websites</span><span class="track"><i style="width:41%"></i></span><span class="bv">41%</span></div>
+    <div class="bar" style="--c:var(--orange)"><span class="bl">On Cloudflare</span><span class="track"><i style="width:87%"></i></span><span class="bv">87%</span></div>
+    <div class="bar" style="--c:var(--green)"><span class="bl">On Nginx</span><span class="track"><i style="width:13.5%"></i></span><span class="bv">13.5%</span></div>
+  </div>
+  <p class="src">Share of sites supporting HTTP/3. All websites: <a href="https://w3techs.com/technologies/details/ce-http3">W3Techs</a>, Nov 2026. By web server: <a href="https://w3techs.com/technologies/breakdown/ce-http3/web_server">W3Techs</a>, Mar 2026.</p>
+
+  <div class="toy">
+    <div class="toy-label"><svg aria-hidden="true"><use href="#pencil"/></svg>The hotel Wi‑Fi gate</div>
+    <p>Many company, hotel and public networks only let web traffic through on TCP port 443. Watch what the browser does.</p>
+    <div class="scene gate-scene" id="gateScene">
+      <svg viewBox="0 0 700 160" aria-hidden="true">
+        <g class="rough">
+          <rect class="st fl-sheet" x="20" y="60" width="80" height="54" rx="4"/><path class="st" d="M8 122 h104 l-10 -8 h-84 z"/>
+          <g id="gateWall">
+            <rect class="st st-red" x="320" y="20" width="60" height="130" style="fill:color-mix(in srgb, var(--red) 18%, transparent)"/>
+            <path class="st st-red" d="M320 52 h60 M320 84 h60 M320 116 h60 M350 20 v32 M335 52 v32 M365 52 v32 M350 84 v32 M335 116 v34 M365 116 v34"/>
+          </g>
+          <rect class="st fl-sheet" x="600" y="30" width="80" height="110" rx="6"/><path class="st" d="M600 66 h80 M600 102 h80"/>
+          <path class="st st-soft" style="stroke-dasharray:6 8" d="M110 90 H590"/>
+        </g>
+        <text class="svg-txt soft" x="22" y="48" font-size="18">browser</text>
+        <text class="svg-txt red" x="300" y="14" font-size="18" id="gateLabel">hotel firewall</text>
+        <text class="svg-txt soft" x="604" y="20" font-size="18">website</text>
+      </svg>
+    </div>
+    <div class="controls">
+      <button class="btn" id="gateBtn">Connect from hotel Wi‑Fi</button>
+      <label class="check"><input type="checkbox" id="gateOpen"> Network admin allows UDP port 443 (a fix from page 8)</label>
+    </div>
+    <p class="status" id="gateMsg">The browser tries QUIC first and keeps TCP ready as a backup.</p>
+  </div>
+
+  <div class="limits">
+    <div class="limit"><h3>UDP gets blocked or throttled</h3><p>Many firewalls, hotel and public Wi‑Fi only allow web traffic over TCP port 443, or slow UDP down because it was used in attacks. The browser falls back to TCP.</p><span class="who-tag">hurts: users on corporate &amp; public networks</span></div>
+    <div class="limit"><h3>Higher CPU cost</h3><p>TCP's work is done by the operating system and network card, tuned for decades. QUIC does encryption and packet handling in app code, packet by packet, so servers can use noticeably more CPU.</p><span class="who-tag">hurts: server operators, data-centre bills</span></div>
+    <div class="limit"><h3>Harder to see inside</h3><p>Almost everything is encrypted, so firewalls, load balancers and monitoring tools can't read packet numbers or delays like they can with TCP.</p><span class="who-tag">hurts: enterprises, ISPs, security teams</span></div>
+    <div class="limit"><h3>Small gains on good networks</h3><p>On fast, stable fibre with almost no loss, HTTP/2 over TCP already does well. The big wins are on mobile and lossy links.</p><span class="who-tag">hurts: sites with mostly desktop broadband users</span></div>
+    <div class="limit"><h3>Young server support</h3><p>Popular servers and libraries added QUIC late, and some features are still experimental. Many companies wait for "boring and stable".</p><span class="who-tag">hurts: self-hosted sites, smaller teams</span></div>
+    <div class="limit"><h3>Discovery costs a trip</h3><p>A browser usually learns a site speaks HTTP/3 only after a first visit over TCP (via the Alt-Svc header). The first visit doesn't benefit.</p><span class="who-tag">hurts: first-time visitors</span></div>
+    <div class="limit"><h3>Load balancing is harder</h3><p>Load balancers route by IP and port. With migration the address can change, so they must route by connection ID, which needs new software.</p><span class="who-tag">hurts: large server fleets</span></div>
+    <div class="limit"><h3>0-RTT replay risk</h3><p>Data in a 0-RTT first packet can be captured and re-sent by an attacker. It's only safe for requests that are harmless to repeat.</p><span class="who-tag">hurts: app developers</span></div>
+    <div class="limit"><h3>OS &amp; hardware gap</h3><p>Operating systems were built around TCP. UDP batching (GSO/GRO) helps, but QUIC lacks TCP's decades of hardware offload.</p><span class="who-tag">hurts: high-traffic servers</span></div>
+  </div>
+
+  <div class="callout" style="border-color:var(--red); background:color-mix(in srgb, var(--red) 6%, transparent)">
+    <span class="tag ink-red">In one line</span>
+    <p>QUIC is faster where networks are messy, but it costs more CPU, is harder to inspect, and some networks still block it. So many organisations stick with TCP for now.</p>
+  </div>
+</section>
+
+<!-- ================= 8 FIXES ================= -->
+<section class="sheet" id="fixes">
+  <div class="page-no">Page 8 of 8</div>
+  <h2>How the limitations <span class="ink-green">can be overcome</span></h2>
+  <p class="lede">Most of QUIC's limits are about missing support and tooling, not flaws in the design. Each one has a practical fix. Flip each card between problem and fix.</p>
+  <div class="fixes" id="fixList"></div>
+  <div class="callout" style="border-color:var(--green); background:color-mix(in srgb, var(--green) 7%, transparent)">
+    <span class="tag ink-green">Own a small website?</span>
+    <p>The easiest path: put the site behind a CDN that offers HTTP/3 and switch it on. Visitors whose network blocks UDP automatically fall back to HTTP/2, so nothing breaks.</p>
+  </div>
+</section>
+
+<!-- ================= GLOSSARY ================= -->
+<section class="sheet" id="glossary">
+  <div class="page-no">Back pages</div>
+  <h2>Glossary <span class="ink-soft" style="font-size:.55em">stick these on your fridge</span></h2>
+  <div class="gloss">
+    <div class="note" style="--c:var(--note-y)"><h3>Packet</h3><p>A small chunk of data sent across the network.</p></div>
+    <div class="note" style="--c:var(--note-p)"><h3>Round trip (RTT)</h3><p>The time for a message to go to the server and a reply to come back.</p></div>
+    <div class="note" style="--c:var(--note-b)"><h3>Handshake</h3><p>The setup conversation before real data is sent.</p></div>
+    <div class="note" style="--c:var(--note-g)"><h3>TLS</h3><p>The security layer that encrypts data. The padlock in your browser.</p></div>
+    <div class="note" style="--c:var(--note-o)"><h3>Stream</h3><p>One independent lane of data inside a QUIC connection.</p></div>
+    <div class="note" style="--c:var(--note-v)"><h3>Head-of-line blocking</h3><p>When one missing piece holds up everything behind it.</p></div>
+    <div class="note" style="--c:var(--note-y)"><h3>Connection ID</h3><p>QUIC's tracking number for a connection, independent of your network address.</p></div>
+    <div class="note" style="--c:var(--note-p)"><h3>0-RTT</h3><p>Sending data in the very first packet to a server you've visited before.</p></div>
+    <div class="note" style="--c:var(--note-b)"><h3>Ossification</h3><p>The internet's middle boxes being so set in their ways that new protocols get blocked.</p></div>
+    <div class="note" style="--c:var(--note-g)"><h3>HTTP/3</h3><p>The version of the web's language that runs on QUIC.</p></div>
+  </div>
+</section>
+
+<!-- ================= QUIZ ================= -->
+<section class="sheet" id="quiz">
+  <div class="page-no">Pop quiz</div>
+  <h2>Did it stick? <span class="score" id="score">0 / 4</span></h2>
+  <form class="quiz" id="quizForm"></form>
+  <div>
+    <h3>Sources</h3>
+    <ol class="sources">
+      <li><a href="https://www.rfc-editor.org/rfc/rfc9000">RFC 9000: QUIC, a UDP-based multiplexed and secure transport</a></li>
+      <li><a href="https://www.rfc-editor.org/rfc/rfc9114">RFC 9114: HTTP/3</a></li>
+      <li><a href="https://w3techs.com/technologies/details/ce-http3">W3Techs: usage statistics of HTTP/3</a></li>
+      <li><a href="https://w3techs.com/technologies/breakdown/ce-http3/web_server">W3Techs: HTTP/3 by web server</a></li>
+    </ol>
+  </div>
+</section>
+
+</main>
+</div>
+<footer>sketched from "QUIC Explained Simply" · Nov 2026 · Ashilesh Sonkusle</footer>
+
+<script>
+(() => {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const sleep = ms => new Promise(r => setTimeout(r, reduce ? Math.min(ms, 60) : ms));
+  const $ = s => document.querySelector(s);
+  const el = (tag, cls, html) => { const e = document.createElement(tag); if (cls) e.className = cls; if (html != null) e.innerHTML = html; return e; };
+  if (reduce) { const h = $('#heroArt'); h && h.pauseAnimations && h.pauseAnimations(); }
+
+  /* ---- active tab on scroll ---- */
+  const tabs = [...document.querySelectorAll('.tab')];
+  const tabStrip = document.getElementById('tabs');
+  let activeId = null;
+  const io = new IntersectionObserver(es => {
+    es.forEach(e => {
+      if (!e.isIntersecting || e.target.id === activeId) return;
+      activeId = e.target.id;
+      tabs.forEach(t => t.classList.toggle('active', t.getAttribute('href') === '#' + activeId));
+      // Scroll only the tab strip sideways; never touch the page's own scroll position.
+      const a = tabs.find(t => t.classList.contains('active'));
+      if (!a) return;
+      const left = a.offsetLeft - tabStrip.offsetLeft, right = left + a.offsetWidth;
+      if (left < tabStrip.scrollLeft) tabStrip.scrollLeft = left - 8;
+      else if (right > tabStrip.scrollLeft + tabStrip.clientWidth) tabStrip.scrollLeft = right - tabStrip.clientWidth + 8;
+    });
+  }, {rootMargin:'-40% 0px -55% 0px'});
+  document.querySelectorAll('main > section').forEach(s => io.observe(s));
+
+  /* ---- helper: move a chip across a scene ---- */
+  function fly(scene, node, from, to, dur, opts = {}) {
+    scene.appendChild(node);
+    const kf = opts.keyframes || [{left: from + '%'}, {left: to + '%'}];
+    const a = node.animate(kf, {duration: reduce ? 200 : dur, delay: reduce ? 0 : (opts.delay || 0), easing: opts.easing || 'ease-in-out', fill: 'forwards'});
+    return a.finished.then(() => node);
+  }
+
+  /* ---- 1. parcels ---- */
+  const sendBtn = $('#sendBtn'), tray = $('#tray'), roadScene = $('#roadScene');
+  sendBtn.addEventListener('click', async () => {
+    sendBtn.disabled = true;
+    tray.innerHTML = '<span class="lbl">Arrived:</span>';
+    const lose = $('#loseToggle').checked;
+    const lost = lose ? 2 + Math.floor(Math.random() * 4) : -1;
+    const order = [];
+    const runs = [];
+    for (let i = 1; i <= 6; i++) {
+      const p = el('div', 'mover c' + i, String(i));
+      p.style.setProperty('--top', (70 + (i % 3) * 6) + '%');
+      const dur = 1700 + Math.random() * 1400;
+      const delay = (i - 1) * 260;
+      let run;
+      if (i === lost) {
+        run = fly(roadScene, p, 17, 84, dur, {delay, keyframes:[
+          {left:'17%', opacity:1, transform:'translate(-50%,-50%)'},
+          {left:'50%', opacity:1, transform:'translate(-50%,-50%)', offset:.55},
+          {left:'52%', opacity:0, transform:'translate(-50%,-140%) rotate(70deg) scale(1.4)'}]})
+          .then(n => { n.remove(); });
+      } else {
+        run = fly(roadScene, p, 17, 84, dur, {delay}).then(n => {
+          n.remove(); order.push(i);
+          tray.appendChild(el('span', 'chip', String(i)));
+        });
+      }
+      runs.push(run);
+    }
+    await Promise.all(runs);
+    if (lost > 0) tray.appendChild(el('span', 'chip lost', lost + '?'));
+    const jumbled = order.some((v, k) => k && v < order[k - 1]);
+    let msg = 'Arrival order: <b>' + order.join(', ') + '</b>. ';
+    if (lost > 0) msg += 'Parcel ' + lost + ' never showed up. ';
+    msg += jumbled ? 'Some overtook others on the way. ' : 'This time they kept their order, but nothing promised that. ';
+    msg += 'Sorting this out is the transport protocol\'s job.';
+    $('#roadMsg').innerHTML = msg;
+    sendBtn.disabled = false;
+  });
+
+  /* ---- 2. one till ---- */
+  const files = [['HTML','var(--note-y)'],['Styles','var(--note-v)'],['Photo 1','var(--note-g)'],['Text','var(--note-b)'],['Script','var(--note-o)'],['Photo 2','var(--note-p)']];
+  const person = c => `<svg viewBox="0 0 46 70" aria-hidden="true"><g class="rough"><circle class="st" cx="23" cy="12" r="9" style="fill:${c}"/><path class="st" d="M23 22 V46 M23 30 L10 40 M23 30 L36 40 M23 46 L13 66 M23 46 L33 66"/></g></svg>`;
+  const tillRow = $('#tillRow');
+  function drawTill() {
+    tillRow.innerHTML = '';
+    const t = el('div', 'till', `<svg viewBox="0 0 96 100" aria-hidden="true"><g class="rough"><rect class="st fl-b" x="6" y="44" width="84" height="52" rx="4"/><rect class="st fl-sheet" x="20" y="16" width="44" height="28"/><path class="st st-green" d="M28 30 h28"/></g><text class="svg-txt note" x="22" y="80" font-size="18">TILL</text></svg>`);
+    tillRow.appendChild(t);
+    return files.map(([name, c]) => { const d = el('div', 'cust', person(c) + `<span class="bag" style="background:${c}">${name}</span>`); tillRow.appendChild(d); return d; });
+  }
+  let custs = drawTill();
+  const tillBtn = $('#tillBtn');
+  tillBtn.addEventListener('click', async () => {
+    tillBtn.disabled = true;
+    custs = drawTill();
+    const slow = $('#slowToggle').checked;
+    const t0 = performance.now();
+    for (let k = 0; k < custs.length; k++) {
+      const c = custs[k];
+      const isSlow = slow && k === 0;
+      custs.slice(k + 1).forEach(x => x.classList.toggle('waiting', isSlow));
+      if (isSlow) {
+        c.appendChild(el('span', 'bubble', 'where\'s my wallet?!'));
+        $('#tillMsg').innerHTML = '<b>Stuck.</b> ' + files.slice(1).map(f => f[0]).join(', ') + ' are all waiting behind one shopper.';
+        await sleep(3800);
+        c.querySelector('.bubble').remove();
+        custs.forEach(x => x.classList.remove('waiting'));
+      } else {
+        $('#tillMsg').innerHTML = 'Serving <b>' + files[k][0] + '</b>…';
+        await sleep(600);
+      }
+      await c.animate([{opacity:1, transform:'none'}, {opacity:0, transform:'translateY(-20px) scale(.8)'}], {duration: reduce ? 1 : 300, fill:'forwards'}).finished;
+      c.style.visibility = 'hidden';
+    }
+    const secs = ((performance.now() - t0) / 1000).toFixed(1);
+    $('#tillMsg').innerHTML = `All 6 files served in <b>${secs} s</b>. ` + (slow ? 'Most of that time, five quick shoppers stood still. QUIC\'s answer is many tills (page 5, idea 3).' : 'Smooth when nothing goes wrong. Now tick the wallet box and try again.');
+    tillBtn.disabled = false; tillBtn.textContent = 'Serve them again';
+  });
+
+  /* ---- 3. postcards ---- */
+  const cardBtn = $('#cardBtn'), cardTray = $('#cardTray'), cardScene = $('#cardScene');
+  cardBtn.addEventListener('click', async () => {
+    cardBtn.disabled = true;
+    cardTray.innerHTML = '<span class="lbl">Screen shows:</span>';
+    let shown = 0; const stats = {shown:0, late:0, lost:0};
+    const runs = [];
+    const lostSet = new Set();
+    while (lostSet.size < 2) lostSet.add(2 + Math.floor(Math.random() * 6));
+    for (let i = 1; i <= 8; i++) {
+      const p = el('div', 'mover c' + (((i - 1) % 6) + 1), String(i));
+      p.style.setProperty('--top', (46 + (i % 3) * 14) + '%');
+      const dur = 1300 + Math.random() * 1600, delay = (i - 1) * 200;
+      if (lostSet.has(i)) {
+        runs.push(fly(cardScene, p, 12, 86, dur, {delay, keyframes:[
+          {left:'12%', opacity:1, transform:'translate(-50%,-50%)'},
+          {left:'45%', opacity:1, transform:'translate(-50%,-50%)', offset:.5},
+          {left:'48%', opacity:0, transform:'translate(-50%,40%) rotate(-60deg)'}]}).then(n => { n.remove(); stats.lost++; }));
+      } else {
+        runs.push(fly(cardScene, p, 12, 86, dur, {delay}).then(n => {
+          n.remove();
+          if (i > shown) { shown = i; stats.shown++; cardTray.appendChild(el('span', 'chip', String(i))); }
+          else { stats.late++; cardTray.appendChild(el('span', 'chip late', String(i))); }
+        }));
+      }
+    }
+    await Promise.all(runs);
+    [...lostSet].sort((a, b) => a - b).forEach(n => cardTray.appendChild(el('span', 'chip lost', n + '?')));
+    $('#cardMsg').innerHTML = `<b>${stats.shown}</b> frames shown, <b>${stats.late}</b> arrived too late and were skipped, <b>${stats.lost}</b> lost. The call kept going the whole time. That's UDP's trade.`;
+    cardBtn.disabled = false;
+  });
+
+  /* envelope */
+  const env = $('#env');
+  env.addEventListener('click', () => {
+    const open = env.classList.toggle('open');
+    env.setAttribute('aria-pressed', open);
+    $('#envHint').textContent = open ? 'routers only ever see the envelope' : 'tap the envelope';
+  });
+
+  /* ---- 5. flip cards ---- */
+  document.querySelectorAll('.flip').forEach(f => {
+    const toggle = () => { const on = f.classList.toggle('flipped'); f.setAttribute('aria-pressed', on); };
+    f.addEventListener('click', e => { if (e.target.closest('a')) return; toggle(); });
+    f.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggle(); } });
+  });
+
+  /* ---- 6. race ---- */
+  const RTT = 6, TICK_S = 0.05, TICK_MS = reduce ? 15 : 45;
+  const spec = [['headline','Headline',3,0],['text','Text',4,0],['text','Text',3,0],['styles','Styles',3,0]];
+  for (let n = 1; n <= 10; n++) spec.push(['photo','Photo ' + n,5,1]);
+  function makePhone(root, kind) {
+    const screen = root.querySelector('.screen');
+    screen.innerHTML = '';
+    const photos = el('div', 'photos');
+    const items = spec.map(([cls, name, size, prio]) => {
+      const b = el('div', 'blk ' + cls, '<i></i>'); b.title = name;
+      (cls === 'photo' ? photos : screen).appendChild(b);
+      return {cls, name, size, prio, got:0, stall:0, node:b};
+    });
+    screen.appendChild(photos);
+    root.classList.remove('done');
+    root.querySelector('.winner') && root.querySelector('.winner').remove();
+    root.querySelector('.netname').textContent = 'Station Wi‑Fi';
+    root.querySelector('.clock').textContent = '0.00 s';
+    root.querySelector('.pstatus').textContent = 'Ready';
+    return {root, kind, items, setup:0, hol:0, rr:0, t:0, done:false, note:''};
+  }
+  let phones = [makePhone($('#phoneTcp'), 'tcp'), makePhone($('#phoneQuic'), 'quic')];
+  let timer = null, tick = 0, events = {tunnel:false, sw:false};
+
+  function step(ph) {
+    if (ph.done) return;
+    ph.t++;
+    if (ph.setup > 0) { ph.setup--; ph.note = ph.kind === 'tcp' && ph.restarted ? 'Connection died. Handshaking again…' : 'Phoning ahead (handshake)…'; return; }
+    if (ph.hol > 0) { ph.hol--; ph.note = 'Everything frozen, waiting for photo 3\'s lost packet'; if (!ph.hol) ph.items.forEach(i => i.stall = 0); return; }
+    let ready = ph.items.filter(i => i.got < i.size && i.stall === 0);
+    ph.items.forEach(i => { if (i.stall > 0 && ph.kind === 'quic') { i.stall--; } });
+    if (ready.length) {
+      const top = Math.min(...ready.map(i => i.prio));
+      ready = ready.filter(i => i.prio === top);
+      const pick = ready[ph.rr++ % ready.length];
+      pick.got = Math.min(pick.size, pick.got + 1);
+    }
+    const stalled = ph.items.some(i => i.stall > 0);
+    ph.note = stalled ? 'Only photo 3 waits. Everything else keeps loading.' : 'Loading…';
+    if (ph.items.every(i => i.got >= i.size)) { ph.done = true; ph.note = 'Done in ' + (ph.t * TICK_S).toFixed(2) + ' s'; }
+  }
+  function draw(ph) {
+    ph.items.forEach(i => {
+      const pct = (i.got / i.size * 100) + '%';
+      const bar = i.node.firstChild;
+      if (i.cls === 'photo') bar.style.height = pct; else bar.style.width = pct;
+      i.node.classList.toggle('stalled', i.stall > 0 || (ph.hol > 0 && i.got < i.size));
+    });
+    ph.root.querySelector('.clock').textContent = (ph.t * TICK_S).toFixed(2) + ' s';
+    ph.root.querySelector('.pstatus').textContent = ph.note;
+    ph.root.classList.toggle('done', ph.done);
+  }
+  function tunnel() {
+    if (events.tunnel) return; events.tunnel = true; $('#raceTunnel').disabled = true;
+    phones.forEach(ph => {
+      if (ph.done) return;
+      const target = ph.items.find(i => i.name === 'Photo 3' && i.got < i.size) || ph.items.find(i => i.got < i.size);
+      if (!target) return;
+      target.stall = RTT * 2;
+      if (ph.kind === 'tcp') ph.hol = RTT * 2;
+    });
+  }
+  function switchNet() {
+    if (events.sw) return; events.sw = true; $('#raceSwitch').disabled = true;
+    phones.forEach(ph => {
+      ph.root.querySelector('.netname').textContent = '4G';
+      if (ph.done) return;
+      if (ph.kind === 'tcp') { ph.setup = RTT * 2; ph.hol = 0; ph.restarted = true; ph.items.forEach(i => { if (i.got < i.size) i.got = 0; i.stall = 0; }); }
+      else { ph.setup = Math.max(ph.setup, 1); }
+    });
+  }
+  function finishBadge() {
+    const [a, b] = phones;
+    if (!(a.done && b.done)) return false;
+    const w = a.t <= b.t ? a : b;
+    w.root.appendChild(el('div', 'winner', 'first!'));
+    return true;
+  }
+  $('#raceStart').addEventListener('click', () => {
+    clearInterval(timer);
+    phones = [makePhone($('#phoneTcp'), 'tcp'), makePhone($('#phoneQuic'), 'quic')];
+    phones[0].setup = RTT * 2;
+    phones[1].setup = $('#raceZero').checked ? 0 : RTT;
+    tick = 0; events = {tunnel:false, sw:false};
+    $('#raceTunnel').disabled = false; $('#raceSwitch').disabled = false;
+    $('#raceStart').textContent = 'Run it again';
+    const auto = $('#raceAuto').checked;
+    timer = setInterval(() => {
+      tick++;
+      if (auto && tick === 26) tunnel();
+      if (auto && tick === 48) switchNet();
+      phones.forEach(ph => { step(ph); draw(ph); });
+      if (finishBadge()) { clearInterval(timer); $('#raceTunnel').disabled = true; $('#raceSwitch').disabled = true; }
+    }, TICK_MS);
+  });
+  $('#raceTunnel').addEventListener('click', tunnel);
+  $('#raceSwitch').addEventListener('click', switchNet);
+  phones.forEach(draw);
+
+  /* ---- 7. firewall gate ---- */
+  const gateBtn = $('#gateBtn'), gateScene = $('#gateScene');
+  gateBtn.addEventListener('click', async () => {
+    gateBtn.disabled = true;
+    const open = $('#gateOpen').checked;
+    $('#gateLabel').textContent = open ? 'UDP 443 allowed' : 'hotel firewall';
+    const q = el('div', 'mover udp', 'QUIC · UDP 443'); q.style.setProperty('--top', '56%');
+    $('#gateMsg').innerHTML = 'Trying <b>HTTP/3 over QUIC</b>…';
+    if (open) {
+      await fly(gateScene, q, 16, 85, 1800);
+      $('#gateMsg').innerHTML = '<b>HTTP/3 connected.</b> One round trip, streams, connection IDs: all the QUIC perks.';
+      await sleep(1200); q.remove();
+    } else {
+      await fly(gateScene, q, 16, 85, 1500, {keyframes:[
+        {left:'16%', transform:'translate(-50%,-50%)'},
+        {left:'42%', transform:'translate(-50%,-50%)', offset:.6},
+        {left:'34%', transform:'translate(-50%,-50%) rotate(-14deg)', offset:.8},
+        {left:'30%', transform:'translate(-50%,-50%) rotate(-14deg)', opacity:.25}]});
+      $('#gateMsg').innerHTML = '<b>Blocked.</b> The firewall drops UDP. Falling back to TCP…';
+      await sleep(500); q.remove();
+      const t = el('div', 'mover tcp', 'TCP 443 · HTTP/2'); t.style.setProperty('--top', '56%');
+      await fly(gateScene, t, 16, 85, 1800);
+      $('#gateMsg').innerHTML = '<b>Connected over HTTP/2.</b> The page still loads, just without QUIC\'s perks. Tick the admin box and try again.';
+      await sleep(1200); t.remove();
+    }
+    gateBtn.disabled = false;
+  });
+
+  /* ---- 8. fixes ---- */
+  const fixes = [
+    ['UDP blocked by firewalls','Some networks drop UDP, so QUIC can\'t get through.','Always keep an automatic TCP fallback (browsers already race HTTP/3 against HTTP/2). Admins can allow UDP port 443 outbound, the same as TCP 443.','Admins and ISPs; fallback already standard in browsers','var(--note-p)'],
+    ['High CPU cost','QUIC does packet work in app code, so servers burn more CPU.','Batch UDP packets (GSO/GRO on Linux), use faster crypto libraries and network cards that offload QUIC encryption. Run QUIC at the CDN edge so origin servers stay on cheap TCP.','Server vendors, NIC makers, CDNs','var(--note-y)'],
+    ['Hard to monitor','Encryption hides packet numbers and delays from network tools.','Use QUIC\'s deliberately visible "spin bit" for latency, endpoint logs in the qlog format viewed with qvis, and observe at the server instead of mid-network.','Ops and security teams','var(--note-b)'],
+    ['Small gains on good networks','On clean fibre, HTTP/2 already does well.','Aim QUIC where it helps most: mobile apps, video streaming, regions with slow or lossy networks. Measure real-user performance before and after.','Product and performance teams','var(--note-g)'],
+    ['Young servers and libraries','Some implementations are late or still experimental.','Use mature ones (Cloudflare quiche, Google\'s QUICHE, Microsoft MsQuic, nginx/Caddy/LiteSpeed HTTP/3) or put a CDN in front of the site.','Developers, hosting providers','var(--note-o)'],
+    ['First-visit discovery','Browsers learn about HTTP/3 only after a TCP visit.','Publish an HTTPS DNS record (SVCB/HTTPS, RFC 9460) that says "HTTP/3 is available" before the first connection.','Site owners, via DNS settings','var(--note-v)'],
+    ['Load balancing with migration','Addresses change, so IP-and-port routing breaks.','Encode routing info inside the connection ID (the IETF QUIC-LB work) so load balancers can route without decrypting.','Load-balancer vendors','var(--note-p)'],
+    ['0-RTT replay','Attackers can re-send first-packet data.','Allow 0-RTT only for safe, repeatable requests (GET a page). Servers can reject or delay risky 0-RTT data and add anti-replay checks.','App and framework developers','var(--note-y)'],
+    ['Kernel and hardware gap','TCP has decades of OS and hardware help; QUIC doesn\'t yet.','Ongoing OS work on UDP performance and hardware offload, plus proposals to move parts of QUIC into the kernel.','OS and hardware vendors (long term)','var(--note-b)']
+  ];
+  const fixList = $('#fixList');
+  fixes.forEach(([title, prob, fix, who, c], k) => {
+    const card = el('div', 'fix');
+    card.innerHTML = `<h3>${title}</h3>
+      <div class="seg" role="group" aria-label="Show problem or fix" style="--c:${c}">
+        <button type="button" aria-pressed="false" id="fx${k}p">Problem</button><button type="button" aria-pressed="true" id="fx${k}f">Fix</button></div>
+      <p class="pane"></p><p class="acts"></p>`;
+    const [bp, bf] = card.querySelectorAll('.seg button'), pane = card.querySelector('.pane'), acts = card.querySelector('.acts');
+    const show = isFix => {
+      bp.setAttribute('aria-pressed', !isFix); bf.setAttribute('aria-pressed', isFix);
+      pane.innerHTML = isFix ? fix : '<span class="ink-red">' + prob + '</span>';
+      acts.textContent = isFix ? 'Who acts: ' + who : '';
+    };
+    bp.onclick = () => show(false); bf.onclick = () => show(true);
+    show(true);
+    fixList.appendChild(card);
+  });
+
+  /* ---- quiz ---- */
+  const quiz = [
+    ['Why is QUIC built on UDP instead of being a brand-new protocol?', ['UDP is faster than light','Middleboxes only let TCP and UDP through','UDP has built-in encryption'], 1, 'Routers and firewalls have "ossified" around TCP and UDP. A plain UDP envelope gets through everywhere.'],
+    ['In QUIC, one packet for photo 3 is lost. What happens to the other files?', ['They all wait for photo 3','They keep flowing; only that stream waits','The page reloads'], 1, 'Each file has its own stream, so only photo 3\'s lane pauses.'],
+    ['Why doesn\'t a QUIC download break when your phone switches to mobile data?', ['Connection IDs','A bigger battery','The server pauses the download'], 0, 'The connection is known by its ID, not your address, so the server recognises it from the new network.'],
+    ['Name one reason a company might not use QUIC yet.', ['It can\'t load images','UDP blocked, CPU cost, or harder monitoring','It only works on Tuesdays'], 1, 'Any of those three is a real reason organisations stay on TCP for now.']
+  ];
+  const form = $('#quizForm'); let score = 0;
+  form.addEventListener('submit', e => e.preventDefault());
+  quiz.forEach(([q, opts, right, why], k) => {
+    const fs = el('fieldset', 'qz');
+    fs.innerHTML = `<legend>${k + 1}. ${q}</legend><div class="opts"></div><p class="why" aria-live="polite"></p>`;
+    const box = fs.querySelector('.opts');
+    opts.forEach((o, j) => {
+      const b = el('button', 'opt', o); b.type = 'button'; b.id = `q${k}o${j}`;
+      b.onclick = () => {
+        if (fs.dataset.done) return;
+        fs.dataset.done = '1';
+        b.classList.add(j === right ? 'right' : 'wrong');
+        box.children[right].classList.add('right');
+        if (j === right) score++;
+        fs.querySelector('.why').innerHTML = (j === right ? '<b class="ink-green">Yes!</b> ' : '<b class="ink-red">Not quite.</b> ') + why;
+        $('#score').textContent = score + ' / ' + quiz.length;
+      };
+      box.appendChild(b);
+    });
+    form.appendChild(fs);
+  });
+})();
+</script>
+</body>
+</html>

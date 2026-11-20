@@ -1,0 +1,59 @@
+# Tech Explainers — maintainer notes (for Claude and humans)
+
+Static GitHub Pages site. No build step, no framework, no Jekyll (`.nojekyll` is present).
+The root `index.html` is a catalog/home page; every other folder is a standalone sub-site.
+
+## Layout
+
+```
+index.html          Home page shell. Rarely needs editing.
+assets/sites.js     ★ THE CATALOG. Site list, categories, home-page title/tagline.
+assets/app.js       Renders the catalog (search, category chips, cards, theme toggle).
+assets/style.css    Home page theme. Colors are tokens on :root (light + 2 dark blocks).
+PQC/                Post-quantum cryptography pages (2 pages)
+QUIC/               QUIC protocol sketchbook (1 page)
+<TOPIC>/            ← new sub-sites go in their own top-level folder
+```
+
+## Adding a new site (the common task)
+
+1. Put the page(s) in a new top-level folder: `<TOPIC>/index.html` (plus any extra pages).
+   Folder name: UPPERCASE for acronyms (`TLS`, `DNS`), kebab-case otherwise (`garbage-collection`).
+   Keep sub-sites self-contained; all links relative.
+2. Open `assets/sites.js` and append an object to `window.SITES` at the
+   `// ↓↓↓ ADD NEW SITES HERE ↓↓↓` marker. Required fields: `id`, `title`, `path`,
+   `category`, `description`, `added` (YYYY-MM-DD = today). Recommended: `topic`, `format`,
+   `tags`, `minutes`. Set `featured: true` only for a flagship page (keep "Start here" to ≤4).
+   Pages sharing one folder share a `topic` (e.g. both PQC pages have `topic: "PQC"`).
+3. Category: reuse an existing `window.CATEGORIES` id if it fits. If not, add a new
+   category object there (and ideally a `--c-<id>` color in `assets/style.css` in all three
+   token blocks, and an icon key in `ICONS` in `assets/app.js`). Empty categories are hidden,
+   so pre-creating them is harmless.
+4. Give every new page a link back home: `<a class="home-link" href="../index.html">← All explainers</a>`
+   at the start of its top nav/header, styled to match that page (see the existing pages:
+   PQC uses a pill / small text link, QUIC uses a dashed `.home-tab` before the tabs).
+   In QUIC the home link is deliberately NOT class `.tab`, so the scroll-spy script ignores it.
+5. Update the `<noscript>` fallback links in `index.html` if you want the new folder listed there.
+6. Verify: open `index.html` locally (works over `file://`, no server needed) — the card
+   should appear under its category, search should find it by its tags.
+
+Do NOT hardcode cards into `index.html`; everything is generated from `sites.js`.
+Use relative paths only (no leading `/`) so it works at both `user.github.io/` and
+`user.github.io/<repo>/`.
+
+## Existing categories (ids)
+
+security, networking, systems, web, data, ai, cloud, algorithms
+(Only `security` and `networking` currently have sites.)
+
+## Theme
+
+"Terminal at night": dark navy with faint grid, terminal-green accent (`--accent`),
+Inter for text, JetBrains Mono for labels. Dark is the system default; the toggle stores
+`theme` in localStorage. Each category has its own hue (`--c-<id>`) used for the card's top
+stripe, topic badge and icon.
+
+## Possible future work
+
+- If the catalog grows past ~50 entries, consider splitting `sites.js` per category or adding
+  pagination; search/filter already handles moderate sizes fine.
