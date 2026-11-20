@@ -102,5 +102,21 @@ window.SITES = [
     featured: true,
   },
 
+  {
+    id: "wasm-sketchbook",
+    title: "Wasm Sketchbook",
+    path: "wasm/index.html",
+    category: "web",
+    topic: "Wasm",
+    format: "Interactive guide · 12 chapters",
+    description:
+      "A hand-drawn guide to WebAssembly: what it is, how the browser runs it, how it rides the JavaScript engine " +
+      "and reaches the GPU, and what it still can't do. Flip cards, a stack machine and a quiz.",
+    tags: ["wasm", "webassembly", "javascript", "v8", "browser", "compilers", "gpu", "webgpu"],
+    added: "2026-11-21",
+    minutes: 45,
+    featured: true,
+  },
+
   // ↓↓↓ ADD NEW SITES HERE ↓↓↓
 ];

@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Borrowed browser powers · Wasm Sketchbook</title>
+<meta name="description" content="Which features are built into WebAssembly and which it borrows from the browser through JavaScript: memory, GC, threads, SIMD, DOM, network, storage, graphics and more.">
+<script>try{var t=localStorage.getItem('wasm-sketchbook-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=Patrick+Hand&display=swap">
+<link rel="stylesheet" href="assets/css/sketch.css">
+<script defer src="assets/js/sketch.js"></script>
+<script defer src="assets/js/site.js"></script>
+<script defer src="assets/js/widgets.js"></script>
+</head>
+<body data-page="browser-features">
+<main class="page" id="main">
+
+  <header class="chapter-head">
+    <p class="chapter-kicker" data-icon="toolbox">Chapter 8</p>
+    <h1>Borrowed browser powers</h1>
+    <p class="lead">Wasm has its own instructions for maths, memory and control flow. Almost everything else it borrows from the browser, nearly always through JavaScript.</p>
+  </header>
+
+  <section class="block" aria-labelledby="toolbox">
+    <h2 id="toolbox">Two toolboxes</h2>
+    <div class="two-col">
+      <div class="sk-box green-line" data-fill="green">
+        <span class="box-title"><span class="tag built">built in</span> Wasm's own toolbox</span>
+        <ul style="margin-top:10px">
+          <li>maths on whole and decimal numbers</li>
+          <li>linear memory (up to 4 GiB, or 16 GiB with 64-bit memory)</li>
+          <li>SIMD: 128-bit "do four sums at once" instructions</li>
+          <li>exceptions (<code>try</code> / <code>throw</code>)</li>
+          <li>garbage-collected structs and arrays (WasmGC)</li>
+          <li>atomic instructions for shared memory</li>
+        </ul>
+      </div>
+      <div class="sk-box" data-fill="orange">
+        <span class="box-title"><span class="tag borrowed">borrowed</span> asked from JavaScript</span>
+        <ul style="margin-top:10px">
+          <li>the page: <code>document</code>, events, CSS</li>
+          <li>network: <code>fetch</code>, WebSocket, WebTransport</li>
+          <li>storage: IndexedDB, the Origin Private File System</li>
+          <li>graphics: Canvas, WebGL, WebGPU</li>
+          <li>sound and video: Web Audio, WebCodecs</li>
+          <li>threads themselves: Web Workers</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="game">
+    <h2 id="game">Game: built in or borrowed?</h2>
+    <div class="btn-row" style="justify-content:space-between;margin-bottom:16px">
+      <p class="muted" style="margin:0">Make a guess for each card, then tap to check.</p>
+      <button type="button" class="sk-btn small" data-fill="paper" data-flip-all="feature-cards">Flip them all</button>
+    </div>
+    <div class="grid" id="feature-cards" style="--min:220px">
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="paper"><span class="big">Memory</span><p>storing bytes and numbers</p><span class="flip-hint">built in or borrowed? tap</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="green"><span class="tag built">built in</span><p><code>WebAssembly.Memory</code>, backed by an <code>ArrayBuffer</code> that JS can read and write too.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="paper"><span class="big">Objects &amp; GC</span><p>for Kotlin, Dart, Java&hellip;</p><span class="flip-hint">built in or borrowed? tap</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="green"><span class="tag built">built in</span><p>WasmGC (Wasm 3.0) structs and arrays, cleaned up by the engine's own garbage collector.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="paper"><span class="big">SIMD</span><p>many sums in one instruction</p><span class="flip-hint">built in or borrowed? tap</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="green"><span class="tag built">built in</span><p>128-bit vector instructions, mapped to SSE/AVX on Intel and AMD, and NEON on ARM.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="paper"><span class="big">Errors</span><p>throwing and catching</p><span class="flip-hint">built in or borrowed? tap</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="green"><span class="tag built">built in</span><p>Native exception handling in Wasm 3.0, and it works together with JS exceptions.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="paper"><span class="big">Threads</span><p>using several CPU cores</p><span class="flip-hint">built in or borrowed? tap</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="yellow"><span class="tag built">half</span> <span class="tag borrowed">half</span><p>Atomics are built in; the threads are Web Workers sharing a <code>SharedArrayBuffer</code>. The page needs COOP/COEP headers.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="paper"><span class="big">The page (DOM)</span><p>buttons, text, styles</p><span class="flip-hint">built in or borrowed? tap</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="orange"><span class="tag borrowed">borrowed</span><p>Only through imported JS functions (glue code). Wasm can't touch <code>document</code> directly.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="paper"><span class="big">Network</span><p>downloading data</p><span class="flip-hint">built in or borrowed? tap</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="orange"><span class="tag borrowed">borrowed</span><p><code>fetch</code>, WebSocket and WebTransport, all called through JS imports.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="paper"><span class="big">Storage</span><p>saving files and data</p><span class="flip-hint">built in or borrowed? tap</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="orange"><span class="tag borrowed">borrowed</span><p>IndexedDB and the Origin Private File System (OPFS). OPFS is how SQLite in the browser saves its database.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="paper"><span class="big">Graphics</span><p>2D and 3D drawing</p><span class="flip-hint">built in or borrowed? tap</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="orange"><span class="tag borrowed">borrowed</span><p>Canvas 2D, WebGL and WebGPU, through JS. The whole trip is in chapter 9.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="paper"><span class="big">Audio &amp; video</span><p>sound effects, codecs</p><span class="flip-hint">built in or borrowed? tap</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="orange"><span class="tag borrowed">borrowed</span><p>Web Audio and WebCodecs. An <code>AudioWorklet</code> can run Wasm sound-processing code in real time.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="paper"><span class="big">Waiting</span><p>for a promise to finish</p><span class="flip-hint">built in or borrowed? tap</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="orange"><span class="tag borrowed">borrowed</span><p>JS Promise Integration (JSPI) lets Wasm pause until a JavaScript promise settles.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="paper"><span class="big">Strings</span><p>text, like "hello"</p><span class="flip-hint">built in or borrowed? tap</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="orange"><span class="tag borrowed">borrowed</span><p>JS string built-ins (Wasm 3.0) let Wasm use JS strings without copying them into its memory.</p></div>
+      </div></div>
+
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="threads">
+    <h2 id="threads">How threads work</h2>
+    <div class="two-col" style="align-items:center">
+      <svg class="doodle" viewBox="0 0 340 230" role="img" aria-label="Three Web Workers, each running a Wasm instance, all pointing at one shared memory">
+        <g class="wob">
+          <rect class="ink f-blue" x="10" y="14" width="96" height="56" rx="8"/>
+          <rect class="ink f-blue" x="122" y="14" width="96" height="56" rx="8"/>
+          <rect class="ink f-blue" x="234" y="14" width="96" height="56" rx="8"/>
+          <path class="ink s-pencil" d="M58 72 v60 M170 72 v60 M282 72 v60"/>
+          <path class="ink s-pencil" d="M50 124 l8 10 8 -10 M162 124 l8 10 8 -10 M274 124 l8 10 8 -10"/>
+          <rect class="ink f-yellow" x="20" y="140" width="300" height="46" rx="6"/>
+          <path class="ink thin" d="M60 140v46M100 140v46M140 140v46M180 140v46M220 140v46M260 140v46M300 140v46"/>
+        </g>
+        <text x="24" y="40">worker 1</text>
+        <text x="136" y="40">worker 2</text>
+        <text x="248" y="40">worker 3</text>
+        <text x="24" y="60" class="t-sm t-soft">Wasm instance</text>
+        <text x="136" y="60" class="t-sm t-soft">Wasm instance</text>
+        <text x="248" y="60" class="t-sm t-soft">Wasm instance</text>
+        <text x="96" y="214" class="t-title" style="font-size:20px">one shared memory</text>
+      </svg>
+      <div class="sk-box callout" data-fill="blue">
+        <span class="callout-label">In plain words</span>
+        <p>Each Web Worker runs its own copy of the module, but they all point at <strong>one shared memory</strong>. Atomic instructions stop them from scribbling over each other.</p>
+        <p class="small">For safety, the page must be "cross-origin isolated" by sending two headers: <code>Cross-Origin-Opener-Policy</code> and <code>Cross-Origin-Embedder-Policy</code>.</p>
+      </div>
+    </div>
+  </section>
+
+  <aside class="block takeaway sk-box" data-fill="yellow" aria-label="Remember">
+    <span class="takeaway-label">Remember</span>
+    <ul>
+      <li>Built in: maths, memory, SIMD, exceptions, GC, atomics.</li>
+      <li>Borrowed through JS: the page, network, storage, graphics, audio, workers.</li>
+      <li>Threads = Web Workers sharing one memory, on a cross-origin isolated page.</li>
+    </ul>
+  </aside>
+
+</main>
+</body>
+</html>

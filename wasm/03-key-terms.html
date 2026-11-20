@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Key terms · Wasm Sketchbook</title>
+<meta name="description" content="Module, instance, linear memory, table, imports, exports and the stack machine, explained with flip cards and a playable stack machine.">
+<script>try{var t=localStorage.getItem('wasm-sketchbook-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=Patrick+Hand&display=swap">
+<link rel="stylesheet" href="assets/css/sketch.css">
+<script defer src="assets/js/sketch.js"></script>
+<script defer src="assets/js/site.js"></script>
+<script defer src="assets/js/widgets.js"></script>
+</head>
+<body data-page="key-terms">
+<main class="page" id="main">
+
+  <header class="chapter-head">
+    <p class="chapter-kicker" data-icon="book">Chapter 3</p>
+    <h1>Key terms</h1>
+    <p class="lead">Seven words cover most of what you need to read anything about Wasm. Each one has a kitchen twin to help it stick.</p>
+  </header>
+
+  <section class="block" aria-labelledby="cards">
+    <h2 id="cards">Seven flip cards</h2>
+    <div class="btn-row" style="justify-content:space-between;margin-bottom:16px">
+      <p class="muted" style="margin:0">Guess the meaning, then tap a card to flip it.</p>
+      <button type="button" class="sk-btn small" data-fill="paper" data-flip-all="term-cards">Flip them all</button>
+    </div>
+    <div class="grid" id="term-cards" style="--min:240px">
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="yellow">
+          <svg class="doodle" viewBox="0 0 64 64" aria-hidden="true"><g class="wob">
+            <rect class="ink f-paper" x="12" y="6" width="40" height="52" rx="3"/>
+            <path class="ink thin" d="M20 18h24M20 28h24M20 38h18M20 48h12"/></g></svg>
+          <span class="big">Module</span>
+          <p>Kitchen twin: the printed recipe card</p>
+          <span class="flip-hint">tap to flip &#8635;</span>
+        </div>
+        <div class="flip-face flip-back sk-box" data-fill="paper">
+          <span class="box-title">Module</span>
+          <p>The compiled <code>.wasm</code> file: code plus a list of what it needs and what it offers. It never changes, so it can be cached and shared.</p>
+          <span class="flip-hint">tap to flip back</span>
+        </div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="blue">
+          <svg class="doodle" viewBox="0 0 64 64" aria-hidden="true"><g class="wob">
+            <path class="ink f-paper" d="M18 26 q-8 -14 4 -18 q4 -10 14 -5 q10 -5 13 5 q11 4 4 18 z"/>
+            <circle class="ink f-paper" cx="34" cy="38" r="14"/>
+            <path class="ink" d="M28 42 q6 6 12 0"/></g></svg>
+          <span class="big">Instance</span>
+          <p>Kitchen twin: one chef actually cooking</p>
+          <span class="flip-hint">tap to flip &#8635;</span>
+        </div>
+        <div class="flip-face flip-back sk-box" data-fill="paper">
+          <span class="box-title">Instance</span>
+          <p>A module brought to life, with its own memory and state. One module can have many instances running side by side.</p>
+          <span class="flip-hint">tap to flip back</span>
+        </div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="green">
+          <svg class="doodle" viewBox="0 0 64 64" aria-hidden="true"><g class="wob">
+            <rect class="ink f-paper" x="2" y="24" width="12" height="16"/>
+            <rect class="ink f-yellow" x="14" y="24" width="12" height="16"/>
+            <rect class="ink f-paper" x="26" y="24" width="12" height="16"/>
+            <rect class="ink f-yellow" x="38" y="24" width="12" height="16"/>
+            <rect class="ink f-paper" x="50" y="24" width="12" height="16"/></g></svg>
+          <span class="big">Linear memory</span>
+          <p>Kitchen twin: the chef's private countertop</p>
+          <span class="flip-hint">tap to flip &#8635;</span>
+        </div>
+        <div class="flip-face flip-back sk-box" data-fill="paper">
+          <span class="box-title">Linear memory</span>
+          <p>One big, resizable row of bytes the module reads and writes. It can't see anything outside it. It grows in 64 KiB pages.</p>
+          <span class="flip-hint">tap to flip back</span>
+        </div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="purple">
+          <svg class="doodle" viewBox="0 0 64 64" aria-hidden="true"><g class="wob">
+            <rect class="ink f-paper" x="10" y="6" width="44" height="52" rx="4"/>
+            <path class="ink thin" d="M18 18h6M30 18h16M18 30h6M30 30h16M18 42h6M30 42h16"/></g></svg>
+          <span class="big">Table</span>
+          <p>Kitchen twin: a speed-dial list of helpers</p>
+          <span class="flip-hint">tap to flip &#8635;</span>
+        </div>
+        <div class="flip-face flip-back sk-box" data-fill="paper">
+          <span class="box-title">Table</span>
+          <p>A list of references, usually functions, that the module can call by position. It's how function pointers and virtual methods work.</p>
+          <span class="flip-hint">tap to flip back</span>
+        </div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="orange">
+          <svg class="doodle" viewBox="0 0 64 64" aria-hidden="true"><g class="wob">
+            <rect class="ink f-paper" x="28" y="12" width="32" height="40" rx="4"/>
+            <path class="ink s-blue" d="M2 32h30M24 24l8 8-8 8"/></g></svg>
+          <span class="big">Imports</span>
+          <p>Kitchen twin: tools the kitchen lends the chef</p>
+          <span class="flip-hint">tap to flip &#8635;</span>
+        </div>
+        <div class="flip-face flip-back sk-box" data-fill="paper">
+          <span class="box-title">Imports</span>
+          <p>Functions, memory or values that JavaScript hands to the module at start-up. They're the only doors to the outside world.</p>
+          <span class="flip-hint">tap to flip back</span>
+        </div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="pink">
+          <svg class="doodle" viewBox="0 0 64 64" aria-hidden="true"><g class="wob">
+            <rect class="ink f-paper" x="4" y="12" width="32" height="40" rx="4"/>
+            <path class="ink s-red" d="M30 32h30M52 24l8 8-8 8"/></g></svg>
+          <span class="big">Exports</span>
+          <p>Kitchen twin: dishes the chef sends out</p>
+          <span class="flip-hint">tap to flip &#8635;</span>
+        </div>
+        <div class="flip-face flip-back sk-box" data-fill="paper">
+          <span class="box-title">Exports</span>
+          <p>Functions, memory or values the module offers back. JavaScript calls exported functions like ordinary JS functions.</p>
+          <span class="flip-hint">tap to flip back</span>
+        </div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="yellow">
+          <svg class="doodle" viewBox="0 0 64 64" aria-hidden="true"><g class="wob">
+            <path class="ink f-blue" d="M14 50 q18 10 36 0 v4 q-18 10 -36 0 z"/>
+            <path class="ink f-pink" d="M16 38 q16 9 32 0 v6 q-16 9 -32 0 z"/>
+            <path class="ink f-yellow" d="M18 26 q14 8 28 0 v6 q-14 8 -28 0 z"/></g></svg>
+          <span class="big">Stack machine</span>
+          <p>Kitchen twin: stacking bowls, combining the top two</p>
+          <span class="flip-hint">tap to flip &#8635;</span>
+        </div>
+        <div class="flip-face flip-back sk-box" data-fill="paper">
+          <span class="box-title">Stack machine</span>
+          <p>How Wasm instructions work: push values onto a stack, then operate on the top ones. <code>2</code>, <code>3</code>, <code>add</code> leaves <code>5</code>. Try it below!</p>
+          <span class="flip-hint">tap to flip back</span>
+        </div>
+      </div></div>
+
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="one-many">
+    <h2 id="one-many">One module, many instances</h2>
+    <p>A module is like a recipe card: you can hand copies to several chefs. Each chef (instance) gets their <mark>own countertop</mark> (memory), so they never mix up each other's ingredients.</p>
+    <div class="flow">
+      <div class="sk-box" data-fill="yellow" style="flex:0.8 1 0">
+        <span class="box-title">app.wasm</span>
+        <span class="box-sub">the module: compiled once</span>
+      </div>
+      <span class="sk-arrow" aria-hidden="true"></span>
+      <div class="sk-box dashed quiet" data-fill="paper">
+        <div class="grid tight" style="--min:150px">
+          <div class="sk-box" data-fill="blue"><span class="box-title">Instance A</span><span class="box-sub">own memory, own state</span></div>
+          <div class="sk-box" data-fill="blue"><span class="box-title">Instance B</span><span class="box-sub">own memory, own state</span></div>
+          <div class="sk-box" data-fill="blue"><span class="box-title">Instance C</span><span class="box-sub">own memory, own state</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="stack">
+    <h2 id="stack">Play with a stack machine</h2>
+    <p>Wasm doesn't name its workspace slots like <code>x = 2 + 3</code>. It pushes values onto a stack and lets each instruction take what it needs from the top. Pick a program and step through it.</p>
+    <div id="stack-machine"></div>
+  </section>
+
+  <section class="block" aria-labelledby="wat">
+    <h2 id="wat">Reading a tiny module</h2>
+    <p>Here's a whole module in the readable text format (<code>.wat</code>). It exports one function that adds two numbers.</p>
+    <div class="annotated">
+      <div class="sk-box code-card" data-fill="paper">
+        <div class="code-title">add.wat</div>
+<pre><code>(module                         <span class="pin">1</span>
+  (func $add (export "add")     <span class="pin">2</span>
+    (param $a i32)
+    (param $b i32)              <span class="pin">3</span>
+    (result i32)
+    local.get $a                <span class="pin">4</span>
+    local.get $b
+    i32.add))                   <span class="pin">5</span></code></pre>
+      </div>
+      <ol class="annotations">
+        <li data-n="1">Everything lives inside one <code>module</code>.</li>
+        <li data-n="2">A function named <code>$add</code>, exported to JavaScript as <code>"add"</code>.</li>
+        <li data-n="3">Two inputs, both <code>i32</code> (32-bit whole numbers). Every type is spelled out.</li>
+        <li data-n="4">Push <code>a</code>, then push <code>b</code>, onto the stack.</li>
+        <li data-n="5"><code>i32.add</code> pops both, pushes the sum. What's left on top is the result.</li>
+      </ol>
+    </div>
+  </section>
+
+  <aside class="block takeaway sk-box" data-fill="yellow" aria-label="Remember">
+    <span class="takeaway-label">Remember</span>
+    <ul>
+      <li>A <strong>module</strong> is the recipe; an <strong>instance</strong> is it running, with its own memory.</li>
+      <li><strong>Linear memory</strong> is a private row of bytes; <strong>imports</strong> and <strong>exports</strong> are the only doors out.</li>
+      <li>Wasm is a <strong>stack machine</strong>: push values, then operate on the top of the stack.</li>
+    </ul>
+  </aside>
+
+</main>
+</body>
+</html>

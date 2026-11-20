@@ -1,0 +1,160 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Inside a JS engine · Wasm Sketchbook</title>
+<meta name="description" content="How a JavaScript engine works: parser, interpreter, JIT compilers, deoptimization, garbage collector and the event loop.">
+<script>try{var t=localStorage.getItem('wasm-sketchbook-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=Patrick+Hand&display=swap">
+<link rel="stylesheet" href="assets/css/sketch.css">
+<script defer src="assets/js/sketch.js"></script>
+<script defer src="assets/js/site.js"></script>
+<script defer src="assets/js/widgets.js"></script>
+</head>
+<body data-page="js-engine">
+<main class="page" id="main">
+
+  <header class="chapter-head">
+    <p class="chapter-kicker" data-icon="gear">Chapter 5</p>
+    <h1>Inside a JS engine</h1>
+    <p class="lead">A JavaScript engine is the program inside your browser that turns JS text into instructions your CPU can run, and keeps memory tidy while it does. Wasm lives inside this same engine, so it's worth a look.</p>
+  </header>
+
+  <section class="block" aria-labelledby="engines">
+    <h2 id="engines">Every browser has one</h2>
+    <div class="grid" style="--min:230px">
+      <div class="sk-box" data-fill="yellow">
+        <span class="box-title">V8</span>
+        <span class="box-sub">Chrome, Edge, Opera, Node.js, Deno</span>
+        <p class="small" style="margin:10px 0 0">Wasm compilers: <strong>Liftoff</strong> (fast start) and <strong>TurboFan</strong> (optimizing)</p>
+      </div>
+      <div class="sk-box" data-fill="orange">
+        <span class="box-title">SpiderMonkey</span>
+        <span class="box-sub">Firefox</span>
+        <p class="small" style="margin:10px 0 0">Wasm compilers: a <strong>baseline</strong> compiler and <strong>Ion</strong> (optimizing)</p>
+      </div>
+      <div class="sk-box" data-fill="blue">
+        <span class="box-title">JavaScriptCore</span>
+        <span class="box-sub">Safari, Bun</span>
+        <p class="small" style="margin:10px 0 0">Wasm tiers: <strong>IPInt</strong> interpreter, <strong>BBQ</strong> (baseline), <strong>OMG</strong> (optimizing)</p>
+      </div>
+    </div>
+    <p class="small muted" style="margin-top:12px">From here on we use V8's names. The others have the same idea with different names.</p>
+  </section>
+
+  <section class="block" aria-labelledby="factory">
+    <h2 id="factory">The code factory</h2>
+    <p>Follow one piece of JavaScript through the engine. Press <em>Next</em> or <em>Play all</em>.</p>
+
+    <div class="stepper" data-speed="3200">
+      <div class="flow">
+        <div class="sk-box" data-fill="paper" data-step-id="source"><span class="box-title">JS text</span><span class="box-sub">downloaded as plain text</span></div>
+        <span class="sk-arrow" aria-hidden="true"></span>
+        <div class="sk-box" data-fill="paper" data-step-id="parser"><span class="box-title">Parser</span><span class="box-sub">text &rarr; syntax tree</span></div>
+        <span class="sk-arrow" aria-hidden="true"></span>
+        <div class="sk-box" data-fill="paper" data-step-id="ignition"><span class="box-title">Ignition</span><span class="box-sub">interpreter, takes notes on types</span></div>
+        <span class="sk-arrow" aria-hidden="true"></span>
+        <div class="sk-box" data-fill="paper" data-step-id="sparkplug"><span class="box-title">Sparkplug + Maglev</span><span class="box-sub">quick JIT for warm code</span></div>
+        <span class="sk-arrow" aria-hidden="true"></span>
+        <div class="sk-box" data-fill="paper" data-step-id="turbofan"><span class="box-title">TurboFan</span><span class="box-sub">optimizer for hot code</span></div>
+      </div>
+
+      <div class="sk-box dashed red-line" data-fill="pink" data-step-id="deopt" style="margin-top:18px">
+        <span class="box-title" style="color:var(--red)">&#8630; Deoptimize</span>
+        <span class="box-sub">when a guess turns out wrong, throw the fast code away and fall back to Ignition</span>
+      </div>
+
+      <div class="grid" style="--min:240px;margin-top:18px">
+        <div class="sk-box" data-fill="green" data-step-id="gc"><span class="box-title">Garbage collector</span><span class="box-sub">frees objects nobody uses any more</span></div>
+        <div class="sk-box" data-fill="blue" data-step-id="loop"><span class="box-title">Event loop</span><span class="box-sub">runs one task at a time on the main thread</span></div>
+      </div>
+
+      <ol class="stepper-steps" hidden>
+        <li data-on="source">Your page sends <code>function total(price) { return price * 2 }</code> as <strong>plain text</strong>. To the engine it's just characters so far.</li>
+        <li data-on="parser">The <strong>parser</strong> reads the text and builds a syntax tree: "this is a function, it multiplies <code>price</code> by 2".</li>
+        <li data-on="ignition">The <strong>Ignition</strong> interpreter turns the tree into compact bytecode and starts running it right away. It's slow-ish, but it starts fast and <mark>notes what types it sees</mark>: "price was a number again".</li>
+        <li data-on="sparkplug">The function gets called a lot, so it's <strong>warm</strong>. Sparkplug, then Maglev, quickly turn it into real machine code.</li>
+        <li data-on="turbofan">Now it's <strong>hot</strong>. TurboFan makes a bet, "price is always a number", and builds very fast machine code based on that bet.</li>
+        <li data-on="deopt,ignition">One day someone calls <code>total("9")</code> with a string! The bet fails, so the engine <strong>deoptimizes</strong>: it throws the fast code away and falls back to Ignition, then learns again.</li>
+        <li data-on="gc">Meanwhile, the <strong>garbage collector</strong> (V8's Orinoco) finds objects nothing points to and frees their memory, mostly in the background.</li>
+        <li data-on="loop">All of this runs on the <strong>event loop</strong>: one task at a time (a click, a timer, a network reply). A long task freezes the page, so heavy work belongs in Web Workers.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="tree">
+    <h2 id="tree">What a syntax tree looks like</h2>
+    <div class="two-col" style="align-items:center">
+      <div>
+        <p>The parser turns <code>total = price * 2</code> into a tree. The engine walks the tree to know what to do first: multiply, then store.</p>
+        <p class="muted">Wasm skips this step entirely. Its file is already a precise list of instructions, so there's no text to parse.</p>
+      </div>
+      <svg class="doodle" viewBox="0 0 340 210" role="img" aria-label="Syntax tree: an equals sign with children total and a multiply sign; the multiply sign has children price and 2">
+        <g class="wob">
+          <path class="ink thin" d="M160 46 L86 106 M184 46 L250 106 M238 128 L192 166 M262 128 L300 166"/>
+          <circle class="ink f-yellow" cx="170" cy="32" r="20"/>
+          <rect class="ink f-paper" x="40" y="104" width="92" height="40" rx="18"/>
+          <circle class="ink f-orange" cx="250" cy="116" r="20"/>
+          <rect class="ink f-paper" x="148" y="164" width="88" height="40" rx="18"/>
+          <rect class="ink f-paper" x="276" y="164" width="50" height="40" rx="18"/>
+        </g>
+        <text x="161" y="40" class="t-title">=</text>
+        <text x="62" y="130">total</text>
+        <text x="243" y="126" class="t-title">&times;</text>
+        <text x="168" y="190">price</text>
+        <text x="296" y="190">2</text>
+      </svg>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="loop">
+    <h2 id="loop">The event loop, sketched</h2>
+    <div class="two-col" style="align-items:center">
+      <svg class="doodle" viewBox="0 0 340 220" role="img" aria-label="A queue of tasks: click, timer and network reply, waiting to enter a loop that runs one task at a time">
+        <g class="wob">
+          <rect class="ink f-yellow" x="10" y="40" width="80" height="34" rx="6"/>
+          <rect class="ink f-blue" x="10" y="90" width="80" height="34" rx="6"/>
+          <rect class="ink f-green" x="10" y="140" width="80" height="34" rx="6"/>
+          <path class="ink s-pencil" d="M96 108 h40 M128 100 l8 8 -8 8"/>
+          <circle class="ink f-paper" cx="232" cy="110" r="78"/>
+          <path class="ink s-red thick" d="M232 44 a66 66 0 1 1 -62 44" />
+          <path class="ink s-red thick" d="M162 78 l8 12 12 -8"/>
+        </g>
+        <text x="26" y="63">click</text>
+        <text x="26" y="113">timer</text>
+        <text x="20" y="163">fetch reply</text>
+        <text x="12" y="28" class="t-sm t-soft">task queue</text>
+        <text x="190" y="104" class="t-title" style="font-size:20px">run ONE</text>
+        <text x="200" y="128" class="t-title" style="font-size:20px">task</text>
+        <text x="186" y="210" class="t-sm t-soft">then repaint, repeat</text>
+      </svg>
+      <div class="sk-box callout" data-fill="blue">
+        <span class="callout-label">Why it matters for Wasm</span>
+        <p>Wasm called from the main thread runs inside one of these tasks. If it crunches numbers for two seconds, the page can't repaint or respond for two seconds.</p>
+        <p>That's why heavy Wasm usually runs in a <strong>Web Worker</strong>: its own thread with its own loop.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="sk-box thick" data-fill="yellow">
+      <span class="callout-label" style="color:var(--red)">The key insight</span>
+      <p style="margin:0">Most of the engine's early work (parsing, interpreting, watching types, guessing) exists to discover facts JavaScript doesn't state, like what type a value is. <mark>Wasm states them up front</mark>, so the engine can skip the guessing and go straight to machine code.</p>
+    </div>
+  </section>
+
+  <aside class="block takeaway sk-box" data-fill="yellow" aria-label="Remember">
+    <span class="takeaway-label">Remember</span>
+    <ul>
+      <li>Engine pipeline: parser &rarr; interpreter &rarr; quick JIT &rarr; optimizing JIT.</li>
+      <li>Optimizations are bets on types; a lost bet means <strong>deoptimization</strong>.</li>
+      <li>A garbage collector cleans memory; the event loop runs one task at a time.</li>
+    </ul>
+  </aside>
+
+</main>
+</body>
+</html>

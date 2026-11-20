@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wasm rides the JS engine · Wasm Sketchbook</title>
+<meta name="description" content="How browsers run WebAssembly inside their JavaScript engines: which steps Wasm skips and which engine parts it borrows.">
+<script>try{var t=localStorage.getItem('wasm-sketchbook-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=Patrick+Hand&display=swap">
+<link rel="stylesheet" href="assets/css/sketch.css">
+<script defer src="assets/js/sketch.js"></script>
+<script defer src="assets/js/site.js"></script>
+<script defer src="assets/js/widgets.js"></script>
+</head>
+<body data-page="wasm-and-engine">
+<main class="page" id="main">
+
+  <header class="chapter-head">
+    <p class="chapter-kicker" data-icon="merge">Chapter 6</p>
+    <h1>Wasm rides the JS engine</h1>
+    <p class="lead">Browsers didn't build a second engine for Wasm. Each one added a Wasm front door to its existing JavaScript engine, then reused its optimizing compiler, garbage collector, sandbox and threads.</p>
+  </header>
+
+  <section class="block" aria-labelledby="paths">
+    <h2 id="paths">Two paths, one engine</h2>
+    <p>Step through both paths side by side (V8 shown). Watch how early Wasm gets to real machine code.</p>
+
+    <div class="stepper" data-speed="3000">
+      <div class="lanes">
+        <div>
+          <div class="lane-title" style="color:var(--orange)">JavaScript path</div>
+          <div class="flow-col">
+            <div class="sk-box" data-fill="paper" data-step-id="js1"><span class="box-title">JS source</span><span class="box-sub">plain text</span></div>
+            <span class="sk-arrow" aria-hidden="true"></span>
+            <div class="sk-box" data-fill="paper" data-step-id="js2"><span class="box-title">Parser</span><span class="box-sub">text &rarr; syntax tree</span></div>
+            <span class="sk-arrow" aria-hidden="true"></span>
+            <div class="sk-box" data-fill="paper" data-step-id="js3"><span class="box-title">Ignition interpreter</span><span class="box-sub">runs bytecode, records types</span></div>
+            <span class="sk-arrow" aria-hidden="true"></span>
+            <div class="sk-box" data-fill="paper" data-step-id="js4"><span class="box-title">Sparkplug + Maglev</span><span class="box-sub">quick JIT for warm code</span></div>
+          </div>
+        </div>
+        <div>
+          <div class="lane-title" style="color:var(--blue)">WebAssembly path</div>
+          <div class="flow-col">
+            <div class="sk-box blue-line" data-fill="blue" data-step-id="w1"><span class="box-title">.wasm bytes</span><span class="box-sub">binary, compiled while still downloading</span></div>
+            <span class="sk-arrow" aria-hidden="true"></span>
+            <div class="sk-box blue-line" data-fill="blue" data-step-id="w2"><span class="box-title">Decode + validate</span><span class="box-sub">one pass; every type already declared</span></div>
+            <span class="sk-arrow" aria-hidden="true"></span>
+            <div class="sk-box blue-line" data-fill="blue" data-step-id="w3"><span class="box-title">Liftoff baseline compiler</span><span class="box-sub">machine code at once, so the app starts fast</span></div>
+          </div>
+        </div>
+      </div>
+
+      <span class="sk-arrow down" aria-hidden="true"></span>
+      <span class="arrow-label">hot code, recompiled on a background thread</span>
+
+      <div class="sk-box thick" data-fill="yellow" data-step-id="tf" style="margin-top:16px">
+        <span class="box-title">TurboFan optimizing compiler &mdash; shared by both paths</span>
+        <span class="box-sub"><strong>JavaScript:</strong> optimizes on guessed types; a wrong guess throws the code away (deopt).</span>
+        <span class="box-sub"><strong>WebAssembly:</strong> types are declared, so it optimizes without guessing and never deopts.</span>
+      </div>
+
+      <span class="sk-arrow down" aria-hidden="true"></span>
+
+      <div class="sk-box dashed quiet zone" data-step-id="shared" style="margin-top:22px">
+        <span class="zone-label">Shared engine services</span>
+        <div class="grid tight" style="--min:170px">
+          <div class="sk-box" data-fill="paper"><span class="box-title">Code generator</span><span class="box-sub">x64 and ARM64 machine code</span></div>
+          <div class="sk-box" data-fill="paper"><span class="box-title">Garbage collector</span><span class="box-sub">JS objects and WasmGC objects</span></div>
+          <div class="sk-box" data-fill="paper"><span class="box-title">Sandbox</span><span class="box-sub">bounds checks, guard pages</span></div>
+          <div class="sk-box" data-fill="paper"><span class="box-title">Call bridges</span><span class="box-sub">JS &harr; Wasm wrappers</span></div>
+        </div>
+      </div>
+
+      <ol class="stepper-steps" hidden>
+        <li data-on="js1,w1">Both start as downloads. JS arrives as <strong>text</strong>; Wasm arrives as <strong>bytes</strong>, and the engine starts compiling them while the rest is still downloading.</li>
+        <li data-on="js2,w2">JS must be <strong>parsed</strong> into a tree. Wasm is just <strong>decoded and validated</strong> in one quick pass, because every type is already written down.</li>
+        <li data-on="js3,w3">JS starts in the <strong>interpreter</strong>, watching types. Wasm is already running <mark>real machine code</mark> from Liftoff.</li>
+        <li data-on="js4,w3">Warm JS gets quick machine code from Sparkplug and Maglev. Wasm is still cruising on Liftoff code.</li>
+        <li data-on="tf">Hot code from <strong>both</strong> paths goes to the same optimizer, TurboFan. Only the JS version can be thrown away later (deopt).</li>
+        <li data-on="shared">Underneath, both share the engine's machine-code generator, garbage collector, sandbox and the bridges that let them call each other.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="skip">
+    <h2 id="skip">What Wasm gets to skip</h2>
+    <div class="grid" style="--min:200px">
+      <div class="sk-box strike" data-fill="paper"><span class="box-title">Parsing text</span><span class="box-sub">it's already binary</span></div>
+      <div class="sk-box strike" data-fill="paper"><span class="box-title">Watching types</span><span class="box-sub">they're declared</span></div>
+      <div class="sk-box strike" data-fill="paper"><span class="box-title">Guessing &amp; deopt</span><span class="box-sub">nothing to guess</span></div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="borrow">
+    <h2 id="borrow">What Wasm borrows from the engine</h2>
+    <div class="grid" style="--min:250px">
+      <div class="note"><h3>The optimizer</h3><p>V8 feeds hot Wasm into TurboFan, the same back end used for hot JS. SpiderMonkey reuses Ion; JavaScriptCore uses its B3 back end for the OMG tier.</p></div>
+      <div class="note blue"><h3>Tiering</h3><p>Liftoff compiles each function on its first call. Busy functions are recompiled by TurboFan in the background. A call already running finishes in Liftoff code.</p></div>
+      <div class="note green"><h3>A code cache</h3><p>Loaded with <code>compileStreaming</code>, TurboFan code is cached once it passes a size threshold, so repeat visits start faster. Liftoff code isn't cached.</p></div>
+      <div class="note pink"><h3>The garbage collector</h3><p>WasmGC objects live on the same heap as JS objects, so JS and a Kotlin or Dart module can safely hold references to each other.</p></div>
+      <div class="note"><h3>Safety checks</h3><p>Bounds checks on every memory access (often free on 64-bit machines thanks to big reserved "guard" regions), stack-overflow checks and the browser's process sandbox.</p></div>
+      <div class="note blue"><h3>Call bridges</h3><p>Small wrapper functions convert JS values to Wasm numbers and back. Modern engines make these calls cheap, but not free.</p></div>
+      <div class="note green"><h3>Debugging</h3><p>Opening DevTools moves code back down to Liftoff so breakpoints and stepping work.</p></div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="tiers">
+    <h2 id="tiers">Same idea, three engines</h2>
+    <p>Every engine uses <mark>tiers</mark>: a quick compiler to start, a careful one for busy code.</p>
+    <div class="grid" style="--min:260px">
+      <div class="sk-box" data-fill="paper">
+        <span class="box-title">V8 (Chrome)</span>
+        <div class="flow keep-row" style="margin-top:8px">
+          <div class="sk-box chip" data-fill="yellow">Liftoff</div><span class="sk-arrow" aria-hidden="true"></span><div class="sk-box chip" data-fill="orange">TurboFan</div>
+        </div>
+      </div>
+      <div class="sk-box" data-fill="paper">
+        <span class="box-title">SpiderMonkey (Firefox)</span>
+        <div class="flow keep-row" style="margin-top:8px">
+          <div class="sk-box chip" data-fill="yellow">Baseline</div><span class="sk-arrow" aria-hidden="true"></span><div class="sk-box chip" data-fill="orange">Ion</div>
+        </div>
+      </div>
+      <div class="sk-box" data-fill="paper">
+        <span class="box-title">JavaScriptCore (Safari)</span>
+        <div class="flow keep-row" style="margin-top:8px">
+          <div class="sk-box chip" data-fill="green">IPInt</div><span class="sk-arrow" aria-hidden="true"></span><div class="sk-box chip" data-fill="yellow">BBQ</div><span class="sk-arrow" aria-hidden="true"></span><div class="sk-box chip" data-fill="orange">OMG</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="block takeaway sk-box" data-fill="yellow" aria-label="Remember">
+    <span class="takeaway-label">Remember</span>
+    <ul>
+      <li>Wasm runs inside the existing JS engine, not a separate one.</li>
+      <li>It skips parsing and type-guessing, starts on a fast baseline compiler, then tiers up to the shared optimizer.</li>
+      <li>It shares the engine's code generator, garbage collector, sandbox and call bridges.</li>
+    </ul>
+  </aside>
+
+</main>
+</body>
+</html>

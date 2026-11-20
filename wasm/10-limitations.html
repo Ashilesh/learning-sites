@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Limitations · Wasm Sketchbook</title>
+<meta name="description" content="What WebAssembly can't do yet, why each limit exists, and the workarounds people use today.">
+<script>try{var t=localStorage.getItem('wasm-sketchbook-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=Patrick+Hand&display=swap">
+<link rel="stylesheet" href="assets/css/sketch.css">
+<script defer src="assets/js/sketch.js"></script>
+<script defer src="assets/js/site.js"></script>
+<script defer src="assets/js/widgets.js"></script>
+</head>
+<body data-page="limitations">
+<main class="page" id="main">
+
+  <header class="chapter-head">
+    <p class="chapter-kicker" data-icon="wall">Chapter 10</p>
+    <h1>Limitations</h1>
+    <p class="lead">Most of Wasm's limits come from the same choice that makes it safe: it can only reach the outside world through doors JavaScript opens for it.</p>
+  </header>
+
+  <section class="block" aria-labelledby="root">
+    <h2 id="root">One choice, many limits</h2>
+    <div class="sk-box thick red-line" data-fill="pink" style="text-align:center;max-width:560px;margin:0 auto">
+      <span class="box-title">The sandbox rule</span>
+      <span class="box-sub">"Only touch what you're handed, and nothing else."</span>
+    </div>
+    <div class="center"><span class="sk-arrow down red" aria-hidden="true"></span></div>
+    <div class="chips" style="justify-content:center">
+      <span class="chip sk-box" data-fill="paper">no direct DOM</span>
+      <span class="chip sk-box" data-fill="paper">no direct GPU</span>
+      <span class="chip sk-box" data-fill="paper">costly JS &harr; Wasm trips</span>
+      <span class="chip sk-box" data-fill="paper">awkward threads</span>
+      <span class="chip sk-box" data-fill="paper">no wide SIMD or NPU</span>
+    </div>
+    <p class="muted center" style="margin-top:16px">Others come from Wasm being young: memory that won't shrink, big downloads, harder debugging.</p>
+  </section>
+
+  <section class="block" aria-labelledby="cards">
+    <h2 id="cards">Eleven limits, flipped</h2>
+    <div class="btn-row" style="justify-content:space-between;margin-bottom:16px">
+      <p class="muted" style="margin:0">Front: the limit. Back: why it exists, and what people do today.</p>
+      <button type="button" class="sk-btn small" data-fill="paper" data-flip-all="limit-cards">Flip them all</button>
+    </div>
+    <div class="grid" id="limit-cards" style="--min:250px">
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="pink"><span class="big">No direct DOM or Web API access</span><span class="flip-hint">why? tap &#8635;</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="paper"><p><strong>Why:</strong> Web APIs are built for JavaScript objects; Wasm only sees numbers and opaque references.</p><p><strong>Today:</strong> generated JS glue (<code>wasm-bindgen</code>, Emscripten). Keep UI in JS, computing in Wasm.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="pink"><span class="big">Crossing the JS &harr; Wasm border costs time</span><span class="flip-hint">why? tap &#8635;</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="paper"><p><strong>Why:</strong> each call converts values; strings and objects get copied into linear memory.</p><p><strong>Today:</strong> batch work into a few big calls, use JS string built-ins, share memory views instead of copying.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="pink"><span class="big">No direct GPU access</span><span class="flip-hint">why? tap &#8635;</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="paper"><p><strong>Why:</strong> security. A page must never talk to the graphics driver directly.</p><p><strong>Today:</strong> WebGL or WebGPU through JS; batch draw calls and upload data in bulk.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="pink"><span class="big">Threads are awkward</span><span class="flip-hint">why? tap &#8635;</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="paper"><p><strong>Why:</strong> they need Web Workers + <code>SharedArrayBuffer</code> + isolation headers, and GC objects, tables and functions can't be shared yet.</p><p><strong>Today:</strong> set COOP/COEP headers; message-pass between workers; Emscripten pthreads.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="pink"><span class="big">Waiting on async web APIs</span><span class="flip-hint">why? tap &#8635;</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="paper"><p><strong>Why:</strong> C, C++ and Rust code expects calls that block; the web is built on promises.</p><p><strong>Today:</strong> JSPI (shipping in Chrome, phase 5), or Asyncify (bigger, slower code).</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="pink"><span class="big">Memory grows but never shrinks</span><span class="flip-hint">why? tap &#8635;</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="paper"><p><strong>Why:</strong> linear memory is one block; giving pages back would break addresses.</p><p><strong>Today:</strong> reuse buffers; restart the instance or worker to get memory back.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="pink"><span class="big">A memory ceiling</span><span class="flip-hint">why? tap &#8635;</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="paper"><p><strong>Why:</strong> 32-bit addresses reach 4 GiB; 64-bit memory is capped at 16 GiB on the web.</p><p><strong>Today:</strong> Memory64 for big data; stream data instead of loading it all.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="pink"><span class="big">Big downloads</span><span class="flip-hint">why? tap &#8635;</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="paper"><p><strong>Why:</strong> whole language runtimes and standard libraries get compiled in.</p><p><strong>Today:</strong> <code>wasm-opt</code>, link-time optimization, lazy-loaded modules, Brotli compression.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="pink"><span class="big">Harder to debug than JS</span><span class="flip-hint">why? tap &#8635;</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="paper"><p><strong>Why:</strong> it's binary code; mapping it back to your source needs extra debug info.</p><p><strong>Today:</strong> DWARF debug info + Chrome's C/C++ DevTools extension; source maps.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="pink"><span class="big">Languages don't mix easily (yet)</span><span class="flip-hint">why? tap &#8635;</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="paper"><p><strong>Why:</strong> each toolchain invents its own way to pass strings, lists and records.</p><p><strong>Today:</strong> the Component Model and WIT interfaces, mostly outside the browser so far.</p></div>
+      </div></div>
+
+      <div class="flip"><div class="flip-inner">
+        <div class="flip-face flip-front sk-box" data-fill="pink"><span class="big">Some hardware is out of reach</span><span class="flip-hint">why? tap &#8635;</span></div>
+        <div class="flip-face flip-back sk-box" data-fill="paper"><p><strong>Why:</strong> a portable instruction set: no 256/512-bit SIMD, no direct NPU access, predictable results required.</p><p><strong>Today:</strong> 128-bit and relaxed SIMD; WebGPU for parallel maths; WebNN for AI chips.</p></div>
+      </div></div>
+
+    </div>
+  </section>
+
+  <aside class="block takeaway sk-box" data-fill="yellow" aria-label="Remember">
+    <span class="takeaway-label">Remember</span>
+    <ul>
+      <li>The biggest limits (DOM, GPU, boundary cost) are the price of the sandbox.</li>
+      <li>Others (memory that won't shrink, size, debugging) are being worked on.</li>
+      <li>Rule of thumb today: UI in JavaScript, heavy computing in Wasm, few big calls between them.</li>
+    </ul>
+  </aside>
+
+</main>
+</body>
+</html>

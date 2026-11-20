@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wasm in plain words · Wasm Sketchbook</title>
+<meta name="description" content="WebAssembly explained with a kitchen analogy: what it is, in one minute.">
+<script>try{var t=localStorage.getItem('wasm-sketchbook-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=Patrick+Hand&display=swap">
+<link rel="stylesheet" href="assets/css/sketch.css">
+<script defer src="assets/js/sketch.js"></script>
+<script defer src="assets/js/site.js"></script>
+<script defer src="assets/js/widgets.js"></script>
+</head>
+<body data-page="plain-words">
+<main class="page" id="main">
+
+  <header class="chapter-head">
+    <p class="chapter-kicker" data-icon="bulb">Chapter 1</p>
+    <h1>Wasm in plain words</h1>
+    <p class="lead">WebAssembly is a universal "machine language" for the web. You write a program in almost any language, translate it once into a small <code>.wasm</code> file, and every modern browser can run it fast and safely.</p>
+  </header>
+
+  <section class="block" aria-labelledby="kitchen">
+    <h2 id="kitchen">The kitchen analogy</h2>
+    <p>Think of your browser as a restaurant kitchen, and the program as a dish to cook.</p>
+
+    <div class="comic">
+      <figure class="panel sk-box" data-fill="paper">
+        <svg class="doodle" viewBox="0 0 260 180" role="img" aria-label="A chef puzzling over a long recipe written in everyday words">
+          <g class="wob">
+            <path class="ink f-paper" d="M44 74 q-12 -22 8 -28 q6 -18 26 -9 q16 -9 22 9 q18 6 6 28 z"/>
+            <circle class="ink f-paper" cx="70" cy="96" r="22"/>
+            <circle class="ink f-ink" cx="62" cy="92" r="2.4"/>
+            <circle class="ink f-ink" cx="78" cy="92" r="2.4"/>
+            <path class="ink" d="M64 106 q6 -4 12 0"/>
+            <path class="ink f-paper" d="M50 120 h40 l12 52 h-64 z"/>
+            <path class="ink" d="M90 132 q20 -4 36 -16"/>
+            <rect class="ink f-paper" x="128" y="22" width="112" height="148" rx="4" transform="rotate(4 184 96)"/>
+            <path class="ink thin s-pencil" d="M140 44 q10 -4 20 0 t20 0 t20 0 t16 0"/>
+            <path class="ink thin s-pencil" d="M140 62 q10 -4 20 0 t20 0 t20 0"/>
+            <path class="ink thin s-pencil" d="M140 80 q10 -4 20 0 t20 0 t20 0 t16 0"/>
+            <path class="ink thin s-pencil" d="M138 98 q10 -4 20 0 t20 0 t20 0 t18 0"/>
+            <path class="ink thin s-pencil" d="M138 116 q10 -4 20 0 t20 0"/>
+            <path class="ink thin s-pencil" d="M136 134 q10 -4 20 0 t20 0 t20 0 t18 0"/>
+            <path class="ink thin s-pencil" d="M136 152 q10 -4 20 0 t20 0 t12 0"/>
+          </g>
+          <text x="14" y="38" class="t-title t-red">?</text>
+          <text x="100" y="40" class="t-title t-red">?</text>
+          <text x="150" y="122" class="t-sm t-blue">"a pinch"??</text>
+        </svg>
+        <figcaption>
+          <span class="panel-title">JavaScript = a recipe in everyday words</span>
+          <p class="panel-caption">The chef has to read it, work out what each sentence means, and learns shortcuts the more often they cook it. Flexible, but there's reading and guessing involved.</p>
+        </figcaption>
+      </figure>
+
+      <figure class="panel sk-box" data-fill="paper">
+        <svg class="doodle" viewBox="0 0 260 180" role="img" aria-label="A happy chef following a short numbered instruction card">
+          <g class="wob">
+            <path class="ink f-paper" d="M44 74 q-12 -22 8 -28 q6 -18 26 -9 q16 -9 22 9 q18 6 6 28 z"/>
+            <circle class="ink f-paper" cx="70" cy="96" r="22"/>
+            <path class="ink" d="M58 92 q4 -5 8 0 M74 92 q4 -5 8 0"/>
+            <path class="ink" d="M60 104 q10 10 20 0"/>
+            <path class="ink f-paper" d="M50 120 h40 l12 52 h-64 z"/>
+            <path class="ink" d="M90 132 q20 -6 40 -6"/>
+            <rect class="ink f-yellow" x="132" y="40" width="112" height="104" rx="6" transform="rotate(-3 188 92)"/>
+            <path class="ink thin s-orange" d="M18 140 h18 M12 152 h22 M20 164 h14"/>
+          </g>
+          <text x="142" y="68" class="t-sm">1. heat pan 180 °C</text>
+          <text x="142" y="92" class="t-sm">2. add 20 g butter</text>
+          <text x="142" y="116" class="t-sm">3. stir 30 s</text>
+          <text x="186" y="168" class="t-sm t-blue">go!</text>
+        </svg>
+        <figcaption>
+          <span class="panel-title">WebAssembly = a numbered instruction card</span>
+          <p class="panel-caption">The same dish, written as precise steps the chef already understands. Almost nothing to interpret, so cooking starts sooner and runs at a steady speed.</p>
+        </figcaption>
+      </figure>
+
+      <figure class="panel sk-box" data-fill="paper">
+        <svg class="doodle" viewBox="0 0 260 180" role="img" aria-label="The chef stays inside the kitchen; the dining room and the street are off limits">
+          <g class="wob">
+            <rect class="ink s-green" x="10" y="20" width="150" height="150" rx="10" style="stroke-dasharray:8 6"/>
+            <path class="ink f-paper" d="M54 84 q-10 -18 6 -22 q5 -14 20 -7 q12 -7 17 7 q14 5 5 22 z"/>
+            <circle class="ink f-paper" cx="76" cy="102" r="18"/>
+            <path class="ink" d="M68 106 q8 7 16 0"/>
+            <path class="ink f-paper" d="M60 122 h32 l9 42 h-50 z"/>
+            <rect class="ink f-orange" x="120" y="122" width="26" height="12" rx="3"/>
+            <path class="ink" d="M120 128 h-18"/>
+            <rect class="ink f-gray" x="186" y="34" width="62" height="54" rx="6"/>
+            <rect class="ink f-gray" x="186" y="108" width="62" height="54" rx="6"/>
+            <circle class="ink s-red" cx="217" cy="61" r="18"/>
+            <path class="ink s-red" d="M204 61 h26"/>
+            <circle class="ink s-red" cx="217" cy="135" r="18"/>
+            <path class="ink s-red" d="M204 135 h26"/>
+          </g>
+          <text x="20" y="40" class="t-sm" style="fill:var(--green)">kitchen (sandbox)</text>
+          <text x="104" y="152" class="t-sm t-soft">tools</text>
+          <text x="180" y="102" class="t-sm t-soft">dining room</text>
+          <text x="196" y="176" class="t-sm t-soft">street</text>
+        </svg>
+        <figcaption>
+          <span class="panel-title">Same kitchen rules for both</span>
+          <p class="panel-caption">Wasm can only use the ingredients and tools the kitchen hands it. It can't walk into the dining room (the web page) or the street (your computer) on its own. That's what makes it safe.</p>
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="minute">
+    <h2 id="minute">What it is, in one minute</h2>
+    <div class="grid" style="--min:250px">
+      <div class="note">
+        <span class="num">1</span>
+        <h3>A binary format</h3>
+        <p>Compact bytes, not human-readable text. A readable text form, <code>.wat</code>, exists for learning and debugging.</p>
+      </div>
+      <div class="note blue">
+        <span class="num">2</span>
+        <h3>A compilation target</h3>
+        <p>You rarely write Wasm by hand. Compilers for C/C++ (Emscripten, Clang), Rust, Go, C#, Kotlin, Zig and others produce it.</p>
+      </div>
+      <div class="note green">
+        <span class="num">3</span>
+        <h3>A sandbox</h3>
+        <p>Wasm runs in a box with its own private memory. It touches the outside world only through functions it is explicitly given.</p>
+      </div>
+      <div class="note pink">
+        <span class="num">4</span>
+        <h3>JavaScript's partner</h3>
+        <p>JS stays in charge of the page. Wasm does the heavy lifting: image filters, physics, video, compression, games, AI.</p>
+      </div>
+      <div class="note">
+        <span class="num">5</span>
+        <h3>Not only browsers</h3>
+        <p>The same format runs on servers, edge networks, plugins and small devices, through runtimes like Wasmtime and WasmEdge.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="once">
+    <h2 id="once">Write once, run (almost) anywhere</h2>
+    <p>One <code>.wasm</code> file works in every major browser and on every operating system, because the browser turns it into the right machine code for <em>your</em> computer.</p>
+    <div class="flow">
+      <div class="sk-box" data-fill="paper">
+        <span class="box-title">Your code</span>
+        <span class="box-sub">in the language you like</span>
+        <div class="chips" style="margin-top:10px">
+          <span class="chip sk-box" data-fill="orange">C / C++</span>
+          <span class="chip sk-box" data-fill="orange">Rust</span>
+          <span class="chip sk-box" data-fill="orange">Go</span>
+          <span class="chip sk-box" data-fill="orange">Kotlin</span>
+          <span class="chip sk-box" data-fill="orange">C#</span>
+          <span class="chip sk-box" data-fill="orange">Zig</span>
+        </div>
+      </div>
+      <span class="sk-arrow" aria-hidden="true"></span>
+      <div class="sk-box" data-fill="purple">
+        <span class="box-sub">a compiler makes</span>
+        <span class="box-title">app.wasm</span>
+        <span class="box-sub">one small binary file, the same for everyone</span>
+      </div>
+      <span class="sk-arrow" aria-hidden="true"></span>
+      <div class="sk-box" data-fill="green">
+        <span class="box-title">Runs on</span>
+        <div class="chips" style="margin-top:8px">
+          <span class="chip sk-box" data-fill="paper">Chrome</span>
+          <span class="chip sk-box" data-fill="paper">Firefox</span>
+          <span class="chip sk-box" data-fill="paper">Safari</span>
+          <span class="chip sk-box" data-fill="paper">Edge</span>
+          <span class="chip sk-box" data-fill="paper">servers</span>
+          <span class="chip sk-box" data-fill="paper">devices</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="team">
+    <h2 id="team">A team, not a replacement</h2>
+    <div class="two-col">
+      <div class="sk-box" data-fill="yellow">
+        <span class="box-title">JavaScript is great at</span>
+        <ul>
+          <li>the page: buttons, text, layout (the DOM)</li>
+          <li>reacting to clicks, typing and scrolling</li>
+          <li>talking to the network and browser features</li>
+          <li>glue: loading Wasm and passing it data</li>
+        </ul>
+      </div>
+      <div class="sk-box" data-fill="purple">
+        <span class="box-title">WebAssembly is great at</span>
+        <ul>
+          <li>heavy maths: physics, simulations, 3D</li>
+          <li>images, audio and video processing</li>
+          <li>compression, encryption, databases</li>
+          <li>reusing big C/C++/Rust libraries as they are</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <aside class="block takeaway sk-box" data-fill="yellow" aria-label="Remember">
+    <span class="takeaway-label">Remember</span>
+    <ul>
+      <li>Wasm is a compact, binary instruction format that compilers produce from many languages.</li>
+      <li>It runs fast because there's little left to interpret, and safely because it lives in a sandbox.</li>
+      <li>JavaScript runs the page; Wasm does the heavy lifting. They work as a team.</li>
+    </ul>
+  </aside>
+
+</main>
+</body>
+</html>

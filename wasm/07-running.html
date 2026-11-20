@@ -1,0 +1,133 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How Wasm runs · Wasm Sketchbook</title>
+<meta name="description" content="How a .wasm file goes from network bytes to running machine code: fetch, stream-compile, validate, compile, instantiate, call. Plus how JavaScript passes a string to Wasm.">
+<script>try{var t=localStorage.getItem('wasm-sketchbook-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=Patrick+Hand&display=swap">
+<link rel="stylesheet" href="assets/css/sketch.css">
+<script defer src="assets/js/sketch.js"></script>
+<script defer src="assets/js/site.js"></script>
+<script defer src="assets/js/widgets.js"></script>
+</head>
+<body data-page="running">
+<main class="page" id="main">
+
+  <header class="chapter-head">
+    <p class="chapter-kicker" data-icon="play">Chapter 7</p>
+    <h1>How Wasm runs</h1>
+    <p class="lead">A <code>.wasm</code> file goes from network bytes to running machine code in six steps. The browser overlaps the first few, so compiling finishes almost as soon as downloading does.</p>
+  </header>
+
+  <section class="block" aria-labelledby="six">
+    <h2 id="six">Six steps, from bytes to running</h2>
+    <div class="stepper" data-speed="3200">
+      <div class="grid" style="--min:200px">
+        <div class="sk-box" data-fill="paper" data-step-id="s1"><span class="box-title">1 &middot; Fetch</span><span class="box-sub">download app.wasm</span></div>
+        <div class="sk-box" data-fill="paper" data-step-id="s2"><span class="box-title">2 &middot; Stream-compile</span><span class="box-sub">compile while downloading</span></div>
+        <div class="sk-box" data-fill="paper" data-step-id="s3"><span class="box-title">3 &middot; Validate</span><span class="box-sub">safety check, one pass</span></div>
+        <div class="sk-box" data-fill="paper" data-step-id="s4"><span class="box-title">4 &middot; Machine code</span><span class="box-sub">Liftoff: fast start</span></div>
+        <div class="sk-box" data-fill="paper" data-step-id="s5"><span class="box-title">5 &middot; Instantiate</span><span class="box-sub">imports in, memory made</span></div>
+        <div class="sk-box" data-fill="paper" data-step-id="s6"><span class="box-title">6 &middot; Call &amp; tier up</span><span class="box-sub">JS calls exports</span></div>
+      </div>
+      <ol class="stepper-steps" hidden>
+        <li data-on="s1"><strong>Fetch.</strong> The page requests <code>app.wasm</code> like any other file. The server must label it <code>application/wasm</code> for streaming to work.</li>
+        <li data-on="s1,s2"><strong>Stream-compile.</strong> <code>WebAssembly.instantiateStreaming()</code> hands bytes to the engine as they arrive. Early functions compile while later ones are still downloading.</li>
+        <li data-on="s3"><strong>Validate.</strong> Before anything runs, every function is checked: types match, jumps land in valid places, nothing reaches outside the sandbox. A bad module is rejected outright.</li>
+        <li data-on="s4"><strong>Compile to machine code.</strong> The fast baseline compiler (V8's Liftoff) turns each instruction into machine code, so the app can start. Optimized code may be cached for your next visit.</li>
+        <li data-on="s5"><strong>Instantiate.</strong> JavaScript hands over the <mark>imports</mark>. The engine creates linear memory, fills tables, runs the optional start function, and returns an instance with its <mark>exports</mark>.</li>
+        <li data-on="s6"><strong>Call and tier up.</strong> JS calls exported functions like normal functions. Busy ones are quietly recompiled by TurboFan in the background and swapped in.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="overlap">
+    <h2 id="overlap">Why streaming matters</h2>
+    <p>Compiling doesn't wait for the download to finish. The two run side by side, like reading a book while it's still being printed.</p>
+    <div class="sk-box" data-fill="paper">
+      <svg class="doodle" viewBox="0 0 540 190" role="img" aria-label="Timeline: download and compile bars overlap almost completely; instantiate and run follow right after">
+        <g class="wob">
+          <rect class="ink f-blue" x="130" y="22" width="280" height="28" rx="8"/>
+          <rect class="ink f-yellow" x="150" y="64" width="282" height="28" rx="8"/>
+          <rect class="ink f-green" x="432" y="106" width="44" height="28" rx="8"/>
+          <path class="ink s-red" d="M476 160 h40 M506 152 l10 8 -10 8"/>
+          <path class="ink thin s-pencil" d="M130 176 h390"/>
+        </g>
+        <text x="10" y="42">download</text>
+        <text x="10" y="84">compile</text>
+        <text x="10" y="126">instantiate</text>
+        <text x="10" y="166">run!</text>
+        <text x="440" y="186" class="t-sm t-soft">time &rarr;</text>
+        <text x="190" y="118" class="t-sm t-blue">almost no waiting here</text>
+      </svg>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="code">
+    <h2 id="code">The JavaScript side</h2>
+    <p>This is all the JavaScript you need to load a module and call it.</p>
+    <div class="annotated">
+      <div class="sk-box code-card" data-fill="paper">
+        <div class="code-title">main.js</div>
+<pre><code>const imports = {                          <span class="pin">1</span>
+  env: { log: (n) =&gt; console.log("from wasm:", n) }
+};
+
+const { instance } =                       <span class="pin">2</span>
+  await WebAssembly.instantiateStreaming(
+    fetch("add.wasm"), imports
+  );
+
+console.log(instance.exports.add(2, 3));   <span class="pin">3</span>
+// 5</code></pre>
+      </div>
+      <ol class="annotations">
+        <li data-n="1">The <strong>imports</strong>: tools JS lends the module. Here, a <code>log</code> function it may call.</li>
+        <li data-n="2">Fetch, stream-compile, validate and instantiate, all in one call. You get back a ready <code>instance</code>.</li>
+        <li data-n="3">Call an <strong>export</strong> like any JS function. Numbers go in, a number comes out.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="pass">
+    <h2 id="pass">Passing a string: try it</h2>
+    <p>Wasm functions only take and return numbers. So how does it read a word? JavaScript writes the bytes into Wasm's linear memory, then passes just two numbers: <em>where</em> the bytes start and <em>how many</em> there are.</p>
+    <div id="memory-demo" class="sk-box" data-fill="paper"></div>
+    <p class="small muted" style="margin-top:10px">Real apps rarely write this by hand: Emscripten and Rust's <code>wasm-bindgen</code> generate this glue code for you.</p>
+  </section>
+
+  <section class="block" aria-labelledby="validate">
+    <h2 id="validate">The validator's checklist</h2>
+    <div class="two-col" style="align-items:center">
+      <div class="sk-box" data-fill="green">
+        <span class="box-title">Before any code runs:</span>
+        <ul class="checklist" style="margin-top:10px">
+          <li>every instruction gets values of the right type</li>
+          <li>every jump lands on a valid target</li>
+          <li>every function call matches its signature</li>
+          <li>only declared memory, tables and globals are used</li>
+        </ul>
+      </div>
+      <div class="sk-box callout" data-fill="blue">
+        <span class="callout-label">Why so strict?</span>
+        <p>Checking everything up front, in one fast pass, means the engine can trust the code afterwards. Combined with bounds checks on memory, it's a big reason Wasm from any website is safe to run.</p>
+      </div>
+    </div>
+  </section>
+
+  <aside class="block takeaway sk-box" data-fill="yellow" aria-label="Remember">
+    <span class="takeaway-label">Remember</span>
+    <ul>
+      <li>Fetch &rarr; stream-compile &rarr; validate &rarr; machine code &rarr; instantiate &rarr; call.</li>
+      <li><code>instantiateStreaming</code> overlaps downloading and compiling.</li>
+      <li>Strings and images travel through linear memory: JS writes the bytes, Wasm gets an address and a length.</li>
+    </ul>
+  </aside>
+
+</main>
+</body>
+</html>

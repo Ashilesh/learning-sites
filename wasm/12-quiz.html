@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quiz &amp; sources · Wasm Sketchbook</title>
+<meta name="description" content="Ten questions to check what you learned about WebAssembly, plus the sources behind the facts in this guide.">
+<script>try{var t=localStorage.getItem('wasm-sketchbook-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=Patrick+Hand&display=swap">
+<link rel="stylesheet" href="assets/css/sketch.css">
+<script defer src="assets/js/sketch.js"></script>
+<script defer src="assets/js/site.js"></script>
+<script defer src="assets/js/widgets.js"></script>
+</head>
+<body data-page="quiz">
+<main class="page" id="main">
+
+  <header class="chapter-head">
+    <p class="chapter-kicker" data-icon="pencil">Chapter 12</p>
+    <h1>Quiz &amp; sources</h1>
+    <p class="lead">Ten quick questions. No pressure: every answer comes with a one-line explanation, and you can try again as often as you like.</p>
+  </header>
+
+  <section class="block" aria-labelledby="quiz-title">
+    <h2 id="quiz-title">Check yourself</h2>
+    <div id="quiz"></div>
+  </section>
+
+  <section class="block" aria-labelledby="cheat">
+    <h2 id="cheat">The whole sketchbook on one page</h2>
+    <div class="flow">
+      <div class="sk-box" data-fill="orange"><span class="box-title">Your code</span><span class="box-sub">C, C++, Rust, Go, Kotlin&hellip;</span></div>
+      <span class="sk-arrow" aria-hidden="true"></span>
+      <div class="sk-box" data-fill="purple"><span class="box-title">.wasm module</span><span class="box-sub">typed sections, binary</span></div>
+      <span class="sk-arrow" aria-hidden="true"></span>
+      <div class="sk-box" data-fill="paper"><span class="box-title">JS engine</span><span class="box-sub">validate, Liftoff, TurboFan</span></div>
+      <span class="sk-arrow" aria-hidden="true"></span>
+      <div class="sk-box blue-line" data-fill="blue"><span class="box-title">Sandboxed instance</span><span class="box-sub">memory, table, code</span></div>
+      <span class="sk-arrow" aria-hidden="true"></span>
+      <div class="sk-box" data-fill="yellow"><span class="box-title">JS + Web APIs</span><span class="box-sub">DOM, fetch, WebGPU&hellip;</span></div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="sources">
+    <h2 id="sources">Sources</h2>
+    <p>Dates, versions and proposal phases were checked against these pages. Engine internals, browser feature details and the usage examples come from general knowledge and are worth re-checking as things change.</p>
+    <div class="sk-box" data-fill="paper">
+      <ul style="margin:0">
+        <li><a href="https://webassembly.org/news/2025-09-17-wasm-3.0/">Wasm 3.0 completed</a> &mdash; webassembly.org, 17 Sep 2025</li>
+        <li><a href="https://v8.dev/docs/wasm-compilation-pipeline">WebAssembly compilation pipeline</a> &mdash; v8.dev (Liftoff, TurboFan, tier-up, code caching)</li>
+        <li><a href="https://www.w3.org/press-releases/2019/wasm/">WebAssembly becomes a W3C Recommendation</a> &mdash; W3C, 5 Dec 2019</li>
+        <li><a href="https://github.com/WebAssembly/proposals">WebAssembly proposals</a> &mdash; phases of active proposals</li>
+        <li><a href="https://bytecodealliance.org/articles">Bytecode Alliance articles</a> &mdash; WASI 0.2 (25 Jan 2024), WASI 0.3 (11 Jun 2026)</li>
+        <li><a href="https://webassembly.org/features/">WebAssembly feature support</a> &mdash; live per-browser support table</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="block center">
+    <svg class="doodle" viewBox="0 0 300 120" role="img" aria-label="A pencil drawing a happy face" style="max-width:300px;margin:0 auto">
+      <g class="wob">
+        <circle class="ink f-yellow" cx="80" cy="60" r="44"/>
+        <circle class="ink f-ink" cx="66" cy="50" r="3"/>
+        <circle class="ink f-ink" cx="94" cy="50" r="3"/>
+        <path class="ink" d="M60 72 q20 18 40 0"/>
+        <path class="ink f-orange" d="M170 96 L250 16 L272 38 L192 118 Z"/>
+        <path class="ink f-pink" d="M250 16 L262 4 L284 26 L272 38 Z"/>
+        <path class="ink f-paper" d="M170 96 L160 124 L192 118 Z"/>
+      </g>
+    </svg>
+    <p class="lead center" style="margin:12px auto 0">That's the sketchbook. Thanks for reading!</p>
+  </section>
+
+</main>
+</body>
+</html>

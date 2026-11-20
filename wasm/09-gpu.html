@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reaching the GPU · Wasm Sketchbook</title>
+<meta name="description" content="How WebAssembly reaches the GPU: through WebGL or WebGPU, JavaScript, the browser's GPU process, native graphics APIs and the driver.">
+<script>try{var t=localStorage.getItem('wasm-sketchbook-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=Patrick+Hand&display=swap">
+<link rel="stylesheet" href="assets/css/sketch.css">
+<script defer src="assets/js/sketch.js"></script>
+<script defer src="assets/js/site.js"></script>
+<script defer src="assets/js/widgets.js"></script>
+</head>
+<body data-page="gpu">
+<main class="page" id="main">
+
+  <header class="chapter-head">
+    <p class="chapter-kicker" data-icon="chip">Chapter 9</p>
+    <h1>Reaching the GPU</h1>
+    <p class="lead">Wasm has no GPU instructions of its own. It reaches the graphics card exactly the way JavaScript does, through WebGL or WebGPU, and every call crosses into a separate, locked-down GPU process.</p>
+  </header>
+
+  <section class="block" aria-labelledby="why-gpu">
+    <h2 id="why-gpu">CPU vs GPU, in one picture</h2>
+    <div class="two-col" style="align-items:center">
+      <svg class="doodle" viewBox="0 0 340 200" role="img" aria-label="A CPU drawn as four big smart chefs, a GPU drawn as a grid of many small line cooks">
+        <g class="wob">
+          <rect class="ink f-blue" x="10" y="30" width="130" height="130" rx="10"/>
+          <circle class="ink f-paper" cx="45" cy="65" r="20"/>
+          <circle class="ink f-paper" cx="105" cy="65" r="20"/>
+          <circle class="ink f-paper" cx="45" cy="125" r="20"/>
+          <circle class="ink f-paper" cx="105" cy="125" r="20"/>
+          <rect class="ink f-green" x="180" y="30" width="150" height="130" rx="10"/>
+        </g>
+        <g class="wob">
+          <path class="ink thin" d="M194 46h8v8h-8zM212 46h8v8h-8zM230 46h8v8h-8zM248 46h8v8h-8zM266 46h8v8h-8zM284 46h8v8h-8zM302 46h8v8h-8z
+            M194 64h8v8h-8zM212 64h8v8h-8zM230 64h8v8h-8zM248 64h8v8h-8zM266 64h8v8h-8zM284 64h8v8h-8zM302 64h8v8h-8z
+            M194 82h8v8h-8zM212 82h8v8h-8zM230 82h8v8h-8zM248 82h8v8h-8zM266 82h8v8h-8zM284 82h8v8h-8zM302 82h8v8h-8z
+            M194 100h8v8h-8zM212 100h8v8h-8zM230 100h8v8h-8zM248 100h8v8h-8zM266 100h8v8h-8zM284 100h8v8h-8zM302 100h8v8h-8z
+            M194 118h8v8h-8zM212 118h8v8h-8zM230 118h8v8h-8zM248 118h8v8h-8zM266 118h8v8h-8zM284 118h8v8h-8zM302 118h8v8h-8z
+            M194 136h8v8h-8zM212 136h8v8h-8zM230 136h8v8h-8zM248 136h8v8h-8zM266 136h8v8h-8zM284 136h8v8h-8zM302 136h8v8h-8z"/>
+        </g>
+        <text x="50" y="22" class="t-title" style="font-size:22px">CPU</text>
+        <text x="236" y="22" class="t-title" style="font-size:22px">GPU</text>
+        <text x="10" y="186" class="t-sm t-soft">a few clever chefs</text>
+        <text x="180" y="186" class="t-sm t-soft">thousands of line cooks</text>
+      </svg>
+      <div class="sk-box callout" data-fill="blue">
+        <span class="callout-label">Think of it like&hellip;</span>
+        <p>A <strong>CPU</strong> is a few clever chefs who can cook anything, one complex dish at a time. A <strong>GPU</strong> is thousands of line cooks who each do one simple job, all at once: perfect for pixels, 3D scenes and AI maths.</p>
+        <p>Wasm runs on the CPU. To use the GPU's cooks, it has to send them orders.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="journey">
+    <h2 id="journey">The journey of a draw call</h2>
+    <p>Follow one "draw this triangle" order from Wasm down to the hardware.</p>
+
+    <div class="stepper" data-speed="3000">
+      <div class="sk-box dashed quiet zone">
+        <span class="zone-label">Web page: renderer process (sandboxed)</span>
+        <div class="flow-col">
+          <div class="sk-box" data-fill="purple" data-step-id="g1"><span class="box-title">Wasm module</span><span class="box-sub">builds vertex data, textures and settings in linear memory</span></div>
+          <span class="sk-arrow" aria-hidden="true"></span>
+          <div class="sk-box" data-fill="yellow" data-step-id="g2"><span class="box-title">JavaScript glue</span><span class="box-sub">Emscripten's WebGPU bindings, or Rust's wgpu + wasm-bindgen</span></div>
+          <span class="sk-arrow" aria-hidden="true"></span>
+          <div class="sk-box" data-fill="paper" data-step-id="g3"><span class="box-title">WebGPU or WebGL API</span><span class="box-sub">checks every call; copies buffers out of Wasm memory</span></div>
+        </div>
+      </div>
+
+      <div class="center" style="margin:10px 0 30px">
+        <span class="sk-arrow down" aria-hidden="true"></span>
+        <span class="chip sk-box red-line" data-fill="pink" data-step-id="ipc" style="display:inline-block">&#9993; command buffers sent across processes (IPC)</span>
+        <span class="sk-arrow down" aria-hidden="true"></span>
+      </div>
+
+      <div class="sk-box dashed quiet zone">
+        <span class="zone-label">Browser GPU process (privileged)</span>
+        <div class="flow-col">
+          <div class="sk-box" data-fill="paper" data-step-id="g4"><span class="box-title">Browser GPU layer</span><span class="box-sub">Dawn in Chrome, wgpu in Firefox, WebKit's own in Safari, ANGLE for WebGL</span></div>
+          <span class="sk-arrow" aria-hidden="true"></span>
+          <div class="sk-box" data-fill="paper" data-step-id="g5"><span class="box-title">Native graphics API</span><span class="box-sub">Vulkan, Metal or Direct3D 12, depending on the operating system</span></div>
+          <span class="sk-arrow" aria-hidden="true"></span>
+          <div class="sk-box" data-fill="paper" data-step-id="g6"><span class="box-title">GPU driver</span><span class="box-sub">vendor code that turns API calls into hardware commands</span></div>
+        </div>
+      </div>
+
+      <span class="sk-arrow down" aria-hidden="true"></span>
+      <div class="sk-box thick blue-line" data-fill="blue" data-step-id="g7" style="margin-top:10px">
+        <span class="box-title">GPU hardware</span>
+        <span class="box-sub">runs shaders on thousands of cores; draws into the page's canvas or returns results to read back</span>
+      </div>
+
+      <ol class="stepper-steps" hidden>
+        <li data-on="g1">The <strong>Wasm module</strong> does the CPU-side work: game logic, physics, preparing the triangle's corner positions in its linear memory.</li>
+        <li data-on="g2">It calls an imported function. <strong>Glue code</strong> in JavaScript turns that into a real WebGPU or WebGL call.</li>
+        <li data-on="g3">The <strong>web API</strong> checks the call is valid and safe, and copies the data out of Wasm memory (with <code>writeBuffer</code> or <code>bufferData</code>).</li>
+        <li data-on="ipc">The commands are packed up and posted to a <strong>separate process</strong>. The web page itself never touches the graphics card.</li>
+        <li data-on="g4">In the GPU process, the <strong>browser's GPU layer</strong> checks everything again and translates shaders for this machine.</li>
+        <li data-on="g5">It speaks the operating system's <strong>native graphics API</strong>: Metal on Apple devices, Direct3D 12 on Windows, Vulkan on Android and Linux.</li>
+        <li data-on="g6">The <strong>driver</strong> from the GPU's maker turns that into hardware commands.</li>
+        <li data-on="g7">The <strong>GPU</strong> runs the shaders on thousands of cores at once, and your triangle appears on the canvas.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="apis">
+    <h2 id="apis">The two web graphics APIs</h2>
+    <div class="two-col">
+      <div class="sk-box" data-fill="paper">
+        <span class="box-title">WebGL 2</span>
+        <span class="box-sub">modelled on OpenGL ES 3.0</span>
+        <ul style="margin-top:10px">
+          <li>graphics only: triangles, textures, shaders</li>
+          <li>works in every modern browser</li>
+          <li>mature, huge number of tutorials</li>
+        </ul>
+      </div>
+      <div class="sk-box blue-line" data-fill="blue">
+        <span class="box-title">WebGPU</span>
+        <span class="box-sub">modelled on Vulkan, Metal and Direct3D 12</span>
+        <ul style="margin-top:10px">
+          <li>graphics <em>and</em> general compute shaders (AI, physics, image processing)</li>
+          <li>less overhead per call, more control</li>
+          <li>Chrome and Edge since 2023; Safari 26 and Firefox 141 (Windows) since 2025 (approximate)</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="no-direct">
+    <h2 id="no-direct">Why no shortcut to the driver?</h2>
+    <div class="two-col" style="align-items:center">
+      <svg class="doodle" viewBox="0 0 300 200" role="img" aria-label="A shield standing between a web page and the GPU driver">
+        <g class="wob">
+          <rect class="ink f-paper" x="10" y="60" width="80" height="80" rx="8"/>
+          <path class="ink f-green" d="M150 30 L196 46 V100 C196 132 172 152 150 164 C128 152 104 132 104 100 V46 Z"/>
+          <path class="ink s-green thick" d="M130 98 l14 14 26 -30"/>
+          <rect class="ink f-orange" x="214" y="60" width="78" height="80" rx="8"/>
+          <path class="ink s-pencil" d="M90 100 h12 M196 100 h16"/>
+        </g>
+        <text x="26" y="104">web</text>
+        <text x="24" y="124">page</text>
+        <text x="228" y="104">GPU</text>
+        <text x="226" y="124">driver</text>
+        <text x="112" y="190" class="t-sm t-soft">checks every call</text>
+      </svg>
+      <div class="sk-box callout" data-fill="blue">
+        <span class="callout-label">Safety first</span>
+        <p>GPU drivers are large, powerful and historically buggy. A web page that could talk to them directly could crash your computer or read another tab's video memory.</p>
+        <p>Keeping the driver in a separate process, behind an API that checks every call, is what makes 3D on the web safe to visit.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="tips">
+    <h2 id="tips">What this means in practice</h2>
+    <div class="grid" style="--min:230px">
+      <div class="note"><h3>Batch your calls</h3><p>Each draw crosses Wasm &rarr; JS &rarr; IPC. Fewer, bigger calls (instancing, render bundles) matter more than raw Wasm speed.</p></div>
+      <div class="note blue"><h3>Keep data on the GPU</h3><p>Upload buffers once and reuse them. Reading results back into Wasm memory is slow and asynchronous.</p></div>
+      <div class="note green"><h3>Use compute shaders</h3><p>In-browser AI (ONNX Runtime Web, Transformers.js, WebLLM) runs models with WebGPU compute; Wasm handles tokenizing, scheduling and CPU fallback.</p></div>
+      <div class="note pink"><h3>Render off the main thread</h3><p><code>OffscreenCanvas</code> lets a Web Worker running Wasm own the canvas, so drawing never blocks the page.</p></div>
+      <div class="note"><h3>Shaders aren't Wasm</h3><p>GPU programs are written in WGSL (WebGPU) or GLSL (WebGL). The browser translates them for each platform.</p></div>
+    </div>
+  </section>
+
+  <aside class="block takeaway sk-box" data-fill="yellow" aria-label="Remember">
+    <span class="takeaway-label">Remember</span>
+    <ul>
+      <li>Wasm &rarr; JS glue &rarr; WebGPU/WebGL &rarr; GPU process &rarr; native API &rarr; driver &rarr; GPU.</li>
+      <li>Only the browser's separate GPU process talks to the driver. That's the safety story.</li>
+      <li>Batch calls and keep data on the GPU; use WebGPU compute for heavy parallel maths.</li>
+    </ul>
+  </aside>
+
+</main>
+</body>
+</html>

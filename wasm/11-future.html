@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What comes next · Wasm Sketchbook</title>
+<meta name="description" content="WebAssembly proposals on their way through the five standards phases, what Wasm 3.0 already shipped, and ideas for removing today's limits.">
+<script>try{var t=localStorage.getItem('wasm-sketchbook-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=Patrick+Hand&display=swap">
+<link rel="stylesheet" href="assets/css/sketch.css">
+<script defer src="assets/js/sketch.js"></script>
+<script defer src="assets/js/site.js"></script>
+<script defer src="assets/js/widgets.js"></script>
+</head>
+<body data-page="future">
+<main class="page" id="main">
+
+  <header class="chapter-head">
+    <p class="chapter-kicker" data-icon="rocket">Chapter 11</p>
+    <h1>What comes next</h1>
+    <p class="lead">The gaps from the last chapter are being closed by standard proposals. Each one climbs five phases before it becomes part of WebAssembly.</p>
+  </header>
+
+  <section class="block" aria-labelledby="stairs">
+    <h2 id="stairs">The five-step staircase</h2>
+    <div class="stairs">
+      <div class="sk-box stair" data-fill="paper" style="--h:0"><span class="box-title">Phase 1</span><span class="box-sub">idea accepted for study</span></div>
+      <div class="sk-box stair" data-fill="paper" style="--h:1"><span class="box-title">Phase 2</span><span class="box-sub">spec text drafted</span></div>
+      <div class="sk-box stair" data-fill="yellow" style="--h:2"><span class="box-title">Phase 3</span><span class="box-sub">browsers build and test it</span></div>
+      <div class="sk-box stair" data-fill="orange" style="--h:3"><span class="box-title">Phase 4</span><span class="box-sub">being standardized</span></div>
+      <div class="sk-box stair" data-fill="green" style="--h:4"><span class="box-title">Phase 5</span><span class="box-sub">done: part of the standard</span></div>
+    </div>
+    <p class="small muted" style="margin-top:12px">Phases 1&ndash;3 are run by the Community Group; phases 4&ndash;5 by the W3C Working Group.</p>
+  </section>
+
+  <section class="block" aria-labelledby="board">
+    <h2 id="board">The proposals board</h2>
+    <p>Where the proposals that matter most for today's limits stand, as of November 2026.</p>
+    <div class="phase-board">
+      <div class="phase-col">
+        <div class="phase-head sk-box" data-fill="paper"><span class="box-title">Phase 1</span><span class="box-sub">being studied</span></div>
+        <div class="note green"><strong>Component Model</strong>Modules from different languages that plug together through typed interfaces (WIT).</div>
+        <div class="note"><strong>Shared-Everything Threads</strong>Share GC objects, tables and functions between threads.</div>
+        <div class="note pink"><strong>Memory control</strong>Free and protect memory pages: fixing "grows but never shrinks".</div>
+      </div>
+      <div class="phase-col">
+        <div class="phase-head sk-box" data-fill="paper"><span class="box-title">Phase 2</span><span class="box-sub">spec drafted</span></div>
+        <div class="note blue"><strong>JS Primitive Builtins</strong>Faster use of JavaScript values from Wasm.</div>
+      </div>
+      <div class="phase-col">
+        <div class="phase-head sk-box" data-fill="yellow"><span class="box-title">Phase 3</span><span class="box-sub">being built</span></div>
+        <div class="note"><strong>ESM Integration</strong><code>import { add } from "./add.wasm"</code>, with no loader code.</div>
+        <div class="note blue"><strong>Stack Switching</strong>Native coroutines and green threads: better async, Go and Kotlin coroutines.</div>
+        <div class="note green"><strong>Custom Descriptors &amp; JS Interop</strong>WasmGC objects JS can use with methods and prototypes.</div>
+        <div class="note pink"><strong>Custom Page Sizes</strong>Memory smaller than 64 KiB pages, for tiny devices.</div>
+      </div>
+      <div class="phase-col">
+        <div class="phase-head sk-box" data-fill="orange"><span class="box-title">Phase 4</span><span class="box-sub">standardizing</span></div>
+        <div class="note"><strong>Compact Import Section</strong>Smaller files for modules with many imports.</div>
+        <div class="note blue"><strong>Wide Arithmetic</strong>Fast 128-bit maths for cryptography and big numbers.</div>
+      </div>
+      <div class="phase-col">
+        <div class="phase-head sk-box" data-fill="green"><span class="box-title">Phase 5</span><span class="box-sub">standardized</span></div>
+        <div class="note green"><strong>JS Promise Integration (JSPI)</strong>Lets synchronous Wasm code wait on async web APIs without a rewrite.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="shipped">
+    <h2 id="shipped">Already shipped: Wasm 3.0</h2>
+    <div class="two-col" style="align-items:center">
+      <div class="sk-box" data-fill="green">
+        <span class="box-title">Wasm 3.0, September 2025</span>
+        <ul class="checklist" style="margin-top:10px">
+          <li>garbage collection (WasmGC)</li>
+          <li>64-bit memory and multiple memories</li>
+          <li>exception handling</li>
+          <li>tail calls</li>
+          <li>typed function references</li>
+          <li>relaxed SIMD</li>
+          <li>JS string built-ins</li>
+        </ul>
+      </div>
+      <div class="center"><span class="stamp">SHIPPED</span><p class="muted" style="margin-top:18px">Most of these already work in all major browsers.</p></div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="ideas">
+    <h2 id="ideas">Ideas to push further</h2>
+    <div class="grid" style="--min:250px">
+      <div class="sk-box" data-fill="paper"><span class="box-title">Cheaper Web API access</span><span class="box-sub">Web API bindings Wasm can call through typed references, with no hand-written glue. Custom Descriptors are a first step; direct DOM access has no active proposal today.</span></div>
+      <div class="sk-box" data-fill="paper"><span class="box-title">Components in browsers</span><span class="box-sub">Landing on servers first (WASI 0.2 in Jan 2024, WASI 0.3 with native async in Jun 2026). In browsers, a Rust image library and a Python script could share data with no glue.</span></div>
+      <div class="sk-box" data-fill="paper"><span class="box-title">Tighter GPU integration</span><span class="box-sub">Share buffers between Wasm memory and WebGPU without copies; use WebGPU from Wasm in workers by default.</span></div>
+      <div class="sk-box" data-fill="paper"><span class="box-title">Better threads</span><span class="box-sub">Shared-everything threads plus lighter isolation rules, to make multicore code as easy as on desktop.</span></div>
+      <div class="sk-box" data-fill="paper"><span class="box-title">Smaller, faster starts</span><span class="box-sub">Better code caching, lazy function loading and standard libraries shared between modules.</span></div>
+      <div class="sk-box" data-fill="paper"><span class="box-title">AI hardware</span><span class="box-sub">WebNN (W3C) to reach NPUs and GPUs for neural networks, with Wasm running the logic around them.</span></div>
+      <div class="sk-box" data-fill="paper"><span class="box-title">Easier debugging</span><span class="box-sub">Standard DWARF support across every browser's DevTools, not only Chrome's extension.</span></div>
+    </div>
+  </section>
+
+  <aside class="block takeaway sk-box" data-fill="yellow" aria-label="Remember">
+    <span class="takeaway-label">Remember</span>
+    <ul>
+      <li>Proposals climb five phases; phase 5 means standardized.</li>
+      <li>JSPI is done; ESM integration and stack switching are being built; the Component Model is still early in browsers.</li>
+      <li>Wasm 3.0 already shipped GC, 64-bit memory, exceptions, tail calls and more.</li>
+    </ul>
+  </aside>
+
+</main>
+</body>
+</html>

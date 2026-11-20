@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Why Wasm exists · Wasm Sketchbook</title>
+<meta name="description" content="What JavaScript struggles with, and the road from Native Client and asm.js to Wasm 3.0.">
+<script>try{var t=localStorage.getItem('wasm-sketchbook-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=Patrick+Hand&display=swap">
+<link rel="stylesheet" href="assets/css/sketch.css">
+<script defer src="assets/js/sketch.js"></script>
+<script defer src="assets/js/site.js"></script>
+<script defer src="assets/js/widgets.js"></script>
+</head>
+<body data-page="why">
+<main class="page" id="main">
+
+  <header class="chapter-head">
+    <p class="chapter-kicker" data-icon="question">Chapter 2</p>
+    <h1>Why Wasm exists</h1>
+    <p class="lead">JavaScript is fast today, but it was never designed to be a fast, predictable target for heavy, low-level work written in other languages. Wasm fills that gap.</p>
+  </header>
+
+  <section class="block" aria-labelledby="struggles">
+    <h2 id="struggles">Four things JavaScript struggles with</h2>
+    <div class="grid" style="--min:250px">
+      <div class="note">
+        <svg class="doodle" viewBox="0 0 64 64" aria-hidden="true"><g class="wob">
+          <path class="ink" d="M16 8h32M16 56h32"/>
+          <path class="ink f-yellow" d="M20 8c0 14 24 16 24 24S20 42 20 56h24c0-14-24-16-24-24S44 22 44 8z"/>
+          <path class="ink thin s-orange" d="M28 50h8M30 46h4"/>
+        </g></svg>
+        <h3>Warm-up time</h3>
+        <p>The engine must read the source text, then watch the code run before it can make it fast. Big apps pay this on every load.</p>
+      </div>
+      <div class="note pink">
+        <svg class="doodle" viewBox="0 0 64 64" aria-hidden="true"><g class="wob">
+          <path class="ink" d="M4 50 C12 10 22 10 26 34 S40 58 46 22 S58 18 60 36"/>
+          <path class="ink thin" d="M10 52v8M26 40v20M46 30v30M58 42v18"/>
+        </g></svg>
+        <h3>Unpredictable speed</h3>
+        <p>Types can change any time (<code>x</code> is a number, then a string). The optimizer guesses; a wrong guess throws fast code away.</p>
+      </div>
+      <div class="note blue">
+        <svg class="doodle" viewBox="0 0 64 64" aria-hidden="true"><g class="wob">
+          <rect class="ink f-paper" x="6" y="22" width="52" height="34" rx="3"/>
+          <path class="ink" d="M26 38h12"/>
+          <path class="ink thin" d="M12 22c4-10 10-14 14-6M30 20c2-12 12-14 16-4M44 22c6-6 12-4 10 4"/>
+        </g></svg>
+        <h3>No memory control</h3>
+        <p>Games, codecs and simulations want tightly packed rows of numbers, not objects shuffled around by a garbage collector.</p>
+      </div>
+      <div class="note green">
+        <svg class="doodle" viewBox="0 0 64 64" aria-hidden="true"><g class="wob">
+          <rect class="ink f-orange" x="8" y="44" width="48" height="12" rx="2"/>
+          <rect class="ink f-blue" x="12" y="32" width="42" height="12" rx="2"/>
+          <rect class="ink f-pink" x="6" y="20" width="44" height="12" rx="2"/>
+          <rect class="ink f-yellow" x="14" y="8" width="38" height="12" rx="2"/>
+        </g></svg>
+        <h3>Reusing old code</h3>
+        <p>Decades of C, C++ and Rust libraries (SQLite, FFmpeg, OpenCV, physics engines) couldn't run in a browser without a rewrite.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="race">
+    <h2 id="race">The start-up race</h2>
+    <p>Imagine a big app starting up. JavaScript speeds up in stages as the engine learns about the code, and can stumble when a guess turns out wrong. Wasm declares everything up front, so it reaches a steady speed early.</p>
+    <div id="speed-race" class="race sk-box" data-fill="paper"></div>
+    <p class="small muted" style="margin-top:10px">An illustrative sketch, not a benchmark. Real numbers depend on the app, the browser and the device, and well-optimized JavaScript can be just as fast once warmed up.</p>
+  </section>
+
+  <section class="block" aria-labelledby="history">
+    <h2 id="history">How we got here</h2>
+    <ol class="timeline">
+      <li class="tl-item"><span class="tl-year">2011</span>
+        <div class="sk-box" data-fill="paper"><span class="box-title">Native Client (NaCl)</span><span class="box-sub">Google runs native code inside Chrome. Clever, but Chrome only.</span></div></li>
+      <li class="tl-item"><span class="tl-year">2013</span>
+        <div class="sk-box" data-fill="paper"><span class="box-title">asm.js</span><span class="box-sub">Mozilla's strict, easy-to-optimize subset of JavaScript that compilers can target. The direct ancestor of Wasm.</span></div></li>
+      <li class="tl-item"><span class="tl-year">2015</span>
+        <div class="sk-box" data-fill="paper"><span class="box-title">WebAssembly announced</span><span class="box-sub">All the big browser makers agree on one shared binary format.</span></div></li>
+      <li class="tl-item"><span class="tl-year">2017</span>
+        <div class="sk-box" data-fill="yellow"><span class="box-title">Wasm 1.0 ships</span><span class="box-sub">The "MVP" (minimum viable product) lands in Chrome, Firefox, Safari and Edge.</span></div></li>
+      <li class="tl-item"><span class="tl-year">2019</span>
+        <div class="sk-box" data-fill="paper"><span class="box-title">An official web standard</span><span class="box-sub">The core spec becomes a W3C Recommendation on 5 Dec 2019.</span></div></li>
+      <li class="tl-item"><span class="tl-year">2024</span>
+        <div class="sk-box" data-fill="paper"><span class="box-title">WASI 0.2</span><span class="box-sub">Standard system interfaces for Wasm outside the browser (25 Jan 2024).</span></div></li>
+      <li class="tl-item"><span class="tl-year">2025</span>
+        <div class="sk-box" data-fill="yellow"><span class="box-title">Wasm 3.0</span><span class="box-sub">The new live standard: garbage collection, 64-bit memory, exceptions, tail calls and more (17 Sep 2025).</span></div></li>
+      <li class="tl-item"><span class="tl-year">2026</span>
+        <div class="sk-box" data-fill="paper"><span class="box-title">WASI 0.3</span><span class="box-sub">Ratified with native async for components (11 Jun 2026).</span></div></li>
+    </ol>
+  </section>
+
+  <section class="block" aria-labelledby="wild">
+    <h2 id="wild">Spotted in the wild</h2>
+    <p>You've probably used Wasm today without noticing. A few well-known examples:</p>
+    <div class="chips">
+      <span class="chip sk-box" data-fill="yellow">Figma's design editor</span>
+      <span class="chip sk-box" data-fill="blue">Photoshop on the web</span>
+      <span class="chip sk-box" data-fill="green">Google Earth</span>
+      <span class="chip sk-box" data-fill="pink">AutoCAD Web</span>
+      <span class="chip sk-box" data-fill="purple">Unity &amp; Unreal web games</span>
+      <span class="chip sk-box" data-fill="orange">Google Sheets' calc engine</span>
+      <span class="chip sk-box" data-fill="yellow">SQLite in the browser</span>
+      <span class="chip sk-box" data-fill="blue">ONNX Runtime Web</span>
+      <span class="chip sk-box" data-fill="green">TensorFlow.js Wasm backend</span>
+    </div>
+  </section>
+
+  <aside class="block takeaway sk-box" data-fill="yellow" aria-label="Remember">
+    <span class="takeaway-label">Remember</span>
+    <ul>
+      <li>JS has to warm up and guess types; Wasm starts with everything declared.</li>
+      <li>Wasm lets decades of existing C, C++ and Rust code run on the web.</li>
+      <li>It grew from NaCl and asm.js, shipped in 2017, and reached Wasm 3.0 in 2025.</li>
+    </ul>
+  </aside>
+
+</main>
+</body>
+</html>

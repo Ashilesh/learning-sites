@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Architecture · Wasm Sketchbook</title>
+<meta name="description" content="The architecture of WebAssembly: from source code to a module of typed sections to a sandboxed instance in the browser.">
+<script>try{var t=localStorage.getItem('wasm-sketchbook-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=Patrick+Hand&display=swap">
+<link rel="stylesheet" href="assets/css/sketch.css">
+<script defer src="assets/js/sketch.js"></script>
+<script defer src="assets/js/site.js"></script>
+<script defer src="assets/js/widgets.js"></script>
+</head>
+<body data-page="architecture">
+<main class="page" id="main">
+
+  <header class="chapter-head">
+    <p class="chapter-kicker" data-icon="blueprint">Chapter 4</p>
+    <h1>Architecture</h1>
+    <p class="lead">A Wasm app has three layers: a compiler that produces a module, the module itself (a file of typed sections), and the live instance the browser builds from it inside a sandbox.</p>
+  </header>
+
+  <section class="block" aria-labelledby="big-picture">
+    <h2 id="big-picture">The big picture</h2>
+    <p>Read it top to bottom. Tap any section of the module to see what it holds.</p>
+
+    <!-- Layer 1 -->
+    <div class="sk-box dashed quiet zone">
+      <span class="zone-label">1 &middot; Build time, on the developer's computer</span>
+      <div class="flow">
+        <div class="sk-box" data-fill="orange"><span class="box-title">Source code</span><span class="box-sub">C, C++, Rust, Go, Kotlin, C#, Zig&hellip;</span></div>
+        <span class="sk-arrow" aria-hidden="true"></span>
+        <div class="sk-box" data-fill="paper"><span class="box-title">Compiler toolchain</span><span class="box-sub">Emscripten, LLVM, rustc + wasm-bindgen, Kotlin/Wasm</span></div>
+        <span class="sk-arrow" aria-hidden="true"></span>
+        <div class="sk-box" data-fill="purple"><span class="box-title">Output files</span><span class="box-sub"><code>app.wasm</code>: the binary module<br><code>glue.js</code>: loader + bindings</span></div>
+      </div>
+    </div>
+
+    <span class="sk-arrow down" aria-hidden="true"></span>
+    <span class="arrow-label">downloaded by the browser</span>
+
+    <!-- Layer 2 -->
+    <div class="sk-box dashed quiet zone explorer" style="margin-top:22px">
+      <span class="zone-label">2 &middot; Inside app.wasm: sections, in file order</span>
+      <div class="grid tight" style="--min:150px">
+        <button type="button" class="sk-box" data-fill="paper" data-explain="type"><span class="box-title">Type</span><span class="box-sub">function signatures</span></button>
+        <button type="button" class="sk-box" data-fill="blue" data-explain="import"><span class="box-title">Import</span><span class="box-sub">what it needs from JS</span></button>
+        <button type="button" class="sk-box" data-fill="paper" data-explain="function"><span class="box-title">Function</span><span class="box-sub">which functions exist</span></button>
+        <button type="button" class="sk-box" data-fill="paper" data-explain="table"><span class="box-title">Table</span><span class="box-sub">function references</span></button>
+        <button type="button" class="sk-box" data-fill="paper" data-explain="memory"><span class="box-title">Memory</span><span class="box-sub">linear memory size</span></button>
+        <button type="button" class="sk-box" data-fill="paper" data-explain="global"><span class="box-title">Global</span><span class="box-sub">module-wide values</span></button>
+        <button type="button" class="sk-box" data-fill="pink" data-explain="export"><span class="box-title">Export</span><span class="box-sub">what it offers to JS</span></button>
+        <button type="button" class="sk-box" data-fill="paper" data-explain="code"><span class="box-title">Code</span><span class="box-sub">the instructions</span></button>
+        <button type="button" class="sk-box" data-fill="paper" data-explain="data"><span class="box-title">Data</span><span class="box-sub">initial memory bytes</span></button>
+      </div>
+      <div class="explorer-out sk-box" data-fill="yellow" aria-live="polite">
+        <span class="box-title">Tap a section</span>
+        <span class="box-sub">Each one is a labelled chunk of the file. The browser reads them in this order, which is also why it can start compiling before the download finishes.</span>
+      </div>
+      <template data-for="type"><span class="box-title">Type section</span><p>A list of function shapes, like "takes two i32, returns one i32". Every function points at one of these, so the engine knows every type before running anything.</p></template>
+      <template data-for="import"><span class="box-title">Import section</span><p>The shopping list: functions, memory, tables or values the module expects JavaScript to hand over, such as a <code>log</code> function. Without these, the module can't touch the outside world at all.</p></template>
+      <template data-for="function"><span class="box-title">Function section</span><p>Declares which functions the module defines and which type each one has. The actual instructions come later, in the Code section.</p></template>
+      <template data-for="table"><span class="box-title">Table section</span><p>Declares tables: lists of function references used for indirect calls. This is how C function pointers and C++ virtual methods work, safely.</p></template>
+      <template data-for="memory"><span class="box-title">Memory section</span><p>Says how big linear memory starts and how far it may grow, counted in 64 KiB pages.</p></template>
+      <template data-for="global"><span class="box-title">Global section</span><p>Values the whole module can see, like the current stack pointer. Each one is marked as fixed or changeable.</p></template>
+      <template data-for="export"><span class="box-title">Export section</span><p>The menu JavaScript can order from: names like <code>"add"</code> mapped to functions, memory or globals inside the module.</p></template>
+      <template data-for="code"><span class="box-title">Code section</span><p>The bodies of every function: the stack-machine instructions you met in chapter 3. Usually the biggest part of the file.</p></template>
+      <template data-for="data"><span class="box-title">Data section</span><p>Bytes copied into linear memory at start-up, such as text strings and lookup tables your program needs.</p></template>
+      <p class="small muted" style="margin:12px 0 0">Two smaller sections, Start (a function run at load) and Element (initial table entries), are left out to keep the sketch simple.</p>
+    </div>
+
+    <span class="sk-arrow down" aria-hidden="true"></span>
+    <span class="arrow-label">validated + compiled</span>
+
+    <!-- Layer 3 -->
+    <div class="sk-box dashed quiet zone" style="margin-top:22px">
+      <span class="zone-label">3 &middot; Run time, in the browser</span>
+      <div class="flow">
+        <div class="sk-box thick blue-line" data-fill="blue" style="flex:1.5 1 0">
+          <span class="box-title" style="color:var(--blue)">One instance, inside the sandbox</span>
+          <div class="grid tight" style="--min:140px;margin-top:10px">
+            <div class="sk-box" data-fill="paper"><span class="box-title">Linear memory</span><span class="box-sub">private byte array</span></div>
+            <div class="sk-box" data-fill="paper"><span class="box-title">Table</span><span class="box-sub">indirect call targets</span></div>
+            <div class="sk-box" data-fill="paper"><span class="box-title">Globals</span><span class="box-sub">module-wide values</span></div>
+            <div class="sk-box" data-fill="paper"><span class="box-title">Machine code</span><span class="box-sub">compiled functions</span></div>
+          </div>
+        </div>
+        <div class="doors" aria-hidden="true">
+          <span class="door-label">imports</span>
+          <span class="sk-arrow in blue"></span>
+          <span class="sk-arrow out red"></span>
+          <span class="door-label">exports</span>
+        </div>
+        <div class="sk-box" data-fill="yellow">
+          <span class="box-title">JavaScript + Web APIs</span>
+          <span class="box-sub">glue code, the page (DOM), fetch, WebGL, WebGPU, audio, storage, workers</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="house">
+    <h2 id="house">A house with two doors</h2>
+    <div class="two-col" style="align-items:center">
+      <svg class="doodle" viewBox="0 0 320 220" role="img" aria-label="A house labelled sandbox with an imports door on the left and an exports door on the right">
+        <g class="wob">
+          <path class="ink f-blue" d="M40 100 L160 24 L280 100"/>
+          <rect class="ink f-paper" x="56" y="96" width="208" height="110" rx="4"/>
+          <rect class="ink f-yellow" x="72" y="138" width="40" height="68" rx="3"/>
+          <rect class="ink f-pink" x="208" y="138" width="40" height="68" rx="3"/>
+          <circle class="ink f-ink" cx="104" cy="174" r="2"/>
+          <circle class="ink f-ink" cx="216" cy="174" r="2"/>
+          <rect class="ink f-gray" x="138" y="116" width="44" height="34" rx="2"/>
+          <path class="ink thin" d="M160 116v34M138 133h44"/>
+          <path class="ink s-blue" d="M4 176 h56 M50 168 l10 8 -10 8"/>
+          <path class="ink s-red" d="M260 176 h56 M306 168 l10 8 -10 8"/>
+          <path class="ink thin s-pencil" d="M10 210 q40 -6 80 0 t80 0 t80 0 t70 0"/>
+        </g>
+        <text x="128" y="88" class="t-title" style="font-size:22px">sandbox</text>
+        <text x="4" y="164" class="t-sm t-blue">imports in</text>
+        <text x="252" y="164" class="t-sm t-red">exports out</text>
+        <text x="132" y="172" class="t-sm t-soft">no other</text>
+        <text x="134" y="190" class="t-sm t-soft">way out</text>
+      </svg>
+      <div class="sk-box callout" data-fill="blue">
+        <span class="callout-label">Think of it like&hellip;</span>
+        <p>A house with no windows and exactly two doors. Things come <strong>in</strong> only through the imports door (whatever JavaScript chose to hand over), and go <strong>out</strong> only through the exports door.</p>
+        <p>Everything else, the module's memory, tables and code, stays inside. That's why a buggy or even malicious module can't read your other tabs or files.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="block" aria-labelledby="memory">
+    <h2 id="memory">Linear memory, up close</h2>
+    <p>Linear memory is just a long row of numbered boxes, each holding one byte (a number from 0 to 255). Addresses start at 0.</p>
+    <div class="sk-box" data-fill="paper">
+      <div class="mem-cells" style="margin-top:0">
+        <div class="mem-cell filled"><span class="mem-addr">0</span><span class="mem-byte">72</span><span class="mem-char">H</span></div>
+        <div class="mem-cell filled"><span class="mem-addr">1</span><span class="mem-byte">105</span><span class="mem-char">i</span></div>
+        <div class="mem-cell"><span class="mem-addr">2</span><span class="mem-byte">0</span><span class="mem-char"></span></div>
+        <div class="mem-cell filled"><span class="mem-addr">3</span><span class="mem-byte">42</span><span class="mem-char"></span></div>
+        <div class="mem-cell"><span class="mem-addr">4</span><span class="mem-byte">0</span><span class="mem-char"></span></div>
+        <div class="mem-cell"><span class="mem-addr">5</span><span class="mem-byte">0</span><span class="mem-char"></span></div>
+        <div class="mem-cell"><span class="mem-addr">&hellip;</span><span class="mem-byte">&hellip;</span><span class="mem-char"></span></div>
+        <div class="mem-cell ptr"><span class="mem-addr">65535</span><span class="mem-byte">0</span><span class="mem-char">end</span></div>
+      </div>
+      <p class="small muted" style="margin:12px 0 0">One 64 KiB page = 65,536 boxes. The module can ask for more pages as it grows.</p>
+    </div>
+    <div class="grid" style="--min:240px;margin-top:22px">
+      <div class="note green"><h3>Inside: fine</h3><p>Reading or writing any address inside the memory is allowed and very fast.</p></div>
+      <div class="note pink"><h3>Outside: trap!</h3><p>Every access is bounds-checked. Ask for an address past the end and the instance stops with an error (a "trap") instead of reading someone else's data.</p></div>
+      <div class="note blue"><h3>JS can peek too</h3><p>JavaScript sees the same bytes as an <code>ArrayBuffer</code>. That's how the two pass strings and images (chapter 7).</p></div>
+    </div>
+  </section>
+
+  <aside class="block takeaway sk-box" data-fill="yellow" aria-label="Remember">
+    <span class="takeaway-label">Remember</span>
+    <ul>
+      <li>Three layers: <strong>toolchain</strong> &rarr; <strong>module</strong> (typed sections) &rarr; <strong>instance</strong> (live, sandboxed).</li>
+      <li>The instance holds linear memory, tables, globals and compiled code, all private.</li>
+      <li>Imports and exports are its only doors to JavaScript and the page.</li>
+    </ul>
+  </aside>
+
+</main>
+</body>
+</html>
