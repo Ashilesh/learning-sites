@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 8: Passwords and Key Derivation · CryptoSketch</title>
+<meta name="description" content="Hackers just stole your website’s password database. Whether that’s a shrug or a catastrophe depends on one choice you made years ago.">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-coral">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">🧂 In this chapter</p><ol><li><a href="#s-8-1" data-sec="s-8-1"><span class="st-num">8.1</span><span class="st-t">The password problem</span></a></li><li><a href="#s-8-2" data-sec="s-8-2"><span class="st-num">8.2</span><span class="st-t">Password storage, from worst to best</span></a></li><li><a href="#s-8-3" data-sec="s-8-3"><span class="st-num">8.3</span><span class="st-t">Salt: stopping precomputed attacks</span></a></li><li><a href="#s-8-4" data-sec="s-8-4"><span class="st-num">8.4</span><span class="st-t">Slow on purpose: key stretching</span></a></li><li><a href="#s-8-5" data-sec="s-8-5"><span class="st-num">8.5</span><span class="st-t">Anatomy of a stored password hash</span></a></li><li><a href="#s-8-6" data-sec="s-8-6"><span class="st-num">8.6</span><span class="st-t">Pepper: an extra secret</span></a></li><li><a href="#s-8-7" data-sec="s-8-7"><span class="st-num">8.7</span><span class="st-t">Advice for humans: what makes a strong password</span></a></li><li><a href="#s-8-8" data-sec="s-8-8"><span class="st-num">8.8</span><span class="st-t">Key derivation functions (KDFs): one secret, many keys</span></a></li><li><a href="#s-8-9" data-sec="s-8-9"><span class="st-num">8.9</span><span class="st-t">Hands-on with password hashing</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="8">
+<header class="ch-hero world-coral">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-2">🧱 World 2 · The Building Blocks</a>
+    <p class="ch-num">Chapter 8</p>
+    <h1 class="ch-title">Passwords and Key Derivation</h1>
+    <p class="ch-hook"><span>🤔</span> Hackers just stole your website’s password database. Whether that’s a shrug or a catastrophe depends on one choice you made years ago.</p>
+    <ul class="ch-stats"><li>⏱️ ~5 min</li><li>📚 9 sections</li><li>🎮 7 interactive</li><li>⭐ 280 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="8" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"></div>
+<section class="sec sec-8-1" id="s-8-1" data-sec="s-8-1">
+<h2 class="sec-title"><span class="sec-num">8.1</span><span class="sec-text">The password problem</span><a class="sec-anchor" href="#s-8-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A website needs to check your password every time you log in, but it should <strong>never store your actual password</strong>. Databases get stolen constantly; billions of account records have leaked over the years. And because people reuse passwords, one leaked password often unlocks email, banking and social media accounts too.</p>
+<p>So how can a site check a password it doesn&#39;t store? With a <strong>one-way hash</strong>. At sign-up, the site stores <code>hash(password)</code>. At login, it hashes what you typed and compares.</p>
+<p>But <em>how</em> you hash matters enormously.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-8-2" id="s-8-2" data-sec="s-8-2">
+<h2 class="sec-title"><span class="sec-num">8.2</span><span class="sec-text">Password storage, from worst to best</span><a class="sec-anchor" href="#s-8-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Method</th>
+<th>What a thief gets after stealing the database</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Plaintext</td>
+<td>Every password, instantly</td>
+<td class="st-bad">❌ Unforgivable</td>
+</tr>
+<tr>
+<td>Encrypted</td>
+<td>Every password, once they find the key (usually on the same server)</td>
+<td class="st-bad">❌ Bad</td>
+</tr>
+<tr>
+<td>Fast hash (MD5, SHA-1, SHA-256)</td>
+<td>Most passwords in hours: GPUs test billions of guesses per second, and precomputed tables crack common passwords instantly</td>
+<td class="st-bad">❌ Bad</td>
+</tr>
+<tr>
+<td>Fast hash + salt</td>
+<td>Precomputed tables no longer work, but billions of guesses per second still do</td>
+<td class="st-warn">⚠️ Not enough</td>
+</tr>
+<tr>
+<td><strong>Slow, salted password hash</strong> (Argon2id, scrypt, bcrypt, PBKDF2)</td>
+<td>Only very weak passwords, and slowly</td>
+<td class="st-ok">✅ <strong>Correct</strong></td>
+</tr>
+</tbody></table></div>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-8-3" id="s-8-3" data-sec="s-8-3">
+<h2 class="sec-title"><span class="sec-num">8.3</span><span class="sec-text">Salt: stopping precomputed attacks</span><a class="sec-anchor" href="#s-8-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Attackers build giant lookup tables: &quot;here&#39;s the hash of every common password.&quot; (A clever compressed version is called a <strong>rainbow table</strong>.) With unsalted hashes, cracking is just a lookup. Worse, users with the same password have the same hash, so cracking one cracks them all.</p>
+<p>A <strong>salt</strong> is a random value, unique to each user, mixed in before hashing:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>                  WITHOUT SALT                         WITH SALT
+User    Password    Stored hash              Salt        Stored hash
+─────   ────────    ──────────────           ────────    ──────────────
+alice   sunshine    a941a4c4fd0c01cd...      8f3a1c      f2a00ce53be8...
+bob     sunshine    a941a4c4fd0c01cd...      d27e44      2736baa811fd...
+                    ↑ identical! crack                   ↑ completely different
+                      one, crack both</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>The salt isn&#39;t secret. It&#39;s stored right next to the hash. Its job is to make every hash unique, so attackers can&#39;t precompute anything and must attack each user separately.</p>
+</div><div class="widget" data-w="salt"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-8-4" id="s-8-4" data-sec="s-8-4">
+<h2 class="sec-title"><span class="sec-num">8.4</span><span class="sec-text">Slow on purpose: key stretching</span><a class="sec-anchor" href="#s-8-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Hash functions like SHA-256 are designed to be <strong>fast</strong>, which is exactly wrong for passwords. A password hash should be <strong>deliberately slow and memory-hungry</strong>:</p>
+<ul>
+<li>A real user logs in once and waits maybe a quarter of a second. Fine.</li>
+<li>An attacker trying a billion guesses waits a billion quarter-seconds: about 8 years per account for that list.</li>
+</ul>
+<p><strong>Memory-hardness</strong> matters too. Attackers use graphics cards (GPUs) and custom chips with thousands of tiny cores. If each guess needs, say, 64 MB of memory, those cores can&#39;t all run at once, because the chip doesn&#39;t have enough memory.</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>Year</th>
+<th>Slow?</th>
+<th>Memory-hard?</th>
+<th>Recommended settings (OWASP guidance)</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Argon2id</strong></td>
+<td>2015</td>
+<td class="st-ok">✅</td>
+<td class="st-ok">✅</td>
+<td>At least 19 MiB memory, 2 iterations, 1 thread</td>
+<td class="st-ok">✅ <strong>First choice.</strong> Winner of the 2015 Password Hashing Competition.</td>
+</tr>
+<tr>
+<td><strong>scrypt</strong></td>
+<td>2009</td>
+<td class="st-ok">✅</td>
+<td class="st-ok">✅</td>
+<td>N=2¹⁷, r=8, p=1</td>
+<td class="st-ok">✅ Good</td>
+</tr>
+<tr>
+<td><strong>bcrypt</strong></td>
+<td>1999</td>
+<td class="st-ok">✅</td>
+<td>Partly</td>
+<td>Cost factor 10 or higher</td>
+<td class="st-ok">✅ Good; widely supported. Only the first 72 bytes of a password count.</td>
+</tr>
+<tr>
+<td><strong>PBKDF2</strong></td>
+<td>2000</td>
+<td class="st-ok">✅</td>
+<td class="st-bad">❌</td>
+<td>600,000 iterations with HMAC-SHA256</td>
+<td class="st-warn">⚠️ Use when regulations require it (FIPS)</td>
+</tr>
+</tbody></table></div>
+<p>These settings get raised over time as computers get faster. Good systems re-hash a user&#39;s password with stronger settings the next time that user logs in.</p>
+</div><div class="widget" data-w="cracktime"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="widget" data-w="pbkdf2"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Password hashing algorithms</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Argon2id</h5><p class="pc-tag">2015, PHC winner</p></header>
+<ul class="pros"><li>Memory-hard: cripples GPUs and ASICs</li><li>Tunable memory, time and threads</li></ul>
+<ul class="cons"><li>Not FIPS-approved</li><li>Memory cost must be tuned for your servers</li></ul>
+<footer><b>Best for:</b> First choice for new systems</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>scrypt</h5><p class="pc-tag">2009</p></header>
+<ul class="pros"><li>Memory-hard</li><li>In Python’s standard library</li></ul>
+<ul class="cons"><li>Parameters interact in confusing ways</li><li>Memory and time tied together</li></ul>
+<footer><b>Best for:</b> Good alternative; crypto wallets</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>bcrypt</h5><p class="pc-tag">1999, Blowfish-based</p></header>
+<ul class="pros"><li>Battle-tested for 25 years</li><li>Supported by every framework</li></ul>
+<ul class="cons"><li>Only the first 72 bytes count</li><li>Only partly memory-hard (4 KB)</li></ul>
+<footer><b>Best for:</b> Existing systems; cost ≥ 10</footer></article>
+<article class="pc-card v-legacy"><header><span class="pc-verdict">⚠️ Legacy</span><h5>PBKDF2</h5><p class="pc-tag">2000, iterated HMAC</p></header>
+<ul class="pros"><li>FIPS-approved; everywhere</li><li>Simple</li></ul>
+<ul class="cons"><li>Not memory-hard: GPUs love it</li><li>Needs 600,000+ iterations</li></ul>
+<footer><b>Best for:</b> When regulations require FIPS</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>Fast hash (+salt)</h5><p class="pc-tag">SHA-256, MD5…</p></header>
+<ul class="pros"><li>Salt stops rainbow tables</li></ul>
+<ul class="cons"><li>Billions of guesses per second on a GPU</li></ul>
+<footer><b>Best for:</b> Never for passwords</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-8-5" id="s-8-5" data-sec="s-8-5">
+<h2 class="sec-title"><span class="sec-num">8.5</span><span class="sec-text">Anatomy of a stored password hash</span><a class="sec-anchor" href="#s-8-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Modern password hashes store everything needed to verify them in one string. An <strong>Argon2id</strong> hash:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>$argon2id$v=19$m=65536,t=3,p=4$D1+DM9x/bm3LfaTFlhL4IQ$D+rtaBkOv+0qB6VJW31BspRapcW31OTydi86CFUqYWU
+ └──┬───┘ └─┬┘ └──────┬───────┘ └─────────┬──────────┘ └───────────────────┬──────────────────────┘
+algorithm version  settings:          salt (Base64)                hash output (Base64)
+                   m = memory in KiB (64 MiB)
+                   t = iterations
+                   p = parallel threads</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>A <strong>bcrypt</strong> hash:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>$2b$12$CbIcmGBGmC0vP4FRMp70tufJAWnU/QVeFouHqPxgJd6/eJm3jZOOG
+ └┬┘└┬┘└─────────┬──────────┘└──────────────┬──────────────┘
+version cost    salt (22 chars)          hash (31 chars)
+       (2¹² = 4,096 rounds)</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure></div><div class="widget" data-w="anatomy"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-8-6" id="s-8-6" data-sec="s-8-6">
+<h2 class="sec-title"><span class="sec-num">8.6</span><span class="sec-text">Pepper: an extra secret</span><a class="sec-anchor" href="#s-8-6" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A <strong>pepper</strong> is a secret value added to every password before hashing, stored <strong>separately</strong> from the database (for example, in a hardware security module or a separate config system). If only the database is stolen, the attacker can&#39;t even start guessing, because they lack the pepper.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-8-7" id="s-8-7" data-sec="s-8-7">
+<h2 class="sec-title"><span class="sec-num">8.7</span><span class="sec-text">Advice for humans: what makes a strong password</span><a class="sec-anchor" href="#s-8-7" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p><strong>Length beats complexity.</strong> Each random character adds a little strength; each random <em>word</em> adds a lot.</p>
+<p>A common method is <strong>Diceware</strong>: pick words at random (using real dice) from a list of 7,776 words. Each word adds about 12.9 bits of entropy:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Passphrase</th>
+<th>Entropy</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>4 random words</td>
+<td>~52 bits</td>
+<td><code>correct horse battery staple</code></td>
+</tr>
+<tr>
+<td>5 random words</td>
+<td>~65 bits</td>
+<td><code>tundra pellet obtuse nimble gravy</code></td>
+</tr>
+<tr>
+<td>6 random words</td>
+<td>~78 bits</td>
+<td><code>mango orbit fable crisp wagon ledge</code></td>
+</tr>
+<tr>
+<td><code>P@ssw0rd!</code></td>
+<td>~0 bits</td>
+<td>One of the first guesses attackers try</td>
+</tr>
+</tbody></table></div>
+<p>Best practices:</p>
+<ul>
+<li><strong>Use a password manager.</strong> It generates a different random password for every site, so one breach can&#39;t spread.</li>
+<li><strong>Turn on multi-factor authentication (MFA).</strong> Even a stolen password isn&#39;t enough.</li>
+<li><strong>Prefer passkeys</strong> where available. They replace passwords with public-key cryptography (Chapter <a class="xref" href="chapter-16.html">16</a>).</li>
+</ul>
+<div class="callout story"><p>📜 <strong>Clever use of hashing: &quot;Have I Been Pwned.&quot;</strong> This service checks whether your password appeared in a breach <strong>without you sending it the password</strong>. Your browser hashes the password with SHA-1 and sends only the <strong>first 5 characters</strong> of the hash. The service returns all leaked hashes starting with those 5 characters (hundreds of them), and your browser checks for a match locally. The service never learns your password or even its full hash. This technique is called <strong>k-anonymity</strong>.</p></div>
+</div><div class="widget" data-w="passphrase"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="widget" data-w="hibp"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-8-8" id="s-8-8" data-sec="s-8-8">
+<h2 class="sec-title"><span class="sec-num">8.8</span><span class="sec-text">Key derivation functions (KDFs): one secret, many keys</span><a class="sec-anchor" href="#s-8-8" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A <strong>KDF</strong> turns one secret into one or more cryptographic keys. There are two kinds.</p>
+<p><strong>1. Password-based KDFs</strong> turn a human password into an encryption key. These are the same slow algorithms as above (PBKDF2, scrypt, Argon2). Examples: password managers deriving the key that encrypts your vault, encrypted ZIP files, disk encryption unlocked by password, and WPA2 Wi-Fi (Chapter <a class="xref" href="chapter-15.html">15</a>).</p>
+<p><strong>2. HKDF</strong> (HMAC-based KDF) takes a secret that is <em>already</em> strong and random (such as the output of a key exchange) and expands it into several independent keys. It works in two steps:</p>
+<ul>
+<li><strong>Extract:</strong> concentrate the randomness into a fixed-size, uniformly random key.</li>
+<li><strong>Expand:</strong> stretch it into as many keys as needed, each with a different label (&quot;info&quot;).</li>
+</ul>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>                         shared secret (from key exchange)
+                                       │
+                                  [ HKDF-Extract ]
+                                       │
+                                 pseudo-random key
+                ┌──────────────────────┼──────────────────────┐
+        Expand(&quot;client key&quot;)   Expand(&quot;server key&quot;)   Expand(&quot;resumption&quot;)
+                │                      │                      │
+     key for client→server   key for server→client    key for resuming later</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>TLS 1.3, Signal, the Noise protocol framework (used by WireGuard) and many other systems use HKDF.</p>
+<aside class="callout key"><p>💡 <strong>Key idea: key separation.</strong> Never use the same key for two different purposes (for example, encryption <em>and</em> MAC). Derive separate keys with a KDF. If one use is ever compromised, the others stay safe.</p>
+</aside>
+</div><div class="widget" data-w="hkdf"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Key derivation functions</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>HKDF</h5><p class="pc-tag">Extract-then-Expand</p></header>
+<ul class="pros"><li>Turns one strong secret into many independent keys</li><li>Used by TLS 1.3, Signal, Noise</li></ul>
+<ul class="cons"><li>Useless for passwords (it’s fast)</li><li>Input must already be high-entropy</li></ul>
+<footer><b>Best for:</b> After key exchange</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Password KDF</h5><p class="pc-tag">Argon2, scrypt, PBKDF2</p></header>
+<ul class="pros"><li>Makes a human password usable as a key</li><li>Slow on purpose</li></ul>
+<ul class="cons"><li>Weak passwords stay weak</li><li>Costs server CPU and RAM</li></ul>
+<footer><b>Best for:</b> Password managers, encrypted archives, Wi-Fi</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-8-9" id="s-8-9" data-sec="s-8-9">
+<h2 class="sec-title"><span class="sec-num">8.9</span><span class="sec-text">Hands-on with password hashing</span><a class="sec-anchor" href="#s-8-9" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p class="lab-label">🧪 <strong>Try it yourself</strong> (Python):</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># Argon2id (pip install argon2-cffi)</span>
+<span class="hljs-keyword">from</span> argon2 <span class="hljs-keyword">import</span> PasswordHasher
+ph = PasswordHasher()                       <span class="hljs-comment"># sensible defaults: 64 MiB, 3 iterations, 4 threads</span>
+
+stored = ph.<span class="hljs-built_in">hash</span>(<span class="hljs-string">&quot;correct horse battery staple&quot;</span>)
+<span class="hljs-built_in">print</span>(stored)    <span class="hljs-comment"># $argon2id$v=19$m=65536,t=3,p=4$...$...</span>
+
+<span class="hljs-built_in">print</span>(ph.verify(stored, <span class="hljs-string">&quot;correct horse battery staple&quot;</span>))   <span class="hljs-comment"># True</span>
+<span class="hljs-keyword">try</span>:
+    ph.verify(stored, <span class="hljs-string">&quot;Tr0ub4dor&amp;3&quot;</span>)
+<span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Wrong password:&quot;</span>, <span class="hljs-built_in">type</span>(e).__name__)              <span class="hljs-comment"># VerifyMismatchError</span></code></pre></div><div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># bcrypt (pip install bcrypt)</span>
+<span class="hljs-keyword">import</span> bcrypt
+stored = bcrypt.hashpw(<span class="hljs-string">b&quot;correct horse battery staple&quot;</span>, bcrypt.gensalt(rounds=<span class="hljs-number">12</span>))
+<span class="hljs-built_in">print</span>(stored)                                              <span class="hljs-comment"># b&#x27;$2b$12$...&#x27;</span>
+<span class="hljs-built_in">print</span>(bcrypt.checkpw(<span class="hljs-string">b&quot;correct horse battery staple&quot;</span>, stored))   <span class="hljs-comment"># True</span></code></pre></div><div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># scrypt and PBKDF2 are built into Python&#x27;s standard library</span>
+<span class="hljs-keyword">import</span> hashlib, os
+
+password = <span class="hljs-string">b&quot;correct horse battery staple&quot;</span>
+salt = os.urandom(<span class="hljs-number">16</span>)
+
+key1 = hashlib.scrypt(password, salt=salt, n=<span class="hljs-number">2</span>**<span class="hljs-number">17</span>, r=<span class="hljs-number">8</span>, p=<span class="hljs-number">1</span>,
+                      maxmem=<span class="hljs-number">256</span>*<span class="hljs-number">1024</span>*<span class="hljs-number">1024</span>, dklen=<span class="hljs-number">32</span>)
+key2 = hashlib.pbkdf2_hmac(<span class="hljs-string">&quot;sha256&quot;</span>, password, salt, <span class="hljs-number">600_000</span>)
+<span class="hljs-built_in">print</span>(key1.<span class="hljs-built_in">hex</span>())
+<span class="hljs-built_in">print</span>(key2.<span class="hljs-built_in">hex</span>())</code></pre></div><div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># HKDF: derive separate keys from one master secret</span>
+<span class="hljs-keyword">import</span> secrets
+<span class="hljs-keyword">from</span> cryptography.hazmat.primitives.kdf.hkdf <span class="hljs-keyword">import</span> HKDF
+<span class="hljs-keyword">from</span> cryptography.hazmat.primitives <span class="hljs-keyword">import</span> hashes
+
+master = secrets.token_bytes(<span class="hljs-number">32</span>)
+enc_key = HKDF(algorithm=hashes.SHA256(), length=<span class="hljs-number">32</span>, salt=<span class="hljs-literal">None</span>, info=<span class="hljs-string">b&quot;encryption&quot;</span>).derive(master)
+mac_key = HKDF(algorithm=hashes.SHA256(), length=<span class="hljs-number">32</span>, salt=<span class="hljs-literal">None</span>, info=<span class="hljs-string">b&quot;authentication&quot;</span>).derive(master)
+<span class="hljs-built_in">print</span>(enc_key != mac_key)   <span class="hljs-comment"># True: same master, independent keys</span></code></pre></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 8</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 8 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-coral" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 9</p>
+<h3>Public-Key Cryptography: The Two-Key Revolution</h3>
+<p class="next-hook">For 3,000 years, sharing a secret meant meeting first. Then someone invented a padlock anyone can snap shut, but only you can open.</p>
+<div class="next-actions"><a class="btn big" href="chapter-09.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-07.html">← Message Authentication Codes: Tamper-Proof Seals</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":8,"title":"Passwords and Key Derivation","quiz":[{"q":"Best choice for storing user passwords today?","o":["SHA-256","AES encryption","Argon2id","MD5 with a salt"],"a":2,"why":"Slow, salted, memory-hard password hashing. Argon2id is first choice; scrypt and bcrypt are fine."},{"q":"A salt is…","o":["a secret stored in an HSM","random, unique per user, stored next to the hash","the user’s password hint","an encryption key"],"a":1,"why":"It is not secret. Its job is to make every hash unique so nothing can be precomputed."},{"q":"Four random Diceware words give about how much entropy?","o":["13 bits","52 bits","128 bits","8 bits"],"a":1,"why":"Each word from a 7,776-word list adds ~12.9 bits; 4 × 12.9 ≈ 52."},{"q":"HKDF is designed for…","o":["hashing passwords","expanding an already-strong secret into several keys","encrypting files","signing documents"],"a":1,"why":"Extract, then Expand with different labels. Passwords need slow KDFs like Argon2 instead."}],"fragment":"salt","secs":["s-8-1","s-8-2","s-8-3","s-8-4","s-8-5","s-8-6","s-8-7","s-8-8","s-8-9"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-b.js?v=86fb719f26"></script>
+</body>
+</html>

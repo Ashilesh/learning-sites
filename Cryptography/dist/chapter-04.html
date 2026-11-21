@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 4: Randomness: The Secret Ingredient · CryptoSketch</title>
+<meta name="description" content="A 256-bit key can secretly have the strength of a 15-bit one. Two deleted lines of code did exactly that to a whole operating system’s keys for two years.">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-sun">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">🎲 In this chapter</p><ol><li><a href="#s-4-1" data-sec="s-4-1"><span class="st-num">4.1</span><span class="st-t">Why randomness matters so much</span></a></li><li><a href="#s-4-2" data-sec="s-4-2"><span class="st-num">4.2</span><span class="st-t">Three kinds of "random"</span></a></li><li><a href="#s-4-3" data-sec="s-4-3"><span class="st-num">4.3</span><span class="st-t">Where good randomness comes from</span></a></li><li><a href="#s-4-4" data-sec="s-4-4"><span class="st-num">4.4</span><span class="st-t">Nonces, IVs and salts: random helpers</span></a></li><li><a href="#s-4-5" data-sec="s-4-5"><span class="st-num">4.5</span><span class="st-t">When randomness fails: real disasters</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="4">
+<header class="ch-hero world-sun">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-1">🏝️ World 1 · Foundations</a>
+    <p class="ch-num">Chapter 4</p>
+    <h1 class="ch-title">Randomness: The Secret Ingredient</h1>
+    <p class="ch-hook"><span>🤔</span> A 256-bit key can secretly have the strength of a 15-bit one. Two deleted lines of code did exactly that to a whole operating system’s keys for two years.</p>
+    <ul class="ch-stats"><li>⏱️ ~5 min</li><li>📚 5 sections</li><li>🎮 3 interactive</li><li>⭐ 200 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="4" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"></div>
+<section class="sec sec-4-1" id="s-4-1" data-sec="s-4-1">
+<h2 class="sec-title"><span class="sec-num">4.1</span><span class="sec-text">Why randomness matters so much</span><a class="sec-anchor" href="#s-4-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Every key, every password salt, every nonce must be <strong>unpredictable</strong>. If an attacker can guess how your key was generated, the strongest algorithm in the world won&#39;t save you.</p>
+<p>Think of it like a combination lock with a trillion combinations. If you always pick your birthday, the lock might as well have 365.</p>
+<aside class="callout key"><p>💡 <strong>Key idea:</strong> A key is only as strong as the randomness used to create it. A 256-bit key generated from a predictable source might really have only 20 bits of security.</p>
+</aside>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-4-2" id="s-4-2" data-sec="s-4-2">
+<h2 class="sec-title"><span class="sec-num">4.2</span><span class="sec-text">Three kinds of &quot;random&quot;</span><a class="sec-anchor" href="#s-4-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Type</th>
+<th>How it works</th>
+<th>Predictable?</th>
+<th>Used for</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>True random (TRNG)</strong></td>
+<td>Measures physical chaos: electrical noise, radioactive decay, timing jitter</td>
+<td>No</td>
+<td>Seeding (starting) the generators below</td>
+</tr>
+<tr>
+<td><strong>Pseudo-random (PRNG)</strong></td>
+<td>A formula that produces random-<em>looking</em> numbers from a starting value called a <strong>seed</strong></td>
+<td><strong>Yes</strong>, if you know the seed or see enough outputs</td>
+<td>Games, simulations, shuffling a playlist</td>
+</tr>
+<tr>
+<td><strong>Cryptographically secure pseudo-random (CSPRNG)</strong></td>
+<td>A PRNG built from crypto primitives, seeded with true randomness</td>
+<td>No, even after seeing lots of output</td>
+<td><strong>Keys, nonces, salts, tokens</strong> — anything security-related</td>
+</tr>
+</tbody></table></div>
+<p>Analogy: a normal PRNG is like a gigantic book of numbers. If you know which page you started on (the seed), you know every number that follows. A CSPRNG is a book that rewrites itself in a way nobody can predict, even after reading a thousand pages.</p>
+<div class="callout story"><p>📜 <strong>True story: lava lamps.</strong> The company Cloudflare has a wall of about 100 lava lamps in its San Francisco office. A camera photographs them, and the unpredictable blobs are mixed into its random number generators as an extra source of entropy. It&#39;s a fun, real example of turning physical chaos into randomness.</p></div>
+<p><strong>Entropy</strong> is the measure of unpredictability, counted in bits. A fair coin flip gives 1 bit of entropy. A random 256-bit key has 256 bits of entropy. A password like <code>password123</code> has close to zero, because it&#39;s one of the first guesses any attacker tries.</p>
+</div><div class="widget" data-w="humanrng"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="widget" data-w="lava"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Random number generators compared</h4></div><div class="pc-grid">
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>TRNG</h5><p class="pc-tag">Measures physical chaos</p></header>
+<ul class="pros"><li>Genuinely unpredictable</li><li>Great seed material (even lava lamps!)</li></ul>
+<ul class="cons"><li>Slow and hardware-dependent</li><li>Can be biased without post-processing</li></ul>
+<footer><b>Best for:</b> Seeding a CSPRNG</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>PRNG</h5><p class="pc-tag">A formula from a seed (e.g. Mersenne Twister)</p></header>
+<ul class="pros"><li>Very fast</li><li>Reproducible: same seed, same sequence</li></ul>
+<ul class="cons"><li>Predictable after enough output (624 for MT)</li><li>Never safe for keys, tokens or salts</li></ul>
+<footer><b>Best for:</b> Games, simulations, shuffling playlists</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>CSPRNG</h5><p class="pc-tag">Crypto-built generator seeded with true randomness</p></header>
+<ul class="pros"><li>Unpredictable even after seeing lots of output</li><li>Built into every OS and language</li></ul>
+<ul class="cons"><li>Must be seeded properly (early-boot devices failed)</li><li>Slightly slower than a plain PRNG</li></ul>
+<footer><b>Best for:</b> Keys, nonces, salts, tokens: anything security-related</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-4-3" id="s-4-3" data-sec="s-4-3">
+<h2 class="sec-title"><span class="sec-num">4.3</span><span class="sec-text">Where good randomness comes from</span><a class="sec-anchor" href="#s-4-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Your operating system collects unpredictable events (hardware noise, CPU randomness instructions, timing of interrupts) and feeds them into a CSPRNG. Always use it:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Platform</th>
+<th>Use this</th>
+<th>Never use this for security</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Linux / macOS</td>
+<td><code>/dev/urandom</code>, <code>getrandom()</code></td>
+<td>—</td>
+</tr>
+<tr>
+<td>Python</td>
+<td><code>secrets</code> module, <code>os.urandom()</code></td>
+<td><code>random</code> module</td>
+</tr>
+<tr>
+<td>JavaScript (browser)</td>
+<td><code>crypto.getRandomValues()</code></td>
+<td><code>Math.random()</code></td>
+</tr>
+<tr>
+<td>Node.js</td>
+<td><code>crypto.randomBytes()</code></td>
+<td><code>Math.random()</code></td>
+</tr>
+<tr>
+<td>Java</td>
+<td><code>SecureRandom</code></td>
+<td><code>java.util.Random</code></td>
+</tr>
+<tr>
+<td>Go</td>
+<td><code>crypto/rand</code></td>
+<td><code>math/rand</code></td>
+</tr>
+<tr>
+<td>Command line</td>
+<td><code>openssl rand</code></td>
+<td><code>$RANDOM</code></td>
+</tr>
+</tbody></table></div>
+<div class="callout warn"><p>⚠️ <strong>Watch out:</strong> Python&#39;s <code>random</code> module uses an algorithm called the Mersenne Twister. After observing 624 of its outputs, an attacker can predict every future output. It&#39;s great for games and terrible for passwords or tokens.</p></div>
+<p class="lab-label">🧪 <strong>Try it yourself:</strong></p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># 32 random bytes as hex (64 characters) — a perfect AES-256 key</span>
+openssl rand -hex 32
+
+<span class="hljs-comment"># 24 random bytes as Base64 — handy for a strong random password</span>
+openssl rand -<span class="hljs-built_in">base64</span> 24
+
+<span class="hljs-comment"># Straight from the operating system&#x27;s generator</span>
+<span class="hljs-built_in">head</span> -c 32 /dev/urandom | xxd -p -c 64</code></pre></div><div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">import</span> secrets
+<span class="hljs-built_in">print</span>(secrets.token_hex(<span class="hljs-number">32</span>))       <span class="hljs-comment"># random 256-bit value as hex</span>
+<span class="hljs-built_in">print</span>(secrets.token_urlsafe(<span class="hljs-number">16</span>))   <span class="hljs-comment"># random token safe for URLs, e.g. password-reset links</span>
+<span class="hljs-built_in">print</span>(secrets.randbelow(<span class="hljs-number">100</span>))      <span class="hljs-comment"># random number from 0 to 99</span></code></pre></div></div><div class="widget" data-w="csprng"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-4-4" id="s-4-4" data-sec="s-4-4">
+<h2 class="sec-title"><span class="sec-num">4.4</span><span class="sec-text">Nonces, IVs and salts: random helpers</span><a class="sec-anchor" href="#s-4-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Besides keys, cryptography uses a few other random-ish values. They&#39;re often confused, so here they are side by side:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Term</th>
+<th>Plain meaning</th>
+<th>Must be secret?</th>
+<th>Must never repeat?</th>
+<th>Must be unpredictable?</th>
+<th>Where you&#39;ll meet it</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Key</strong></td>
+<td>The secret that locks and unlocks</td>
+<td class="st-ok">✅ Yes</td>
+<td class="st-ok">✅ Yes</td>
+<td class="st-ok">✅ Yes</td>
+<td>Everywhere</td>
+</tr>
+<tr>
+<td><strong>Nonce</strong> (&quot;number used once&quot;)</td>
+<td>A value that makes each encryption unique, even with the same key and message</td>
+<td class="st-bad">❌ No (sent openly)</td>
+<td class="st-ok">✅ <strong>Yes, with the same key</strong></td>
+<td>Not always (a counter can work)</td>
+<td>AES-GCM, ChaCha20-Poly1305</td>
+</tr>
+<tr>
+<td><strong>IV</strong> (initialization vector)</td>
+<td>The starting value for some encryption modes</td>
+<td class="st-bad">❌ No</td>
+<td class="st-ok">✅ Yes</td>
+<td class="st-ok">✅ Yes, for CBC mode</td>
+<td>AES-CBC</td>
+</tr>
+<tr>
+<td><strong>Salt</strong></td>
+<td>Random data mixed into a password before hashing, so identical passwords get different hashes</td>
+<td class="st-bad">❌ No (stored next to the hash)</td>
+<td class="st-ok">✅ Yes, unique per user</td>
+<td>Ideally</td>
+<td>Password storage (Chapter <a class="xref" href="chapter-08.html">8</a>)</td>
+</tr>
+</tbody></table></div>
+<p>Why would a nonce or salt not need to be secret? Their job isn&#39;t to hide anything. Their job is to make sure <strong>the same input never produces the same output twice</strong>. Remember lesson 3 from history: repetition leaks information.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-4-5" id="s-4-5" data-sec="s-4-5">
+<h2 class="sec-title"><span class="sec-num">4.5</span><span class="sec-text">When randomness fails: real disasters</span><a class="sec-anchor" href="#s-4-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="callout story"><p>📜 <strong>Debian OpenSSL (2006–2008).</strong> A developer removed two lines of code that a code-checking tool flagged as &quot;using uninitialized memory.&quot; Those lines were feeding randomness into OpenSSL. For two years, Debian and Ubuntu systems could generate only about <strong>32,768 different keys</strong> (based on the process ID number). Attackers could pre-compute all of them. SSH keys and certificates worldwide had to be replaced.</p></div>
+<div class="callout story"><p>📜 <strong>Sony PlayStation 3 (2010).</strong> The ECDSA signature algorithm needs a fresh random number for every signature. Sony used <strong>the same number every time</strong>. Hackers used two signatures to solve for Sony&#39;s private master key, which let anyone sign software as if they were Sony.</p></div>
+<div class="callout story"><p>📜 <strong>Android Bitcoin wallets (2013).</strong> A bug in Android&#39;s random number generator caused some wallet apps to reuse random values in signatures. Attackers computed the private keys and stole bitcoins.</p></div>
+<div class="callout story"><p>📜 <strong>&quot;Mining your Ps and Qs&quot; (2012).</strong> Researchers scanned the internet and found that tens of thousands of devices (routers, firewalls) had generated RSA keys right after booting, before they had gathered enough randomness. Many keys shared a prime factor, which let researchers instantly compute their private keys.</p></div>
+<div class="callout story"><p>📜 <strong>Dual_EC_DRBG (2006–2014).</strong> A random number generator approved as a US standard was later shown to likely contain a backdoor: whoever knew a secret relationship between its constants could predict its output. It was withdrawn in 2014.</p></div>
+<aside class="callout key"><p>💡 <strong>Key idea:</strong> Always use your operating system&#39;s cryptographic random generator or a well-known library that uses it. Never invent your own, and never use a regular &quot;random&quot; function for anything security-related.</p>
+</aside>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 4</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 4 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-coral" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 5</p>
+<h3>Symmetric Encryption: One Shared Key</h3>
+<p class="next-hook">An attacker who doesn’t know the key changes “$100” into “$900”, and the bank’s decryption raises no alarm at all. How is that even possible?</p>
+<div class="next-actions"><a class="btn big" href="chapter-05.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-03.html">← The Math Toolbox, Gently</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":4,"title":"Randomness: The Secret Ingredient","quiz":[{"q":"Which should generate a password-reset token in Python?","o":["random.randint()","the secrets module","time.time()","hash(username)"],"a":1,"why":"Use the OS CSPRNG (secrets, os.urandom). Python’s random module is predictable."},{"q":"After how many outputs can an attacker predict Python’s Mersenne Twister?","o":["2","624","a million","never"],"a":1,"why":"After 624 observed outputs, every future output is predictable. Great for games, terrible for tokens."},{"q":"A nonce must…","o":["always be secret","never repeat with the same key","be a password","be exactly 1 byte"],"a":1,"why":"Nonces are sent openly. Their job is uniqueness: the same input must never produce the same output twice."},{"q":"Hackers recovered Sony’s PS3 signing key because Sony…","o":["used 512-bit RSA","used the same random number in every ECDSA signature","used MD5","printed the key in a manual"],"a":1,"why":"ECDSA needs a fresh random number per signature. Two signatures with the same one reveal the private key."}],"fragment":"entropy","secs":["s-4-1","s-4-2","s-4-3","s-4-4","s-4-5"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-a.js?v=86fb719f26"></script>
+</body>
+</html>

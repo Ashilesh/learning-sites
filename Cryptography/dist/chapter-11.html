@@ -1,0 +1,415 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 11: Digital Signatures: Unforgeable Digital Ink · CryptoSketch</title>
+<meta name="description" content="How can anyone on Earth check that a file came from you, without being able to forge your signature themselves?">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-coral">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">✍️ In this chapter</p><ol><li><a href="#s-11-1" data-sec="s-11-1"><span class="st-num">11.1</span><span class="st-t">The idea</span></a></li><li><a href="#s-11-2" data-sec="s-11-2"><span class="st-num">11.2</span><span class="st-t">How signing and verifying work</span></a></li><li><a href="#s-11-3" data-sec="s-11-3"><span class="st-num">11.3</span><span class="st-t">A toy RSA signature</span></a></li><li><a href="#s-11-4" data-sec="s-11-4"><span class="st-num">11.4</span><span class="st-t">Hash vs. MAC vs. signature</span></a></li><li><a href="#s-11-5" data-sec="s-11-5"><span class="st-num">11.5</span><span class="st-t">Signature algorithms</span></a></li><li><a href="#s-11-6" data-sec="s-11-6"><span class="st-num">11.6</span><span class="st-t">Where signatures are used</span></a></li><li><a href="#s-11-7" data-sec="s-11-7"><span class="st-num">11.7</span><span class="st-t">The missing piece: whose key is it?</span></a></li><li><a href="#s-11-8" data-sec="s-11-8"><span class="st-num">11.8</span><span class="st-t">Hands-on with signatures</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="11">
+<header class="ch-hero world-coral">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-2">🧱 World 2 · The Building Blocks</a>
+    <p class="ch-num">Chapter 11</p>
+    <h1 class="ch-title">Digital Signatures: Unforgeable Digital Ink</h1>
+    <p class="ch-hook"><span>🤔</span> How can anyone on Earth check that a file came from you, without being able to forge your signature themselves?</p>
+    <ul class="ch-stats"><li>⏱️ ~5 min</li><li>📚 8 sections</li><li>🎮 2 interactive</li><li>⭐ 200 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="11" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"></div>
+<section class="sec sec-11-1" id="s-11-1" data-sec="s-11-1">
+<h2 class="sec-title"><span class="sec-num">11.1</span><span class="sec-text">The idea</span><a class="sec-anchor" href="#s-11-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A <strong>digital signature</strong> proves three things about a message or file:</p>
+<ol>
+<li><strong>Who</strong> created or approved it (authentication).</li>
+<li>That it <strong>hasn&#39;t changed</strong> since it was signed (integrity).</li>
+<li>That the signer <strong>can&#39;t later deny</strong> signing it (non-repudiation).</li>
+</ol>
+<p>And unlike a MAC, <strong>anyone</strong> can verify it, using the signer&#39;s public key.</p>
+<p>A digital signature is much stronger than a handwritten one. A handwritten signature looks the same on every document, so it can be traced or cut and pasted. A digital signature is <strong>computed from the document&#39;s contents</strong>, so it&#39;s different for every document. Move it to another document, or change a single comma, and it no longer verifies.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-11-2" id="s-11-2" data-sec="s-11-2">
+<h2 class="sec-title"><span class="sec-num">11.2</span><span class="sec-text">How signing and verifying work</span><a class="sec-anchor" href="#s-11-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><figure class="sketch diagram"><div class="sketch-scroll"><pre>SIGNING (Alice, using her PRIVATE key)
+
+  document ──► [ SHA-256 ] ──► hash ──► [ SIGN with private key 🔑 ] ──► signature
+                                                                            │
+                         Alice sends:  document  +  signature  ◄────────────┘
+
+VERIFYING (anyone, using Alice's PUBLIC key)
+
+  document ──► [ SHA-256 ] ──► hash ──┐
+                                      ├──► [ VERIFY with public key 🔓 ] ──► ✅ valid / ❌ invalid
+  signature ──────────────────────────┘</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>Why hash first? Public-key operations are slow and work on small inputs. Hashing shrinks a document of any size to 32 bytes, and the hash&#39;s collision resistance (Chapter <a class="xref" href="chapter-06.html">6</a>) means signing the hash is as good as signing the whole document. That&#39;s also why broken hashes (MD5, SHA-1) break signatures: if Mallory can find two documents with the same hash, a signature on one is valid for the other.</p>
+<div class="callout warn"><p>⚠️ You&#39;ll often hear &quot;a signature is the hash encrypted with the private key.&quot; That&#39;s roughly true for RSA, but <strong>not</strong> for ECDSA or Ed25519, which use different math. The intuition that matters: <strong>only the private key can create the signature, and the public key can check it.</strong></p></div>
+</div><div class="widget" data-w="sign"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-11-3" id="s-11-3" data-sec="s-11-3">
+<h2 class="sec-title"><span class="sec-num">11.3</span><span class="sec-text">A toy RSA signature</span><a class="sec-anchor" href="#s-11-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Using Bob&#39;s toy RSA keys from Chapter <a class="xref" href="chapter-09.html">9</a> (<code>n = 3233</code>, <code>e = 17</code>, <code>d = 2753</code>), and pretending the hash of his message is <code>65</code>:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>Sign (private key d):     s = 65^2753 mod 3233 = 588
+Verify (public key e):    588^17 mod 3233 = 65   ✓ matches the hash → valid</pre></div></figure><p>Anyone can do the verification step, since <code>e</code> and <code>n</code> are public. Only Bob could have produced <code>588</code>, because only he knows <code>d</code>.</p>
+</div><div class="widget" data-w="toysig"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-11-4" id="s-11-4" data-sec="s-11-4">
+<h2 class="sec-title"><span class="sec-num">11.4</span><span class="sec-text">Hash vs. MAC vs. signature</span><a class="sec-anchor" href="#s-11-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th></th>
+<th>Hash</th>
+<th>MAC</th>
+<th>Digital signature</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Key</td>
+<td>None</td>
+<td>One shared secret key</td>
+<td>Private key signs, public key verifies</td>
+</tr>
+<tr>
+<td>Detects accidental changes</td>
+<td class="st-ok">✅</td>
+<td class="st-ok">✅</td>
+<td class="st-ok">✅</td>
+</tr>
+<tr>
+<td>Detects deliberate tampering</td>
+<td class="st-bad">❌ (attacker can recompute)</td>
+<td class="st-ok">✅</td>
+<td class="st-ok">✅</td>
+</tr>
+<tr>
+<td>Proves who made it</td>
+<td class="st-bad">❌</td>
+<td class="st-ok">✅ (to the other key holder only)</td>
+<td class="st-ok">✅ (to anyone)</td>
+</tr>
+<tr>
+<td>Non-repudiation</td>
+<td class="st-bad">❌</td>
+<td class="st-bad">❌</td>
+<td class="st-ok">✅</td>
+</tr>
+<tr>
+<td>Speed</td>
+<td>Fastest</td>
+<td>Very fast</td>
+<td>Slower</td>
+</tr>
+<tr>
+<td>Example</td>
+<td>SHA-256</td>
+<td>HMAC-SHA256</td>
+<td>Ed25519, ECDSA, RSA-PSS</td>
+</tr>
+</tbody></table></div>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-11-5" id="s-11-5" data-sec="s-11-5">
+<h2 class="sec-title"><span class="sec-num">11.5</span><span class="sec-text">Signature algorithms</span><a class="sec-anchor" href="#s-11-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>Based on</th>
+<th>Public key</th>
+<th>Signature</th>
+<th>Status and notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>RSA PKCS#1 v1.5</td>
+<td>Factoring</td>
+<td>256–512 B</td>
+<td>256–512 B</td>
+<td class="st-warn">⚠️ Very common in certificates; acceptable for signatures</td>
+</tr>
+<tr>
+<td><strong>RSA-PSS</strong></td>
+<td>Factoring</td>
+<td>256–512 B</td>
+<td>256–512 B</td>
+<td class="st-ok">✅ Preferred RSA signature; used by TLS 1.3</td>
+</tr>
+<tr>
+<td>DSA</td>
+<td>Discrete log</td>
+<td>—</td>
+<td>—</td>
+<td class="st-bad">❌ Obsolete</td>
+</tr>
+<tr>
+<td><strong>ECDSA</strong> (P-256)</td>
+<td>Elliptic curves</td>
+<td>64 B</td>
+<td>~64–72 B</td>
+<td class="st-ok">✅ Very common (TLS certificates, passkeys). ⚠️ Needs a perfect random number for every signature.</td>
+</tr>
+<tr>
+<td><strong>Ed25519</strong> (EdDSA)</td>
+<td>Curve25519</td>
+<td>32 B</td>
+<td>64 B</td>
+<td class="st-ok">✅ Recommended: fast, small, deterministic, hard to misuse</td>
+</tr>
+<tr>
+<td>Schnorr (secp256k1)</td>
+<td>Elliptic curves</td>
+<td>32 B</td>
+<td>64 B</td>
+<td class="st-ok">✅ Used by Bitcoin since the 2021 &quot;Taproot&quot; upgrade</td>
+</tr>
+<tr>
+<td><strong>ML-DSA</strong> (Dilithium)</td>
+<td>Lattices</td>
+<td>~1.3–2.6 KB</td>
+<td>~2.4–4.6 KB</td>
+<td class="st-ok">✅ Post-quantum standard (FIPS 204, 2024)</td>
+</tr>
+<tr>
+<td><strong>SLH-DSA</strong> (SPHINCS+)</td>
+<td>Hash functions only</td>
+<td>32–64 B</td>
+<td>~8–50 KB</td>
+<td class="st-ok">✅ Post-quantum, very conservative (FIPS 205, 2024)</td>
+</tr>
+<tr>
+<td>FN-DSA (Falcon)</td>
+<td>Lattices</td>
+<td>~0.9–1.8 KB</td>
+<td>~0.7–1.3 KB</td>
+<td>Post-quantum; standard being finalized</td>
+</tr>
+</tbody></table></div>
+<div class="callout story"><p>📜 <strong>Remember the PlayStation 3?</strong> ECDSA needs a secret random number (called a &quot;nonce,&quot; <code>k</code>) for each signature. Sony used the same <code>k</code> every time. With two signatures made with the same <code>k</code>, simple algebra reveals the private key. <strong>Ed25519 avoids this entirely</strong> by computing <code>k</code> deterministically from the private key and the message, so there&#39;s no random number to get wrong. (A standard called RFC 6979 does the same for ECDSA.)</p></div>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Signature algorithms</h4></div><div class="pc-grid">
+<article class="pc-card v-legacy"><header><span class="pc-verdict">⚠️ Legacy</span><h5>RSA PKCS#1 v1.5</h5><p class="pc-tag">Classic RSA signatures</p></header>
+<ul class="pros"><li>Universal in certificates</li></ul>
+<ul class="cons"><li>No security proof; big signatures</li></ul>
+<footer><b>Best for:</b> Existing certificate chains</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>RSA-PSS</h5><p class="pc-tag">Modern RSA signatures</p></header>
+<ul class="pros"><li>Provable security; TLS 1.3</li></ul>
+<ul class="cons"><li>256–512-byte signatures</li><li>Slow signing</li></ul>
+<footer><b>Best for:</b> Where RSA is required</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>DSA</h5><p class="pc-tag">Discrete-log signatures</p></header>
+<ul class="pros"><li>Historic standard</li></ul>
+<ul class="cons"><li>Obsolete; nonce-reuse fragile</li></ul>
+<footer><b>Best for:</b> Nowhere</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>ECDSA P-256</h5><p class="pc-tag">Elliptic-curve DSA</p></header>
+<ul class="pros"><li>Small, fast, in every secure chip</li><li>Passkeys and certificates</li></ul>
+<ul class="cons"><li>Needs a perfect random nonce per signature (PS3!)</li><li>Use RFC 6979 deterministic nonces</li></ul>
+<footer><b>Best for:</b> TLS certs, passkeys, hardware</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Ed25519</h5><p class="pc-tag">EdDSA on Curve25519</p></header>
+<ul class="pros"><li>Deterministic: no nonce to get wrong</li><li>32-byte keys, 64-byte signatures, very fast</li></ul>
+<ul class="cons"><li>Not in some older hardware/FIPS stacks</li></ul>
+<footer><b>Best for:</b> SSH, Git, software signing, new designs</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>Schnorr (secp256k1)</h5><p class="pc-tag">Bitcoin Taproot</p></header>
+<ul class="pros"><li>Simple, provable, aggregatable</li></ul>
+<ul class="cons"><li>Ecosystem mostly crypto-currency</li></ul>
+<footer><b>Best for:</b> Bitcoin multisig</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>ML-DSA (Dilithium)</h5><p class="pc-tag">Lattice, FIPS 204</p></header>
+<ul class="pros"><li>Quantum-resistant</li><li>Fast signing and verifying</li></ul>
+<ul class="cons"><li>~2.4–4.6 KB signatures</li><li>Young in production</li></ul>
+<footer><b>Best for:</b> Post-quantum signatures</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>SLH-DSA (SPHINCS+)</h5><p class="pc-tag">Hash-based, FIPS 205</p></header>
+<ul class="pros"><li>Relies only on hash functions: very conservative</li><li>Tiny public keys</li></ul>
+<ul class="cons"><li>8–50 KB signatures</li><li>Slow signing</li></ul>
+<footer><b>Best for:</b> Firmware and long-lived roots</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>FN-DSA (Falcon)</h5><p class="pc-tag">Compact lattice signatures</p></header>
+<ul class="pros"><li>Smallest post-quantum lattice signatures</li></ul>
+<ul class="cons"><li>Floating-point math is hard to implement safely</li><li>Standard still being finalized</li></ul>
+<footer><b>Best for:</b> Bandwidth-tight PQ use</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-11-6" id="s-11-6" data-sec="s-11-6">
+<h2 class="sec-title"><span class="sec-num">11.6</span><span class="sec-text">Where signatures are used</span><a class="sec-anchor" href="#s-11-6" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Signatures are everywhere, mostly invisible:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Where</th>
+<th>What&#39;s signed</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>HTTPS certificates</strong></td>
+<td>A certificate authority signs each website&#39;s certificate (Chapter <a class="xref" href="chapter-13.html">13</a>)</td>
+</tr>
+<tr>
+<td><strong>TLS handshakes</strong></td>
+<td>The server signs the handshake to prove it owns the certificate&#39;s private key (Chapter <a class="xref" href="chapter-14.html">14</a>)</td>
+</tr>
+<tr>
+<td><strong>Software updates</strong></td>
+<td>Windows, macOS, iOS, Android and Linux only install updates signed by the vendor</td>
+</tr>
+<tr>
+<td><strong>App stores and code signing</strong></td>
+<td>Apps must be signed (Apple notarization, Windows Authenticode, Android APK signing)</td>
+</tr>
+<tr>
+<td><strong>Package managers</strong></td>
+<td>Linux <code>apt</code>/<code>dnf</code> packages; npm, PyPI and container images increasingly use signing services such as Sigstore</td>
+</tr>
+<tr>
+<td><strong>Git</strong></td>
+<td>Signed commits and tags prove who wrote the code</td>
+</tr>
+<tr>
+<td><strong>Documents</strong></td>
+<td>PDF signatures, electronic signature services, legally recognized digital signatures (e.g. under EU eIDAS)</td>
+</tr>
+<tr>
+<td><strong>Passports</strong></td>
+<td>The chip in an ePassport holds your data signed by the issuing country</td>
+</tr>
+<tr>
+<td><strong>Email</strong></td>
+<td>DKIM signatures prove an email really came from the sending domain (Chapter <a class="xref" href="chapter-16.html">16</a>)</td>
+</tr>
+<tr>
+<td><strong>DNS</strong></td>
+<td>DNSSEC signs DNS records (Chapter <a class="xref" href="chapter-15.html">15</a>)</td>
+</tr>
+<tr>
+<td><strong>Cryptocurrency</strong></td>
+<td>Every transaction is signed with the owner&#39;s private key (Chapter <a class="xref" href="chapter-16.html">16</a>)</td>
+</tr>
+<tr>
+<td><strong>Web tokens</strong></td>
+<td>JWTs signed with RS256, ES256 or EdDSA (Chapter <a class="xref" href="chapter-16.html">16</a>)</td>
+</tr>
+<tr>
+<td><strong>Secure Boot</strong></td>
+<td>Each stage of startup checks the signature of the next, from firmware to operating system</td>
+</tr>
+<tr>
+<td><strong>Passkeys</strong></td>
+<td>Your device signs a login challenge (Chapter <a class="xref" href="chapter-16.html">16</a>)</td>
+</tr>
+</tbody></table></div>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-11-7" id="s-11-7" data-sec="s-11-7">
+<h2 class="sec-title"><span class="sec-num">11.7</span><span class="sec-text">The missing piece: whose key is it?</span><a class="sec-anchor" href="#s-11-7" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A valid signature proves the message was signed by <strong>whoever holds that private key</strong>. But how do you know that a public key really belongs to Alice, or to your bank, rather than to Mallory pretending to be them?</p>
+<p>That question, <strong>linking keys to real identities</strong>, is what certificates and PKI solve. It&#39;s the subject of Part III.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-11-8" id="s-11-8" data-sec="s-11-8">
+<h2 class="sec-title"><span class="sec-num">11.8</span><span class="sec-text">Hands-on with signatures</span><a class="sec-anchor" href="#s-11-8" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p class="lab-label">🧪 <strong>Try it yourself</strong> (OpenSSL, Ed25519):</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># Generate a signing key pair</span>
+openssl genpkey -algorithm ed25519 -out signer.pem
+openssl pkey -<span class="hljs-keyword">in</span> signer.pem -pubout -out signer_pub.pem
+
+<span class="hljs-comment"># Sign a document</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;I, Alice, owe Bob 10 dollars.&quot;</span> &gt; contract.txt
+openssl pkeyutl -sign -inkey signer.pem -rawin -<span class="hljs-keyword">in</span> contract.txt -out contract.sig
+<span class="hljs-built_in">ls</span> -l contract.sig          <span class="hljs-comment"># 64 bytes</span>
+
+<span class="hljs-comment"># Anyone with the PUBLIC key can verify</span>
+openssl pkeyutl -verify -pubin -inkey signer_pub.pem -rawin \
+  -<span class="hljs-keyword">in</span> contract.txt -sigfile contract.sig
+<span class="hljs-comment"># Signature Verified Successfully</span>
+
+<span class="hljs-comment"># Now someone tampers with the contract...</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;I, Alice, owe Bob 1000 dollars.&quot;</span> &gt; contract.txt
+openssl pkeyutl -verify -pubin -inkey signer_pub.pem -rawin \
+  -<span class="hljs-keyword">in</span> contract.txt -sigfile contract.sig
+<span class="hljs-comment"># Signature Verification Failure</span></code></pre></div><p>With RSA (the classic way to sign files such as software releases):</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;release v1.0&quot;</span> &gt; release.txt
+openssl dgst -sha256 -sign alice_private.pem -out release.sig release.txt
+openssl dgst -sha256 -verify alice_public.pem -signature release.sig release.txt
+<span class="hljs-comment"># Verified OK</span></code></pre></div><p>In Python:</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">from</span> cryptography.hazmat.primitives.asymmetric.ed25519 <span class="hljs-keyword">import</span> Ed25519PrivateKey
+<span class="hljs-keyword">from</span> cryptography.exceptions <span class="hljs-keyword">import</span> InvalidSignature
+
+signing_key = Ed25519PrivateKey.generate()
+verify_key  = signing_key.public_key()       <span class="hljs-comment"># share this one</span>
+
+document  = <span class="hljs-string">b&quot;I, Alice, owe Bob $10.&quot;</span>
+signature = signing_key.sign(document)       <span class="hljs-comment"># 64 bytes</span>
+
+verify_key.verify(signature, document)        <span class="hljs-comment"># no exception → valid</span>
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;valid&quot;</span>)
+
+<span class="hljs-keyword">try</span>:
+    verify_key.verify(signature, <span class="hljs-string">b&quot;I, Alice, owe Bob $1000.&quot;</span>)
+<span class="hljs-keyword">except</span> InvalidSignature:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;forgery detected&quot;</span>)</code></pre></div><p><strong>Real-world example: verifying a Linux download.</strong> Remember the <code>SHA256SUMS</code> file from Chapter <a class="xref" href="chapter-06.html">6</a>? Ubuntu also publishes <code>SHA256SUMS.gpg</code>, a signature of that file. After importing Ubuntu&#39;s public signing key (obtained from a trusted source), you run:</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs">gpg --verify SHA256SUMS.gpg SHA256SUMS     <span class="hljs-comment"># is the checksum list genuine?</span>
+<span class="hljs-built_in">sha256sum</span> -c SHA256SUMS --ignore-missing    <span class="hljs-comment"># does my download match it?</span></code></pre></div><p>Now a hacker who replaces the download <strong>and</strong> the checksum still fails, because they can&#39;t forge Ubuntu&#39;s signature.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 11</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 11 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-ocean" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 12</p>
+<h3>Networking Essentials for Cryptography</h3>
+<p class="next-hook">Your messages are chopped into postcards and passed hand to hand by 10 to 20 strangers in different countries. What can each of them read?</p>
+<div class="next-actions"><a class="btn big" href="chapter-12.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-10.html">← Key Exchange: Agreeing on a Secret in Public</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":11,"title":"Digital Signatures: Unforgeable Digital Ink","quiz":[{"q":"You sign with your ___ key; others verify with your ___ key.","o":["public / private","private / public","shared / shared","session / master"],"a":1,"why":"Only you can make the seal, but everyone can check it."},{"q":"Toy RSA: Bob signs hash 65 and gets s = 588. Verification computes 588¹⁷ mod 3233 = ?","o":["588","65","2753","17"],"a":1,"why":"It returns the hash 65, which matches, so the signature is valid."},{"q":"Why can’t Ed25519 make the PlayStation 3 mistake?","o":["It uses RSA internally","It derives the per-signature nonce deterministically","Its keys are longer","It skips hashing"],"a":1,"why":"There is no random number to get wrong: k comes from the private key and the message."},{"q":"Which one gives non-repudiation?","o":["SHA-256","HMAC-SHA256","AES-GCM","A digital signature"],"a":3,"why":"Only the private-key holder could have produced it, and anyone can verify it."}],"fragment":"ink","secs":["s-11-1","s-11-2","s-11-3","s-11-4","s-11-5","s-11-6","s-11-7","s-11-8"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-c.js?v=86fb719f26"></script>
+</body>
+</html>

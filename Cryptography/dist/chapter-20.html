@@ -1,0 +1,653 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 20: Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places · CryptoSketch</title>
+<meta name="description" content="You know which tools to use. Now meet the games that define “secure”, the tricks that break ciphers, and the hidden crypto inside Tor, “Sign in with Google”, your bank card and your laptop’s boot screen.">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-orange">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">🔭 In this chapter</p><ol><li><a href="#s-20-1" data-sec="s-20-1"><span class="st-num">20.1</span><span class="st-t">What "secure" means: security games</span></a></li><li><a href="#s-20-2" data-sec="s-20-2"><span class="st-num">20.2</span><span class="st-t">Security proofs, reductions and the random oracle model</span></a></li><li><a href="#s-20-3" data-sec="s-20-3"><span class="st-num">20.3</span><span class="st-t">How block ciphers are built: Feistel networks, SPNs and ARX</span></a></li><li><a href="#s-20-4" data-sec="s-20-4"><span class="st-num">20.4</span><span class="st-t">How ciphers get broken: the cryptanalyst's toolbox</span></a></li><li><a href="#s-20-5" data-sec="s-20-5"><span class="st-num">20.5</span><span class="st-t">Tor and onion routing: hiding who talks to whom</span></a></li><li><a href="#s-20-6" data-sec="s-20-6"><span class="st-num">20.6</span><span class="st-t">Logging in everywhere: Kerberos, SAML, OAuth 2.0 and OpenID Connect</span></a></li><li><a href="#s-20-7" data-sec="s-20-7"><span class="st-num">20.7</span><span class="st-t">Paying with a card: EMV chips, contactless and tokens</span></a></li><li><a href="#s-20-8" data-sec="s-20-8"><span class="st-num">20.8</span><span class="st-t">Trusting the device: secure boot, measured boot and attestation</span></a></li><li><a href="#s-20-9" data-sec="s-20-9"><span class="st-num">20.9</span><span class="st-t">Hiding that a message exists: steganography</span></a></li><li><a href="#s-20-10" data-sec="s-20-10"><span class="st-num">20.10</span><span class="st-t">The crypto wars: export rules, key escrow and backdoors</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="20">
+<header class="ch-hero world-orange">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-5">🔭 World 5 · Going Deeper</a>
+    <p class="ch-num">Chapter 20</p>
+    <h1 class="ch-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</h1>
+    <p class="ch-hook"><span>🤔</span> You know which tools to use. Now meet the games that define “secure”, the tricks that break ciphers, and the hidden crypto inside Tor, “Sign in with Google”, your bank card and your laptop’s boot screen.</p>
+    <ul class="ch-stats"><li>⏱️ ~22 min</li><li>📚 10 sections</li><li>🎮 8 interactive</li><li>⭐ 320 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="20" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"><p>The first nineteen chapters explained what each tool does and which one to pick. This chapter lifts the lid on three things most guides skip: how cryptographers define and prove &quot;secure,&quot; how ciphers are built and broken, and the cryptography hiding inside Tor, &quot;Sign in with Google,&quot; your bank card and your laptop&#39;s startup screen. It ends with the long political fight over who gets to use strong encryption.</p>
+<p>You still don&#39;t need any math. Every idea comes with a picture, an analogy or a game.</p>
+</div>
+<section class="sec sec-20-1" id="s-20-1" data-sec="s-20-1">
+<h2 class="sec-title"><span class="sec-num">20.1</span><span class="sec-text">What &quot;secure&quot; means: security games</span><a class="sec-anchor" href="#s-20-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>&quot;This cipher is secure&quot; sounds like an opinion. Cryptographers turn it into something you can test, by describing a <strong>game</strong> between a <strong>challenger</strong> (who holds the key) and an <strong>attacker</strong>. A scheme is secure if no realistic attacker can win the game noticeably more often than by guessing.</p>
+<p><strong>The classic game: IND-CPA</strong> (&quot;indistinguishability under chosen-plaintext attack&quot;).</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>  ATTACKER                                           CHALLENGER (holds the key)
+     │  1. &quot;Encrypt anything I like, as often as I like&quot;  ──►  │   (chosen plaintexts)
+     │  ◄──  ciphertexts                                       │
+     │                                                         │
+     │  2. &quot;Here are two messages of the same length: M0, M1&quot; ►│
+     │                                     flips a secret coin: b = 0 or 1
+     │  ◄──  C* = Encrypt(M_b)          (the &quot;challenge&quot;)      │
+     │                                                         │
+     │  3. Attacker guesses b                                  │
+     │     Guessing blindly wins 50% of the time.              │
+     │     Secure = nobody can do meaningfully better than 50%.│</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>This one game captures a lot:</p>
+<ul>
+<li><strong>It forbids patterns.</strong> If the ciphertext leaked even one bit about the message (its first letter, whether it contains &quot;YES&quot;), the attacker would pick two messages that differ in that bit and win.</li>
+<li><strong>It forbids deterministic encryption.</strong> If the same message always gives the same ciphertext, the attacker simply asks the challenger to encrypt M0 in step 1 and compares. That is exactly why <strong>ECB mode</strong> (Chapter <a class="xref" href="chapter-05.html">5</a>) and <strong>textbook RSA</strong> (Chapter <a class="xref" href="chapter-09.html">9</a>) fail, and why real encryption needs a random IV or a unique nonce.</li>
+<li><strong>Length is allowed to leak.</strong> The two messages must be the same length, because almost all encryption reveals length. (The CRIME and BREACH attacks in Chapter <a class="xref" href="chapter-18.html">18</a> exploited exactly that.)</li>
+</ul>
+<p>The idea behind this game is called <strong>semantic security</strong>: the ciphertext tells you nothing useful about the plaintext except its length. Shafi Goldwasser and Silvio Micali formalized it in 1982 and later won the Turing Award, computing&#39;s highest honor, partly for it.</p>
+<p><strong>Stronger and other games:</strong></p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Security notion</th>
+<th>What the attacker may do</th>
+<th>What it rules out</th>
+<th>Schemes that meet it</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>IND-CPA</strong></td>
+<td>Get any messages encrypted</td>
+<td>Patterns, deterministic encryption</td>
+<td>AES-CTR or AES-CBC with random IVs</td>
+</tr>
+<tr>
+<td><strong>IND-CCA</strong> (chosen-ciphertext)</td>
+<td>Also get any ciphertext <em>decrypted</em>, except the challenge</td>
+<td>Malleability: tweaking a ciphertext and learning from the result</td>
+<td>AES-GCM, ChaCha20-Poly1305, RSA-OAEP, HPKE</td>
+</tr>
+<tr>
+<td><strong>INT-CTXT</strong> (ciphertext integrity)</td>
+<td>Try to create any new ciphertext that decrypts successfully</td>
+<td>Forgery</td>
+<td>Every AEAD</td>
+</tr>
+<tr>
+<td><strong>EUF-CMA</strong> (unforgeability)</td>
+<td>Get signatures or MAC tags on any messages</td>
+<td>Forging a valid tag or signature on a new message</td>
+<td>HMAC, Ed25519, ECDSA, RSA-PSS</td>
+</tr>
+</tbody></table></div>
+<p>IND-CCA matters because real systems <em>do</em> decrypt whatever arrives and react to it. Bleichenbacher&#39;s 1998 attack on RSA PKCS#1 v1.5 (Chapter <a class="xref" href="chapter-09.html">9</a>) and padding-oracle attacks (Chapter <a class="xref" href="chapter-18.html">18</a>) are both chosen-ciphertext attacks: the attacker sends modified ciphertexts and watches the error messages. AEAD (authenticated encryption) gives you IND-CCA plus INT-CTXT in one package.</p>
+<p class="lab-label">🧪 <strong>Try it yourself</strong> (Python): play the IND-CPA game against ECB, then see why randomized encryption survives it.</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">import</span> secrets
+<span class="hljs-keyword">from</span> cryptography.hazmat.primitives.ciphers <span class="hljs-keyword">import</span> Cipher, algorithms, modes
+<span class="hljs-keyword">from</span> cryptography.hazmat.primitives.ciphers.aead <span class="hljs-keyword">import</span> AESGCM
+
+key = secrets.token_bytes(<span class="hljs-number">16</span>)
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">ecb</span>(<span class="hljs-params">m</span>):                                         <span class="hljs-comment"># deterministic: same input, same output</span>
+    enc = Cipher(algorithms.AES(key), modes.ECB()).encryptor()
+    <span class="hljs-keyword">return</span> enc.update(m) + enc.finalize()
+
+m0, m1 = <span class="hljs-string">b&quot;ATTACK AT DAWN!!&quot;</span>, <span class="hljs-string">b&quot;RETREAT AT TEN!!&quot;</span>   <span class="hljs-comment"># equal length: 16 bytes each</span>
+b = secrets.randbelow(<span class="hljs-number">2</span>)                            <span class="hljs-comment"># the challenger&#x27;s secret coin</span>
+challenge = ecb([m0, m1][b])
+
+<span class="hljs-comment"># The attacker may ask for encryptions of anything (chosen plaintexts)...</span>
+guess = <span class="hljs-number">0</span> <span class="hljs-keyword">if</span> ecb(m0) == challenge <span class="hljs-keyword">else</span> <span class="hljs-number">1</span>
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;attacker wins:&quot;</span>, guess == b)                 <span class="hljs-comment"># always True</span>
+
+aes = AESGCM(AESGCM.generate_key(bit_length=<span class="hljs-number">128</span>))
+c1 = aes.encrypt(secrets.token_bytes(<span class="hljs-number">12</span>), m0, <span class="hljs-literal">None</span>)
+c2 = aes.encrypt(secrets.token_bytes(<span class="hljs-number">12</span>), m0, <span class="hljs-literal">None</span>)
+<span class="hljs-built_in">print</span>(c1 == c2)                                     <span class="hljs-comment"># False: same message, different ciphertexts</span></code></pre></div><aside class="callout key"><p>💡 <strong>Key idea:</strong> &quot;Secure&quot; always means &quot;secure against a specific attacker who can do specific things.&quot; When you read that a scheme is IND-CCA secure, it means: even an attacker who can get anything else decrypted learns nothing from the ciphertext you care about.</p>
+</aside>
+</div><div class="widget" data-w="indgame"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-20-2" id="s-20-2" data-sec="s-20-2">
+<h2 class="sec-title"><span class="sec-num">20.2</span><span class="sec-text">Security proofs, reductions and the random oracle model</span><a class="sec-anchor" href="#s-20-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Once &quot;secure&quot; is a game, you can try to <strong>prove</strong> that a scheme wins it. Cryptographic proofs almost never say &quot;this is unbreakable.&quot; They say something more modest and more useful:</p>
+<aside class="callout quote"><p><strong>If</strong> someone could break this scheme, <strong>then</strong> they could also solve a problem everyone believes is hard.</p>
+</aside>
+<p>This is called a <strong>reduction</strong>. Analogy: you can&#39;t prove that nobody will ever pick your new lock. But you can prove &quot;anyone who picks my lock can also open a bank vault of a famous design that has resisted every thief for 50 years.&quot; That&#39;s strong evidence your lock is good.</p>
+<p>Examples of what reductions connect:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Scheme</th>
+<th>&quot;Breaking it would mean…&quot;</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Diffie-Hellman key exchange</td>
+<td>Solving a Diffie-Hellman-style discrete-log problem (Chapter <a class="xref" href="chapter-10.html">10</a>)</td>
+</tr>
+<tr>
+<td>RSA-OAEP</td>
+<td>Inverting RSA without the private key (Chapter <a class="xref" href="chapter-09.html">9</a>)</td>
+</tr>
+<tr>
+<td>HMAC</td>
+<td>Breaking the hash function&#39;s internal compression step</td>
+</tr>
+<tr>
+<td>ML-KEM (Kyber)</td>
+<td>Solving a hard lattice problem (Chapter <a class="xref" href="chapter-17.html">17</a>)</td>
+</tr>
+<tr>
+<td>Encrypt-then-MAC</td>
+<td>Breaking either the cipher or the MAC (Chapter <a class="xref" href="chapter-07.html">7</a>)</td>
+</tr>
+</tbody></table></div>
+<p><strong>Models: the fine print.</strong> Some proofs only work in a simplified world. The most famous is the <strong>random oracle model</strong> (Bellare and Rogaway, 1993): the proof pretends the hash function is a perfect magic box that returns a fresh random answer for every new input. Real hash functions such as SHA-256 aren&#39;t magic boxes, but they behave very much like them, and proofs in this model (RSA-OAEP, Ed25519 and Schnorr signatures, many post-quantum KEMs) have held up well in practice. A proof that doesn&#39;t need this idealization is said to be in the <strong>standard model</strong>, and is considered stronger.</p>
+<p>What a proof does <strong>not</strong> cover:</p>
+<ul>
+<li><strong>The model&#39;s assumptions.</strong> If the &quot;hard problem&quot; turns out to be easy (as quantum computers would make factoring), the proof says nothing.</li>
+<li><strong>Implementation.</strong> A proof is about the algorithm on paper. Timing leaks, bad random numbers and buffer overflows (Chapter <a class="xref" href="chapter-18.html">18</a>) live outside it.</li>
+<li><strong>Mistakes in the proof itself.</strong> Proofs are written by humans.</li>
+</ul>
+<div class="callout story"><p>📜 <strong>True story: a gap in a famous proof.</strong> RSA-OAEP was published with a security proof in 1994. In 2001, Victor Shoup showed that the proof had a gap: it didn&#39;t actually prove what everyone thought. The scheme turned out to be fine (other researchers quickly repaired the proof the same year), but it was a reminder that &quot;provably secure&quot; deserves the same scrutiny as any other claim.</p></div>
+<p>And here&#39;s a surprise: <strong>AES has no security proof at all.</strong> There is no reduction to a famous hard problem. Its security comes from 25 years of the world&#39;s best cryptanalysts attacking it and failing (next two sections). For symmetric ciphers and hash functions, that public battle-testing <em>is</em> the evidence.</p>
+<aside class="callout key"><p>💡 <strong>Key idea:</strong> A security proof turns &quot;trust me&quot; into &quot;trust this well-studied hard problem, in this model, assuming the code matches the paper.&quot; It&#39;s powerful, but it is one ingredient of confidence, not a guarantee.</p>
+</aside>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Kinds of evidence that a scheme is secure</h4></div><div class="pc-grid">
+<article class="pc-card v-idea"><header><span class="pc-verdict">💡 Concept</span><h5>Proof in the standard model</h5><p class="pc-tag">Reduction with no idealized parts</p></header>
+<ul class="pros"><li>Strongest kind of proof</li><li>No “pretend the hash is magic” step</li></ul>
+<ul class="cons"><li>Schemes are often slower or bigger</li><li>Still only as good as the hard problem and the code</li></ul>
+<footer><b>Best for:</b> High-assurance designs</footer></article>
+<article class="pc-card v-idea"><header><span class="pc-verdict">💡 Concept</span><h5>Proof in the random oracle model</h5><p class="pc-tag">Treats the hash as a perfect random function</p></header>
+<ul class="pros"><li>Allows fast, practical schemes (RSA-OAEP, Ed25519, ML-KEM)</li><li>Excellent real-world track record</li></ul>
+<ul class="cons"><li>Real hashes aren’t random oracles</li><li>Contrived schemes exist that are “proven” yet breakable</li></ul>
+<footer><b>Best for:</b> Most modern public-key schemes</footer></article>
+<article class="pc-card v-idea"><header><span class="pc-verdict">💡 Concept</span><h5>Survived public cryptanalysis</h5><p class="pc-tag">No proof, decades of attacks (AES, SHA-2)</p></header>
+<ul class="pros"><li>Tested against every known attack technique</li><li>Allows very fast designs</li></ul>
+<ul class="cons"><li>A brand-new technique could appear</li><li>Needs ongoing, open scrutiny</li></ul>
+<footer><b>Best for:</b> Block ciphers and hash functions</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>“Provably unbreakable” marketing</h5><p class="pc-tag">Claims without a published model</p></header>
+<ul class="pros"><li>None</li></ul>
+<ul class="cons"><li>No stated game, assumptions or review means no proof</li><li>Often a sign of home-made crypto</li></ul>
+<footer><b>Best for:</b> Treat as a red flag</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-20-3" id="s-20-3" data-sec="s-20-3">
+<h2 class="sec-title"><span class="sec-num">20.3</span><span class="sec-text">How block ciphers are built: Feistel networks, SPNs and ARX</span><a class="sec-anchor" href="#s-20-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Chapter <a class="xref" href="chapter-05.html">5</a> showed AES as a Rubik&#39;s cube of rounds. Designers use a few standard blueprints for those rounds.</p>
+<p><strong>1. The Feistel network</strong> (invented by Horst Feistel at IBM in the early 1970s; used by DES).</p>
+<p>Split the block into a <strong>left</strong> half and a <strong>right</strong> half. Each round, scramble the right half with a round key, XOR the result into the left half, then swap:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>   L0                         R0
+   │                          │
+   │                          ├──────────► becomes L1
+   │                          ▼
+   ⊕ ◄──────────────────── [ F ] ◄── round key K1
+   │
+   └─────────────────────────────────────► becomes R1
+
+   L1 = R0                R1 = L0 ⊕ F(R0, K1)
+   ... repeat for every round (DES: 16 rounds)</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>The magic: <strong>F doesn&#39;t have to be reversible.</strong> It can be any scrambling function, even a one-way hash. To decrypt, you run the very same rounds with the keys in reverse order, because XOR-ing the same F output twice cancels out (Chapter <a class="xref" href="chapter-03.html">3</a>). That made Feistel designs easy to build in 1970s hardware: one circuit both encrypts and decrypts.</p>
+<p class="lab-label">🧪 <strong>Try it yourself</strong> (Python): a toy 2-byte Feistel cipher whose round function is a SHA-256 hash, which can&#39;t be reversed. Decryption still works.</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">import</span> hashlib
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">F</span>(<span class="hljs-params">half: <span class="hljs-built_in">int</span>, key: <span class="hljs-built_in">bytes</span></span>) -&gt; <span class="hljs-built_in">int</span>:
+    <span class="hljs-comment"># Any scrambling function works, even a one-way hash!</span>
+    <span class="hljs-keyword">return</span> hashlib.sha256(key + <span class="hljs-built_in">bytes</span>([half])).digest()[<span class="hljs-number">0</span>]
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">feistel</span>(<span class="hljs-params">block: <span class="hljs-built_in">bytes</span>, keys, decrypt=<span class="hljs-literal">False</span></span>):
+    L, R = block[<span class="hljs-number">0</span>], block[<span class="hljs-number">1</span>]
+    <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> (<span class="hljs-built_in">reversed</span>(keys) <span class="hljs-keyword">if</span> decrypt <span class="hljs-keyword">else</span> keys):
+        L, R = R, L ^ F(R, k)
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">bytes</span>([R, L])                     <span class="hljs-comment"># swap the halves at the end</span>
+
+keys = [<span class="hljs-string">b&quot;k1&quot;</span>, <span class="hljs-string">b&quot;k2&quot;</span>, <span class="hljs-string">b&quot;k3&quot;</span>, <span class="hljs-string">b&quot;k4&quot;</span>]
+ct = feistel(<span class="hljs-string">b&quot;Hi&quot;</span>, keys)
+<span class="hljs-built_in">print</span>(ct.<span class="hljs-built_in">hex</span>())                              <span class="hljs-comment"># ebda</span>
+<span class="hljs-built_in">print</span>(feistel(ct, keys, decrypt=<span class="hljs-literal">True</span>))       <span class="hljs-comment"># b&#x27;Hi&#x27;</span></code></pre></div><p>(Never use this for real data: a 16-bit block and four rounds are toys.)</p>
+<p><strong>2. The substitution–permutation network (SPN)</strong> (used by AES). Instead of halves, every round transforms the <strong>whole</strong> block: substitute bytes through an S-box (confusion), then shuffle and mix them (diffusion), then add the round key. Every step must be reversible, so decryption runs inverse steps. SPNs spread changes faster, which is one reason AES needs only 10 to 14 rounds where DES needed 16.</p>
+<p><strong>3. ARX</strong> (Add–Rotate–XOR): use only those three cheap CPU operations, repeated many times. ChaCha20 (Chapter <a class="xref" href="chapter-05.html">5</a>) and BLAKE2/BLAKE3 (Chapter <a class="xref" href="chapter-06.html">6</a>) are built this way. ARX is fast on any processor and naturally constant-time, because none of its operations depend on secret-indexed lookup tables.</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Design</th>
+<th>Ciphers</th>
+<th>Strengths</th>
+<th>Weaknesses</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Feistel</strong></td>
+<td>DES, 3DES, Blowfish, Twofish, Camellia</td>
+<td>Round function needn&#39;t be reversible; same circuit decrypts</td>
+<td>Only half the block changes per round, so it needs more rounds</td>
+</tr>
+<tr>
+<td><strong>SPN</strong></td>
+<td>AES, Serpent, PRESENT</td>
+<td>Fast diffusion; well-understood design theory</td>
+<td>Needs reversible S-boxes; table lookups can leak timing in software</td>
+</tr>
+<tr>
+<td><strong>ARX</strong></td>
+<td>ChaCha20, Salsa20, BLAKE2/3, Speck</td>
+<td>Fast everywhere; constant-time by nature</td>
+<td>Harder to analyze; needs many rounds</td>
+</tr>
+</tbody></table></div>
+<p><strong>Why so many rounds?</strong> One round of any of these is weak. Each round adds a layer of confusion and diffusion, and attacks typically work against reduced versions first. Designers choose a round count well above the best attack: that buffer is called the <strong>security margin</strong>.</p>
+</div><div class="widget" data-w="feistel"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Cipher blueprints</h4></div><div class="pc-grid">
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>Feistel network</h5><p class="pc-tag">Split in halves, mix one into the other</p></header>
+<ul class="pros"><li>Round function needn’t be reversible</li><li>Same circuit encrypts and decrypts</li></ul>
+<ul class="cons"><li>Half the block changes per round, so more rounds</li><li>Its famous member (DES) is retired</li></ul>
+<footer><b>Best for:</b> DES, 3DES, Blowfish, Twofish, Camellia</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>SPN</h5><p class="pc-tag">Substitute, permute, add key: whole block per round</p></header>
+<ul class="pros"><li>Fast diffusion, fewer rounds</li><li>Rich design theory (AES)</li></ul>
+<ul class="cons"><li>Needs reversible S-boxes</li><li>Table lookups can leak timing in software</li></ul>
+<footer><b>Best for:</b> AES, Serpent, PRESENT</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>ARX</h5><p class="pc-tag">Only Add, Rotate, XOR</p></header>
+<ul class="pros"><li>Fast on any CPU</li><li>Constant-time by nature</li></ul>
+<ul class="cons"><li>Harder to analyze</li><li>Needs many rounds</li></ul>
+<footer><b>Best for:</b> ChaCha20, BLAKE2/3</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-20-4" id="s-20-4" data-sec="s-20-4">
+<h2 class="sec-title"><span class="sec-num">20.4</span><span class="sec-text">How ciphers get broken: the cryptanalyst&#39;s toolbox</span><a class="sec-anchor" href="#s-20-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Brute force tries every key. <strong>Cryptanalysis</strong> looks for shortcuts: statistical patterns that survive all the rounds. Here are the big ideas, without the math.</p>
+<p><strong>Differential cryptanalysis: follow the difference.</strong> Encrypt pairs of plaintexts that differ in a chosen way, and watch how that difference travels through the cipher. For a perfect cipher, the output differences would look completely random. For a real one, some input differences lead to some output differences more often than they should. An S-box is the key ingredient: here&#39;s what happens inside the 4-bit S-box of the lightweight cipher PRESENT:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>Input difference → most likely output difference    (if it were random: about 1/16 each)
+in 1: best out 3 happens 4/16 times    ← four times more often than chance
+in 2: best out 5 happens 4/16 times
+...
+in e: best out 2 happens 2/16 times</pre></div></figure><p>4/16 sounds bad, but it is actually the best any 4-bit S-box can achieve: perfection is impossible, so designers aim for &quot;as flat as possible.&quot; Attackers chain these &quot;lucky&quot; paths across rounds. If the chain holds more often than chance predicts, it reveals bits of the last round&#39;s key. The defense: S-boxes whose best path is as unlikely as possible, and enough rounds that every chain becomes hopelessly improbable.</p>
+<div class="callout story"><p>📜 <strong>True story: IBM knew in 1974.</strong> Eli Biham and Adi Shamir published differential cryptanalysis around 1990 and found that DES resisted it surprisingly well. In 1994, IBM&#39;s Don Coppersmith revealed why: IBM had discovered the technique while designing DES in 1974, tuned the S-boxes against it, and agreed with the NSA to keep it secret. The mysterious S-boxes that had fueled backdoor rumors for 20 years were actually protecting DES.</p></div>
+<p><strong>Linear cryptanalysis: find a lopsided coin.</strong> Look for a simple relationship between some plaintext bits, some ciphertext bits and some key bits that holds a little more (or less) than 50% of the time. With enough known plaintext–ciphertext pairs, the bias reveals key bits. Mitsuru Matsui published it in 1993 and, in 1994, recovered a real DES key using 2⁴³ known plaintexts: the first experimental attack on full DES faster than brute force.</p>
+<p><strong>Other tools in the box:</strong></p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Attack</th>
+<th>Idea</th>
+<th>Famous result</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Meet-in-the-middle</strong></td>
+<td>Encrypt from the front and decrypt from the back, and match in the middle</td>
+<td>Why &quot;double DES&quot; is barely stronger than DES, and 3DES was used instead (Chapter <a class="xref" href="chapter-05.html">5</a>)</td>
+</tr>
+<tr>
+<td><strong>Related-key</strong></td>
+<td>Study encryptions under keys that differ in known ways</td>
+<td>A 2009 attack on AES-256 needs 2⁹⁹·⁵ steps, but only if the attacker can make you use related keys</td>
+</tr>
+<tr>
+<td><strong>Slide attack</strong></td>
+<td>Exploit rounds that are all identical</td>
+<td>Breaks ciphers with weak key schedules, whatever the number of rounds</td>
+</tr>
+<tr>
+<td><strong>Algebraic</strong></td>
+<td>Write the cipher as huge systems of equations and solve them</td>
+<td>Mostly theoretical against modern ciphers</td>
+</tr>
+<tr>
+<td><strong>Biclique</strong></td>
+<td>Advanced brute-force bookkeeping</td>
+<td>Best known attack on full AES-128: about 2¹²⁶ work, barely better than 2¹²⁸</td>
+</tr>
+</tbody></table></div>
+<p><strong>What &quot;broken&quot; means to a cryptographer.</strong> Academic papers call a cipher &quot;broken&quot; when any attack beats brute force, even if it needs more energy than the Sun will ever produce. AES-128 has been &quot;broken&quot; by 2 bits since 2011, and it is still perfectly safe. In practice, worry when an attack becomes <em>feasible</em> (DES in 1998, SHA-1 in 2017), not when it becomes <em>publishable</em>.</p>
+<aside class="callout key"><p>💡 <strong>Key idea:</strong> Ciphers earn trust by surviving years of public cryptanalysis with a comfortable security margin. That&#39;s why you use AES and ChaCha20, and never a cipher that hasn&#39;t had that ordeal.</p>
+</aside>
+</div><div class="widget" data-w="ddt"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-20-5" id="s-20-5" data-sec="s-20-5">
+<h2 class="sec-title"><span class="sec-num">20.5</span><span class="sec-text">Tor and onion routing: hiding who talks to whom</span><a class="sec-anchor" href="#s-20-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>HTTPS hides <em>what</em> you say, but everyone on the path still sees <em>who</em> you&#39;re talking to (Chapter <a class="xref" href="chapter-12.html">12</a>). A VPN hides that from your café and internet provider, but the VPN provider sees everything instead. <strong>Onion routing</strong> spreads the trust so that <strong>no single computer knows both who you are and where you&#39;re going</strong>.</p>
+<p>The idea was developed at the US Naval Research Laboratory in the 1990s. <strong>Tor</strong> (&quot;The Onion Router&quot;), run by thousands of volunteer relays, made it available to everyone in the early 2000s.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> You ──► Guard relay ──► Middle relay ──► Exit relay ──► Website
+        knows: you        knows: guard     knows: middle
+        not: website      and exit only    and website
+                                           not: you
+
+ Your Tor client wraps the request in three layers of encryption:
+   ┌──────────────── layer for the guard ─────────────────┐
+   │  ┌──────────── layer for the middle ──────────────┐  │
+   │  │  ┌──────── layer for the exit ─────────────┐   │  │
+   │  │  │   GET https://example.com/              │   │  │
+   │  │  └─────────────────────────────────────────┘   │  │
+   │  └────────────────────────────────────────────────┘  │
+   └──────────────────────────────────────────────────────┘
+ Each relay peels exactly one layer, like an onion, and learns only the next hop.</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>How the pieces from earlier chapters fit:</p>
+<ul>
+<li>Your client builds a <strong>circuit</strong> one relay at a time, doing a separate <strong>key exchange</strong> (based on X25519, Chapter <a class="xref" href="chapter-10.html">10</a>) with each relay, so each layer has its own key.</li>
+<li>Each relay&#39;s layer uses <strong>symmetric encryption</strong> (Chapter <a class="xref" href="chapter-05.html">5</a>); replies come back the same way, gaining a layer at each hop, and your client removes all three.</li>
+<li><strong>Onion services</strong> (addresses ending in <code>.onion</code>) never leave the Tor network at all. A modern onion address <em>is</em> an encoding of the service&#39;s <strong>Ed25519 public key</strong> (Chapter <a class="xref" href="chapter-11.html">11</a>), so the address itself proves you reached the right server: no certificate authority needed.</li>
+</ul>
+<p>Its limits:</p>
+<ul>
+<li><strong>The exit relay sees your traffic to the website.</strong> If the site isn&#39;t HTTPS, the exit can read and change it. Use HTTPS inside Tor.</li>
+<li><strong>Traffic correlation.</strong> An adversary who can watch both your connection <em>and</em> the website&#39;s (say, a big network operator or a government) can match the timing and size of packets. Tor makes this hard, not impossible.</li>
+<li><strong>You can still identify yourself.</strong> Logging into your usual accounts or using a browser with a unique fingerprint undoes the anonymity. That&#39;s why the Tor Browser makes every user look alike.</li>
+</ul>
+<p class="lab-label">🧪 <strong>Try it yourself:</strong> with Tor running locally (<code>brew install tor</code> on macOS, or install Tor Browser), check that your traffic really goes through it:</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs">torsocks curl https://check.torproject.org/api/ip
+<span class="hljs-comment"># {&quot;IsTor&quot;:true,&quot;IP&quot;:&quot;185.220.101.4&quot;}      ← the exit relay&#x27;s address, not yours</span></code></pre></div></div><div class="widget" data-w="onion"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Hiding who you talk to</h4></div><div class="pc-grid">
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>HTTPS alone</h5><p class="pc-tag">Encrypts content</p></header>
+<ul class="pros"><li>Everywhere, automatic</li><li>Hides pages, forms, cookies</li></ul>
+<ul class="cons"><li>IP addresses and the site’s name still visible</li></ul>
+<footer><b>Best for:</b> Everyday browsing</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>VPN</h5><p class="pc-tag">One encrypted tunnel to one provider</p></header>
+<ul class="pros"><li>Hides traffic from café Wi-Fi and your ISP</li><li>Fast</li></ul>
+<ul class="cons"><li>The VPN provider sees everything instead</li><li>One point of trust and of failure</li></ul>
+<footer><b>Best for:</b> Untrusted networks, company access</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Tor</h5><p class="pc-tag">Three relays, three layers of encryption</p></header>
+<ul class="pros"><li>No single relay knows both ends</li><li>Onion services need no CA</li></ul>
+<ul class="cons"><li>Slower</li><li>Exit relay sees non-HTTPS traffic</li><li>Global traffic correlation is possible</li></ul>
+<footer><b>Best for:</b> Anonymity and censorship circumvention</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>Plain web proxy</h5><p class="pc-tag">Forwards requests for you</p></header>
+<ul class="pros"><li>Changes your apparent IP</li></ul>
+<ul class="cons"><li>Often unencrypted</li><li>The proxy sees and can change everything</li></ul>
+<footer><b>Best for:</b> Not for privacy</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-20-6" id="s-20-6" data-sec="s-20-6">
+<h2 class="sec-title"><span class="sec-num">20.6</span><span class="sec-text">Logging in everywhere: Kerberos, SAML, OAuth 2.0 and OpenID Connect</span><a class="sec-anchor" href="#s-20-6" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Chapter <a class="xref" href="chapter-16.html">16</a> covered how <em>you</em> prove who you are (passwords, codes, passkeys). Big organizations and the web also need <strong>single sign-on</strong>: log in once, then use many services without each one seeing your password. Four standards dominate.</p>
+<p><strong>Kerberos: tickets at the office.</strong> Created at MIT in the 1980s and the default in Windows Active Directory since 2000.</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre> 1. You log in once. Your PC proves your password to the Key Distribution Center (KDC)
+    without ever sending it, and receives a Ticket-Granting Ticket (TGT).
+ 2. You want the file server. Your PC shows the TGT to the KDC and gets a service ticket,
+    encrypted with the FILE SERVER's secret key.
+ 3. The file server decrypts the ticket with its own key: &quot;the KDC vouches this is Alice.&quot;</pre></div></figure><p>It&#39;s all symmetric cryptography plus a trusted third party (Trent from Chapter <a class="xref" href="chapter-01.html">1</a>). Tickets expire, usually after about 10 hours.</p>
+<div class="callout story"><p>📜 <strong>True story: Kerberoasting (2014).</strong> Any logged-in user can request a service ticket for any service, and that ticket is encrypted with a key derived from the <em>service account&#39;s password</em>. Security researcher Tim Medin showed that attackers can take those tickets offline and brute-force them. Service accounts with weak passwords fall in minutes, which is why they need long random passwords (Chapter <a class="xref" href="chapter-08.html">8</a>). And if attackers ever steal the KDC&#39;s own master key (the <code>krbtgt</code> account), they can forge &quot;golden tickets&quot; for anyone.</p></div>
+<p><strong>SAML: signed XML for enterprise web apps.</strong> SAML 2.0 (2005) lets a company&#39;s <strong>identity provider</strong> (such as Okta, Microsoft Entra ID or Google Workspace) log you into hundreds of cloud apps. After you log in, the identity provider sends your browser a <strong>signed XML document</strong> (an &quot;assertion&quot;) saying who you are; the app checks the signature (Chapter <a class="xref" href="chapter-11.html">11</a>) against the identity provider&#39;s certificate.</p>
+<div class="callout warn"><p>⚠️ <strong>Watch out:</strong> XML signatures are notoriously tricky. &quot;Signature wrapping&quot; attacks smuggle an unsigned, forged assertion next to a genuinely signed one and trick sloppy parsers into reading the forgery. And whoever steals the identity provider&#39;s signing key can sign in as anyone, anywhere: the &quot;Golden SAML&quot; technique seen in the 2020 SolarWinds intrusions.</p></div>
+<p><strong>OAuth 2.0: &quot;let this app access my account&quot;.</strong> When a calendar app asks &quot;Allow access to your Google Calendar?&quot;, that&#39;s <strong>OAuth 2.0</strong> (2012). It&#39;s about <strong>authorization</strong> (granting access), not login. The app never sees your password; it receives a limited, revocable <strong>access token</strong>.</p>
+<p><strong>OpenID Connect (OIDC): login built on OAuth.</strong> OIDC (2014) adds identity on top: alongside the access token, the identity provider issues an <strong>ID token</strong>, a signed JWT (Chapter <a class="xref" href="chapter-16.html">16</a>) that says &quot;this is <a href="mailto:alice@example.com">alice@example.com</a>.&quot; That&#39;s what &quot;Sign in with Google/Apple/Microsoft&quot; uses.</p>
+<p>The recommended flow is the <strong>authorization code flow with PKCE</strong> (&quot;pixy&quot;):</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> App                                Identity provider                 
+  1. Pick a random secret: code_verifier. Send only its SHA-256 hash (code_challenge)
+     in the login redirect ──────────────────────►  You log in (password, passkey…)
+  2. ◄────────────────── redirected back with a one-time authorization code
+  3. Send the code + the ORIGINAL code_verifier ─►  Checks SHA-256(verifier) = challenge
+  4. ◄────────────────── ID token (who you are) + access token (what the app may do)</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>If a malicious app or a leaky log steals the authorization code in step 2, it&#39;s useless without the verifier, which never traveled through the browser. That&#39;s a one-way hash (Chapter <a class="xref" href="chapter-06.html">6</a>) doing security work in plain sight.</p>
+<p class="lab-label">🧪 <strong>Try it yourself</strong> (Python): make a PKCE pair, and check the official test value from RFC 7636.</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">import</span> base64, hashlib, secrets
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">challenge_for</span>(<span class="hljs-params">verifier: <span class="hljs-built_in">str</span></span>) -&gt; <span class="hljs-built_in">str</span>:
+    digest = hashlib.sha256(verifier.encode()).digest()
+    <span class="hljs-keyword">return</span> base64.urlsafe_b64encode(digest).rstrip(<span class="hljs-string">b&quot;=&quot;</span>).decode()
+
+verifier = base64.urlsafe_b64encode(secrets.token_bytes(<span class="hljs-number">32</span>)).rstrip(<span class="hljs-string">b&quot;=&quot;</span>).decode()
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;code_verifier :&quot;</span>, verifier)               <span class="hljs-comment"># kept secret by the app</span>
+<span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;code_challenge:&quot;</span>, challenge_for(verifier))  <span class="hljs-comment"># sent in the login redirect</span>
+
+<span class="hljs-built_in">print</span>(challenge_for(<span class="hljs-string">&quot;dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk&quot;</span>))
+<span class="hljs-comment"># E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM   ← matches RFC 7636, Appendix B</span></code></pre></div><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Standard</th>
+<th>Year</th>
+<th>Format</th>
+<th>Used for</th>
+<th>Typical home</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Kerberos</strong></td>
+<td>1980s</td>
+<td>Binary tickets, symmetric keys</td>
+<td>Logging into office networks and file servers</td>
+<td>Windows Active Directory</td>
+</tr>
+<tr>
+<td><strong>SAML 2.0</strong></td>
+<td>2005</td>
+<td>Signed XML assertions</td>
+<td>Enterprise single sign-on to web apps</td>
+<td>Okta, Entra ID, Google Workspace</td>
+</tr>
+<tr>
+<td><strong>OAuth 2.0</strong></td>
+<td>2012</td>
+<td>Access tokens</td>
+<td>Letting an app access an account (authorization)</td>
+<td>APIs everywhere</td>
+</tr>
+<tr>
+<td><strong>OpenID Connect</strong></td>
+<td>2014</td>
+<td>Signed JWT ID tokens</td>
+<td>&quot;Sign in with…&quot; (authentication)</td>
+<td>Consumer and modern enterprise apps</td>
+</tr>
+</tbody></table></div>
+<div class="callout warn"><p>⚠️ <strong>Watch out:</strong> OAuth on its own does not tell an app <em>who</em> you are. Apps that treated &quot;I received an access token&quot; as &quot;the user logged in&quot; have been tricked with tokens issued to other apps. Use OpenID Connect for login, validate the ID token&#39;s signature, issuer and audience, and use PKCE. The older &quot;implicit flow,&quot; which put tokens directly in browser URLs, is now discouraged by the OAuth security best practices (RFC 9700, 2025).</p></div>
+</div><div class="widget" data-w="pkce"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Single sign-on standards</h4></div><div class="pc-grid">
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>Kerberos</h5><p class="pc-tag">Tickets from a Key Distribution Center</p></header>
+<ul class="pros"><li>Password never crosses the network</li><li>Mature, built into Windows</li></ul>
+<ul class="cons"><li>Kerberoasting and golden tickets</li><li>Built for one organization’s network</li></ul>
+<footer><b>Best for:</b> Office networks (Active Directory)</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>SAML 2.0</h5><p class="pc-tag">Signed XML assertions</p></header>
+<ul class="pros"><li>Supported by almost every enterprise app</li></ul>
+<ul class="cons"><li>XML signature wrapping bugs</li><li>Stolen signing key = Golden SAML</li></ul>
+<footer><b>Best for:</b> Existing enterprise SSO</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>OAuth 2.0</h5><p class="pc-tag">Delegated access tokens</p></header>
+<ul class="pros"><li>Apps never see your password</li><li>Limited, revocable access</li></ul>
+<ul class="cons"><li>Not a login protocol on its own</li><li>Many options to misconfigure</li></ul>
+<footer><b>Best for:</b> Letting an app use an API on your behalf</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>OpenID Connect</h5><p class="pc-tag">Signed ID token on top of OAuth</p></header>
+<ul class="pros"><li>Standard “Sign in with…”</li><li>JWT ID tokens anyone can verify</li></ul>
+<ul class="cons"><li>Must validate signature, issuer, audience, expiry</li></ul>
+<footer><b>Best for:</b> Modern web and mobile login (with PKCE)</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>Implicit flow</h5><p class="pc-tag">Tokens returned in the browser URL</p></header>
+<ul class="pros"><li>Simple for old single-page apps</li></ul>
+<ul class="cons"><li>Tokens leak via history, logs and referrers</li><li>Discouraged by RFC 9700</li></ul>
+<footer><b>Best for:</b> Replace with code flow + PKCE</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-20-7" id="s-20-7" data-sec="s-20-7">
+<h2 class="sec-title"><span class="sec-num">20.7</span><span class="sec-text">Paying with a card: EMV chips, contactless and tokens</span><a class="sec-anchor" href="#s-20-7" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A card&#39;s <strong>magnetic stripe</strong> stores fixed data: card number, expiry, a check value. Copy it once (a hidden &quot;skimmer&quot; on an ATM) and you can make a perfect clone. The <strong>EMV</strong> chip standard (named after Europay, Mastercard and Visa) fixes this with cryptography.</p>
+<p><strong>What the chip does on every payment:</strong></p>
+<ol>
+<li>The terminal sends the transaction details plus a fresh random number, the <strong>unpredictable number</strong>.</li>
+<li>The chip combines them with its <strong>transaction counter</strong> (which goes up by one every time) and computes a MAC (Chapter <a class="xref" href="chapter-07.html">7</a>) using a secret key that <strong>never leaves the chip</strong>. This MAC is called the <strong>ARQC</strong> (Authorization Request Cryptogram).</li>
+<li>The bank, which can derive the same card key from its master key inside an HSM (Chapter <a class="xref" href="chapter-19.html">19</a>), recomputes and checks it.</li>
+</ol>
+<figure class="sketch plain"><div class="sketch-scroll"><pre> ARQC = MAC( card's secret key,  amount ‖ currency ‖ date ‖ unpredictable number ‖ counter )</pre></div></figure><p>A skimmer can copy the card number, but not the key. A recorded cryptogram is useless later, because the amount, unpredictable number and counter will differ: replay protection, exactly as in Chapter <a class="xref" href="chapter-18.html">18</a>. Chips can also prove they&#39;re genuine offline using RSA signatures and a small certificate chain from the payment network (Chapter <a class="xref" href="chapter-13.html">13</a>).</p>
+<p><strong>Contactless</strong> cards and phones use the same cryptograms over radio. <strong>Apple Pay and Google Pay</strong> add <strong>tokenization</strong>: the phone never stores your real card number. It holds a substitute &quot;device account number,&quot; and a secure chip in the phone generates a one-time cryptogram for each payment. If a merchant is hacked, the stolen token is useless elsewhere. Your <strong>PIN</strong> gets its own protection: payment terminals typically encrypt it with a fresh key for every transaction, derived with a scheme called <strong>DUKPT</strong> (Derived Unique Key Per Transaction), so a compromised terminal can&#39;t decrypt earlier PINs.</p>
+<div class="callout story"><p>📜 <strong>True story: when &quot;unpredictable&quot; wasn&#39;t.</strong> In 2012, researchers at the University of Cambridge found that some ATMs generated the &quot;unpredictable number&quot; with a weak counter-like generator. Anyone who could predict it could get a cloned card to precompute valid cryptograms in advance (a &quot;pre-play&quot; attack) and use them later. It&#39;s Chapter <a class="xref" href="chapter-04.html">4</a>&#39;s lesson again: the whole design collapses when randomness fails. The same group had shown in 2010 that a man-in-the-middle device could make some terminals accept <em>any</em> PIN.</p></div>
+</div><div class="widget" data-w="emv"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Ways to pay</h4></div><div class="pc-grid">
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>Magnetic stripe</h5><p class="pc-tag">Static data</p></header>
+<ul class="pros"><li>Works everywhere, even old terminals</li></ul>
+<ul class="cons"><li>One swipe through a skimmer = a perfect clone</li></ul>
+<footer><b>Best for:</b> Fallback only</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Chip (EMV)</h5><p class="pc-tag">Fresh cryptogram per payment</p></header>
+<ul class="pros"><li>Key never leaves the chip</li><li>Replays fail (counter + unpredictable number)</li></ul>
+<ul class="cons"><li>Implementation flaws have let terminals accept wrong PINs</li><li>Weak terminal randomness enabled pre-play attacks</li></ul>
+<footer><b>Best for:</b> In-person payments</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Contactless</h5><p class="pc-tag">Same cryptograms over radio</p></header>
+<ul class="pros"><li>Fast; same chip security</li></ul>
+<ul class="cons"><li>Relay attacks possible in theory</li><li>Spending limits without PIN</li></ul>
+<footer><b>Best for:</b> Small everyday payments</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Phone wallet (tokenized)</h5><p class="pc-tag">Device token + secure element</p></header>
+<ul class="pros"><li>Real card number never stored or shared</li><li>Biometric check per payment</li></ul>
+<ul class="cons"><li>Depends on phone security and the platform</li></ul>
+<footer><b>Best for:</b> Best everyday option</footer></article>
+<article class="pc-card v-legacy"><header><span class="pc-verdict">⚠️ Legacy</span><h5>Typing card number online</h5><p class="pc-tag">Card-not-present</p></header>
+<ul class="pros"><li>Universal</li></ul>
+<ul class="cons"><li>Static number can be stolen and reused</li><li>Needs extra checks (3-D Secure)</li></ul>
+<footer><b>Best for:</b> With 3-D Secure or tokenized checkout</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-20-8" id="s-20-8" data-sec="s-20-8">
+<h2 class="sec-title"><span class="sec-num">20.8</span><span class="sec-text">Trusting the device: secure boot, measured boot and attestation</span><a class="sec-anchor" href="#s-20-8" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>All the cryptography in this guide assumes the software running it is honest. Malware that loads <em>before</em> the operating system (a &quot;bootkit&quot;) could see every key. Three techniques build trust from the moment you press the power button.</p>
+<p><strong>Secure boot: check each signature before you run it.</strong> A tiny piece of code in read-only memory, the <strong>root of trust</strong>, verifies the digital signature (Chapter <a class="xref" href="chapter-11.html">11</a>) of the firmware; the firmware verifies the bootloader; the bootloader verifies the operating system kernel. If any signature is wrong, startup stops. UEFI Secure Boot on PCs keeps a list of allowed signing keys (<code>db</code>) and a revocation list of banned ones (<code>dbx</code>). Apple devices and Android phones (&quot;Verified Boot&quot;) use the same chain-of-trust idea.</p>
+<p><strong>Measured boot: write down a fingerprint of each step.</strong> Instead of only allowing or blocking, the TPM chip (Chapter <a class="xref" href="chapter-19.html">19</a>) keeps a running hash of everything that loaded, in registers called <strong>PCRs</strong>:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre> PCR = SHA-256( old PCR value ‖ SHA-256(next stage) )        ← called &quot;extend&quot;</pre></div></figure><p>Like a blockchain (Chapter <a class="xref" href="chapter-16.html">16</a>), each value depends on everything before it. Change one byte of the bootloader and every later value changes. The TPM can also refuse to release a secret (for example, the disk-encryption key behind BitLocker) unless the PCRs match the known-good values.</p>
+<p class="lab-label">🧪 <strong>Try it yourself</strong> (Python): simulate three PCR &quot;extend&quot; steps.</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">import</span> hashlib
+
+pcr = <span class="hljs-built_in">bytes</span>(<span class="hljs-number">32</span>)                                        <span class="hljs-comment"># PCRs start at all zeros</span>
+<span class="hljs-keyword">for</span> stage <span class="hljs-keyword">in</span> [<span class="hljs-string">b&quot;firmware v1.2&quot;</span>, <span class="hljs-string">b&quot;bootloader v2.06&quot;</span>, <span class="hljs-string">b&quot;kernel 6.8&quot;</span>]:
+    measurement = hashlib.sha256(stage).digest()
+    pcr = hashlib.sha256(pcr + measurement).digest()   <span class="hljs-comment"># &quot;extend&quot;</span>
+    <span class="hljs-built_in">print</span>(stage.decode().ljust(<span class="hljs-number">18</span>), pcr.<span class="hljs-built_in">hex</span>()[:<span class="hljs-number">16</span>], <span class="hljs-string">&quot;…&quot;</span>)
+<span class="hljs-comment"># firmware v1.2      5d816df843726846 …</span>
+<span class="hljs-comment"># bootloader v2.06   029a2705d0dcd16e …</span>
+<span class="hljs-comment"># kernel 6.8         0eac0b47b054574c …</span></code></pre></div><p>On Linux you can look at the real thing: <code>mokutil --sb-state</code> shows whether Secure Boot is on, and <code>sudo tpm2_pcrread sha256:0,7</code> (from <code>tpm2-tools</code>) prints your PCRs.</p>
+<p><strong>Remote attestation: prove it to someone else.</strong> The TPM signs the current PCR values with a key that can&#39;t leave the chip (a &quot;quote&quot;). A server can then check, remotely, that a device booted genuine software before letting it onto a company network. The same idea lets cloud customers verify confidential-computing enclaves (Chapter <a class="xref" href="chapter-17.html">17</a>) before sending them secrets.</p>
+<div class="callout story"><p>📜 <strong>True story: BlackLotus (2023).</strong> Security firm ESET found the first publicly known bootkit able to bypass UEFI Secure Boot on fully updated Windows 11. It exploited an old, legitimately signed but vulnerable Windows boot component that had been patched, but not yet added to the <code>dbx</code> revocation list, so the firmware still trusted it. Revocation is just as hard for boot code as for certificates (Chapter <a class="xref" href="chapter-13.html">13</a>).</p></div>
+</div><div class="widget" data-w="measuredboot"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Device trust</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Secure boot</h5><p class="pc-tag">Verify each stage’s signature</p></header>
+<ul class="pros"><li>Blocks unsigned bootkits</li><li>Simple yes/no decision</li></ul>
+<ul class="cons"><li>Vulnerable signed code must be revoked (BlackLotus)</li><li>Can restrict installing your own OS</li></ul>
+<footer><b>Best for:</b> Every PC and phone</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Measured boot</h5><p class="pc-tag">Hash every stage into TPM PCRs</p></header>
+<ul class="pros"><li>Detects any change, even signed ones</li><li>Can seal disk keys to known-good state</li></ul>
+<ul class="cons"><li>Legitimate updates change the values</li><li>Needs someone to check the measurements</li></ul>
+<footer><b>Best for:</b> BitLocker, Linux disk unlock</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>Remote attestation</h5><p class="pc-tag">Prove boot state to a server</p></header>
+<ul class="pros"><li>Zero-trust device checks</li><li>Verify cloud enclaves before sending secrets</li></ul>
+<ul class="cons"><li>Privacy and platform lock-in concerns</li><li>Complex to deploy</li></ul>
+<footer><b>Best for:</b> Company devices, confidential computing</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-20-9" id="s-20-9" data-sec="s-20-9">
+<h2 class="sec-title"><span class="sec-num">20.9</span><span class="sec-text">Hiding that a message exists: steganography</span><a class="sec-anchor" href="#s-20-9" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Encryption hides <em>what</em> a message says, but everyone can see that a secret message exists. <strong>Steganography</strong> (&quot;covered writing&quot; in Greek) hides the message&#39;s <em>existence</em>.</p>
+<p>It&#39;s ancient: the Greek historian Herodotus tells of a message tattooed on a messenger&#39;s shaved head, delivered once the hair had grown back. Digital versions hide data in places nobody looks:</p>
+<ul>
+<li><strong>Least significant bits of an image.</strong> Changing the lowest bit of a pixel&#39;s color changes it by 1 out of 255, invisible to the eye. A 12-megapixel photo has room for megabytes of hidden data.</li>
+<li>Unused space in files, the timing between network packets, or tiny spacing changes in text.</li>
+</ul>
+<p class="lab-label">🧪 <strong>Try it yourself</strong> (Python): hide a message in the lowest bits of &quot;pixel&quot; values.</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">import</span> os
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">hide</span>(<span class="hljs-params">pixels: <span class="hljs-built_in">bytearray</span>, secret: <span class="hljs-built_in">bytes</span></span>) -&gt; <span class="hljs-built_in">bytearray</span>:
+    bits = [(byte &gt;&gt; i) &amp; <span class="hljs-number">1</span> <span class="hljs-keyword">for</span> byte <span class="hljs-keyword">in</span> secret <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">7</span>, -<span class="hljs-number">1</span>, -<span class="hljs-number">1</span>)]
+    out = <span class="hljs-built_in">bytearray</span>(pixels)
+    <span class="hljs-keyword">for</span> i, bit <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(bits):
+        out[i] = (out[i] &amp; <span class="hljs-number">0xFE</span>) | bit          <span class="hljs-comment"># overwrite the least significant bit</span>
+    <span class="hljs-keyword">return</span> out
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">reveal</span>(<span class="hljs-params">pixels: <span class="hljs-built_in">bytes</span>, length: <span class="hljs-built_in">int</span></span>) -&gt; <span class="hljs-built_in">bytes</span>:
+    bits = [p &amp; <span class="hljs-number">1</span> <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> pixels[:length * <span class="hljs-number">8</span>]]
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">bytes</span>(<span class="hljs-built_in">int</span>(<span class="hljs-string">&quot;&quot;</span>.join(<span class="hljs-built_in">map</span>(<span class="hljs-built_in">str</span>, bits[i:i+<span class="hljs-number">8</span>])), <span class="hljs-number">2</span>) <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(bits), <span class="hljs-number">8</span>))
+
+image = <span class="hljs-built_in">bytearray</span>(os.urandom(<span class="hljs-number">1000</span>))             <span class="hljs-comment"># pretend these are pixel values</span>
+stego = hide(image, <span class="hljs-string">b&quot;meet at 5&quot;</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-built_in">max</span>(<span class="hljs-built_in">abs</span>(a - b) <span class="hljs-keyword">for</span> a, b <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(image, stego)))   <span class="hljs-comment"># 1: no pixel changed by more than 1</span>
+<span class="hljs-built_in">print</span>(reveal(stego, <span class="hljs-number">9</span>))                                  <span class="hljs-comment"># b&#x27;meet at 5&#x27;</span></code></pre></div><p>Where it shows up for real:</p>
+<ul>
+<li><strong>Malware</strong> hides commands and code inside innocent-looking images to slip past filters.</li>
+<li><strong>Watermarking</strong> embeds an owner&#39;s or recipient&#39;s ID in images, audio and documents, so leaks can be traced.</li>
+<li>Many <strong>color laser printers</strong> print a nearly invisible pattern of tiny yellow dots encoding the printer&#39;s serial number and a timestamp, as the EFF documented in 2005.</li>
+</ul>
+<div class="callout warn"><p>⚠️ <strong>Watch out:</strong> steganography is not a substitute for encryption. <strong>Steganalysis</strong> tools detect the statistical fingerprints that hiding leaves behind, and once the hiding place is found, the message is in plain sight. If you use it, encrypt first, then hide, so even a discovered message is unreadable.</p></div>
+</div><div class="widget" data-w="stego"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Hiding vs. encrypting</h4></div><div class="pc-grid">
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>Steganography</h5><p class="pc-tag">Hide that a message exists</p></header>
+<ul class="pros"><li>Doesn’t draw attention</li></ul>
+<ul class="cons"><li>Steganalysis detects statistical traces</li><li>Found = readable, unless also encrypted</li></ul>
+<footer><b>Best for:</b> On top of encryption, never instead</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Encryption</h5><p class="pc-tag">Hide what a message says</p></header>
+<ul class="pros"><li>Proven, standard, strong</li></ul>
+<ul class="cons"><li>Everyone can see a secret exists</li></ul>
+<footer><b>Best for:</b> Always</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>Watermarking</h5><p class="pc-tag">Hidden owner or recipient ID</p></header>
+<ul class="pros"><li>Traces leaks back to the source</li></ul>
+<ul class="cons"><li>Can sometimes be removed or forged</li><li>Privacy concerns (printer dots)</li></ul>
+<footer><b>Best for:</b> Media and document leak tracing</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-20-10" id="s-20-10" data-sec="s-20-10">
+<h2 class="sec-title"><span class="sec-num">20.10</span><span class="sec-text">The crypto wars: export rules, key escrow and backdoors</span><a class="sec-anchor" href="#s-20-10" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Strong encryption protects everyone equally, including people that governments want to monitor. That tension has produced decades of conflict, often called the <strong>crypto wars</strong>.</p>
+<p><strong>Round 1: crypto as a weapon (1970s–2000).</strong> The US classified strong encryption as a <strong>munition</strong>, alongside missiles. Software sold abroad was limited to deliberately weak &quot;export-grade&quot; crypto, typically <strong>40-bit keys</strong>: Netscape shipped a strong &quot;US edition&quot; and a weak &quot;international edition&quot; of its browser.</p>
+<ul>
+<li>After Phil Zimmermann released PGP in 1991 (Chapter <a class="xref" href="chapter-02.html">2</a>) and it spread abroad, he faced a three-year criminal investigation, dropped in 1996.</li>
+<li>In 1995, PGP&#39;s source code was printed and exported as a <strong>book</strong>, because printed books were protected as speech while software wasn&#39;t.</li>
+<li>In 1999, a US appeals court sided with Daniel J. Bernstein (the designer of ChaCha20 and Curve25519), treating source code as protected speech. In 2000, the rules were substantially relaxed.</li>
+</ul>
+<p>Today, mass-market and open-source encryption can generally be exported, though some paperwork and country restrictions remain (international coordination happens through the <strong>Wassenaar Arrangement</strong>). The old rules still did damage: the FREAK and Logjam attacks of 2015 (Chapter <a class="xref" href="chapter-18.html">18</a>) exploited export-grade options that servers had forgotten to remove 15 years later.</p>
+<p><strong>Round 2: key escrow and the Clipper chip (1993).</strong> The US government proposed the <strong>Clipper chip</strong> for phones: strong encryption, but with a copy of every device&#39;s key held in escrow by the government, released for authorized wiretaps. In 1994, researcher Matt Blaze showed the escrow mechanism could be bypassed, because the field that carried the escrowed key information was protected by only a 16-bit checksum that could be brute-forced. Industry and public opposition was fierce, and the plan was quietly abandoned by 1996.</p>
+<p><strong>Round 3: &quot;going dark&quot; (2010s–today).</strong> As phones, disks and messaging apps adopted strong encryption by default (Chapter <a class="xref" href="chapter-16.html">16</a>), law enforcement warned of evidence &quot;going dark&quot; and asked for <strong>exceptional access</strong>: a way to unlock encrypted data with a court order.</p>
+<ul>
+<li><strong>2016:</strong> the FBI asked a court to order Apple to write software unlocking a terrorist&#39;s iPhone. Apple refused; the FBI eventually got in with help from an outside firm and dropped the case.</li>
+<li><strong>2015:</strong> a group of leading cryptographers published <em>Keys Under Doormats</em>, arguing that any exceptional-access system adds complexity and a high-value target that attackers will seek.</li>
+<li><strong>2015:</strong> Juniper Networks found unauthorized code in its firewall software. Investigators concluded that the constants of the Dual_EC random generator (Chapter <a class="xref" href="chapter-04.html">4</a>) had been changed by unknown attackers: a suspected backdoor taken over by someone else.</li>
+<li>Some laws now let governments order companies to assist with access (for example, the UK&#39;s Investigatory Powers Act). In 2025, Apple withdrew its Advanced Data Protection end-to-end encrypted backups for UK users after reportedly receiving such an order. Proposals in several countries to scan messages on users&#39; devices before encryption (&quot;client-side scanning&quot;) remain hotly debated.</li>
+</ul>
+<aside class="callout key"><p>💡 <strong>Key idea:</strong> Mathematics can&#39;t tell a lawful investigator from a criminal or a hostile government. A key held &quot;only for the good guys&quot; is a key that can be stolen, leaked or abused, which is why most cryptographers oppose backdoors. The policy debate weighs that risk against real investigative needs, and it isn&#39;t over.</p>
+</aside>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>The policy debate: arguments on each side</h4></div><div class="pc-grid">
+<article class="pc-card v-idea"><header><span class="pc-verdict">💡 Concept</span><h5>Exceptional access</h5><p class="pc-tag">Key escrow / lawful-access mechanisms</p></header>
+<ul class="pros"><li>Could help investigate serious crimes when data is otherwise unreadable</li><li>Courts could oversee each use</li></ul>
+<ul class="cons"><li>Creates a high-value key or mechanism to steal or abuse</li><li>History: Clipper flaw, hijacked Dual_EC at Juniper</li><li>Other governments will demand the same</li></ul>
+<footer><b>Best for:</b> Hotly debated</footer></article>
+<article class="pc-card v-idea"><header><span class="pc-verdict">💡 Concept</span><h5>Strong encryption by default</h5><p class="pc-tag">No one but the user holds the keys</p></header>
+<ul class="pros"><li>Protects everyone: citizens, businesses, journalists, governments</li><li>No master key to leak</li></ul>
+<ul class="cons"><li>Can hinder investigations (“going dark”)</li><li>Lost keys can mean lost data</li></ul>
+<footer><b>Best for:</b> The default in modern phones and messengers</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 20</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 5 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 20 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-grape" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 21</p>
+<h3>Cheat Sheet: What to Use Today</h3>
+<p class="next-hook">Everything you’ve learned, boiled down to one page you could stick on your fridge.</p>
+<div class="next-actions"><a class="btn big" href="chapter-21.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-19.html">← Key Management: Guarding the Keys</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":20,"title":"Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places","quiz":[{"q":"In the IND-CPA game, why does every deterministic encryption scheme lose?","o":["Its keys are too short","The attacker asks for an encryption of M0 and compares it with the challenge","It leaks the message length","It has no MAC"],"a":1,"why":"Same message, same ciphertext: the attacker wins every time. That is why real encryption needs a random IV or a unique nonce (and why ECB fails)."},{"q":"In a Feistel network, the round function F…","o":["must be reversible","doesn’t need to be reversible: decryption runs the same rounds with the keys in reverse order","is only used when decrypting","must be a public-key operation"],"a":1,"why":"XOR-ing the same F output twice cancels out, so F can even be a one-way hash. DES is built this way."},{"q":"What does a Tor middle relay know?","o":["Who you are","Which website you’re visiting","Only the previous relay and the next relay","Your password"],"a":2,"why":"Each relay peels one layer of encryption and learns only the next hop. Only the guard sees you; only the exit sees the website."},{"q":"On its own, OAuth 2.0 is…","o":["a login protocol","a way to grant an app access to an account (authorization); OpenID Connect adds login","an encryption algorithm","a password hash"],"a":1,"why":"Use OpenID Connect (signed ID tokens) for “Sign in with…”, plus the authorization code flow with PKCE."},{"q":"Why can’t a skimmer clone a chip card the way it clones a magnetic stripe?","o":["Chips are waterproof","Every payment needs a fresh cryptogram made with a key that never leaves the chip","Chip cards have no card number","Terminals scan fingerprints"],"a":1,"why":"The ARQC is a MAC over the amount, a fresh unpredictable number and a counter. Copied data can’t produce a new one, and old ones can’t be replayed."}],"fragment":"onion","secs":["s-20-1","s-20-2","s-20-3","s-20-4","s-20-5","s-20-6","s-20-7","s-20-8","s-20-9","s-20-10"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-e.js?v=86fb719f26"></script>
+</body>
+</html>

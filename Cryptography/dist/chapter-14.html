@@ -1,0 +1,530 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 14: TLS and HTTPS: Putting It All Together · CryptoSketch</title>
+<meta name="description" content="In about 100 milliseconds, your browser and a server on another continent run almost everything from Chapters 4 to 13. Let’s watch it happen in slow motion.">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-ocean">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">🤝 In this chapter</p><ol><li><a href="#s-14-1" data-sec="s-14-1"><span class="st-num">14.1</span><span class="st-t">What TLS is</span></a></li><li><a href="#s-14-2" data-sec="s-14-2"><span class="st-num">14.2</span><span class="st-t">TLS versions</span></a></li><li><a href="#s-14-3" data-sec="s-14-3"><span class="st-num">14.3</span><span class="st-t">The journey of a web request, from typing to page</span></a></li><li><a href="#s-14-4" data-sec="s-14-4"><span class="st-num">14.4</span><span class="st-t">The TLS 1.3 handshake, step by step</span></a></li><li><a href="#s-14-5" data-sec="s-14-5"><span class="st-num">14.5</span><span class="st-t">TLS 1.2, for comparison</span></a></li><li><a href="#s-14-6" data-sec="s-14-6"><span class="st-num">14.6</span><span class="st-t">Cipher suites, decoded</span></a></li><li><a href="#s-14-7" data-sec="s-14-7"><span class="st-num">14.7</span><span class="st-t">After the handshake: the record protocol</span></a></li><li><a href="#s-14-8" data-sec="s-14-8"><span class="st-num">14.8</span><span class="st-t">Resumption and 0-RTT</span></a></li><li><a href="#s-14-9" data-sec="s-14-9"><span class="st-num">14.9</span><span class="st-t">SNI and Encrypted Client Hello (ECH)</span></a></li><li><a href="#s-14-10" data-sec="s-14-10"><span class="st-num">14.10</span><span class="st-t">HTTP/2, HTTP/3 and QUIC</span></a></li><li><a href="#s-14-11" data-sec="s-14-11"><span class="st-num">14.11</span><span class="st-t">Mutual TLS (mTLS)</span></a></li><li><a href="#s-14-12" data-sec="s-14-12"><span class="st-num">14.12</span><span class="st-t">HSTS: closing the HTTP loophole</span></a></li><li><a href="#s-14-13" data-sec="s-14-13"><span class="st-num">14.13</span><span class="st-t">TLS interception: the "approved" man-in-the-middle</span></a></li><li><a href="#s-14-14" data-sec="s-14-14"><span class="st-num">14.14</span><span class="st-t">Common certificate errors and what they mean</span></a></li><li><a href="#s-14-15" data-sec="s-14-15"><span class="st-num">14.15</span><span class="st-t">Hands-on with TLS</span></a></li><li><a href="#s-14-16" data-sec="s-14-16"><span class="st-num">14.16</span><span class="st-t">A secure TLS setup checklist (for people running servers)</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="14">
+<header class="ch-hero world-ocean">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-3">🌐 World 3 · Trust on the Internet</a>
+    <p class="ch-num">Chapter 14</p>
+    <h1 class="ch-title">TLS and HTTPS: Putting It All Together</h1>
+    <p class="ch-hook"><span>🤔</span> In about 100 milliseconds, your browser and a server on another continent run almost everything from Chapters 4 to 13. Let’s watch it happen in slow motion.</p>
+    <ul class="ch-stats"><li>⏱️ ~10 min</li><li>📚 16 sections</li><li>🎮 2 interactive</li><li>⭐ 240 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="14" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"><p>This is where every building block in the guide comes together.</p>
+</div>
+<section class="sec sec-14-1" id="s-14-1" data-sec="s-14-1">
+<h2 class="sec-title"><span class="sec-num">14.1</span><span class="sec-text">What TLS is</span><a class="sec-anchor" href="#s-14-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p><strong>TLS (Transport Layer Security)</strong> is the protocol that protects data traveling between two programs over a network. Its older name was <strong>SSL</strong> (Secure Sockets Layer), and people still say &quot;SSL certificate&quot; out of habit.</p>
+<p><strong>HTTPS</strong> is HTTP (the web) running inside TLS. TLS also protects email (IMAPS, SMTP with STARTTLS), many VPNs, database connections, app APIs, smart-home devices and DNS over TLS/HTTPS.</p>
+<p><strong>What TLS gives you:</strong></p>
+<ul>
+<li>✅ <strong>Confidentiality:</strong> nobody on the path can read the data.</li>
+<li>✅ <strong>Integrity:</strong> nobody can change the data without being detected.</li>
+<li>✅ <strong>Server authentication:</strong> you&#39;re talking to the real <code>bank.example</code>, proven by its certificate.</li>
+<li>✅ Optional <strong>client authentication</strong> (mutual TLS).</li>
+<li>✅ <strong>Forward secrecy</strong> (TLS 1.3 always; TLS 1.2 if configured with ECDHE).</li>
+</ul>
+<p><strong>What TLS does NOT give you:</strong></p>
+<ul>
+<li>❌ Protection of data once it reaches the server (that&#39;s the server&#39;s job).</li>
+<li>❌ Proof that the website is honest (phishing sites have TLS too).</li>
+<li>❌ Hiding which domain you visited (partly fixed by encrypted DNS and ECH).</li>
+<li>❌ Protection from malware on your own device.</li>
+</ul>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-14-2" id="s-14-2" data-sec="s-14-2">
+<h2 class="sec-title"><span class="sec-num">14.2</span><span class="sec-text">TLS versions</span><a class="sec-anchor" href="#s-14-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Version</th>
+<th>Year</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>SSL 2.0</td>
+<td>1995</td>
+<td class="st-bad">❌ Broken</td>
+</tr>
+<tr>
+<td>SSL 3.0</td>
+<td>1996</td>
+<td class="st-bad">❌ Broken (POODLE attack, 2014)</td>
+</tr>
+<tr>
+<td>TLS 1.0</td>
+<td>1999</td>
+<td class="st-bad">❌ Deprecated (officially in 2021)</td>
+</tr>
+<tr>
+<td>TLS 1.1</td>
+<td>2006</td>
+<td class="st-bad">❌ Deprecated (2021)</td>
+</tr>
+<tr>
+<td><strong>TLS 1.2</strong></td>
+<td>2008</td>
+<td class="st-warn">⚠️ Still widely used; safe <strong>only</strong> with modern settings</td>
+</tr>
+<tr>
+<td><strong>TLS 1.3</strong></td>
+<td>2018</td>
+<td class="st-ok">✅ Current standard: faster, simpler, safer</td>
+</tr>
+</tbody></table></div>
+<p>TLS 1.3 removed a large list of old, risky options: RSA key transport (no forward secrecy), CBC-mode ciphers, RC4, SHA-1, MD5, compression and renegotiation. What&#39;s left is a small set of choices that are all secure.</p>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>SSL/TLS versions</h4></div><div class="pc-grid">
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>SSL 2.0 / 3.0</h5><p class="pc-tag">1995 / 1996</p></header>
+<ul class="pros"><li>Started web encryption</li></ul>
+<ul class="cons"><li>POODLE, DROWN; fundamentally broken</li></ul>
+<footer><b>Best for:</b> Disable everywhere</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>TLS 1.0 / 1.1</h5><p class="pc-tag">1999 / 2006</p></header>
+<ul class="pros"><li>Widely compatible in their day</li></ul>
+<ul class="cons"><li>BEAST, SHA-1/MD5 internals</li><li>Deprecated in 2021</li></ul>
+<footer><b>Best for:</b> Disable everywhere</footer></article>
+<article class="pc-card v-legacy"><header><span class="pc-verdict">⚠️ Legacy</span><h5>TLS 1.2</h5><p class="pc-tag">2008</p></header>
+<ul class="pros"><li>Universal support</li><li>Secure with ECDHE + AEAD</li></ul>
+<ul class="cons"><li>Many dangerous options to misconfigure</li><li>2-round-trip handshake</li></ul>
+<footer><b>Best for:</b> Fallback for old clients</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>TLS 1.3</h5><p class="pc-tag">2018</p></header>
+<ul class="pros"><li>1-RTT handshake; encrypts more of it</li><li>Only secure options left</li><li>Forward secrecy always</li></ul>
+<ul class="cons"><li>0-RTT data is replayable</li><li>Breaks some legacy middleboxes</li></ul>
+<footer><b>Best for:</b> Everything new</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-14-3" id="s-14-3" data-sec="s-14-3">
+<h2 class="sec-title"><span class="sec-num">14.3</span><span class="sec-text">The journey of a web request, from typing to page</span><a class="sec-anchor" href="#s-14-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>When you type <code>https://example.com</code> and press Enter:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> Time ─────────────────────────────────────────────────────────────────────────►
+
+ 1. DNS lookup        &quot;What's example.com's IP?&quot;  →  &quot;172.66.147.243&quot;     (~1 round trip, often cached)
+ 2. TCP handshake     SYN → SYN-ACK → ACK                                  (1 round trip)
+ 3. TLS handshake     ClientHello → ServerHello ... Finished               (1 round trip in TLS 1.3)
+ 4. HTTP request      GET / (encrypted)  →  200 OK + page (encrypted)      (1 round trip)
+ 5. Page renders, more requests reuse the same secure connection</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-14-4" id="s-14-4" data-sec="s-14-4">
+<h2 class="sec-title"><span class="sec-num">14.4</span><span class="sec-text">The TLS 1.3 handshake, step by step</span><a class="sec-anchor" href="#s-14-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>The <strong>handshake</strong> is a short conversation at the start of the connection in which client and server agree on a key and the server proves its identity. Here it is in full:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> Browser (client)                                                 Server (example.com)
+      │                                                                     │
+      │ ─── 1. ClientHello ───────────────────────────────────────────────► │
+      │       • &quot;I speak TLS 1.3&quot;                                           │
+      │       • a fresh random number                                       │
+      │       • cipher suites I support (AES-GCM, ChaCha20-Poly1305)        │
+      │       • key_share: my temporary public key(s) (X25519MLKEM768)      │
+      │       • server_name (SNI): &quot;example.com&quot;                            │
+      │       • ALPN: &quot;I can speak HTTP/2 or HTTP/1.1&quot;                      │
+      │       • signature algorithms I accept                               │
+      │                                                                     │
+      │ ◄─────────────────────────────────────────────── 2. ServerHello ─── │
+      │       • &quot;TLS 1.3, cipher suite TLS_AES_256_GCM_SHA384&quot;              │
+      │       • a fresh random number                                       │
+      │       • key_share: my temporary public key / ML-KEM ciphertext      │
+      │                                                                     │
+      │    ═══ 3. Both sides compute the same shared secret ═══             │
+      │        (key exchange) and derive handshake keys with HKDF           │
+      │        ↓ Everything from here on is ENCRYPTED ↓                     │
+      │                                                                     │
+      │ ◄─────────────────────────────────────── 4. EncryptedExtensions ─── │
+      │       • &quot;Let's use HTTP/2&quot;                                          │
+      │ ◄─────────────────────────────────────────────── 5. Certificate ─── │
+      │       • my certificate + intermediate certificate(s)                │
+      │ ◄───────────────────────────────────────── 6. CertificateVerify ─── │
+      │       • a SIGNATURE over the entire handshake so far,               │
+      │         made with my certificate's PRIVATE key                      │
+      │ ◄────────────────────────────────────────────────── 7. Finished ─── │
+      │       • a MAC over the entire handshake (proves nothing was altered)│
+      │                                                                     │
+      │  8. Browser checks: certificate chain → trusted root? name matches? │
+      │     not expired? signature valid? Finished MAC correct?             │
+      │                                                                     │
+      │ ─── 9. Finished ──────────────────────────────────────────────────► │
+      │                                                                     │
+      │    ═══ 10. Both derive the application traffic keys ═══             │
+      │                                                                     │
+      │ ─── GET / HTTP/2  (encrypted with AES-256-GCM) ───────────────────► │
+      │ ◄───────────────────────────── 200 OK + web page (encrypted) ────── │</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>What each step is for, in plain words:</p>
+<ol>
+<li><strong>ClientHello:</strong> the browser says what it supports and, to save time, <strong>guesses</strong> the key-exchange method and sends its half of the key exchange right away.</li>
+<li><strong>ServerHello:</strong> the server picks the options and sends <strong>its</strong> half of the key exchange.</li>
+<li><strong>Shared secret:</strong> both sides now compute the same secret, just like Alice and Bob in Chapter <a class="xref" href="chapter-10.html">10</a>. Eve, who saw both public halves, can&#39;t. HKDF turns it into encryption keys.</li>
+<li><strong>EncryptedExtensions:</strong> remaining settings, now encrypted (TLS 1.3 encrypts much more of the handshake than TLS 1.2).</li>
+<li><strong>Certificate:</strong> the server&#39;s ID card (Chapter <a class="xref" href="chapter-13.html">13</a>).</li>
+<li><strong>CertificateVerify:</strong> the crucial anti-Mallory step. The server <strong>signs the whole conversation</strong> with its certificate&#39;s private key. Mallory could copy the certificate but can&#39;t produce this signature. And because the signature covers the key-exchange values, Mallory can&#39;t swap in her own key-exchange values either.</li>
+<li><strong>Finished:</strong> a MAC over all handshake messages, using the new keys. If anyone altered <em>anything</em> (for example, removing strong cipher suites to force a weaker choice), the MACs won&#39;t match and the connection is aborted.</li>
+<li><strong>Browser checks</strong> everything listed in <a class="xref" href="chapter-13.html#s-13-5">section 13.5</a>.</li>
+<li><strong>Client Finished:</strong> the browser confirms its side.</li>
+<li><strong>Application data</strong> flows, protected by AEAD encryption.</li>
+</ol>
+<p>All of this takes <strong>one round trip</strong>. If the server doesn&#39;t support the key-exchange method the browser guessed, it sends a <code>HelloRetryRequest</code> and the browser tries again, costing an extra round trip.</p>
+<h4 id="where-every-chapter-of-this-guide-shows-up-in-tls" class="h4">Where every chapter of this guide shows up in TLS</h4>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>TLS ingredient</th>
+<th>What it does</th>
+<th>Chapter</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Random numbers in ClientHello/ServerHello</td>
+<td>Make every session unique</td>
+<td>4</td>
+</tr>
+<tr>
+<td>X25519 / ML-KEM key shares</td>
+<td>Agree on a shared secret in public, with forward secrecy</td>
+<td>10</td>
+</tr>
+<tr>
+<td>HKDF key schedule</td>
+<td>Derive separate keys for each direction and purpose</td>
+<td>8</td>
+</tr>
+<tr>
+<td>Certificate chain</td>
+<td>Proves the public key belongs to <code>example.com</code></td>
+<td>13</td>
+</tr>
+<tr>
+<td>CertificateVerify (ECDSA, RSA-PSS or Ed25519)</td>
+<td>Proves the server holds the private key</td>
+<td>11</td>
+</tr>
+<tr>
+<td>Transcript hash (SHA-256/384)</td>
+<td>A fingerprint of the whole handshake</td>
+<td>6</td>
+</tr>
+<tr>
+<td>Finished messages (HMAC)</td>
+<td>Detect any tampering with the handshake</td>
+<td>7</td>
+</tr>
+<tr>
+<td>AES-GCM / ChaCha20-Poly1305</td>
+<td>Encrypt and authenticate the actual data</td>
+<td>5</td>
+</tr>
+</tbody></table></div>
+</div><div class="widget" data-w="handshake"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-14-5" id="s-14-5" data-sec="s-14-5">
+<h2 class="sec-title"><span class="sec-num">14.5</span><span class="sec-text">TLS 1.2, for comparison</span><a class="sec-anchor" href="#s-14-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>You&#39;ll still see TLS 1.2 in older systems. Its handshake takes <strong>two</strong> round trips, and the certificate is sent unencrypted:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> Client                                              Server
+   │ ── ClientHello ─────────────────────────────────► │
+   │ ◄──────── ServerHello, Certificate,               │
+   │           ServerKeyExchange (signed ECDHE value), │
+   │           ServerHelloDone ─────────────────────── │
+   │ ── ClientKeyExchange, ChangeCipherSpec, Finished ►│
+   │ ◄─────────────────── ChangeCipherSpec, Finished ──│
+   │ ══ application data ═══════════════════════════════│</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>TLS 1.2 also allowed <strong>RSA key transport</strong>: the client encrypted the secret with the server&#39;s RSA key, with no forward secrecy (Chapter <a class="xref" href="chapter-10.html">10</a>). A well-configured TLS 1.2 server today only allows ECDHE key exchange with AEAD ciphers.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-14-6" id="s-14-6" data-sec="s-14-6">
+<h2 class="sec-title"><span class="sec-num">14.6</span><span class="sec-text">Cipher suites, decoded</span><a class="sec-anchor" href="#s-14-6" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A <strong>cipher suite</strong> is a named combination of algorithms.</p>
+<p><strong>A TLS 1.2 cipher suite</strong> names everything:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256
+    └─┬─┘ └┬┘      └─────┬─────┘ └─┬──┘
+      │    │             │         └── hash for key derivation: SHA-256
+      │    │             └──────────── bulk encryption: AES-128 in GCM mode (AEAD)
+      │    └────────────────────────── authentication: RSA signature (certificate type)
+      └─────────────────────────────── key exchange: ephemeral elliptic-curve Diffie-Hellman</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p><strong>A TLS 1.3 cipher suite</strong> only names the encryption and hash, because key exchange and signatures are negotiated separately (as &quot;groups&quot; and &quot;signature algorithms&quot;):</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>TLS_AES_256_GCM_SHA384
+    └─────┬─────┘ └─┬──┘
+          │         └── hash for HKDF: SHA-384
+          └──────────── AEAD: AES-256-GCM</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>TLS 1.3 defines only five suites:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>TLS 1.3 cipher suite</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>TLS_AES_128_GCM_SHA256</code></td>
+<td class="st-ok">✅ Most common</td>
+</tr>
+<tr>
+<td><code>TLS_AES_256_GCM_SHA384</code></td>
+<td class="st-ok">✅ Common</td>
+</tr>
+<tr>
+<td><code>TLS_CHACHA20_POLY1305_SHA256</code></td>
+<td class="st-ok">✅ Preferred on devices without AES hardware</td>
+</tr>
+<tr>
+<td><code>TLS_AES_128_CCM_SHA256</code></td>
+<td>IoT devices</td>
+</tr>
+<tr>
+<td><code>TLS_AES_128_CCM_8_SHA256</code></td>
+<td>IoT, shorter tag; not recommended for general use</td>
+</tr>
+</tbody></table></div>
+<p>Red flags in older cipher suites (avoid any that contain): <code>NULL</code> (no encryption), <code>anon</code> (no authentication), <code>EXPORT</code> (deliberately weakened 1990s crypto), <code>RC4</code>, <code>DES</code>, <code>3DES</code>, <code>MD5</code>, and <code>TLS_RSA_WITH_...</code> (static RSA key exchange, no forward secrecy).</p>
+</div><div class="widget" data-w="suite"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-14-7" id="s-14-7" data-sec="s-14-7">
+<h2 class="sec-title"><span class="sec-num">14.7</span><span class="sec-text">After the handshake: the record protocol</span><a class="sec-anchor" href="#s-14-7" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Once keys are agreed, data is split into <strong>records</strong> (up to 16 KB each). Each record is encrypted with the AEAD cipher, using a <strong>sequence number</strong> as part of the nonce. That means:</p>
+<ul>
+<li>Every record has a unique nonce (no nonce reuse).</li>
+<li>If an attacker deletes, reorders or replays a record, decryption fails.</li>
+<li>Long-lived connections can switch to fresh keys with a <code>KeyUpdate</code> message.</li>
+</ul>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-14-8" id="s-14-8" data-sec="s-14-8">
+<h2 class="sec-title"><span class="sec-num">14.8</span><span class="sec-text">Resumption and 0-RTT</span><a class="sec-anchor" href="#s-14-8" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Reconnecting to a site you visited recently can skip some work. The server gives the client a <strong>session ticket</strong> (a pre-shared key) at the end of the first connection. Next time, the client presents the ticket and they resume quickly.</p>
+<p>TLS 1.3 even allows <strong>0-RTT</strong> (&quot;zero round trip&quot;) mode, where the client sends its first request <strong>together with</strong> the ClientHello. It&#39;s fast, but that early data can be <strong>replayed</strong> by an attacker (sent again to the server). So servers should only accept 0-RTT for harmless, repeatable requests like loading a page, never for &quot;transfer money.&quot;</p>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Session resumption</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Resumption (PSK)</h5><p class="pc-tag">Reuse a ticket from last time</p></header>
+<ul class="pros"><li>Skips certificate checks: faster</li><li>Less CPU on busy servers</li></ul>
+<ul class="cons"><li>Ticket keys must be rotated or they weaken forward secrecy</li></ul>
+<footer><b>Best for:</b> Returning visitors</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>0-RTT</h5><p class="pc-tag">Send data with the first packet</p></header>
+<ul class="pros"><li>Zero waiting on repeat visits</li></ul>
+<ul class="cons"><li>Early data can be replayed</li><li>Only safe for idempotent requests (GETs)</li></ul>
+<footer><b>Best for:</b> Static content</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-14-9" id="s-14-9" data-sec="s-14-9">
+<h2 class="sec-title"><span class="sec-num">14.9</span><span class="sec-text">SNI and Encrypted Client Hello (ECH)</span><a class="sec-anchor" href="#s-14-9" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>One server often hosts hundreds of websites on one IP address. To know which certificate to present, it needs to know which site you want before encryption starts. So the ClientHello includes the domain name in a field called <strong>SNI (Server Name Indication)</strong>, <strong>unencrypted</strong>. Anyone watching can see which site you&#39;re visiting, even with HTTPS.</p>
+<p><strong>Encrypted Client Hello (ECH)</strong> fixes this. The website publishes a public key in DNS; the browser uses it to encrypt the real ClientHello (including the domain name) inside an outer ClientHello that shows only a generic name, like the hosting provider&#39;s. Cloudflare and major browsers support ECH, and it&#39;s spreading.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-14-10" id="s-14-10" data-sec="s-14-10">
+<h2 class="sec-title"><span class="sec-num">14.10</span><span class="sec-text">HTTP/2, HTTP/3 and QUIC</span><a class="sec-anchor" href="#s-14-10" aria-label="Link to this section">#</a></h2>
+<div class="prose"><ul>
+<li><strong>ALPN</strong> (Application-Layer Protocol Negotiation) is the part of the handshake where client and server agree on HTTP/1.1, HTTP/2 or HTTP/3.</li>
+<li><strong>HTTP/3</strong> runs over <strong>QUIC</strong>, a newer transport built on UDP. QUIC has TLS 1.3 <strong>built in</strong>: the transport handshake and the crypto handshake happen together, so a new connection takes one round trip instead of two (TCP + TLS). QUIC also encrypts most of its own packet headers.</li>
+</ul>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>HTTP versions</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>HTTP/2</h5><p class="pc-tag">Over TLS + TCP</p></header>
+<ul class="pros"><li>Multiplexes many requests on one connection</li></ul>
+<ul class="cons"><li>TCP head-of-line blocking on lossy networks</li></ul>
+<footer><b>Best for:</b> Default for most sites</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>HTTP/3 (QUIC)</h5><p class="pc-tag">TLS 1.3 built into QUIC over UDP</p></header>
+<ul class="pros"><li>Faster setup; no head-of-line blocking</li><li>Survives network changes (Wi-Fi → 4G)</li></ul>
+<ul class="cons"><li>UDP sometimes blocked</li><li>Harder for middleboxes to inspect</li></ul>
+<footer><b>Best for:</b> Mobile and global sites</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-14-11" id="s-14-11" data-sec="s-14-11">
+<h2 class="sec-title"><span class="sec-num">14.11</span><span class="sec-text">Mutual TLS (mTLS)</span><a class="sec-anchor" href="#s-14-11" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>In normal TLS, only the server shows a certificate. The client usually proves who it is later, with a password or a cookie. In <strong>mutual TLS</strong>, <strong>both sides</strong> present certificates during the handshake.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> Client                                Server
+   │ ◄── &quot;Here's my certificate&quot; ─────── │  (server authenticates as usual)
+   │ ◄── &quot;Show me YOUR certificate&quot; ──── │  (CertificateRequest)
+   │ ─── client certificate ───────────► │
+   │ ─── CertificateVerify (signature) ─►│  (client proves it holds the private key)</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>mTLS is used for service-to-service traffic inside companies (often managed by &quot;service meshes&quot; such as Istio or Linkerd), &quot;zero trust&quot; networks, IoT devices, banking APIs and VPNs. You tried it in Step 8 of the PKI lab.</p>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Mutual TLS</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>mTLS</h5><p class="pc-tag">Both sides show certificates</p></header>
+<ul class="pros"><li>Strong machine identity, no passwords</li><li>Zero-trust networks</li></ul>
+<ul class="cons"><li>Certificate issuance and rotation for every client</li><li>Painful for human users</li></ul>
+<footer><b>Best for:</b> Service-to-service traffic</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-14-12" id="s-14-12" data-sec="s-14-12">
+<h2 class="sec-title"><span class="sec-num">14.12</span><span class="sec-text">HSTS: closing the HTTP loophole</span><a class="sec-anchor" href="#s-14-12" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Most people type <code>bank.example</code>, not <code>https://bank.example</code>. The browser&#39;s first request may go out over plain HTTP, and the server then redirects to HTTPS. That first unencrypted moment is an opening.</p>
+<div class="callout story"><p>📜 <strong>SSL stripping (2009).</strong> Security researcher Moxie Marlinspike released a tool called <code>sslstrip</code>. An attacker on the network intercepts that first HTTP request, talks HTTPS to the bank on the victim&#39;s behalf, and keeps talking <strong>plain HTTP</strong> to the victim. The victim never sees a certificate error, just a missing padlock that most people don&#39;t notice.</p></div>
+<p>The fix is <strong>HSTS (HTTP Strict Transport Security)</strong>. The server sends a header:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>Strict-Transport-Security: max-age=31536000; includeSubDomains; preload</pre></div></figure><p>It tells the browser: &quot;For the next year, <strong>only ever</strong> connect to me over HTTPS, and don&#39;t let the user click through certificate errors.&quot; Sites can also join the <strong>HSTS preload list</strong>, built into browsers, so even the very first visit is protected. Modern browsers additionally offer &quot;HTTPS-First&quot; or &quot;HTTPS-Only&quot; modes.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-14-13" id="s-14-13" data-sec="s-14-13">
+<h2 class="sec-title"><span class="sec-num">14.13</span><span class="sec-text">TLS interception: the &quot;approved&quot; man-in-the-middle</span><a class="sec-anchor" href="#s-14-13" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Some corporate networks, antivirus products and parental-control tools <strong>inspect</strong> HTTPS traffic. They work by installing their own <strong>root certificate</strong> on your device. The proxy then generates a fake certificate for every site on the fly, signed by that root. Your device trusts it, so you see no warning.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> Your browser ◄── TLS (fake cert for bank.example, signed by Corp Root) ──► Corporate proxy ◄── TLS (real cert) ──► bank.example
+                                                                            (decrypts, inspects, re-encrypts)</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>To check whether this is happening, look at the certificate&#39;s <strong>issuer</strong> in your browser. If <code>google.com</code> was issued by &quot;Contoso Corp Security Proxy,&quot; your traffic is being inspected. Poorly built interception products have historically weakened security, for example by not checking the real site&#39;s certificate properly.</p>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>TLS interception</h4></div><div class="pc-grid">
+<article class="pc-card v-legacy"><header><span class="pc-verdict">⚠️ Legacy</span><h5>Corporate TLS inspection</h5><p class="pc-tag">An “approved” man in the middle</p></header>
+<ul class="pros"><li>Lets companies scan for malware and data leaks</li></ul>
+<ul class="cons"><li>Breaks end-to-end security</li><li>Middleboxes often validate certificates badly</li><li>One box sees every secret</li></ul>
+<footer><b>Best for:</b> Only with careful policy</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-14-14" id="s-14-14" data-sec="s-14-14">
+<h2 class="sec-title"><span class="sec-num">14.14</span><span class="sec-text">Common certificate errors and what they mean</span><a class="sec-anchor" href="#s-14-14" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Browser error (Chrome style)</th>
+<th>Meaning</th>
+<th>Common cause</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>NET::ERR_CERT_DATE_INVALID</code></td>
+<td>Certificate expired or not yet valid</td>
+<td>Forgotten renewal, <strong>or your computer&#39;s clock is wrong</strong></td>
+</tr>
+<tr>
+<td><code>NET::ERR_CERT_COMMON_NAME_INVALID</code></td>
+<td>The name doesn&#39;t match the certificate&#39;s SAN</td>
+<td>Wrong certificate installed, or visiting <code>example.com</code> with a certificate for <code>www.example.com</code> only</td>
+</tr>
+<tr>
+<td><code>NET::ERR_CERT_AUTHORITY_INVALID</code></td>
+<td>The chain doesn&#39;t lead to a trusted root</td>
+<td>Self-signed certificate, private CA, missing intermediate, or interception</td>
+</tr>
+<tr>
+<td><code>NET::ERR_CERT_REVOKED</code></td>
+<td>The certificate was cancelled</td>
+<td>Key compromise or mis-issuance</td>
+</tr>
+<tr>
+<td><code>ERR_SSL_VERSION_OR_CIPHER_MISMATCH</code></td>
+<td>No common TLS version or cipher</td>
+<td>A very old server or client</td>
+</tr>
+<tr>
+<td>Warning with no &quot;proceed anyway&quot; link</td>
+<td>The site uses HSTS</td>
+<td>You can&#39;t (and shouldn&#39;t) bypass it</td>
+</tr>
+</tbody></table></div>
+<p>Explore these safely at <strong><a href="https://badssl.com" target="_blank" rel="noopener">badssl.com</a></strong>, which hosts deliberately broken test sites (<code>expired.badssl.com</code>, <code>self-signed.badssl.com</code>, <code>wrong.host.badssl.com</code> …).</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-14-15" id="s-14-15" data-sec="s-14-15">
+<h2 class="sec-title"><span class="sec-num">14.15</span><span class="sec-text">Hands-on with TLS</span><a class="sec-anchor" href="#s-14-15" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p class="lab-label">🧪 <strong>Try it yourself:</strong></p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># A quick summary of a site&#x27;s TLS connection</span>
+openssl s_client -connect www.google.com:443 -servername www.google.com -brief &lt;/dev/null
+<span class="hljs-comment"># CONNECTION ESTABLISHED</span>
+<span class="hljs-comment"># Protocol version: TLSv1.3</span>
+<span class="hljs-comment"># Ciphersuite: TLS_AES_256_GCM_SHA384</span>
+<span class="hljs-comment"># Peer certificate: CN=www.google.com</span>
+<span class="hljs-comment"># Hash used: SHA256</span>
+<span class="hljs-comment"># Signature type: ecdsa_secp256r1_sha256</span>
+<span class="hljs-comment"># Verification: OK</span>
+<span class="hljs-comment"># Negotiated TLS1.3 group: X25519MLKEM768        ← post-quantum hybrid key exchange!</span>
+
+<span class="hljs-comment"># Force a specific TLS version (does the server still allow TLS 1.2?)</span>
+openssl s_client -connect example.com:443 -servername example.com -tls1_2 -brief &lt;/dev/null
+
+<span class="hljs-comment"># Check when a site&#x27;s certificate expires</span>
+<span class="hljs-built_in">echo</span> | openssl s_client -connect example.com:443 -servername example.com 2&gt;/dev/null \
+  | openssl x509 -noout -enddate</code></pre></div><p>In Python:</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">import</span> socket, ssl
+
+ctx = ssl.create_default_context()      <span class="hljs-comment"># verifies certificates and hostnames by default</span>
+<span class="hljs-keyword">with</span> socket.create_connection((<span class="hljs-string">&quot;example.com&quot;</span>, <span class="hljs-number">443</span>)) <span class="hljs-keyword">as</span> sock:
+    <span class="hljs-keyword">with</span> ctx.wrap_socket(sock, server_hostname=<span class="hljs-string">&quot;example.com&quot;</span>) <span class="hljs-keyword">as</span> tls:
+        <span class="hljs-built_in">print</span>(tls.version())            <span class="hljs-comment"># TLSv1.3</span>
+        <span class="hljs-built_in">print</span>(tls.cipher())             <span class="hljs-comment"># (&#x27;TLS_AES_256_GCM_SHA384&#x27;, &#x27;TLSv1.3&#x27;, 256)</span>
+        cert = tls.getpeercert()
+        <span class="hljs-built_in">print</span>(cert[<span class="hljs-string">&quot;subject&quot;</span>], cert[<span class="hljs-string">&quot;issuer&quot;</span>], cert[<span class="hljs-string">&quot;notAfter&quot;</span>])</code></pre></div><p>(If Python reports <code>CERTIFICATE_VERIFY_FAILED</code> on macOS, run the &quot;Install Certificates.command&quot; script that comes with the python.org installer, or <code>pip install certifi</code> and pass <code>cafile=certifi.where()</code> to <code>create_default_context</code>.)</p>
+<div class="callout warn"><p>⚠️ <strong>Watch out:</strong> never &quot;fix&quot; certificate errors in code by turning verification off (<code>verify=False</code> in Python&#39;s <code>requests</code>, <code>curl -k</code>, <code>InsecureSkipVerify</code> in Go, <code>rejectUnauthorized: false</code> in Node.js). That silently removes <strong>all</strong> protection against man-in-the-middle attacks. It&#39;s one of the most common security bugs in real software.</p></div>
+<p><strong>Great free tools for going deeper:</strong></p>
+<ul>
+<li><strong><a href="https://www.ssllabs.com/ssltest/" target="_blank" rel="noopener">SSL Labs Server Test</a></strong>: grades any public website&#39;s TLS configuration.</li>
+<li><strong><a href="https://tls13.xargs.org" target="_blank" rel="noopener">The Illustrated TLS 1.3 Connection</a></strong>: every byte of a real handshake, explained.</li>
+<li><strong><a href="https://ssl-config.mozilla.org" target="_blank" rel="noopener">Mozilla SSL Configuration Generator</a></strong>: secure server settings for nginx, Apache and others.</li>
+<li><strong>Wireshark + <code>SSLKEYLOGFILE</code></strong>: if you start Chrome or Firefox with the environment variable <code>SSLKEYLOGFILE=/path/to/keys.log</code>, the browser writes its session keys to that file, and Wireshark can use it to decrypt <strong>your own</strong> captured HTTPS traffic. It&#39;s a great way to see the handshake messages above for real.</li>
+</ul>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-14-16" id="s-14-16" data-sec="s-14-16">
+<h2 class="sec-title"><span class="sec-num">14.16</span><span class="sec-text">A secure TLS setup checklist (for people running servers)</span><a class="sec-anchor" href="#s-14-16" aria-label="Link to this section">#</a></h2>
+<div class="prose"><ul>
+<li>✅ Enable <strong>TLS 1.3</strong>, keep <strong>TLS 1.2</strong> only for older clients, and disable everything older.</li>
+<li>✅ Allow only <strong>ECDHE</strong> key exchange and <strong>AEAD</strong> ciphers (AES-GCM, ChaCha20-Poly1305).</li>
+<li>✅ Use an <strong>ECDSA P-256</strong> certificate (or RSA 2048+), and serve the <strong>full chain</strong>.</li>
+<li>✅ <strong>Automate</strong> certificate renewal with ACME, and monitor expiry anyway.</li>
+<li>✅ Send <strong>HSTS</strong>; consider preloading.</li>
+<li>✅ Redirect HTTP to HTTPS.</li>
+<li>✅ Set a <strong>CAA</strong> record and monitor Certificate Transparency logs for your domains.</li>
+<li>✅ Keep your TLS library (OpenSSL, BoringSSL, etc.) up to date.</li>
+</ul>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 14</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 14 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-mint" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 15</p>
+<h3>Secure Connections: SSH, VPNs, Wi-Fi and DNS</h3>
+<p class="next-hook">SSH, VPNs, Wi-Fi and DNS look like four different worlds. Underneath, they’re the same handful of building blocks snapped together in different shapes.</p>
+<div class="next-actions"><a class="btn big" href="chapter-15.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-13.html">← Certificates and PKI: The Internet's ID Cards</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":14,"title":"TLS and HTTPS: Putting It All Together","quiz":[{"q":"Which handshake message proves the server holds its certificate’s private key?","o":["ClientHello","ServerHello","CertificateVerify","EncryptedExtensions"],"a":2,"why":"A signature over the whole handshake. Mallory can copy the certificate but can’t make this signature."},{"q":"In TLS_AES_256_GCM_SHA384, what is SHA-384 used for?","o":["Bulk encryption","HKDF and the transcript hash","The certificate signature","Compression"],"a":1,"why":"TLS 1.3 suites name only the AEAD and the hash for key derivation."},{"q":"A full TLS 1.3 handshake takes how many round trips?","o":["0","1","2","3"],"a":1,"why":"One round trip (TLS 1.2 needed two). Resumption with 0-RTT can send data immediately."},{"q":"HSTS protects against…","o":["quantum computers","being downgraded to plain HTTP","expired certificates","weak passwords"],"a":1,"why":"It tells the browser: always use HTTPS for this site, even if someone links to http://."}],"fragment":"handshake","secs":["s-14-1","s-14-2","s-14-3","s-14-4","s-14-5","s-14-6","s-14-7","s-14-8","s-14-9","s-14-10","s-14-11","s-14-12","s-14-13","s-14-14","s-14-15","s-14-16"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-d.js?v=86fb719f26"></script>
+</body>
+</html>

@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 21: Cheat Sheet: What to Use Today · CryptoSketch</title>
+<meta name="description" content="Everything you’ve learned, boiled down to one page you could stick on your fridge.">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-grape">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">📋 In this chapter</p><ol><li><a href="#s-21-1" data-sec="s-21-1"><span class="st-num">21.1</span><span class="st-t">Recommended choices (as of late 2026)</span></a></li><li><a href="#s-21-2" data-sec="s-21-2"><span class="st-num">21.2</span><span class="st-t">Avoid</span></a></li><li><a href="#s-21-3" data-sec="s-21-3"><span class="st-num">21.3</span><span class="st-t">"Which tool do I need?" decision guide</span></a></li><li><a href="#s-21-4" data-sec="s-21-4"><span class="st-num">21.4</span><span class="st-t">OpenSSL command cheat sheet</span></a></li><li><a href="#s-21-5" data-sec="s-21-5"><span class="st-num">21.5</span><span class="st-t">Key and output sizes at a glance</span></a></li><li><a href="#s-21-6" data-sec="s-21-6"><span class="st-num">21.6</span><span class="st-t">The whole guide in 15 sentences</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="21">
+<header class="ch-hero world-grape">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-6">📚 World 6 · Reference</a>
+    <p class="ch-num">Chapter 21</p>
+    <h1 class="ch-title">Cheat Sheet: What to Use Today</h1>
+    <p class="ch-hook"><span>🤔</span> Everything you’ve learned, boiled down to one page you could stick on your fridge.</p>
+    <ul class="ch-stats"><li>⏱️ ~5 min</li><li>📚 6 sections</li><li>🎮 1 interactive</li><li>⭐ 175 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="21" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"></div>
+<section class="sec sec-21-1" id="s-21-1" data-sec="s-21-1">
+<h2 class="sec-title"><span class="sec-num">21.1</span><span class="sec-text">Recommended choices (as of late 2026)</span><a class="sec-anchor" href="#s-21-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>I need to…</th>
+<th>Use</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Encrypt data with a shared key</td>
+<td><strong>AES-256-GCM</strong> or <strong>ChaCha20-Poly1305</strong></td>
+<td>XChaCha20-Poly1305 if you want random nonces; AES-GCM-SIV if nonce reuse is a risk</td>
+</tr>
+<tr>
+<td>Encrypt a file</td>
+<td><strong>age</strong>, or GnuPG</td>
+<td>Don&#39;t use <code>openssl enc</code> for real data (no integrity)</td>
+</tr>
+<tr>
+<td>Hash data (integrity, fingerprints)</td>
+<td><strong>SHA-256</strong>, SHA-512, SHA-3, BLAKE2/BLAKE3</td>
+<td></td>
+</tr>
+<tr>
+<td>Authenticate a message with a shared key</td>
+<td><strong>HMAC-SHA256</strong></td>
+<td>Or use AEAD, which includes authentication</td>
+</tr>
+<tr>
+<td>Store user passwords</td>
+<td><strong>Argon2id</strong></td>
+<td>scrypt or bcrypt are fine; PBKDF2 (600,000+ iterations) if FIPS is required</td>
+</tr>
+<tr>
+<td>Turn a shared secret into keys</td>
+<td><strong>HKDF</strong></td>
+<td>Never use raw key-exchange output directly</td>
+</tr>
+<tr>
+<td>Agree on a key</td>
+<td><strong>X25519</strong>, ideally hybrid <strong>X25519MLKEM768</strong></td>
+<td>ECDH P-256 where required</td>
+</tr>
+<tr>
+<td>Sign data</td>
+<td><strong>Ed25519</strong>, or ECDSA P-256</td>
+<td>RSA-PSS 3072+ where RSA is required; ML-DSA for post-quantum</td>
+</tr>
+<tr>
+<td>Encrypt to someone&#39;s public key</td>
+<td><strong>HPKE</strong> (RFC 9180), age, or RSA-OAEP 3072+</td>
+<td>Hybrid encryption under the hood</td>
+</tr>
+<tr>
+<td>Generate random values</td>
+<td>The OS CSPRNG (<code>secrets</code>, <code>crypto.getRandomValues</code>, <code>/dev/urandom</code>)</td>
+<td>Never <code>random</code> / <code>Math.random</code></td>
+</tr>
+<tr>
+<td>Secure network connections</td>
+<td><strong>TLS 1.3</strong> (TLS 1.2 with ECDHE + AEAD only if needed)</td>
+<td></td>
+</tr>
+<tr>
+<td>Website certificates</td>
+<td>ECDSA P-256 (or RSA 2048+), automated via <strong>ACME</strong></td>
+<td>Serve the full chain; set CAA; monitor CT</td>
+</tr>
+<tr>
+<td>Remote login</td>
+<td>SSH with <strong>Ed25519</strong> keys (or <code>ed25519-sk</code> hardware keys)</td>
+<td>Disable password login on servers</td>
+</tr>
+<tr>
+<td>VPN</td>
+<td><strong>WireGuard</strong>, or IPsec IKEv2</td>
+<td></td>
+</tr>
+<tr>
+<td>Hide who you&#39;re talking to</td>
+<td><strong>Tor</strong> (with HTTPS inside it)</td>
+<td>A VPN only moves the trust to one provider (Chapter <a class="xref" href="chapter-20.html">20</a>)</td>
+</tr>
+<tr>
+<td>Wi-Fi</td>
+<td><strong>WPA3</strong> (WPA2-AES if necessary) with a long passphrase</td>
+<td>Disable WPS</td>
+</tr>
+<tr>
+<td>User logins</td>
+<td><strong>Passkeys</strong>, or password + phishing-resistant MFA</td>
+<td>SMS only as a last resort</td>
+</tr>
+<tr>
+<td>&quot;Sign in with…&quot; another account, or app access to an account</td>
+<td><strong>OpenID Connect</strong> / <strong>OAuth 2.0</strong>: authorization code flow + <strong>PKCE</strong></td>
+<td>Never the implicit flow; validate ID tokens and redirect URIs (Chapter <a class="xref" href="chapter-20.html">20</a>)</td>
+</tr>
+<tr>
+<td>Messaging</td>
+<td>Signal Protocol / MLS-based apps with E2EE on by default</td>
+<td></td>
+</tr>
+<tr>
+<td>Long-term secrets (10+ years)</td>
+<td>AES-256 and post-quantum key exchange now</td>
+<td>&quot;Harvest now, decrypt later&quot;</td>
+</tr>
+</tbody></table></div>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-21-2" id="s-21-2" data-sec="s-21-2">
+<h2 class="sec-title"><span class="sec-num">21.2</span><span class="sec-text">Avoid</span><a class="sec-anchor" href="#s-21-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>❌ Don&#39;t use</th>
+<th>Why</th>
+<th>Use instead</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>DES, 3DES, RC4, Blowfish (for new systems)</td>
+<td>Broken or small blocks</td>
+<td>AES-GCM, ChaCha20-Poly1305</td>
+</tr>
+<tr>
+<td>ECB mode</td>
+<td>Leaks patterns</td>
+<td>GCM</td>
+</tr>
+<tr>
+<td>CBC/CTR without a MAC</td>
+<td>Malleable; padding oracles</td>
+<td>AEAD</td>
+</tr>
+<tr>
+<td>MD5, SHA-1</td>
+<td>Collisions</td>
+<td>SHA-256, SHA-3</td>
+</tr>
+<tr>
+<td>Fast hashes for passwords</td>
+<td>Billions of guesses per second</td>
+<td>Argon2id</td>
+</tr>
+<tr>
+<td>RSA under 2048 bits</td>
+<td>Factorable</td>
+<td>RSA 3072+ or ECC</td>
+</tr>
+<tr>
+<td>RSA PKCS#1 v1.5 <em>encryption</em></td>
+<td>Padding oracle attacks</td>
+<td>OAEP, HPKE</td>
+</tr>
+<tr>
+<td>Textbook RSA</td>
+<td>Deterministic and malleable</td>
+<td>Proper padding / libraries</td>
+</tr>
+<tr>
+<td>SSL 2/3, TLS 1.0/1.1</td>
+<td>Known attacks</td>
+<td>TLS 1.3 / 1.2</td>
+</tr>
+<tr>
+<td>Static RSA key exchange</td>
+<td>No forward secrecy</td>
+<td>ECDHE / X25519</td>
+</tr>
+<tr>
+<td>OAuth implicit flow, or OAuth without PKCE</td>
+<td>Tokens leak through URLs; stolen codes can be redeemed</td>
+<td>Authorization code flow + PKCE</td>
+</tr>
+<tr>
+<td>WEP, WPA (TKIP), PPTP</td>
+<td>Broken</td>
+<td>WPA3, WireGuard</td>
+</tr>
+<tr>
+<td>Dual_EC_DRBG, home-made RNGs</td>
+<td>Backdoored or weak</td>
+<td>OS CSPRNG</td>
+</tr>
+<tr>
+<td>Home-made algorithms or protocols</td>
+<td>Unreviewed</td>
+<td>Standard libraries and protocols</td>
+</tr>
+</tbody></table></div>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-21-3" id="s-21-3" data-sec="s-21-3">
+<h2 class="sec-title"><span class="sec-num">21.3</span><span class="sec-text">&quot;Which tool do I need?&quot; decision guide</span><a class="sec-anchor" href="#s-21-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><figure class="sketch diagram"><div class="sketch-scroll"><pre>What are you trying to do?
+│
+├─ Keep data SECRET
+│    ├─ Both sides already share a key?  ──────────────► AEAD (AES-GCM / ChaCha20-Poly1305)
+│    ├─ Need to send to someone's public key?  ─────────► Hybrid encryption (HPKE, age)
+│    └─ Need to set up a shared key over a network? ────► Key exchange (X25519 / X25519MLKEM768) + authentication
+│
+├─ Detect CHANGES
+│    ├─ Accidental corruption only?  ──────────────────► Hash (SHA-256)
+│    ├─ Deliberate tampering, shared key?  ─────────────► MAC (HMAC-SHA256) or AEAD
+│    └─ Deliberate tampering, anyone must verify?  ─────► Digital signature (Ed25519)
+│
+├─ Prove IDENTITY
+│    ├─ A website or server?  ─────────────────────────► Certificate (X.509) + TLS
+│    ├─ A person logging in?  ─────────────────────────► Passkey / password + MFA
+│    ├─ &quot;Sign in with&quot; another account?  ──────────────► OpenID Connect + PKCE
+│    └─ A machine or service?  ─────────────────────────► mTLS, SSH keys, signed tokens
+│
+├─ Store PASSWORDS  ───────────────────────────────────► Argon2id (salted, slow)
+│
+└─ Protect a CONNECTION
+     ├─ Web / API?  ───────────────────────────────────► HTTPS (TLS 1.3)
+     ├─ Remote shell / file copy?  ─────────────────────► SSH
+     └─ Whole network / device?  ──────────────────────► VPN (WireGuard, IPsec)</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure></div><div class="widget" data-w="decide"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-21-4" id="s-21-4" data-sec="s-21-4">
+<h2 class="sec-title"><span class="sec-num">21.4</span><span class="sec-text">OpenSSL command cheat sheet</span><a class="sec-anchor" href="#s-21-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>All commands were tested with OpenSSL 3.6.</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># ---------- Randomness ----------</span>
+openssl rand -hex 32                                    <span class="hljs-comment"># 256-bit random value (hex)</span>
+openssl rand -<span class="hljs-built_in">base64</span> 24                                 <span class="hljs-comment"># random password-like string</span>
+
+<span class="hljs-comment"># ---------- Hashing and HMAC ----------</span>
+openssl dgst -sha256 file.txt
+<span class="hljs-built_in">printf</span> <span class="hljs-string">&#x27;hello&#x27;</span> | openssl dgst -sha256 -hmac <span class="hljs-string">&quot;secret&quot;</span>
+
+<span class="hljs-comment"># ---------- Encoding (NOT encryption) ----------</span>
+<span class="hljs-built_in">printf</span> <span class="hljs-string">&#x27;Hello&#x27;</span> | openssl <span class="hljs-built_in">base64</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&#x27;SGVsbG8=&#x27;</span> | openssl <span class="hljs-built_in">base64</span> -d                    <span class="hljs-comment"># needs a trailing newline, hence echo</span>
+
+<span class="hljs-comment"># ---------- Symmetric file encryption (learning only; no integrity) ----------</span>
+openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -salt -<span class="hljs-keyword">in</span> in.txt -out out.enc
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 -<span class="hljs-keyword">in</span> out.enc
+
+<span class="hljs-comment"># ---------- Key generation ----------</span>
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 -out rsa.key
+openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 -out ec.key
+openssl genpkey -algorithm ed25519 -out ed.key
+openssl genpkey -algorithm X25519 -out x.key
+openssl genpkey -algorithm ML-KEM-768 -out mlkem.key   <span class="hljs-comment"># OpenSSL 3.5+</span>
+openssl genpkey -algorithm ML-DSA-65 -out mldsa.key    <span class="hljs-comment"># OpenSSL 3.5+</span>
+openssl pkey -<span class="hljs-keyword">in</span> rsa.key -pubout -out rsa.pub           <span class="hljs-comment"># extract public key</span>
+openssl pkey -<span class="hljs-keyword">in</span> rsa.key -text -noout                   <span class="hljs-comment"># inspect a key</span>
+
+<span class="hljs-comment"># ---------- Public-key encryption (RSA-OAEP) ----------</span>
+openssl pkeyutl -encrypt -pubin -inkey rsa.pub -pkeyopt rsa_padding_mode:oaep \
+  -pkeyopt rsa_oaep_md:sha256 -<span class="hljs-keyword">in</span> msg.txt -out msg.enc
+openssl pkeyutl -decrypt -inkey rsa.key -pkeyopt rsa_padding_mode:oaep \
+  -pkeyopt rsa_oaep_md:sha256 -<span class="hljs-keyword">in</span> msg.enc
+
+<span class="hljs-comment"># ---------- Key exchange ----------</span>
+openssl pkeyutl -derive -inkey my_x.key -peerkey their_x.pub -out shared.bin
+
+<span class="hljs-comment"># ---------- Signatures ----------</span>
+openssl pkeyutl -sign   -inkey ed.key -rawin -<span class="hljs-keyword">in</span> doc.txt -out doc.sig            <span class="hljs-comment"># Ed25519</span>
+openssl pkeyutl -verify -pubin -inkey ed.pub -rawin -<span class="hljs-keyword">in</span> doc.txt -sigfile doc.sig
+openssl dgst -sha256 -sign rsa.key -out doc.sig doc.txt                          <span class="hljs-comment"># RSA / ECDSA</span>
+openssl dgst -sha256 -verify rsa.pub -signature doc.sig doc.txt
+
+<span class="hljs-comment"># ---------- Certificates ----------</span>
+openssl req -new -key server.key -subj <span class="hljs-string">&quot;/CN=example.com&quot;</span> -out server.csr          <span class="hljs-comment"># make a CSR</span>
+openssl req -<span class="hljs-keyword">in</span> server.csr -noout -text                                          <span class="hljs-comment"># inspect a CSR</span>
+openssl req -x509 -new -key ca.key -sha256 -days 3650 -subj <span class="hljs-string">&quot;/CN=My CA&quot;</span> \
+  -addext <span class="hljs-string">&quot;basicConstraints=critical,CA:TRUE&quot;</span> -out ca.crt                        <span class="hljs-comment"># self-signed CA</span>
+openssl x509 -req -<span class="hljs-keyword">in</span> server.csr -CA ca.crt -CAkey ca.key -CAcreateserial \
+  -days 90 -sha256 -extfile server-ext.cnf -out server.crt                       <span class="hljs-comment"># sign a CSR</span>
+openssl x509 -<span class="hljs-keyword">in</span> server.crt -noout -text                                         <span class="hljs-comment"># inspect a cert</span>
+openssl x509 -<span class="hljs-keyword">in</span> server.crt -noout -subject -issuer -dates -ext subjectAltName
+openssl x509 -<span class="hljs-keyword">in</span> server.crt -noout -fingerprint -sha256
+openssl verify -CAfile root.crt -untrusted intermediate.crt server.crt           <span class="hljs-comment"># check a chain</span>
+
+<span class="hljs-comment"># ---------- Formats ----------</span>
+openssl x509 -<span class="hljs-keyword">in</span> cert.pem -outform DER -out cert.der                             <span class="hljs-comment"># PEM → DER</span>
+openssl pkcs12 -<span class="hljs-built_in">export</span> -<span class="hljs-keyword">in</span> server.crt -inkey server.key -certfile chain.crt -out bundle.p12
+
+<span class="hljs-comment"># ---------- Inspect live servers ----------</span>
+openssl s_client -connect example.com:443 -servername example.com -brief &lt;/dev/null
+openssl s_client -connect example.com:443 -servername example.com -showcerts &lt;/dev/null
+<span class="hljs-built_in">echo</span> | openssl s_client -connect example.com:443 -servername example.com 2&gt;/dev/null \
+  | openssl x509 -noout -dates
+openssl s_server -accept 8443 -cert server.crt -key server.key -www              <span class="hljs-comment"># test server</span></code></pre></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-21-5" id="s-21-5" data-sec="s-21-5">
+<h2 class="sec-title"><span class="sec-num">21.5</span><span class="sec-text">Key and output sizes at a glance</span><a class="sec-anchor" href="#s-21-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Thing</th>
+<th>Size</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>AES-128 / AES-256 key</td>
+<td>16 / 32 bytes</td>
+</tr>
+<tr>
+<td>AES block</td>
+<td>16 bytes</td>
+</tr>
+<tr>
+<td>AES-GCM nonce / tag</td>
+<td>12 / 16 bytes</td>
+</tr>
+<tr>
+<td>ChaCha20 key / nonce (XChaCha20 nonce)</td>
+<td>32 / 12 (24) bytes</td>
+</tr>
+<tr>
+<td>SHA-256 / SHA-512 output</td>
+<td>32 / 64 bytes</td>
+</tr>
+<tr>
+<td>HMAC-SHA256 tag</td>
+<td>32 bytes</td>
+</tr>
+<tr>
+<td>X25519 public key / shared secret</td>
+<td>32 / 32 bytes</td>
+</tr>
+<tr>
+<td>Ed25519 public key / signature</td>
+<td>32 / 64 bytes</td>
+</tr>
+<tr>
+<td>ECDSA P-256 signature</td>
+<td>~64–72 bytes</td>
+</tr>
+<tr>
+<td>RSA-2048 / RSA-3072 signature or ciphertext</td>
+<td>256 / 384 bytes</td>
+</tr>
+<tr>
+<td>ML-KEM-768 public key / ciphertext</td>
+<td>1,184 / 1,088 bytes</td>
+</tr>
+<tr>
+<td>ML-DSA-65 public key / signature</td>
+<td>1,952 / 3,309 bytes</td>
+</tr>
+<tr>
+<td>Typical TLS certificate (ECDSA)</td>
+<td>~700–1,500 bytes (PEM)</td>
+</tr>
+</tbody></table></div>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-21-6" id="s-21-6" data-sec="s-21-6">
+<h2 class="sec-title"><span class="sec-num">21.6</span><span class="sec-text">The whole guide in 15 sentences</span><a class="sec-anchor" href="#s-21-6" aria-label="Link to this section">#</a></h2>
+<div class="prose"><ol>
+<li>Cryptography protects <strong>confidentiality, integrity, authenticity and non-repudiation</strong>, even when attackers can see and change everything.</li>
+<li>Everything about a good system is public <strong>except the key</strong>.</li>
+<li>Keys must come from a <strong>cryptographically secure random number generator</strong>.</li>
+<li><strong>Symmetric encryption</strong> (AES, ChaCha20) is fast and protects the actual data, but both sides need the same key.</li>
+<li>Always use <strong>authenticated encryption (AEAD)</strong>, and never reuse a nonce with the same key.</li>
+<li><strong>Hashes</strong> are one-way fingerprints; <strong>MACs</strong> are fingerprints with a secret key; <strong>signatures</strong> are fingerprints anyone can verify but only the key owner can make.</li>
+<li><strong>Passwords</strong> must be stored with slow, salted, memory-hard hashing like <strong>Argon2id</strong>.</li>
+<li><strong>Public-key cryptography</strong> uses a public key and a private key, solving the problem of sharing keys with strangers.</li>
+<li><strong>Key exchange</strong> (Diffie-Hellman, X25519, ML-KEM) creates a shared secret in public; <strong>ephemeral</strong> keys give <strong>forward secrecy</strong>.</li>
+<li>Key exchange without authentication is vulnerable to a <strong>man in the middle</strong>.</li>
+<li><strong>Certificates</strong> bind public keys to names, vouched for by <strong>certificate authorities</strong> in a <strong>chain of trust</strong>.</li>
+<li><strong>TLS</strong> combines all of the above: key exchange, certificates, signatures, HKDF and AEAD, in one round trip.</li>
+<li>The same building blocks power <strong>SSH, VPNs, Wi-Fi, Signal, passkeys, disk encryption and cryptocurrencies</strong>.</li>
+<li>Crypto usually fails through <strong>bad randomness, bugs, misconfiguration, stolen keys and people</strong>, rarely through broken math, so use well-reviewed libraries and <strong>don&#39;t roll your own</strong>.</li>
+<li><strong>Quantum computers</strong> threaten today&#39;s public-key crypto, and the migration to <strong>post-quantum</strong> algorithms is already underway.</li>
+</ol>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 21</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 21 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-grape" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 22</p>
+<h3>Glossary</h3>
+<p class="next-hook">Every term in the guide, decoded. Flip the flashcards and find out how many you know cold.</p>
+<div class="next-actions"><a class="btn big" href="chapter-22.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-20.html">← Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":21,"title":"Cheat Sheet: What to Use Today","quiz":[{"q":"You need to encrypt data with a shared key. Use…","o":["AES-ECB","AES-256-GCM or ChaCha20-Poly1305","RC4","Base64"],"a":1,"why":"An AEAD. XChaCha20-Poly1305 if you want random nonces."},{"q":"You need to store user passwords. Use…","o":["SHA-256","Argon2id","AES","MD5"],"a":1,"why":"scrypt or bcrypt are fine; PBKDF2 with 600,000+ iterations if FIPS is required."},{"q":"You need to sign data. First choice?","o":["Ed25519","DSA","RSA-1024","HMAC"],"a":0,"why":"Ed25519 or ECDSA P-256. RSA-PSS 3072+ where RSA is required; ML-DSA for post-quantum."},{"q":"Which belongs on the “avoid” list?","o":["TLS 1.3","X25519","Static RSA key exchange","HKDF"],"a":2,"why":"No forward secrecy. Use ECDHE / X25519 instead."}],"fragment":"toolbox","secs":["s-21-1","s-21-2","s-21-3","s-21-4","s-21-5","s-21-6"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-d.js?v=86fb719f26"></script>
+</body>
+</html>

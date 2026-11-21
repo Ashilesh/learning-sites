@@ -1,0 +1,616 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 16: Everyday Security: Email, Messaging, Disks, Logins and Money · CryptoSketch</title>
+<meta name="description" content="Your 6-digit authenticator code is an HMAC of the clock. Your passkey is a private key inside a chip. And a bitcoin is, at heart, just a signature.">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-mint">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">📱 In this chapter</p><ol><li><a href="#s-16-1" data-sec="s-16-1"><span class="st-num">16.1</span><span class="st-t">Email</span></a></li><li><a href="#s-16-2" data-sec="s-16-2"><span class="st-num">16.2</span><span class="st-t">End-to-end encrypted messaging</span></a></li><li><a href="#s-16-3" data-sec="s-16-3"><span class="st-num">16.3</span><span class="st-t">Encrypting data at rest: disks, phones, files and the cloud</span></a></li><li><a href="#s-16-4" data-sec="s-16-4"><span class="st-num">16.4</span><span class="st-t">Logging in: passwords, 2FA codes and passkeys</span></a></li><li><a href="#s-16-5" data-sec="s-16-5"><span class="st-num">16.5</span><span class="st-t">Web tokens: JWTs</span></a></li><li><a href="#s-16-6" data-sec="s-16-6"><span class="st-num">16.6</span><span class="st-t">Cryptocurrency and blockchains</span></a></li><li><a href="#s-16-7" data-sec="s-16-7"><span class="st-num">16.7</span><span class="st-t">Software supply chain: code signing and secure updates</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="16">
+<header class="ch-hero world-mint">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-4">🏙️ World 4 · Cryptography in the Real World</a>
+    <p class="ch-num">Chapter 16</p>
+    <h1 class="ch-title">Everyday Security: Email, Messaging, Disks, Logins and Money</h1>
+    <p class="ch-hook"><span>🤔</span> Your 6-digit authenticator code is an HMAC of the clock. Your passkey is a private key inside a chip. And a bitcoin is, at heart, just a signature.</p>
+    <ul class="ch-stats"><li>⏱️ ~13 min</li><li>📚 7 sections</li><li>🎮 4 interactive</li><li>⭐ 225 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="16" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"></div>
+<section class="sec sec-16-1" id="s-16-1" data-sec="s-16-1">
+<h2 class="sec-title"><span class="sec-num">16.1</span><span class="sec-text">Email</span><a class="sec-anchor" href="#s-16-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Email was designed in the 1970s and 80s for a small, friendly network. Security was bolted on later, in layers.</p>
+<h4 id="encryption-in-transit" class="h4">Encryption in transit</h4>
+<ul>
+<li><strong>Your device ↔ your email provider:</strong> protected by TLS (IMAPS on port 993, SMTP submission on 587/465).</li>
+<li><strong>Provider ↔ provider:</strong> servers try to upgrade their connection with <strong>STARTTLS</strong>. But it&#39;s &quot;opportunistic&quot;: if an attacker strips the STARTTLS offer, many servers fall back to plain text. Standards called <strong>MTA-STS</strong> and <strong>DANE</strong> let a domain insist on TLS.</li>
+<li><strong>At rest:</strong> your provider can read your email, because it stores it in a form it can decrypt.</li>
+</ul>
+<h4 id="end-to-end-encrypted-email" class="h4">End-to-end encrypted email</h4>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th></th>
+<th><strong>OpenPGP</strong> (PGP, GnuPG)</th>
+<th><strong>S/MIME</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Trust model</td>
+<td>Web of trust / manual fingerprint checks</td>
+<td>Certificates from CAs</td>
+</tr>
+<tr>
+<td>Typical users</td>
+<td>Individuals, journalists, open-source projects</td>
+<td>Companies, governments</td>
+</tr>
+<tr>
+<td>How it works</td>
+<td>Hybrid encryption (Chapter <a class="xref" href="chapter-09.html">9</a>) + signatures</td>
+<td>Same idea</td>
+</tr>
+</tbody></table></div>
+<p>Both have existed since the 1990s and are notoriously hard for ordinary people to use. A famous 1999 study, &quot;Why Johnny Can&#39;t Encrypt,&quot; found that most participants couldn&#39;t correctly sign and encrypt an email with PGP within 90 minutes. Services like Proton Mail use OpenPGP behind the scenes to make it easier.</p>
+<p class="lab-label">🧪 <strong>Try it yourself</strong> (GnuPG):</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs">gpg --full-generate-key                          <span class="hljs-comment"># create your key pair</span>
+gpg --armor --<span class="hljs-built_in">export</span> you@example.com &gt; me.asc     <span class="hljs-comment"># export your PUBLIC key to share</span>
+gpg --import bob.asc                              <span class="hljs-comment"># import a friend&#x27;s public key</span>
+gpg --fingerprint bob@example.com                 <span class="hljs-comment"># verify it with Bob in person/by phone!</span>
+
+gpg --encrypt --sign --armor -r bob@example.com letter.txt   <span class="hljs-comment"># → letter.txt.asc</span>
+gpg --decrypt letter.txt.asc                                 <span class="hljs-comment"># Bob decrypts and checks your signature</span></code></pre></div><h4 id="stopping-forged-senders-spf-dkim-and-dmarc" class="h4">Stopping forged senders: SPF, DKIM and DMARC</h4>
+<p>The &quot;From:&quot; address in an email is just text; anyone can type anything. Three DNS-based standards fight forgery:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Standard</th>
+<th>What it does</th>
+<th>Crypto?</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>SPF</strong></td>
+<td>The domain publishes a list of servers allowed to send its email</td>
+<td>No (an allow-list of IP addresses)</td>
+</tr>
+<tr>
+<td><strong>DKIM</strong></td>
+<td>The sending server <strong>signs</strong> the message headers and body; the public key is published in DNS</td>
+<td class="st-ok">✅ Digital signature</td>
+</tr>
+<tr>
+<td><strong>DMARC</strong></td>
+<td>The domain tells receivers what to do if SPF/DKIM fail (nothing, quarantine, reject) and where to send reports</td>
+<td>Policy</td>
+</tr>
+</tbody></table></div>
+<p>A DKIM signature in an email&#39;s headers looks like this (shortened):</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>DKIM-Signature: v=1; a=rsa-sha256; d=example.com; s=selector1;
+    h=from:to:subject:date; bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;
+    b=AuUoFEfDxTDkHlLXSZEpZj79LICEps6eda7W3deTVFOk4yAUoqOB4nujc7YopdG5dWLSdNg6x...</pre></div></figure><p><code>d=</code> is the signing domain, <code>bh=</code> is the hash of the body, <code>b=</code> is the signature. The receiving server fetches the public key from DNS at <code>selector1._domainkey.example.com</code> and verifies it.</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># Look up a domain&#x27;s DMARC policy</span>
+dig +short TXT _dmarc.google.com
+<span class="hljs-comment"># &quot;v=DMARC1; p=reject; rua=mailto:mailauth-reports@google.com&quot;</span></code></pre></div><p>In Gmail, open a message → <strong>⋮</strong> → <strong>Show original</strong> to see <code>SPF: PASS</code>, <code>DKIM: PASS</code> and <code>DMARC: PASS</code> for that message. Since 2024, Gmail and Yahoo require bulk senders to use all three.</p>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Email protections</h4></div><div class="pc-grid">
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>STARTTLS / TLS</h5><p class="pc-tag">Encryption in transit</p></header>
+<ul class="pros"><li>Automatic, invisible</li></ul>
+<ul class="cons"><li>Servers can read your mail</li><li>Opportunistic: can be stripped</li></ul>
+<footer><b>Best for:</b> Baseline for all mail</footer></article>
+<article class="pc-card v-legacy"><header><span class="pc-verdict">⚠️ Legacy</span><h5>PGP / GnuPG</h5><p class="pc-tag">End-to-end, web of trust</p></header>
+<ul class="pros"><li>No central authority</li><li>Strong when used correctly</li></ul>
+<ul class="cons"><li>Hard to use; metadata visible</li><li>No forward secrecy</li></ul>
+<footer><b>Best for:</b> Journalists and developers</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>S/MIME</h5><p class="pc-tag">End-to-end with certificates</p></header>
+<ul class="pros"><li>Built into Outlook and Apple Mail</li></ul>
+<ul class="cons"><li>Certificate management for everyone</li></ul>
+<footer><b>Best for:</b> Enterprises</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>SPF + DKIM + DMARC</h5><p class="pc-tag">Stop forged senders</p></header>
+<ul class="pros"><li>Blocks spoofing of your domain</li><li>DKIM signs messages</li></ul>
+<ul class="cons"><li>Easy to misconfigure</li><li>Doesn’t stop look-alike domains</li></ul>
+<footer><b>Best for:</b> Every domain that sends mail</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-16-2" id="s-16-2" data-sec="s-16-2">
+<h2 class="sec-title"><span class="sec-num">16.2</span><span class="sec-text">End-to-end encrypted messaging</span><a class="sec-anchor" href="#s-16-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>There&#39;s a huge difference between &quot;encrypted&quot; and &quot;<strong>end-to-end</strong> encrypted&quot;:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>ENCRYPTED IN TRANSIT ONLY (most websites, many chat apps, regular email)
+
+  You ══TLS══► Company server ══TLS══► Friend
+               (message stored
+                readable here 👀)
+
+END-TO-END ENCRYPTED (Signal, WhatsApp, iMessage, Messenger)
+
+  You ═══════════ encrypted with keys only you and your friend have ═══════════► Friend
+               Company server only relays
+               scrambled data 🔒</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>With end-to-end encryption (E2EE), even the company running the service, its employees, or anyone who hacks its servers cannot read your messages.</p>
+<h4 id="the-signal-protocol" class="h4">The Signal Protocol</h4>
+<p>The <strong>Signal Protocol</strong>, designed by Moxie Marlinspike and Trevor Perrin, is the most widely used E2EE design. It powers Signal, <strong>WhatsApp</strong> (since 2016), Facebook Messenger&#39;s default encryption, Google Messages (RCS chats) and others: billions of people.</p>
+<p>Its main ingredients:</p>
+<ol>
+<li><strong>Starting a conversation when your friend is offline.</strong> Each user uploads a bundle of public keys (&quot;prekeys&quot;) to the server in advance. You download your friend&#39;s bundle and run a special key agreement (originally <strong>X3DH</strong>; since 2023 <strong>PQXDH</strong>, which adds the post-quantum ML-KEM) to derive a shared secret, without your friend being online.</li>
+<li><strong>The Double Ratchet: a new key for every message.</strong><ul>
+<li>A <strong>symmetric ratchet</strong> runs each key through a KDF to produce the next one, then deletes the old one. Like a gear that only turns forward, you can&#39;t run it backwards, so a stolen phone doesn&#39;t reveal <strong>past</strong> messages (forward secrecy).</li>
+<li>A <strong>Diffie-Hellman ratchet</strong> mixes a fresh key exchange into the chain every time the conversation changes direction. So even if an attacker steals your current keys, they&#39;re locked out again after a few messages. This is called <strong>post-compromise security</strong>, or &quot;self-healing.&quot; (In 2025, Signal also began mixing post-quantum keys into this ongoing ratchet.)</li>
+</ul>
+</li>
+<li><strong>Safety numbers.</strong> Each conversation has a number (or QR code) derived from both people&#39;s identity keys. Comparing it in person defeats a man-in-the-middle, including the server itself.</li>
+</ol>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>Message 1 key ──KDF──► Message 2 key ──KDF──► Message 3 key ──KDF──► ...
+     │ deleted             │ deleted              │ deleted
+     ▼                     ▼                      ▼
+  decrypt #1            decrypt #2             decrypt #3
+
+  + every time the conversation changes direction, a new Diffie-Hellman
+    exchange is mixed in, so the chain &quot;heals&quot; after a compromise.</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>Other things worth knowing:</p>
+<ul>
+<li><strong>Group chats</strong> need extra machinery. A newer standard, <strong>MLS</strong> (Messaging Layer Security, RFC 9420, 2023), handles large groups efficiently.</li>
+<li><strong>Apple iMessage</strong> uses its own protocol, upgraded in 2024 to &quot;PQ3&quot; with post-quantum key exchange.</li>
+<li><strong>Metadata</strong> (who talks to whom, when, how often) is often <em>not</em> protected. Signal works hard to minimize what it stores; other apps collect more.</li>
+<li><strong>Backups</strong> can be the weak point: chat backups to the cloud may not be end-to-end encrypted unless you turn that option on (WhatsApp&#39;s encrypted backups, Apple&#39;s Advanced Data Protection).</li>
+<li>⚠️ <strong>Telegram&#39;s</strong> regular chats are <strong>not</strong> end-to-end encrypted; only optional &quot;secret chats&quot; are.</li>
+</ul>
+</div><div class="widget" data-w="ratchet"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Messaging security</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Signal Protocol</h5><p class="pc-tag">X3DH/PQXDH + Double Ratchet</p></header>
+<ul class="pros"><li>Forward secrecy and post-compromise security</li><li>Battle-tested (Signal, WhatsApp)</li></ul>
+<ul class="cons"><li>Metadata still partly visible</li><li>Phone-based identity</li></ul>
+<footer><b>Best for:</b> Private chats</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>MLS</h5><p class="pc-tag">Messaging Layer Security (RFC 9420)</p></header>
+<ul class="pros"><li>Efficient for big groups</li><li>Interoperable standard</li></ul>
+<ul class="cons"><li>Newer; fewer deployments</li></ul>
+<footer><b>Best for:</b> Large group chats</footer></article>
+<article class="pc-card v-legacy"><header><span class="pc-verdict">⚠️ Legacy</span><h5>Server-side encryption only</h5><p class="pc-tag">“Encrypted” chats the provider can read</p></header>
+<ul class="pros"><li>Cloud sync and search are easy</li></ul>
+<ul class="cons"><li>Provider (or a breach) can read everything</li></ul>
+<footer><b>Best for:</b> Non-sensitive chat</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-16-3" id="s-16-3" data-sec="s-16-3">
+<h2 class="sec-title"><span class="sec-num">16.3</span><span class="sec-text">Encrypting data at rest: disks, phones, files and the cloud</span><a class="sec-anchor" href="#s-16-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Data exists in three states, each needing different protection:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>State</th>
+<th>Example</th>
+<th>Protection</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>In transit</strong></td>
+<td>Data crossing the network</td>
+<td>TLS, VPNs, SSH, E2EE</td>
+</tr>
+<tr>
+<td><strong>At rest</strong></td>
+<td>Data stored on disks, phones, backups, cloud storage</td>
+<td>Disk/file/database encryption</td>
+</tr>
+<tr>
+<td><strong>In use</strong></td>
+<td>Data in memory while being processed</td>
+<td>Hardware &quot;secure enclaves,&quot; homomorphic encryption (Chapter <a class="xref" href="chapter-17.html">17</a>)</td>
+</tr>
+</tbody></table></div>
+<h4 id="full-disk-encryption" class="h4">Full-disk encryption</h4>
+<p>If your laptop is stolen, full-disk encryption makes its contents unreadable without your password. Turn it on:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>System</th>
+<th>Tool</th>
+<th>Default?</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Windows</td>
+<td><strong>BitLocker</strong> / Device Encryption</td>
+<td>On by default on many recent PCs</td>
+</tr>
+<tr>
+<td>macOS</td>
+<td><strong>FileVault</strong></td>
+<td>Prompted at setup</td>
+</tr>
+<tr>
+<td>Linux</td>
+<td><strong>LUKS</strong> (often via the installer)</td>
+<td>Optional at install</td>
+</tr>
+<tr>
+<td>iPhone / iPad</td>
+<td>Data Protection</td>
+<td class="st-ok">✅ Always on with a passcode</td>
+</tr>
+<tr>
+<td>Android</td>
+<td>File-Based Encryption</td>
+<td class="st-ok">✅ On by default on modern phones</td>
+</tr>
+</tbody></table></div>
+<p>Disks are encrypted with <strong>AES in XTS mode</strong>, designed for storage. There&#39;s also a clever <strong>key hierarchy</strong>:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> Your password / PIN
+        │  (combined with a secret inside the TPM or Secure Enclave chip,
+        │   which also limits how many guesses are allowed)
+        ▼
+ Key-encryption key ──unlocks──► Volume master key ──encrypts──► the whole disk</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>Because of this layering, changing your password doesn&#39;t require re-encrypting the whole disk; only the small wrapped master key changes. And the security chip makes a short PIN surprisingly strong. On an iPhone, the passcode is mixed with a unique hardware key that can&#39;t be extracted, so guesses can only be made <strong>on that phone</strong>, with growing delays (and an optional wipe after 10 failures).</p>
+<div class="callout warn"><p>⚠️ <strong>Watch out:</strong></p></div>
+<ul>
+<li><strong>Save your recovery key</strong> somewhere safe. Without it, a forgotten password can mean the data is gone forever. That&#39;s the point of encryption.</li>
+<li>Disk encryption protects a device that&#39;s <strong>off</strong> (or locked). While you&#39;re logged in, the data is readable by anything running on the computer.</li>
+</ul>
+<h4 id="files-archives-and-the-cloud" class="h4">Files, archives and the cloud</h4>
+<ul>
+<li>For individual files: <code>age</code>, GnuPG, VeraCrypt containers, or 7-Zip with AES-256. ⚠️ Avoid the old &quot;ZipCrypto&quot; encryption in ZIP files; it&#39;s weak.</li>
+<li><strong>Cloud storage</strong> is usually encrypted at rest by the provider with <strong>the provider&#39;s keys</strong>. That protects against stolen hard drives in a data center, but not against the provider itself or someone with access to its systems. <strong>Client-side</strong> or end-to-end encrypted storage (Apple&#39;s Advanced Data Protection, Proton Drive, tools like Cryptomator) means only you hold the keys.</li>
+<li><strong>Crypto-shredding:</strong> to delete encrypted data permanently, delete its key. Without the key, the ciphertext is just noise. Cloud providers use this to erase data reliably.</li>
+</ul>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Data-at-rest encryption</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Full-disk encryption</h5><p class="pc-tag">BitLocker, FileVault, LUKS</p></header>
+<ul class="pros"><li>Protects a lost or stolen laptop</li><li>Transparent once unlocked</li></ul>
+<ul class="cons"><li>No protection while the device is on and unlocked</li><li>Recovery key must be stored safely</li></ul>
+<footer><b>Best for:</b> Every laptop and phone</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>File / archive encryption</h5><p class="pc-tag">age, GnuPG, encrypted ZIP</p></header>
+<ul class="pros"><li>Protects files when shared or backed up</li></ul>
+<ul class="cons"><li>Weak passwords; old ZIP crypto is weak</li></ul>
+<footer><b>Best for:</b> Sending or archiving files</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Cloud E2EE</h5><p class="pc-tag">You hold the keys</p></header>
+<ul class="pros"><li>Provider can’t read your data</li></ul>
+<ul class="cons"><li>Lose the key, lose the data</li><li>Fewer server-side features</li></ul>
+<footer><b>Best for:</b> Sensitive cloud backups</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-16-4" id="s-16-4" data-sec="s-16-4">
+<h2 class="sec-title"><span class="sec-num">16.4</span><span class="sec-text">Logging in: passwords, 2FA codes and passkeys</span><a class="sec-anchor" href="#s-16-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>There are three kinds of authentication factor:</p>
+<ul>
+<li><strong>Something you know:</strong> a password or PIN.</li>
+<li><strong>Something you have:</strong> a phone, a security key.</li>
+<li><strong>Something you are:</strong> a fingerprint, your face.</li>
+</ul>
+<p><strong>Multi-factor authentication (MFA)</strong> combines two or more.</p>
+<h4 id="sms-codes" class="h4">SMS codes</h4>
+<p>Better than nothing, but weak: attackers can talk a mobile carrier into moving your number to their SIM card (&quot;SIM swapping&quot;), and codes can be phished.</p>
+<h4 id="authenticator-app-codes-totp" class="h4">Authenticator app codes (TOTP)</h4>
+<p>The 6-digit codes in Google Authenticator, Microsoft Authenticator, 1Password and similar apps use <strong>TOTP (Time-based One-Time Password, RFC 6238)</strong>. It&#39;s an HMAC (Chapter <a class="xref" href="chapter-07.html">7</a>) of the current time:</p>
+<ol>
+<li>When you set up 2FA, the website shows a <strong>QR code</strong> containing a shared secret, like <code>otpauth://totp/Example:alice?secret=JBSWY3DPEHPK3PXP&amp;issuer=Example</code>.</li>
+<li>Your app and the website both store that secret.</li>
+<li>Every 30 seconds, both compute <code>HMAC-SHA1(secret, current_time ÷ 30)</code> and shorten the result to 6 digits.</li>
+<li>If your code matches the server&#39;s, you&#39;re in.</li>
+</ol>
+<p class="lab-label">🧪 <strong>Try it yourself</strong> (Python, a complete TOTP generator in a dozen lines):</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">import</span> hmac, hashlib, struct, time, base64
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">totp</span>(<span class="hljs-params">secret: <span class="hljs-built_in">bytes</span>, for_time: <span class="hljs-built_in">int</span>, digits=<span class="hljs-number">6</span>, step=<span class="hljs-number">30</span></span>):
+    counter = for_time // step                                  <span class="hljs-comment"># which 30-second window</span>
+    mac = hmac.new(secret, struct.pack(<span class="hljs-string">&quot;&gt;Q&quot;</span>, counter), hashlib.sha1).digest()
+    offset = mac[-<span class="hljs-number">1</span>] &amp; <span class="hljs-number">0x0F</span>                                     <span class="hljs-comment"># &quot;dynamic truncation&quot;</span>
+    code = (struct.unpack(<span class="hljs-string">&quot;&gt;I&quot;</span>, mac[offset:offset+<span class="hljs-number">4</span>])[<span class="hljs-number">0</span>] &amp; <span class="hljs-number">0x7FFFFFFF</span>) % (<span class="hljs-number">10</span> ** digits)
+    <span class="hljs-keyword">return</span> <span class="hljs-built_in">str</span>(code).zfill(digits)
+
+<span class="hljs-comment"># Official test vector from RFC 6238: secret &quot;12345678901234567890&quot;, time 59 → 94287082</span>
+<span class="hljs-built_in">print</span>(totp(<span class="hljs-string">b&quot;12345678901234567890&quot;</span>, <span class="hljs-number">59</span>, digits=<span class="hljs-number">8</span>))   <span class="hljs-comment"># 94287082</span>
+
+<span class="hljs-comment"># The secret from the QR code above (Base32-encoded). Add it to an authenticator</span>
+<span class="hljs-comment"># app manually and compare: the codes will match.</span>
+secret = base64.b32decode(<span class="hljs-string">&quot;JBSWY3DPEHPK3PXP&quot;</span>)
+<span class="hljs-built_in">print</span>(totp(secret, <span class="hljs-built_in">int</span>(time.time())))</code></pre></div><div class="callout warn"><p>⚠️ TOTP codes can still be <strong>phished</strong>: a fake login page can ask for your code and use it on the real site within seconds.</p></div>
+<h4 id="push-notifications-and-mfa-fatigue" class="h4">Push notifications and &quot;MFA fatigue&quot;</h4>
+<p>&quot;Approve this sign-in?&quot; prompts are convenient, but attackers who have your password can spam you with prompts until you tap &quot;Approve&quot; by mistake or out of annoyance. 📜 This &quot;MFA fatigue&quot; trick was used in a 2022 breach of Uber. Modern apps add <strong>number matching</strong> (type the number shown on the login screen) to counter it.</p>
+<h4 id="passkeys-public-key-cryptography-replaces-passwords" class="h4">Passkeys: public-key cryptography replaces passwords</h4>
+<p><strong>Passkeys</strong> (built on the FIDO2 / WebAuthn standards) replace passwords entirely with a key pair:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>REGISTRATION (once per website)
+  Your device creates a NEW key pair just for &quot;bank.example&quot;.
+  Private key: stays on your device (protected by its secure chip).
+  Public key:  sent to bank.example and stored with your account.
+
+LOGIN
+  bank.example ──── &quot;Sign this random challenge: 7f3a9c...&quot; ────► your device
+                                                                  │ You unlock with fingerprint,
+                                                                  │ face or PIN (stays local)
+  bank.example ◄─── signature over the challenge + &quot;bank.example&quot; ┘
+  Verifies the signature with your stored public key ✅</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>Why passkeys are a big improvement:</p>
+<ul>
+<li><strong>Phishing-resistant:</strong> the browser includes the real website&#39;s domain in what gets signed, and a passkey created for <code>bank.example</code> simply won&#39;t be offered to <code>bank-example-login.com</code>. A fake site gets nothing useful.</li>
+<li><strong>Nothing to steal from the server:</strong> the website stores only public keys. A database breach reveals nothing an attacker can log in with.</li>
+<li><strong>Nothing to remember or reuse.</strong></li>
+<li>Your fingerprint or face <strong>never leaves your device</strong>. It only unlocks the private key locally.</li>
+</ul>
+<p>Passkeys can sync between your devices through Apple&#39;s iCloud Keychain, Google Password Manager or password managers (end-to-end encrypted), or live on a <strong>hardware security key</strong> like a YubiKey.</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Method</th>
+<th>Phishing-resistant?</th>
+<th>Server breach exposes it?</th>
+<th>Convenience</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Password only</td>
+<td class="st-bad">❌</td>
+<td class="st-warn">⚠️ Hashes (crackable if weak)</td>
+<td>Must remember</td>
+</tr>
+<tr>
+<td>Password + SMS</td>
+<td class="st-bad">❌</td>
+<td class="st-warn">⚠️</td>
+<td>Wait for SMS</td>
+</tr>
+<tr>
+<td>Password + TOTP app</td>
+<td class="st-bad">❌</td>
+<td class="st-warn">⚠️</td>
+<td>Type a code</td>
+</tr>
+<tr>
+<td>Password + push with number matching</td>
+<td class="st-warn">⚠️ Better</td>
+<td class="st-warn">⚠️</td>
+<td>Tap and type</td>
+</tr>
+<tr>
+<td><strong>Passkey / security key</strong></td>
+<td class="st-ok">✅</td>
+<td class="st-ok">✅ No: only public keys stored</td>
+<td>Touch or glance</td>
+</tr>
+</tbody></table></div>
+<p><strong>&quot;Sign in with Google/Apple/Microsoft&quot;</strong> (single sign-on) uses standards called <strong>OAuth 2.0</strong> and <strong>OpenID Connect</strong>: the identity provider authenticates you and hands the website a <strong>signed token</strong> stating who you are, usually a JWT.</p>
+</div><div class="widget" data-w="totp"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Second factors and logins</h4></div><div class="pc-grid">
+<article class="pc-card v-legacy"><header><span class="pc-verdict">⚠️ Legacy</span><h5>SMS codes</h5><p class="pc-tag">Text message</p></header>
+<ul class="pros"><li>Works on any phone</li><li>Better than no 2FA</li></ul>
+<ul class="cons"><li>SIM swapping and SS7 interception</li><li>Phishable</li></ul>
+<footer><b>Best for:</b> Last resort</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>TOTP app</h5><p class="pc-tag">HMAC of the time</p></header>
+<ul class="pros"><li>Offline; free; standard (RFC 6238)</li></ul>
+<ul class="cons"><li>Phishable in real time</li><li>Shared secret stored on the server</li></ul>
+<footer><b>Best for:</b> Good default 2FA</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>Push approval</h5><p class="pc-tag">Tap “Approve”</p></header>
+<ul class="pros"><li>Convenient</li></ul>
+<ul class="cons"><li>MFA fatigue: users approve spam prompts</li></ul>
+<footer><b>Best for:</b> With number matching</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Passkeys / security keys</h5><p class="pc-tag">WebAuthn public-key login</p></header>
+<ul class="pros"><li>Phishing-resistant (domain-bound)</li><li>Nothing secret stored on the server</li><li>Fast to use</li></ul>
+<ul class="cons"><li>Account recovery planning needed</li><li>Cross-device sync depends on ecosystem</li></ul>
+<footer><b>Best for:</b> Everything that supports them</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-16-5" id="s-16-5" data-sec="s-16-5">
+<h2 class="sec-title"><span class="sec-num">16.5</span><span class="sec-text">Web tokens: JWTs</span><a class="sec-anchor" href="#s-16-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A <strong>JSON Web Token (JWT)</strong> is a compact, signed piece of data that a server gives you after login. You send it back with each request to prove who you are. It has three Base64url-encoded parts separated by dots:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJhbGljZSIsImFkbWluIjpmYWxzZSwiZXhwIjoxNzk4NzYxNjAwfQ.wcjxcpVQL16GddnaZsrqmTNWMirRd8LblmCSlHWjup4
+└────────────── header ─────────────┘└────────────────────────── payload ───────────────────────────┘└──────────── signature ─────────────┘
+
+header    = {&quot;alg&quot;:&quot;HS256&quot;,&quot;typ&quot;:&quot;JWT&quot;}                  → algorithm: HMAC-SHA256
+payload   = {&quot;sub&quot;:&quot;alice&quot;,&quot;admin&quot;:false,&quot;exp&quot;:1798761600} → user alice, not admin, expires 1 Jan 2027
+signature = HMAC-SHA256(server_secret, header + &quot;.&quot; + payload)</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>If Alice edits the payload to <code>&quot;admin&quot;:true</code>, the signature no longer matches and the server rejects the token.</p>
+<div class="callout warn"><p>⚠️ <strong>The most important JWT fact: signed is not encrypted.</strong> Anyone can decode the payload. Never put secrets in it:</p></div>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">import</span> base64
+payload = <span class="hljs-string">&quot;eyJzdWIiOiJhbGljZSIsImFkbWluIjpmYWxzZSwiZXhwIjoxNzk4NzYxNjAwfQ&quot;</span>
+<span class="hljs-built_in">print</span>(base64.urlsafe_b64decode(payload + <span class="hljs-string">&quot;=&quot;</span> * (-<span class="hljs-built_in">len</span>(payload) % <span class="hljs-number">4</span>)))
+<span class="hljs-comment"># b&#x27;{&quot;sub&quot;:&quot;alice&quot;,&quot;admin&quot;:false,&quot;exp&quot;:1798761600}&#x27;</span></code></pre></div><p>(Paste any JWT into a decoder like jwt.io to see this, but never paste real production tokens into websites.)</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th><code>alg</code></th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>HS256</code></td>
+<td>HMAC-SHA256 with a shared secret (the server that creates tokens also verifies them)</td>
+</tr>
+<tr>
+<td><code>RS256</code> / <code>PS256</code></td>
+<td>RSA signature (others can verify with the public key)</td>
+</tr>
+<tr>
+<td><code>ES256</code></td>
+<td>ECDSA P-256 signature</td>
+</tr>
+<tr>
+<td><code>EdDSA</code></td>
+<td>Ed25519 signature</td>
+</tr>
+</tbody></table></div>
+<p>Classic JWT mistakes:</p>
+<ul>
+<li>📜 <strong><code>&quot;alg&quot;: &quot;none&quot;</code>:</strong> some libraries once accepted tokens that declared &quot;no signature,&quot; letting attackers forge any token. Always enforce the expected algorithm on the server.</li>
+<li><strong>Algorithm confusion:</strong> tricking a server that expects RS256 into treating its <em>public</em> key as an HS256 secret.</li>
+<li><strong>Weak HS256 secrets:</strong> short secrets can be brute-forced offline from a single token. Use at least 32 random bytes.</li>
+<li><strong>No expiry:</strong> always set <code>exp</code> and keep lifetimes short.</li>
+<li>If you need the contents hidden, use <strong>JWE</strong> (JSON Web Encryption).</li>
+</ul>
+</div><div class="widget" data-w="jwt"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>JWT signing algorithms</h4></div><div class="pc-grid">
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>HS256</h5><p class="pc-tag">HMAC-SHA256</p></header>
+<ul class="pros"><li>Tiny and fast</li></ul>
+<ul class="cons"><li>Every verifier can also forge</li><li>Weak secrets can be brute-forced</li></ul>
+<footer><b>Best for:</b> One service issuing and verifying</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>RS256 / PS256</h5><p class="pc-tag">RSA signatures</p></header>
+<ul class="pros"><li>Public verification; very widespread</li></ul>
+<ul class="cons"><li>Large tokens</li><li>Algorithm-confusion pitfalls</li></ul>
+<footer><b>Best for:</b> Identity providers</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>ES256 / EdDSA</h5><p class="pc-tag">ECDSA P-256 / Ed25519</p></header>
+<ul class="pros"><li>Small tokens; public verification</li></ul>
+<ul class="cons"><li>ES256 needs good nonces (libraries handle it)</li></ul>
+<footer><b>Best for:</b> Modern APIs</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>alg: none</h5><p class="pc-tag">“No signature”</p></header>
+<ul class="pros"><li>None</li></ul>
+<ul class="cons"><li>Anyone can forge any token</li></ul>
+<footer><b>Best for:</b> Reject it, always</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-16-6" id="s-16-6" data-sec="s-16-6">
+<h2 class="sec-title"><span class="sec-num">16.6</span><span class="sec-text">Cryptocurrency and blockchains</span><a class="sec-anchor" href="#s-16-6" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>&quot;Crypto&quot; in the news usually means cryptocurrency. It isn&#39;t the same thing as cryptography, but it&#39;s built entirely from the tools in this guide. (This section explains the technology only; it isn&#39;t financial advice.)</p>
+<p><strong>Bitcoin&#39;s ingredients:</strong></p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Concept</th>
+<th>Crypto tool</th>
+<th>Chapter</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Your wallet&#39;s <strong>private key</strong></td>
+<td>A random 256-bit number</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Your <strong>public key</strong></td>
+<td><code>k × G</code> on the secp256k1 elliptic curve</td>
+<td>9</td>
+</tr>
+<tr>
+<td>Your <strong>address</strong></td>
+<td>A hash of your public key (SHA-256 then RIPEMD-160), encoded as text</td>
+<td>6</td>
+</tr>
+<tr>
+<td><strong>Spending</strong> coins</td>
+<td>Signing a transaction with your private key (ECDSA, or Schnorr since 2021)</td>
+<td>11</td>
+</tr>
+<tr>
+<td><strong>Blocks</strong> chained together</td>
+<td>Each block contains the hash of the previous one</td>
+<td>6</td>
+</tr>
+<tr>
+<td>All transactions in a block</td>
+<td>Summarized by a <strong>Merkle root</strong></td>
+<td>6</td>
+</tr>
+<tr>
+<td><strong>Mining</strong> (proof of work)</td>
+<td>Searching for a number that makes the block&#39;s double-SHA-256 hash start with many zeros</td>
+<td>6</td>
+</tr>
+</tbody></table></div>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>  Block 100                  Block 101                  Block 102
+ ┌────────────────────┐     ┌────────────────────┐     ┌────────────────────┐
+ │ prev hash: 0000a1… │◄────│ prev hash: 0000f3… │◄────│ prev hash: 00007c… │
+ │ Merkle root: 9b2…  │     │ Merkle root: 41d…  │     │ Merkle root: e70…  │
+ │ nonce: 2083236893  │     │ nonce: 1759401275  │     │ nonce: 3092214718  │
+ │ transactions...    │     │ transactions...    │     │ transactions...    │
+ └────────────────────┘     └────────────────────┘     └────────────────────┘
+  Change anything in block 100 and its hash changes, breaking every later
+  block's &quot;prev hash&quot; link. Rewriting history means redoing all that mining work.</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p><strong>Proof of work</strong> is a lottery: miners repeatedly change a number (the nonce) and hash the block until, by luck, the hash falls below a target. It takes enormous computing power to win, which is what makes rewriting history impractical. Ethereum switched in 2022 to <strong>proof of stake</strong>, which uses signatures from participants who lock up funds instead of mining.</p>
+<p><strong>Seed phrases.</strong> Wallets show you 12 or 24 words (a standard called BIP-39). Those words <strong>encode the master random secret</strong> from which all your keys are derived.</p>
+<aside class="callout warn"><p>⚠️ <strong>Anyone who has your seed phrase has your money.</strong> No bank, no password reset, no undo. Never type it into a website, never share it with &quot;support staff,&quot; never store it as a photo in the cloud. &quot;Not your keys, not your coins&quot;: if an exchange holds the keys for you, you&#39;re trusting the exchange.</p>
+</aside>
+<p>Lost keys mean lost funds forever. Researchers estimate that millions of bitcoins are permanently inaccessible because their owners lost their keys.</p>
+</div><div class="widget" data-w="blockchain"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Blockchain building blocks</h4></div><div class="pc-grid">
+<article class="pc-card v-idea"><header><span class="pc-verdict">💡 Concept</span><h5>Hash-chained blocks</h5><p class="pc-tag">Each block holds the previous hash</p></header>
+<ul class="pros"><li>Tamper-evident history</li></ul>
+<ul class="cons"><li>Doesn’t stop a majority of miners/validators</li></ul>
+<footer><b>Best for:</b> Public ledgers, audit logs</footer></article>
+<article class="pc-card v-idea"><header><span class="pc-verdict">💡 Concept</span><h5>Proof of work</h5><p class="pc-tag">Find a hash below a target</p></header>
+<ul class="pros"><li>Permissionless and simple</li></ul>
+<ul class="cons"><li>Enormous energy use</li></ul>
+<footer><b>Best for:</b> Bitcoin</footer></article>
+<article class="pc-card v-idea"><header><span class="pc-verdict">💡 Concept</span><h5>Proof of stake</h5><p class="pc-tag">Validators lock up coins</p></header>
+<ul class="pros"><li>~99.9% less energy</li></ul>
+<ul class="cons"><li>More complex security assumptions</li></ul>
+<footer><b>Best for:</b> Ethereum since 2022</footer></article>
+<article class="pc-card v-idea"><header><span class="pc-verdict">💡 Concept</span><h5>Wallet = private key</h5><p class="pc-tag">secp256k1 signatures</p></header>
+<ul class="pros"><li>You truly own your funds</li></ul>
+<ul class="cons"><li>Lose the key, lose the money; no undo</li></ul>
+<footer><b>Best for:</b> Use hardware wallets + backups</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-16-7" id="s-16-7" data-sec="s-16-7">
+<h2 class="sec-title"><span class="sec-num">16.7</span><span class="sec-text">Software supply chain: code signing and secure updates</span><a class="sec-anchor" href="#s-16-7" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>How do you know an app or update really comes from its developer, and wasn&#39;t modified along the way?</p>
+<ul>
+<li><strong>Code signing:</strong> developers sign their software (Chapter <a class="xref" href="chapter-11.html">11</a>). Your operating system checks the signature before running it: macOS Gatekeeper and notarization, Windows SmartScreen and Authenticode, Android&#39;s APK signature checks, iOS&#39;s App Store signatures.</li>
+<li><strong>Secure Boot:</strong> a <strong>chain of trust</strong> at startup. The firmware checks the bootloader&#39;s signature, the bootloader checks the operating system&#39;s, and so on. A TPM chip can record (&quot;measure&quot;) each step so the system can prove it booted cleanly.</li>
+<li><strong>Package managers:</strong> Linux repositories sign their package lists with GPG. Newer systems like <strong>Sigstore</strong> let developers sign software with short-lived certificates tied to their login identity, and record every signature in a public transparency log (like Certificate Transparency for software).</li>
+<li><strong>Git commit signing:</strong> prove who wrote a commit. With an SSH key:</li>
+</ul>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs">git config --global gpg.format ssh
+git config --global user.signingkey ~/.ssh/id_ed25519.pub
+git config --global commit.gpgsign <span class="hljs-literal">true</span>
+git commit -m <span class="hljs-string">&quot;Signed commit&quot;</span>          <span class="hljs-comment"># GitHub/GitLab show a &quot;Verified&quot; badge</span></code></pre></div><div class="callout story"><p>📜 <strong>SolarWinds (2020):</strong> attackers broke into a software company&#39;s <strong>build system</strong> and inserted malware into a product update. The update was then <strong>legitimately signed</strong> and installed by thousands of organizations, including government agencies. Lesson: a signature proves <em>who</em> shipped the code, not that the code is safe.</p></div>
+<div class="callout story"><p>📜 <strong>The xz backdoor (2024):</strong> over about two years, someone using the name &quot;Jia Tan&quot; gained the trust of the maintainer of <code>xz</code>, a compression library used throughout Linux, and slipped in a hidden backdoor that targeted SSH servers. It was discovered by chance, just before reaching major Linux releases, by a Microsoft engineer, Andres Freund, who noticed SSH logins taking about half a second longer than usual. Lesson: supply-chain security is about people and processes as much as cryptography.</p></div>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Supply-chain protections</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Code signing</h5><p class="pc-tag">Sign releases and updates</p></header>
+<ul class="pros"><li>Users know who published it</li><li>Tampered updates fail verification</li></ul>
+<ul class="cons"><li>Stolen signing keys sign malware too</li></ul>
+<footer><b>Best for:</b> All software distribution</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Sigstore / transparency</h5><p class="pc-tag">Keyless signing + public logs</p></header>
+<ul class="pros"><li>No long-lived keys to steal</li><li>Public audit trail</li></ul>
+<ul class="cons"><li>Depends on identity providers</li></ul>
+<footer><b>Best for:</b> Open-source packages</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Reproducible builds</h5><p class="pc-tag">Anyone can rebuild bit-for-bit</p></header>
+<ul class="pros"><li>Catches compromised build servers</li></ul>
+<ul class="cons"><li>Hard to achieve</li></ul>
+<footer><b>Best for:</b> Critical projects</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 16</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 16 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-mint" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 17</p>
+<h3>Advanced and Emerging Cryptography</h3>
+<p class="next-hook">A machine that doesn’t fully exist yet already threatens secrets you send today. Plus: how to prove you know a secret without revealing a single bit of it.</p>
+<div class="next-actions"><a class="btn big" href="chapter-17.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-15.html">← Secure Connections: SSH, VPNs, Wi-Fi and DNS</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":16,"title":"Everyday Security: Email, Messaging, Disks, Logins and Money","quiz":[{"q":"A TOTP code is an HMAC of…","o":["your password","a shared secret and the current 30-second time step","your phone number","your IP address"],"a":1,"why":"HMAC-SHA1(secret, time ÷ 30), shortened to 6 digits."},{"q":"JWT payloads are…","o":["encrypted","signed but readable by anyone","hashed passwords","random noise"],"a":1,"why":"Signed is not encrypted. Never put secrets in a JWT payload (use JWE if you must hide it)."},{"q":"Why are passkeys phishing-resistant?","o":["They are longer passwords","They are bound to the real site’s domain and the private key never leaves your device","They use SMS","They use CAPTCHAs"],"a":1,"why":"A fake site gets nothing it can use: the signature is tied to the genuine origin."},{"q":"A DMARC policy of <code>p=reject</code> tells receivers to…","o":["encrypt the mail","reject mail that fails SPF/DKIM alignment","sign every email","mark everything as spam"],"a":1,"why":"SPF, DKIM and DMARC work together to stop forged senders."}],"fragment":"passkey","secs":["s-16-1","s-16-2","s-16-3","s-16-4","s-16-5","s-16-6","s-16-7"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-d.js?v=86fb719f26"></script>
+</body>
+</html>

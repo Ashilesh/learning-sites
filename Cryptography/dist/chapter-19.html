@@ -1,0 +1,348 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 19: Key Management: Guarding the Keys · CryptoSketch</title>
+<meta name="description" content="Strong crypto turns a data-protection problem into a key-protection problem. So where do you hide the one key that protects everything?">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-mint">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">🗄️ In this chapter</p><ol><li><a href="#s-19-1" data-sec="s-19-1"><span class="st-num">19.1</span><span class="st-t">The real problem</span></a></li><li><a href="#s-19-2" data-sec="s-19-2"><span class="st-num">19.2</span><span class="st-t">The key lifecycle</span></a></li><li><a href="#s-19-3" data-sec="s-19-3"><span class="st-num">19.3</span><span class="st-t">Where keys should live</span></a></li><li><a href="#s-19-4" data-sec="s-19-4"><span class="st-num">19.4</span><span class="st-t">Envelope encryption: keys that protect keys</span></a></li><li><a href="#s-19-5" data-sec="s-19-5"><span class="st-num">19.5</span><span class="st-t">Secrets in applications</span></a></li><li><a href="#s-19-6" data-sec="s-19-6"><span class="st-num">19.6</span><span class="st-t">Principles of good key management</span></a></li><li><a href="#s-19-7" data-sec="s-19-7"><span class="st-num">19.7</span><span class="st-t">Backup and recovery: the trade-off</span></a></li><li><a href="#s-19-8" data-sec="s-19-8"><span class="st-num">19.8</span><span class="st-t">Standards and compliance, briefly</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="19">
+<header class="ch-hero world-mint">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-4">🏙️ World 4 · Cryptography in the Real World</a>
+    <p class="ch-num">Chapter 19</p>
+    <h1 class="ch-title">Key Management: Guarding the Keys</h1>
+    <p class="ch-hook"><span>🤔</span> Strong crypto turns a data-protection problem into a key-protection problem. So where do you hide the one key that protects everything?</p>
+    <ul class="ch-stats"><li>⏱️ ~6 min</li><li>📚 8 sections</li><li>🎮 2 interactive</li><li>⭐ 200 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="19" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"></div>
+<section class="sec sec-19-1" id="s-19-1" data-sec="s-19-1">
+<h2 class="sec-title"><span class="sec-num">19.1</span><span class="sec-text">The real problem</span><a class="sec-anchor" href="#s-19-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Strong encryption turns a <strong>large</strong> problem (protecting gigabytes of data) into a <strong>small</strong> one (protecting a 32-byte key). But that small problem is now <em>everything</em>. If the key leaks, the encryption is worthless. If the key is lost, so is the data.</p>
+<p>Most real-world crypto failures are key-management failures: keys hard-coded in apps, left in public code repositories, stored next to the data they protect, never rotated, or lost without backup.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-19-2" id="s-19-2" data-sec="s-19-2">
+<h2 class="sec-title"><span class="sec-num">19.2</span><span class="sec-text">The key lifecycle</span><a class="sec-anchor" href="#s-19-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><figure class="sketch diagram"><div class="sketch-scroll"><pre>  ┌──────────┐   ┌────────────┐   ┌────────┐   ┌──────┐   ┌────────┐   ┌──────────┐   ┌─────────┐
+  │ Generate │──►│ Distribute │──►│ Store  │──►│ Use  │──►│ Rotate │──►│ Revoke / │──►│ Destroy │
+  │ (CSPRNG) │   │  securely  │   │ safely │   │      │   │        │   │  retire  │   │         │
+  └──────────┘   └────────────┘   └────────┘   └──────┘   └────────┘   └──────────┘   └─────────┘
+                                      │
+                                      └──► Back up / escrow (for keys whose loss would lose data)</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Stage</th>
+<th>Key questions</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Generate</strong></td>
+<td>Is it made with a CSPRNG, ideally inside secure hardware? Is it the right type and size?</td>
+</tr>
+<tr>
+<td><strong>Distribute</strong></td>
+<td>How does it reach where it&#39;s needed without being exposed? (Key exchange, wrapping with another key, hardware provisioning)</td>
+</tr>
+<tr>
+<td><strong>Store</strong></td>
+<td>Where does it live at rest? Who and what can read it?</td>
+</tr>
+<tr>
+<td><strong>Use</strong></td>
+<td>Is it used for one purpose only? Is every use logged?</td>
+</tr>
+<tr>
+<td><strong>Rotate</strong></td>
+<td>How often is it replaced, and can you do it without downtime?</td>
+</tr>
+<tr>
+<td><strong>Back up</strong></td>
+<td>If it&#39;s lost, is the data gone forever? Is that acceptable?</td>
+</tr>
+<tr>
+<td><strong>Revoke</strong></td>
+<td>If it&#39;s compromised, how fast can you stop it being trusted?</td>
+</tr>
+<tr>
+<td><strong>Destroy</strong></td>
+<td>When retired, is every copy truly erased?</td>
+</tr>
+</tbody></table></div>
+</div><div class="widget" data-w="lifecycle"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-19-3" id="s-19-3" data-sec="s-19-3">
+<h2 class="sec-title"><span class="sec-num">19.3</span><span class="sec-text">Where keys should live</span><a class="sec-anchor" href="#s-19-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>From weakest to strongest:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Storage</th>
+<th>Examples</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td class="st-bad">❌ In source code</td>
+<td><code>API_KEY = &quot;sk_live_...&quot;</code></td>
+<td>Anyone with the code (or the app binary) has the key</td>
+</tr>
+<tr>
+<td class="st-warn">⚠️ Plain files / environment variables</td>
+<td><code>.env</code> files, config files</td>
+<td>OK for development; easily leaked through logs, backups or mistakes</td>
+</tr>
+<tr>
+<td class="st-ok">✅ OS key stores</td>
+<td>macOS/iOS Keychain, Windows DPAPI, Android Keystore</td>
+<td>Protected by the OS and often by hardware</td>
+</tr>
+<tr>
+<td class="st-ok">✅ Secret managers</td>
+<td>HashiCorp Vault, AWS Secrets Manager, Google Secret Manager, Azure Key Vault</td>
+<td>Access control, audit logs, rotation</td>
+</tr>
+<tr>
+<td class="st-ok">✅ <strong>Cloud KMS</strong></td>
+<td>AWS KMS, Google Cloud KMS, Azure Key Vault keys</td>
+<td>Keys stay inside the provider&#39;s HSMs; you send data to be encrypted or signed</td>
+</tr>
+<tr>
+<td class="st-ok">✅ <strong>Hardware in your devices</strong></td>
+<td><strong>TPM</strong> chips in PCs (Windows 11 requires TPM 2.0), Apple <strong>Secure Enclave</strong>, Android <strong>StrongBox</strong></td>
+<td>Keys are generated inside the chip and can&#39;t be exported</td>
+</tr>
+<tr>
+<td class="st-ok">✅ <strong>Security keys and smart cards</strong></td>
+<td>YubiKey, Google Titan, government ID cards</td>
+<td>Portable, tamper-resistant, require physical presence</td>
+</tr>
+<tr>
+<td class="st-ok">✅ <strong>HSMs</strong> (Hardware Security Modules)</td>
+<td>Used by banks, certificate authorities, payment networks</td>
+<td>Tamper-responsive: they erase their keys if someone tries to open them. Certified under standards like FIPS 140-3.</td>
+</tr>
+</tbody></table></div>
+<aside class="callout key"><p>💡 <strong>Key idea: non-exportable keys.</strong> The best hardware never lets the private key out. You send it data, and it sends back a signature or decryption. Even if the computer is completely hacked, the attacker can <em>use</em> the key while they have access, but can never <em>copy</em> it.</p>
+</aside>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Where keys live</h4></div><div class="pc-grid">
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>Source code</h5><p class="pc-tag">API_KEY = &quot;sk_live_…&quot;</p></header>
+<ul class="pros"><li>Zero effort</li></ul>
+<ul class="cons"><li>Everyone with the repo or binary has it</li><li>Lives forever in Git history</li></ul>
+<footer><b>Best for:</b> Never</footer></article>
+<article class="pc-card v-legacy"><header><span class="pc-verdict">⚠️ Legacy</span><h5>.env / config files</h5><p class="pc-tag">Plain files</p></header>
+<ul class="pros"><li>Simple for development</li></ul>
+<ul class="cons"><li>Leaks via logs, backups, screenshots</li></ul>
+<footer><b>Best for:</b> Local development</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>OS key stores</h5><p class="pc-tag">Keychain, DPAPI, Android Keystore</p></header>
+<ul class="pros"><li>OS-protected, often hardware-backed</li></ul>
+<ul class="cons"><li>Platform-specific APIs</li></ul>
+<footer><b>Best for:</b> Desktop and mobile apps</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Secret managers</h5><p class="pc-tag">Vault, AWS/GCP/Azure secrets</p></header>
+<ul class="pros"><li>Access control, audit logs, rotation</li></ul>
+<ul class="cons"><li>Another critical service to run</li></ul>
+<footer><b>Best for:</b> Servers and pipelines</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Cloud KMS</h5><p class="pc-tag">Keys stay in provider HSMs</p></header>
+<ul class="pros"><li>Non-exportable; envelope encryption built in</li></ul>
+<ul class="cons"><li>Trust and lock-in to the provider</li><li>Per-request cost and latency</li></ul>
+<footer><b>Best for:</b> Cloud data encryption</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>TPM / Secure Enclave</h5><p class="pc-tag">Chip in your device</p></header>
+<ul class="pros"><li>Keys born inside, can’t be exported</li></ul>
+<ul class="cons"><li>Device loss = key loss (plan recovery)</li></ul>
+<footer><b>Best for:</b> Disk encryption, passkeys</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Security keys / smart cards</h5><p class="pc-tag">YubiKey, Titan, ID cards</p></header>
+<ul class="pros"><li>Portable, tamper-resistant, needs presence</li></ul>
+<ul class="cons"><li>Can be lost; buy two</li></ul>
+<footer><b>Best for:</b> Admins, SSH, logins</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>HSM</h5><p class="pc-tag">FIPS 140-3 tamper-responsive box</p></header>
+<ul class="pros"><li>Strongest protection; erases keys if attacked</li></ul>
+<ul class="cons"><li>Expensive; specialist operations</li></ul>
+<footer><b>Best for:</b> Banks, CAs, payment networks</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-19-4" id="s-19-4" data-sec="s-19-4">
+<h2 class="sec-title"><span class="sec-num">19.4</span><span class="sec-text">Envelope encryption: keys that protect keys</span><a class="sec-anchor" href="#s-19-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Large systems don&#39;t encrypt every file directly with one master key. Instead they use <strong>envelope encryption</strong>:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>                       ┌─────────────────────────────┐
+                       │   KMS / HSM                  │
+                       │   Key-Encryption Key (KEK)   │  ← never leaves the hardware
+                       └──────────────┬──────────────┘
+                                      │ encrypts (&quot;wraps&quot;) the DEK
+                                      ▼
+  ┌──────────────────────────────────────────────────────────────┐
+  │ Stored together:                                              │
+  │   [ encrypted DEK ]  +  [ file encrypted with the DEK ]       │
+  └──────────────────────────────────────────────────────────────┘
+         ▲
+         │ a fresh random Data-Encryption Key (DEK) per file or record</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><ol>
+<li>For each file, generate a fresh random <strong>Data-Encryption Key (DEK)</strong>.</li>
+<li>Encrypt the file with the DEK (fast, local AES-GCM).</li>
+<li>Ask the KMS to encrypt (&quot;wrap&quot;) the DEK with the <strong>Key-Encryption Key (KEK)</strong>, which never leaves the KMS.</li>
+<li>Store the wrapped DEK next to the encrypted file. Throw away the plain DEK.</li>
+</ol>
+<p>To decrypt, ask the KMS to unwrap the DEK (an access-controlled, logged request), then decrypt the file locally.</p>
+<p>Benefits: the master key never leaves secure hardware; each file has its own key; rotating the master key only requires re-wrapping small DEKs, not re-encrypting terabytes; and access to every file can be controlled and audited at the KMS. This is how cloud storage encryption, database encryption and the disk-encryption hierarchy in Chapter <a class="xref" href="chapter-16.html">16</a> work.</p>
+</div><div class="widget" data-w="envelope"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Envelope encryption</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Envelope encryption</h5><p class="pc-tag">DEK per object, wrapped by a KEK</p></header>
+<ul class="pros"><li>Master key never leaves the KMS</li><li>Rotate the KEK without re-encrypting all data</li><li>Fast local bulk encryption</li></ul>
+<ul class="cons"><li>Two-level key bookkeeping</li><li>KMS outage = no decryption</li></ul>
+<footer><b>Best for:</b> Cloud storage, databases</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>One key for everything</h5><p class="pc-tag">A single long-lived key</p></header>
+<ul class="pros"><li>Simple</li></ul>
+<ul class="cons"><li>One leak exposes all data</li><li>Rotation means re-encrypting everything</li></ul>
+<footer><b>Best for:</b> Nowhere serious</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-19-5" id="s-19-5" data-sec="s-19-5">
+<h2 class="sec-title"><span class="sec-num">19.5</span><span class="sec-text">Secrets in applications</span><a class="sec-anchor" href="#s-19-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="callout story"><p>📜 <strong>Leaked keys get used within minutes.</strong> Automated bots constantly scan public code repositories for anything that looks like a cloud access key or API token. Developers who accidentally push a key to a public repository have reported unauthorized use within minutes.</p></div>
+<p>Good practice:</p>
+<ul>
+<li><strong>Never commit secrets.</strong> Add <code>.env</code> and key files to <code>.gitignore</code>. Turn on secret scanning and &quot;push protection&quot; in GitHub or GitLab.</li>
+<li><strong>If a secret is ever committed, rotate it immediately.</strong> Deleting the commit isn&#39;t enough: it may already have been copied.</li>
+<li><strong>Prefer short-lived credentials</strong> over long-lived keys. For example, let cloud workloads use their built-in identity to get temporary tokens instead of storing permanent keys.</li>
+<li><strong>Keep secrets out of logs, error messages and URLs.</strong></li>
+<li><strong>Give each service its own credentials</strong> with only the permissions it needs.</li>
+</ul>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-19-6" id="s-19-6" data-sec="s-19-6">
+<h2 class="sec-title"><span class="sec-num">19.6</span><span class="sec-text">Principles of good key management</span><a class="sec-anchor" href="#s-19-6" aria-label="Link to this section">#</a></h2>
+<div class="prose"><ol>
+<li><strong>Key separation:</strong> one key, one purpose. Don&#39;t use the same key for encryption and signing, or for two different applications.</li>
+<li><strong>Least privilege:</strong> only the people and services that need a key can use it.</li>
+<li><strong>Rotation:</strong> replace keys on a schedule, and immediately on suspicion of compromise. Automate it.</li>
+<li><strong>Dual control and split knowledge:</strong> for the most critical keys, require several people (Shamir&#39;s Secret Sharing, Chapter <a class="xref" href="chapter-17.html">17</a>; key ceremonies, Chapter <a class="xref" href="chapter-13.html">13</a>).</li>
+<li><strong>Auditing:</strong> log every use of important keys, and review the logs.</li>
+<li><strong>Crypto agility:</strong> be able to change algorithms and key sizes without redesigning everything (essential for the post-quantum migration).</li>
+<li><strong>Plan for compromise:</strong> know in advance how you&#39;ll revoke, rotate and recover.</li>
+</ol>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-19-7" id="s-19-7" data-sec="s-19-7">
+<h2 class="sec-title"><span class="sec-num">19.7</span><span class="sec-text">Backup and recovery: the trade-off</span><a class="sec-anchor" href="#s-19-7" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Every encryption system faces a tension: <strong>the better the protection, the easier it is to lose data forever.</strong></p>
+<ul>
+<li><strong>Organizations</strong> usually <strong>escrow</strong> recovery keys: company laptops&#39; disk-encryption recovery keys are stored in the company&#39;s device-management system, so IT can recover a machine if an employee forgets a password or leaves.</li>
+<li><strong>Individuals</strong> should save recovery keys and codes (for disk encryption, password managers, 2FA and crypto wallets) offline: printed and stored somewhere safe, or in a password manager that is itself backed up.</li>
+<li>End-to-end encrypted services often <strong>can&#39;t</strong> recover your data if you lose your keys. That isn&#39;t a flaw; it&#39;s the point. Know where your recovery options are before you need them.</li>
+</ul>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Recovery strategies</h4></div><div class="pc-grid">
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>Key escrow</h5><p class="pc-tag">Organization keeps recovery keys</p></header>
+<ul class="pros"><li>IT can recover a forgotten laptop</li></ul>
+<ul class="cons"><li>The escrow store becomes a juicy target</li></ul>
+<footer><b>Best for:</b> Company devices</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Offline backup</h5><p class="pc-tag">Printed codes in a safe place</p></header>
+<ul class="pros"><li>Immune to online attacks</li></ul>
+<ul class="cons"><li>Fire, loss, and forgetting where it is</li></ul>
+<footer><b>Best for:</b> Individuals</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>No recovery (true E2EE)</h5><p class="pc-tag">Lose the key, lose the data</p></header>
+<ul class="pros"><li>Nobody else can ever get in</li></ul>
+<ul class="cons"><li>Nobody can help you either</li></ul>
+<footer><b>Best for:</b> When privacy matters most</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-19-8" id="s-19-8" data-sec="s-19-8">
+<h2 class="sec-title"><span class="sec-num">19.8</span><span class="sec-text">Standards and compliance, briefly</span><a class="sec-anchor" href="#s-19-8" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>You&#39;ll hear these names in professional settings:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Name</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>FIPS 140-3</strong></td>
+<td>US/Canadian certification program for cryptographic modules (libraries and hardware)</td>
+</tr>
+<tr>
+<td><strong>NIST SP 800-57 / 800-131A</strong></td>
+<td>NIST guidance on key management and which algorithms and key sizes are acceptable</td>
+</tr>
+<tr>
+<td><strong>PCI DSS</strong></td>
+<td>Security rules for organizations handling payment card data, including encryption and key-management requirements</td>
+</tr>
+<tr>
+<td><strong>HIPAA</strong> (US) / <strong>GDPR</strong> (EU)</td>
+<td>Health-data and personal-data laws; strong encryption reduces risk and can change breach-notification obligations</td>
+</tr>
+<tr>
+<td><strong>Common Criteria</strong></td>
+<td>International security certification for products such as smart cards and HSMs</td>
+</tr>
+<tr>
+<td><strong>eIDAS</strong> (EU)</td>
+<td>Legal framework for electronic signatures and trust services</td>
+</tr>
+</tbody></table></div>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 19</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 19 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-orange" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 20</p>
+<h3>Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</h3>
+<p class="next-hook">You know which tools to use. Now meet the games that define “secure”, the tricks that break ciphers, and the hidden crypto inside Tor, “Sign in with Google”, your bank card and your laptop’s boot screen.</p>
+<div class="next-actions"><a class="btn big" href="chapter-20.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-18.html">← How Cryptography Breaks: Attacks and Pitfalls</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":19,"title":"Key Management: Guarding the Keys","quiz":[{"q":"In envelope encryption, the data key (DEK) is…","o":["stored in plaintext next to the data","encrypted by a key-encryption key (KEK), usually in a KMS","emailed to admins","derived from the file name"],"a":1,"why":"Keys protect keys. The master key never leaves the KMS or HSM."},{"q":"The strongest place for a private key is…","o":["the source code","a .env file","non-exportable secure hardware (HSM, TPM, Secure Enclave)","a shared spreadsheet"],"a":2,"why":"Attackers might use the key while they have access, but can never copy it."},{"q":"Key separation means…","o":["one key per purpose, derived with a KDF","splitting a key into halves","storing keys in two places","two people per key"],"a":0,"why":"If one use is compromised, the others stay safe."},{"q":"The backup trade-off: the better the protection…","o":["the faster it is","the easier it is to lose data forever","the cheaper it is","the less you need backups"],"a":1,"why":"Escrow recovery keys (organizations) or store them offline (individuals)."}],"fragment":"envelope","secs":["s-19-1","s-19-2","s-19-3","s-19-4","s-19-5","s-19-6","s-19-7","s-19-8"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-d.js?v=86fb719f26"></script>
+</body>
+</html>

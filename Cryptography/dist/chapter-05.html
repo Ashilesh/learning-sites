@@ -1,0 +1,620 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 5: Symmetric Encryption: One Shared Key · CryptoSketch</title>
+<meta name="description" content="An attacker who doesn’t know the key changes “$100” into “$900”, and the bank’s decryption raises no alarm at all. How is that even possible?">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-coral">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">🔑 In this chapter</p><ol><li><a href="#s-5-1" data-sec="s-5-1"><span class="st-num">5.1</span><span class="st-t">The idea</span></a></li><li><a href="#s-5-2" data-sec="s-5-2"><span class="st-num">5.2</span><span class="st-t">The big problem: how do you share the key?</span></a></li><li><a href="#s-5-3" data-sec="s-5-3"><span class="st-num">5.3</span><span class="st-t">Two families: stream ciphers and block ciphers</span></a></li><li><a href="#s-5-4" data-sec="s-5-4"><span class="st-num">5.4</span><span class="st-t">Stream ciphers</span></a></li><li><a href="#s-5-5" data-sec="s-5-5"><span class="st-num">5.5</span><span class="st-t">Block ciphers: DES, 3DES and AES</span></a></li><li><a href="#s-5-6" data-sec="s-5-6"><span class="st-num">5.6</span><span class="st-t">Modes of operation: encrypting more than 16 bytes</span></a></li><li><a href="#s-5-7" data-sec="s-5-7"><span class="st-num">5.7</span><span class="st-t">Encryption without integrity is dangerous</span></a></li><li><a href="#s-5-8" data-sec="s-5-8"><span class="st-num">5.8</span><span class="st-t">AEAD: encryption and integrity in one step</span></a></li><li><a href="#s-5-9" data-sec="s-5-9"><span class="st-num">5.9</span><span class="st-t">Encrypting a file from the command line</span></a></li><li><a href="#s-5-10" data-sec="s-5-10"><span class="st-num">5.10</span><span class="st-t">Symmetric encryption summary</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="5">
+<header class="ch-hero world-coral">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-2">🧱 World 2 · The Building Blocks</a>
+    <p class="ch-num">Chapter 5</p>
+    <h1 class="ch-title">Symmetric Encryption: One Shared Key</h1>
+    <p class="ch-hook"><span>🤔</span> An attacker who doesn’t know the key changes “$100” into “$900”, and the bank’s decryption raises no alarm at all. How is that even possible?</p>
+    <ul class="ch-stats"><li>⏱️ ~9 min</li><li>📚 10 sections</li><li>🎮 6 interactive</li><li>⭐ 270 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="5" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"></div>
+<section class="sec sec-5-1" id="s-5-1" data-sec="s-5-1">
+<h2 class="sec-title"><span class="sec-num">5.1</span><span class="sec-text">The idea</span><a class="sec-anchor" href="#s-5-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p><strong>Symmetric encryption</strong> uses <strong>one key</strong> for both locking and unlocking. Alice and Bob each hold a copy of the same key.</p>
+<p>Analogy: a lockbox with two identical keys. Alice puts a letter inside, locks it and mails the box. Bob opens it with his copy of the key. Anyone who intercepts the box sees only a locked box.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>           same secret key                        same secret key
+                 🔑                                      🔑
+                 │                                       │
+ &quot;Hi Bob&quot; ──► [ENCRYPT] ──► 7f3a9c01e4...  ──────► [DECRYPT] ──► &quot;Hi Bob&quot;
+   Alice                    (ciphertext travels                    Bob
+                             over the internet)</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>Symmetric encryption is <strong>extremely fast</strong>. A modern laptop can encrypt several gigabytes per second. That&#39;s why it&#39;s used for almost all actual data: web pages, video calls, files, disk drives.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-5-2" id="s-5-2" data-sec="s-5-2">
+<h2 class="sec-title"><span class="sec-num">5.2</span><span class="sec-text">The big problem: how do you share the key?</span><a class="sec-anchor" href="#s-5-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>If Alice and Bob have never met, how does Bob get a copy of the key? If Alice sends it over the internet, Eve copies it. If she encrypts it, she needs <em>another</em> key to do that, and so on forever.</p>
+<p>It also gets out of hand quickly. If every pair of people needs its own key:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>People</th>
+<th>Keys needed</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>2</td>
+<td>1</td>
+</tr>
+<tr>
+<td>10</td>
+<td>45</td>
+</tr>
+<tr>
+<td>1,000</td>
+<td>499,500</td>
+</tr>
+<tr>
+<td>1 billion</td>
+<td>~500 quadrillion</td>
+</tr>
+</tbody></table></div>
+<p>This <strong>key distribution problem</strong> puzzled people for thousands of years. Armies used couriers with locked briefcases. The solution, public-key cryptography, came in the 1970s (Chapters <a class="xref" href="chapter-09.html">9</a> and <a class="xref" href="chapter-10.html">10</a>).</p>
+<aside class="callout key"><p>💡 <strong>Key idea:</strong> In practice, we use <strong>public-key cryptography to agree on a key</strong>, then <strong>symmetric encryption to protect the actual data</strong>. Every HTTPS connection works this way. Symmetric crypto does the heavy lifting because it&#39;s roughly a thousand times faster.</p>
+</aside>
+</div><div class="widget" data-w="keycount"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-5-3" id="s-5-3" data-sec="s-5-3">
+<h2 class="sec-title"><span class="sec-num">5.3</span><span class="sec-text">Two families: stream ciphers and block ciphers</span><a class="sec-anchor" href="#s-5-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><figure class="sketch diagram"><div class="sketch-scroll"><pre>STREAM CIPHER: encrypts a continuous flow, bit by bit (or byte by byte)
+
+   key + nonce ──► [keystream generator] ──► 8f 2a 91 c4 07 ...  (endless random-looking stream)
+                                               ⊕  ⊕  ⊕  ⊕  ⊕
+   plaintext ────────────────────────────────► H  e  l  l  o
+                                               =  =  =  =  =
+   ciphertext ───────────────────────────────► c7 4f fd a8 68 ...
+
+BLOCK CIPHER: encrypts fixed-size chunks (blocks)
+
+   plaintext:   [ block 1: 16 bytes ][ block 2: 16 bytes ][ block 3: 16 bytes ]
+                        │                    │                    │
+                     [ AES ]              [ AES ]              [ AES ]    ← all use the key
+                        │                    │                    │
+   ciphertext:  [ 16 scrambled bytes ][ 16 scrambled bytes ][ 16 scrambled bytes ]</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Stream vs. block ciphers</h4></div><div class="pc-grid">
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>Stream cipher</h5><p class="pc-tag">Keystream ⊕ plaintext</p></header>
+<ul class="pros"><li>No padding; any length</li><li>Fast, low latency, great in software</li></ul>
+<ul class="cons"><li>Key + nonce reuse = two-time pad</li><li>Malleable without a MAC</li></ul>
+<footer><b>Best for:</b> ChaCha20 in TLS, WireGuard, Signal</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>Block cipher</h5><p class="pc-tag">Scrambles fixed 16-byte blocks</p></header>
+<ul class="pros"><li>Very well studied (AES)</li><li>Hardware acceleration everywhere</li><li>Flexible via modes</li></ul>
+<ul class="cons"><li>Needs a mode of operation to be useful</li><li>Wrong mode (ECB) leaks patterns</li></ul>
+<footer><b>Best for:</b> AES-GCM almost everywhere</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-5-4" id="s-5-4" data-sec="s-5-4">
+<h2 class="sec-title"><span class="sec-num">5.4</span><span class="sec-text">Stream ciphers</span><a class="sec-anchor" href="#s-5-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A stream cipher turns a short key into a long, random-looking <strong>keystream</strong>, then XORs it with the message (remember XOR from Chapter <a class="xref" href="chapter-03.html">3</a>). It&#39;s a practical version of the one-time pad: instead of a truly random pad as long as the message, you get a pseudo-random pad generated from a short key.</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Cipher</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>RC4</strong></td>
+<td class="st-bad">❌ Broken</td>
+<td>Was everywhere (WEP Wi-Fi, early HTTPS). Statistical biases in its output. Banned from TLS in 2015.</td>
+</tr>
+<tr>
+<td><strong>ChaCha20</strong></td>
+<td class="st-ok">✅ Modern, recommended</td>
+<td>Designed by Daniel J. Bernstein. Uses only additions, rotations and XORs (&quot;ARX&quot;), so it&#39;s fast on any processor, including phones without special AES hardware. Used in TLS, WireGuard, SSH and Signal.</td>
+</tr>
+</tbody></table></div>
+<div class="callout warn"><p>⚠️ <strong>Watch out:</strong> a stream cipher must <strong>never</strong> reuse the same key + nonce combination. Doing so produces the same keystream, which is exactly the two-time pad problem from Chapter <a class="xref" href="chapter-03.html">3</a>.</p></div>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Stream ciphers</h4></div><div class="pc-grid">
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>RC4</h5><p class="pc-tag">Was everywhere in the 90s and 2000s</p></header>
+<ul class="pros"><li>Tiny and fast</li><li>Easy to implement</li></ul>
+<ul class="cons"><li>Statistically biased output</li><li>Broke WEP; banned from TLS in 2015</li></ul>
+<footer><b>Best for:</b> Nothing, anymore</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>ChaCha20</h5><p class="pc-tag">ARX design by Daniel J. Bernstein</p></header>
+<ul class="pros"><li>Fast on any CPU, even without AES hardware</li><li>Only add, rotate and XOR: naturally constant time</li><li>Huge security margin</li></ul>
+<ul class="cons"><li>Slower than AES where AES-NI exists</li><li>Still needs Poly1305 for integrity</li></ul>
+<footer><b>Best for:</b> Phones, IoT, TLS, WireGuard, SSH</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-5-5" id="s-5-5" data-sec="s-5-5">
+<h2 class="sec-title"><span class="sec-num">5.5</span><span class="sec-text">Block ciphers: DES, 3DES and AES</span><a class="sec-anchor" href="#s-5-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Cipher</th>
+<th>Year</th>
+<th>Key size</th>
+<th>Block size</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>DES</strong></td>
+<td>1977</td>
+<td>56 bits</td>
+<td>64 bits</td>
+<td class="st-bad">❌ Broken by brute force (1998, in 56 hours)</td>
+</tr>
+<tr>
+<td><strong>3DES</strong> (Triple DES)</td>
+<td>1998</td>
+<td>112 bits effective</td>
+<td>64 bits</td>
+<td class="st-bad">❌ Retired. Slow, and the small block size enables attacks (Sweet32, 2016). NIST disallowed it after 2023.</td>
+</tr>
+<tr>
+<td><strong>AES</strong></td>
+<td>2001</td>
+<td>128, 192 or 256 bits</td>
+<td>128 bits</td>
+<td class="st-ok">✅ The world standard</td>
+</tr>
+</tbody></table></div>
+<p><strong>AES</strong> (Advanced Encryption Standard) was chosen through an open, public competition run by NIST from 1997 to 2000. Fifteen designs from around the world were submitted and attacked by cryptographers. The winner, <strong>Rijndael</strong>, was designed by two Belgian cryptographers, Joan Daemen and Vincent Rijmen. It&#39;s now used everywhere: HTTPS, Wi-Fi, disk encryption, messaging apps, banking and government secrets.</p>
+<h4 id="how-aes-scrambles-data-the-intuition" class="h4">How AES scrambles data (the intuition)</h4>
+<p>AES takes 16 bytes and arranges them in a 4×4 grid. Then it repeats a &quot;round&quot; of four steps many times: <strong>10 rounds</strong> for a 128-bit key, <strong>12</strong> for 192-bit, <strong>14</strong> for 256-bit.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> 16 bytes of input arranged in a 4×4 grid:
+
+   ┌────┬────┬────┬────┐
+   │ 48 │ 6f │ 20 │ 6f │     Each round does four things:
+   ├────┼────┼────┼────┤
+   │ 65 │ 2c │ 42 │ 62 │     1. SubBytes    swap each byte for another using a fixed
+   ├────┼────┼────┼────┤                    lookup table (the &quot;S-box&quot;)
+   │ 6c │ 20 │ 6f │ 21 │     2. ShiftRows   slide row 2 left by 1, row 3 by 2, row 4 by 3
+   ├────┼────┼────┼────┤     3. MixColumns  blend the 4 bytes of each column together
+   │ 6c │ 21 │ 62 │ 00 │     4. AddRoundKey XOR the whole grid with a &quot;round key&quot;
+   └────┴────┴────┴────┘                    derived from your main key</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>Think of a Rubik&#39;s cube. Each round twists the cube in a way that depends on your key. After a few rounds, every byte of the output depends on <strong>every</strong> byte of the input and <strong>every</strong> bit of the key. Change one input bit, and about half of all output bits flip.</p>
+<p>Claude Shannon called the two ingredients:</p>
+<ul>
+<li><strong>Confusion:</strong> the relationship between key and ciphertext is hopelessly complicated (SubBytes, AddRoundKey).</li>
+<li><strong>Diffusion:</strong> a change anywhere spreads everywhere (ShiftRows, MixColumns).</li>
+</ul>
+<p>Modern CPUs have special AES instructions (Intel/AMD &quot;AES-NI,&quot; ARM &quot;Cryptography Extensions&quot;), so AES runs at gigabytes per second and resists certain timing attacks.</p>
+<div class="callout math"><p>🧮 <strong>Math corner:</strong> the &quot;blending&quot; in MixColumns and the S-box use arithmetic in a finite field called GF(2⁸). It&#39;s a number system with exactly 256 elements, one for each possible byte, where addition is XOR and multiplication follows special rules that wrap around. It guarantees every operation can be undone with the key.</p></div>
+</div><div class="widget" data-w="aesround"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Block ciphers</h4></div><div class="pc-grid">
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>DES</h5><p class="pc-tag">1977, 56-bit key</p></header>
+<ul class="pros"><li>Historic: decades of public cryptanalysis</li></ul>
+<ul class="cons"><li>Brute-forced in 56 hours (1998)</li><li>64-bit blocks</li></ul>
+<footer><b>Best for:</b> History class</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>3DES</h5><p class="pc-tag">DES three times, 112-bit effective</p></header>
+<ul class="pros"><li>Backwards compatible with DES hardware</li><li>No practical key-recovery attack</li></ul>
+<ul class="cons"><li>Slow (3 passes)</li><li>64-bit blocks → Sweet32</li><li>Disallowed by NIST after 2023</li></ul>
+<footer><b>Best for:</b> Legacy payment systems being migrated</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>AES</h5><p class="pc-tag">Rijndael, the 2001 world standard</p></header>
+<ul class="pros"><li>Open competition winner, 25 years of scrutiny</li><li>Hardware instructions (AES-NI, ARMv8)</li><li>128/192/256-bit keys</li></ul>
+<ul class="cons"><li>Table-based software can leak timing</li><li>Only as good as its mode</li></ul>
+<footer><b>Best for:</b> Everything: HTTPS, Wi-Fi, disks, messaging</footer></article>
+<article class="pc-card v-legacy"><header><span class="pc-verdict">⚠️ Legacy</span><h5>Blowfish</h5><p class="pc-tag">1993, up to 448-bit keys</p></header>
+<ul class="pros"><li>Unbroken core design</li><li>Lives on inside bcrypt</li></ul>
+<ul class="cons"><li>64-bit blocks (Sweet32)</li><li>Slow key setup</li></ul>
+<footer><b>Best for:</b> Only inside bcrypt</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-5-6" id="s-5-6" data-sec="s-5-6">
+<h2 class="sec-title"><span class="sec-num">5.6</span><span class="sec-text">Modes of operation: encrypting more than 16 bytes</span><a class="sec-anchor" href="#s-5-6" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>AES on its own only encrypts a single 16-byte block. To encrypt a 5 MB photo, you need a <strong>mode of operation</strong>: a rule for chaining blocks together. The choice of mode matters as much as the choice of cipher.</p>
+<h4 id="ecb-electronic-codebook-never-use-it" class="h4">ECB (Electronic Codebook): ❌ never use it</h4>
+<p>Each block is encrypted independently with the same key. Simple, and badly broken: <strong>identical plaintext blocks produce identical ciphertext blocks</strong>.</p>
+<p>The famous demonstration is the &quot;ECB penguin&quot;: encrypt a picture of the Linux penguin with ECB mode and <strong>you can still see the penguin</strong> in the encrypted image, because areas of the same color become the same encrypted pattern.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> Original image          Encrypted with ECB         Encrypted with CBC/CTR/GCM
+ ┌──────────────┐        ┌──────────────┐           ┌──────────────┐
+ │    ▄▄▄▄▄▄    │        │    ▒▒▒▒▒▒    │           │▓░▒█░▓▒░█▓▒░▓█│
+ │   █ ◉  ◉ █   │        │   ▓ ░  ░ ▓   │           │░▒▓█▒░▓▒█░▓▒░▒│
+ │   █  ▼▼  █   │  ───►  │   ▓  ▒▒  ▓   │           │▒█░▓░█▒▓░▒█▓░█│
+ │  ██      ██  │        │  ▓▓      ▓▓  │           │▓░▒▓█░▒░▓█▒░▓▒│
+ │   ▀▀▀▀▀▀▀▀   │        │   ▒▒▒▒▒▒▒▒   │           │█▒░▓▒░█▓▒░▓█▒░│
+ └──────────────┘        └──────────────┘           └──────────────┘
+                          shape still visible!       looks like random noise</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p class="lab-label">🧪 <strong>Try it yourself</strong> (Python): three identical blocks in ECB mode give three identical ciphertext blocks. CBC mode doesn&#39;t.</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">import</span> secrets
+<span class="hljs-keyword">from</span> cryptography.hazmat.primitives.ciphers <span class="hljs-keyword">import</span> Cipher, algorithms, modes
+
+key = secrets.token_bytes(<span class="hljs-number">16</span>)
+plaintext = <span class="hljs-string">b&quot;YELLOW SUBMARINE&quot;</span> * <span class="hljs-number">3</span>          <span class="hljs-comment"># three identical 16-byte blocks</span>
+
+enc = Cipher(algorithms.AES(key), modes.ECB()).encryptor()
+ct = enc.update(plaintext) + enc.finalize()
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(ct), <span class="hljs-number">16</span>):
+    <span class="hljs-built_in">print</span>(ct[i:i+<span class="hljs-number">16</span>].<span class="hljs-built_in">hex</span>())
+<span class="hljs-comment"># e649ef630d47b3db50a8229109e31403</span>
+<span class="hljs-comment"># e649ef630d47b3db50a8229109e31403   ← identical! the pattern leaks</span>
+<span class="hljs-comment"># e649ef630d47b3db50a8229109e31403</span>
+
+iv = secrets.token_bytes(<span class="hljs-number">16</span>)
+enc = Cipher(algorithms.AES(key), modes.CBC(iv)).encryptor()
+ct = enc.update(plaintext) + enc.finalize()
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">0</span>, <span class="hljs-built_in">len</span>(ct), <span class="hljs-number">16</span>):
+    <span class="hljs-built_in">print</span>(ct[i:i+<span class="hljs-number">16</span>].<span class="hljs-built_in">hex</span>())
+<span class="hljs-comment"># 3d414db5de5966e6f81095c5f2fd2a61</span>
+<span class="hljs-comment"># 12548cb0d2eea1530164de8171b26578   ← all different</span>
+<span class="hljs-comment"># cd44a639e22bb72c14f0f663e16a9b36</span></code></pre></div><p>(Your hex values will differ because the key is random. The pattern is what matters.)</p>
+<h4 id="cbc-cipher-block-chaining-legacy-ok-with-care" class="h4">CBC (Cipher Block Chaining): legacy, OK with care</h4>
+<p>Before encrypting each block, XOR it with the <strong>previous ciphertext block</strong>. The first block is XORed with a random <strong>IV</strong>. Now identical plaintext blocks look different.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>          P1                 P2                 P3
+          │                  │                  │
+  IV ───► ⊕         ┌──────► ⊕         ┌──────► ⊕
+          │         │        │         │        │
+        [AES]       │      [AES]       │      [AES]      ← all use the same key
+          │         │        │         │        │
+          C1 ───────┘        C2 ───────┘        C3</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>Downsides: encryption can&#39;t be parallelized, the message must be <strong>padded</strong> to a multiple of 16 bytes, and without a separate integrity check it&#39;s vulnerable to &quot;padding oracle&quot; attacks (Chapter <a class="xref" href="chapter-18.html">18</a>).</p>
+<p><strong>Padding (PKCS#7):</strong> if the last block needs N more bytes, add N bytes each with the value N.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>Last block &quot;HELLO WORLD&quot; is 11 bytes; it needs 5 more:
+48 45 4c 4c 4f 20 57 4f 52 4c 44 05 05 05 05 05
+ H  E  L  L  O     W  O  R  L  D └── padding ──┘</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><h4 id="ctr-counter-turn-a-block-cipher-into-a-stream-cipher" class="h4">CTR (Counter): turn a block cipher into a stream cipher</h4>
+<p>Encrypt a sequence of counter values (<code>nonce‖1</code>, <code>nonce‖2</code>, <code>nonce‖3</code> …) to produce a keystream, then XOR it with the plaintext. Fast, parallel, no padding needed.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> nonce‖counter=1    nonce‖counter=2    nonce‖counter=3
+        │                  │                  │
+     [AES]              [AES]              [AES]       ← keystream blocks
+        │                  │                  │
+  P1 ──►⊕            P2 ──►⊕            P3 ──►⊕
+        │                  │                  │
+        C1                 C2                 C3</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><div class="callout warn"><p>⚠️ The nonce must never repeat with the same key.</p></div>
+<h4 id="gcm-galoiscounter-mode-the-modern-default" class="h4">GCM (Galois/Counter Mode): ✅ the modern default</h4>
+<p>GCM = <strong>CTR mode for secrecy + a built-in authentication tag for integrity</strong>. It&#39;s an &quot;AEAD&quot; mode (<a class="xref" href="chapter-05.html#s-5-8">section 5.8</a>). AES-GCM protects most HTTPS traffic in the world.</p>
+<h4 id="mode-comparison" class="h4">Mode comparison</h4>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Mode</th>
+<th>Hides patterns?</th>
+<th>Detects tampering?</th>
+<th>Parallel?</th>
+<th>Needs padding?</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>ECB</td>
+<td class="st-bad">❌ No</td>
+<td class="st-bad">❌ No</td>
+<td class="st-ok">✅</td>
+<td>Yes</td>
+<td class="st-bad">❌ Never use</td>
+</tr>
+<tr>
+<td>CBC</td>
+<td class="st-ok">✅</td>
+<td class="st-bad">❌ No</td>
+<td>Decrypt only</td>
+<td>Yes</td>
+<td class="st-warn">⚠️ Legacy; only with a MAC</td>
+</tr>
+<tr>
+<td>CTR</td>
+<td class="st-ok">✅</td>
+<td class="st-bad">❌ No</td>
+<td class="st-ok">✅</td>
+<td>No</td>
+<td class="st-warn">⚠️ Only with a MAC</td>
+</tr>
+<tr>
+<td><strong>GCM</strong></td>
+<td class="st-ok">✅</td>
+<td class="st-ok">✅ <strong>Yes</strong></td>
+<td class="st-ok">✅</td>
+<td>No</td>
+<td class="st-ok">✅ <strong>Use this</strong></td>
+</tr>
+<tr>
+<td>XTS</td>
+<td class="st-ok">✅</td>
+<td class="st-bad">❌</td>
+<td class="st-ok">✅</td>
+<td>No</td>
+<td class="st-ok">✅ For disk encryption only</td>
+</tr>
+</tbody></table></div>
+</div><div class="widget" data-w="ecbimage"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="widget" data-w="padding"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Modes of operation</h4></div><div class="pc-grid">
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>ECB</h5><p class="pc-tag">Each block alone</p></header>
+<ul class="pros"><li>Simple, parallel</li></ul>
+<ul class="cons"><li>Identical blocks → identical ciphertext (the penguin!)</li><li>No integrity</li></ul>
+<footer><b>Best for:</b> Never</footer></article>
+<article class="pc-card v-legacy"><header><span class="pc-verdict">⚠️ Legacy</span><h5>CBC</h5><p class="pc-tag">Chain each block to the previous one</p></header>
+<ul class="pros"><li>Hides patterns</li><li>Supported everywhere</li></ul>
+<ul class="cons"><li>Needs padding → padding oracles</li><li>Encryption not parallel</li><li>Needs a separate MAC</li></ul>
+<footer><b>Best for:</b> Legacy systems, with Encrypt-then-MAC</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>CTR</h5><p class="pc-tag">Encrypt a counter → keystream</p></header>
+<ul class="pros"><li>Parallel and seekable</li><li>No padding</li></ul>
+<ul class="cons"><li>Nonce reuse is fatal</li><li>Malleable: bits flip straight through</li></ul>
+<footer><b>Best for:</b> Building block (inside GCM)</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>GCM</h5><p class="pc-tag">CTR + authentication tag (AEAD)</p></header>
+<ul class="pros"><li>Secrecy + integrity in one step</li><li>Fast with hardware</li><li>Protects most HTTPS traffic</li></ul>
+<ul class="cons"><li>Nonce reuse leaks data AND allows forgery</li><li>Rotate keys before ~2³² random nonces</li></ul>
+<footer><b>Best for:</b> Default for new designs</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>XTS</h5><p class="pc-tag">Tweakable mode for disk sectors</p></header>
+<ul class="pros"><li>Same-size output: fits disk sectors</li><li>Each sector encrypted differently</li></ul>
+<ul class="cons"><li>No integrity (by design)</li><li>Only for storage</li></ul>
+<footer><b>Best for:</b> BitLocker, FileVault, LUKS</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-5-7" id="s-5-7" data-sec="s-5-7">
+<h2 class="sec-title"><span class="sec-num">5.7</span><span class="sec-text">Encryption without integrity is dangerous</span><a class="sec-anchor" href="#s-5-7" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Here&#39;s a surprise for most people: <strong>an attacker can change encrypted data without knowing the key.</strong></p>
+<p>With stream ciphers and CTR mode, flipping a bit in the ciphertext flips the same bit in the decrypted plaintext. If Mallory can guess what the message says (for example, a bank transfer with a known format), she can change it precisely.</p>
+<p class="lab-label">🧪 <strong>Try it yourself</strong> (Python): turn &quot;$100&quot; into &quot;$900&quot; without the key.</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">import</span> secrets
+<span class="hljs-keyword">from</span> cryptography.hazmat.primitives.ciphers <span class="hljs-keyword">import</span> Cipher, algorithms, modes
+
+key = secrets.token_bytes(<span class="hljs-number">16</span>)
+nonce = secrets.token_bytes(<span class="hljs-number">16</span>)
+
+<span class="hljs-comment"># Alice encrypts a payment instruction</span>
+enc = Cipher(algorithms.AES(key), modes.CTR(nonce)).encryptor()
+ct = <span class="hljs-built_in">bytearray</span>(enc.update(<span class="hljs-string">b&quot;PAY BOB $100&quot;</span>) + enc.finalize())
+
+<span class="hljs-comment"># Mallory doesn&#x27;t know the key, but guesses the format.</span>
+<span class="hljs-comment"># Position 9 holds &quot;1&quot;. She flips exactly the bits that turn &quot;1&quot; into &quot;9&quot;.</span>
+ct[<span class="hljs-number">9</span>] ^= <span class="hljs-built_in">ord</span>(<span class="hljs-string">&quot;1&quot;</span>) ^ <span class="hljs-built_in">ord</span>(<span class="hljs-string">&quot;9&quot;</span>)
+
+<span class="hljs-comment"># Bob decrypts the modified message</span>
+dec = Cipher(algorithms.AES(key), modes.CTR(nonce)).decryptor()
+<span class="hljs-built_in">print</span>(dec.update(<span class="hljs-built_in">bytes</span>(ct)) + dec.finalize())   <span class="hljs-comment"># b&#x27;PAY BOB $900&#x27;  ← no error!</span></code></pre></div><p>Bob&#39;s decryption succeeds with no warning. This property is called <strong>malleability</strong>, and it&#39;s why modern systems never use encryption without an integrity check.</p>
+</div><div class="widget" data-w="malleable"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-5-8" id="s-5-8" data-sec="s-5-8">
+<h2 class="sec-title"><span class="sec-num">5.8</span><span class="sec-text">AEAD: encryption and integrity in one step</span><a class="sec-anchor" href="#s-5-8" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p><strong>AEAD</strong> stands for <strong>Authenticated Encryption with Associated Data</strong>. It&#39;s the modern, correct way to encrypt. It gives you:</p>
+<ul>
+<li><strong>Confidentiality:</strong> the data is secret.</li>
+<li><strong>Integrity and authenticity:</strong> any change to the ciphertext, nonce or associated data is detected.</li>
+</ul>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>                    ┌──────────────────────┐
+   key ───────────► │                      │
+   nonce ─────────► │   AEAD ENCRYPT       │ ───► ciphertext  +  tag (16 bytes)
+   plaintext ─────► │ (AES-GCM or          │       (secret)      (tamper seal)
+   associated ────► │  ChaCha20-Poly1305)  │
+   data (AD)        └──────────────────────┘
+
+   On decryption: if even ONE bit of ciphertext, tag, nonce or AD
+   was changed → decryption FAILS with an error. No partial output.</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p><strong>Associated data</strong> is information that must not be tampered with but doesn&#39;t need to be secret. Example: the header of a network packet says where it&#39;s going. Routers need to read it, so it can&#39;t be encrypted, but you want to detect if someone changes it.</p>
+<p>The two AEADs you&#39;ll see everywhere:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>AEAD</th>
+<th>Where it shines</th>
+<th>Used in</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>AES-GCM</strong> (128 or 256)</td>
+<td>Computers with AES hardware</td>
+<td>TLS, IPsec, SSH, disk tools, cloud storage</td>
+</tr>
+<tr>
+<td><strong>ChaCha20-Poly1305</strong></td>
+<td>Phones and devices without AES hardware; simple to implement safely</td>
+<td>TLS, WireGuard, SSH, Signal, Android</td>
+</tr>
+</tbody></table></div>
+<div class="callout warn"><p>⚠️ <strong>Watch out: nonce reuse in AES-GCM is catastrophic.</strong> Reusing a nonce with the same key reveals the XOR of the two messages <strong>and</strong> lets the attacker forge new valid messages. Safe approaches:</p></div>
+<ul>
+<li>Use a counter that never repeats (TLS does this), or</li>
+<li>Use a random 96-bit nonce and rotate the key well before 2³² (about 4 billion) messages, or</li>
+<li>Use <strong>XChaCha20-Poly1305</strong> (192-bit nonce, so random nonces are safe), or <strong>AES-GCM-SIV</strong>, which is designed to survive accidental nonce reuse.</li>
+</ul>
+<p class="lab-label">🧪 <strong>Try it yourself</strong> (Python): AES-256-GCM with tamper detection.</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">import</span> secrets
+<span class="hljs-keyword">from</span> cryptography.hazmat.primitives.ciphers.aead <span class="hljs-keyword">import</span> AESGCM
+
+key = AESGCM.generate_key(bit_length=<span class="hljs-number">256</span>)   <span class="hljs-comment"># 32 random bytes</span>
+aesgcm = AESGCM(key)
+
+nonce = secrets.token_bytes(<span class="hljs-number">12</span>)             <span class="hljs-comment"># 96-bit nonce: unique per message!</span>
+header = <span class="hljs-string">b&quot;to:bob&quot;</span>                          <span class="hljs-comment"># associated data: visible but protected</span>
+ciphertext = aesgcm.encrypt(nonce, <span class="hljs-string">b&quot;Meet me at 5pm&quot;</span>, header)
+<span class="hljs-built_in">print</span>(ciphertext.<span class="hljs-built_in">hex</span>())                     <span class="hljs-comment"># 14 bytes of ciphertext + 16-byte tag = 30 bytes</span>
+
+<span class="hljs-built_in">print</span>(aesgcm.decrypt(nonce, ciphertext, header))   <span class="hljs-comment"># b&#x27;Meet me at 5pm&#x27;</span>
+
+<span class="hljs-comment"># Mallory flips one bit...</span>
+tampered = <span class="hljs-built_in">bytearray</span>(ciphertext)
+tampered[<span class="hljs-number">0</span>] ^= <span class="hljs-number">0x01</span>
+<span class="hljs-keyword">try</span>:
+    aesgcm.decrypt(nonce, <span class="hljs-built_in">bytes</span>(tampered), header)
+<span class="hljs-keyword">except</span> Exception <span class="hljs-keyword">as</span> e:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">&quot;Tampering detected!&quot;</span>, <span class="hljs-built_in">type</span>(e).__name__)  <span class="hljs-comment"># Tampering detected! InvalidTag</span></code></pre></div><p>And ChaCha20-Poly1305 works the same way:</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">import</span> secrets
+<span class="hljs-keyword">from</span> cryptography.hazmat.primitives.ciphers.aead <span class="hljs-keyword">import</span> ChaCha20Poly1305
+
+key = ChaCha20Poly1305.generate_key()
+chacha = ChaCha20Poly1305(key)
+nonce = secrets.token_bytes(<span class="hljs-number">12</span>)
+ct = chacha.encrypt(nonce, <span class="hljs-string">b&quot;hello from my phone&quot;</span>, <span class="hljs-literal">None</span>)   <span class="hljs-comment"># None = no associated data</span>
+<span class="hljs-built_in">print</span>(chacha.decrypt(nonce, ct, <span class="hljs-literal">None</span>))                     <span class="hljs-comment"># b&#x27;hello from my phone&#x27;</span></code></pre></div></div><div class="widget" data-w="aead"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>AEADs: the modern way to encrypt</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>AES-GCM</h5><p class="pc-tag">AES + Galois MAC</p></header>
+<ul class="pros"><li>Blazing fast with AES-NI</li><li>Standard in TLS, IPsec, SSH, cloud</li></ul>
+<ul class="cons"><li>Catastrophic on nonce reuse</li><li>Slow and tricky in pure software</li></ul>
+<footer><b>Best for:</b> Servers and laptops</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>ChaCha20-Poly1305</h5><p class="pc-tag">Stream cipher + one-time MAC</p></header>
+<ul class="pros"><li>Fast everywhere, even cheap phones</li><li>Simple to implement safely</li></ul>
+<ul class="cons"><li>Still needs unique nonces (96-bit)</li><li>Slightly slower than AES-NI on desktops</li></ul>
+<footer><b>Best for:</b> Mobile, WireGuard, Signal</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>XChaCha20-Poly1305</h5><p class="pc-tag">192-bit nonce variant</p></header>
+<ul class="pros"><li>Random nonces are safe</li><li>Same speed as ChaCha20</li></ul>
+<ul class="cons"><li>Not in TLS</li><li>Fewer standard libraries</li></ul>
+<footer><b>Best for:</b> Apps that pick random nonces</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>AES-GCM-SIV</h5><p class="pc-tag">Nonce-misuse resistant</p></header>
+<ul class="pros"><li>Survives accidental nonce reuse (only reveals duplicates)</li><li>AES-NI speed</li></ul>
+<ul class="cons"><li>Two passes over the data</li><li>Less widely deployed</li></ul>
+<footer><b>Best for:</b> When nonce uniqueness can’t be guaranteed</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-5-9" id="s-5-9" data-sec="s-5-9">
+<h2 class="sec-title"><span class="sec-num">5.9</span><span class="sec-text">Encrypting a file from the command line</span><a class="sec-anchor" href="#s-5-9" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p class="lab-label">🧪 <strong>Try it yourself</strong> (OpenSSL): encrypt a file with a password.</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Meet me at the library at 5pm&quot;</span> &gt; secret.txt
+
+<span class="hljs-comment"># Encrypt (AES-256 in CBC mode; the key is derived from the password with PBKDF2)</span>
+openssl enc -aes-256-cbc -pbkdf2 -iter 600000 -salt \
+  -<span class="hljs-keyword">in</span> secret.txt -out secret.enc -pass pass:correct-horse
+
+<span class="hljs-comment"># Look at the encrypted bytes</span>
+xxd secret.enc | <span class="hljs-built_in">head</span> -3
+<span class="hljs-comment"># 00000000: 5361 6c74 6564 5f5f d7b4 c733 f5af 4a13  Salted__...3..J.</span>
+<span class="hljs-comment"># 00000010: c2b6 2612 340a 6f06 156a d918 04e6 f4e3  ..&amp;.4.o..j......</span>
+<span class="hljs-comment"># ...</span>
+
+<span class="hljs-comment"># Decrypt with the right password</span>
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
+  -<span class="hljs-keyword">in</span> secret.enc -pass pass:correct-horse
+<span class="hljs-comment"># Meet me at the library at 5pm</span>
+
+<span class="hljs-comment"># Wrong password</span>
+openssl enc -d -aes-256-cbc -pbkdf2 -iter 600000 \
+  -<span class="hljs-keyword">in</span> secret.enc -pass pass:wrong
+<span class="hljs-comment"># bad decrypt</span></code></pre></div><p>What&#39;s in the file: the first 8 bytes are literally the text <code>Salted__</code>, the next 8 are the random <strong>salt</strong>, and the rest is ciphertext. OpenSSL uses the password and salt to derive the AES key (more on that in Chapter <a class="xref" href="chapter-08.html">8</a>).</p>
+<div class="callout warn"><p>⚠️ <strong>Watch out:</strong> <code>openssl enc</code> doesn&#39;t support AEAD modes like GCM, so this file has <strong>no integrity protection</strong>. It&#39;s fine for learning. For real file encryption, use a tool designed for it, such as <a href="https://github.com/FiloSottile/age" target="_blank" rel="noopener"><code>age</code></a> or GnuPG (<code>gpg --symmetric</code>), which authenticate the data.</p></div>
+<p>(On a shared computer, also avoid putting a password directly on the command line, since other users can sometimes see running commands. Leave off <code>-pass</code> and OpenSSL will prompt for it.)</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-5-10" id="s-5-10" data-sec="s-5-10">
+<h2 class="sec-title"><span class="sec-num">5.10</span><span class="sec-text">Symmetric encryption summary</span><a class="sec-anchor" href="#s-5-10" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Name</th>
+<th>Type</th>
+<th>Key sizes</th>
+<th>Status today</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Caesar, Vigenère</td>
+<td>Classical</td>
+<td>tiny</td>
+<td class="st-bad">❌ Toy</td>
+<td>History only</td>
+</tr>
+<tr>
+<td>DES</td>
+<td>Block</td>
+<td>56</td>
+<td class="st-bad">❌ Broken</td>
+<td>Brute-forced in 1998</td>
+</tr>
+<tr>
+<td>3DES</td>
+<td>Block</td>
+<td>112/168</td>
+<td class="st-bad">❌ Retired</td>
+<td>Slow; 64-bit blocks</td>
+</tr>
+<tr>
+<td>RC4</td>
+<td>Stream</td>
+<td>40–2048</td>
+<td class="st-bad">❌ Broken</td>
+<td>Biased output</td>
+</tr>
+<tr>
+<td>Blowfish</td>
+<td>Block</td>
+<td>up to 448</td>
+<td class="st-warn">⚠️ Legacy</td>
+<td>64-bit blocks; lives on inside bcrypt</td>
+</tr>
+<tr>
+<td><strong>AES-GCM</strong></td>
+<td>Block + AEAD mode</td>
+<td>128/256</td>
+<td class="st-ok">✅ Recommended</td>
+<td>Hardware-accelerated</td>
+</tr>
+<tr>
+<td><strong>ChaCha20-Poly1305</strong></td>
+<td>Stream + AEAD</td>
+<td>256</td>
+<td class="st-ok">✅ Recommended</td>
+<td>Fast everywhere</td>
+</tr>
+<tr>
+<td>XChaCha20-Poly1305</td>
+<td>Stream + AEAD</td>
+<td>256</td>
+<td class="st-ok">✅ Recommended</td>
+<td>Safe with random nonces</td>
+</tr>
+<tr>
+<td>AES-XTS</td>
+<td>Block, disk mode</td>
+<td>256/512</td>
+<td class="st-ok">✅ For disks</td>
+<td>Used by BitLocker, FileVault, LUKS</td>
+</tr>
+</tbody></table></div>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 5</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 5 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-coral" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 6</p>
+<h3>Hash Functions: Digital Fingerprints</h3>
+<p class="next-hook">Change one letter in a 4 GB movie and its fingerprint changes completely. Find two files with the same fingerprint and you can fake a Windows Update. 😱</p>
+<div class="next-actions"><a class="btn big" href="chapter-06.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-04.html">← Randomness: The Secret Ingredient</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":5,"title":"Symmetric Encryption: One Shared Key","quiz":[{"q":"Which mode lets you still see the picture after encryption?","o":["GCM","CTR","ECB","CBC"],"a":2,"why":"ECB encrypts identical blocks identically, so patterns survive. Never use it."},{"q":"GCM = CTR mode plus…","o":["an authentication tag","padding","a bigger key","compression"],"a":0,"why":"GCM is an AEAD: CTR for secrecy plus a 16-byte tag that detects any tampering."},{"q":"Reusing a nonce with the same AES-GCM key…","o":["is harmless","only slows it down","reveals the XOR of the messages and allows forgeries","makes the key longer"],"a":2,"why":"Nonce reuse in GCM is catastrophic. Use counters, random 96-bit nonces with key rotation, XChaCha20 or AES-GCM-SIV."},{"q":"How many rounds does AES use with a 256-bit key?","o":["10","12","14","16"],"a":2,"why":"10 rounds for 128-bit keys, 12 for 192-bit, 14 for 256-bit."}],"fragment":"rijndael","secs":["s-5-1","s-5-2","s-5-3","s-5-4","s-5-5","s-5-6","s-5-7","s-5-8","s-5-9","s-5-10"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-b.js?v=86fb719f26"></script>
+</body>
+</html>

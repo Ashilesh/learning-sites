@@ -1,0 +1,396 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 12: Networking Essentials for Cryptography · CryptoSketch</title>
+<meta name="description" content="Your messages are chopped into postcards and passed hand to hand by 10 to 20 strangers in different countries. What can each of them read?">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-ocean">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">📮 In this chapter</p><ol><li><a href="#s-12-1" data-sec="s-12-1"><span class="st-num">12.1</span><span class="st-t">🌐 Packets: the internet is a postal system</span></a></li><li><a href="#s-12-2" data-sec="s-12-2"><span class="st-num">12.2</span><span class="st-t">🌐 The layers of networking</span></a></li><li><a href="#s-12-3" data-sec="s-12-3"><span class="st-num">12.3</span><span class="st-t">🌐 Encapsulation: envelopes inside envelopes</span></a></li><li><a href="#s-12-4" data-sec="s-12-4"><span class="st-num">12.4</span><span class="st-t">🌐 IP addresses and ports</span></a></li><li><a href="#s-12-5" data-sec="s-12-5"><span class="st-num">12.5</span><span class="st-t">🌐 TCP and UDP</span></a></li><li><a href="#s-12-6" data-sec="s-12-6"><span class="st-num">12.6</span><span class="st-t">🌐 DNS: the internet's phone book</span></a></li><li><a href="#s-12-7" data-sec="s-12-7"><span class="st-num">12.7</span><span class="st-t">🌐 HTTP: how browsers talk to websites</span></a></li><li><a href="#s-12-8" data-sec="s-12-8"><span class="st-num">12.8</span><span class="st-t">🌐 What others can see, with and without HTTPS</span></a></li><li><a href="#s-12-9" data-sec="s-12-9"><span class="st-num">12.9</span><span class="st-t">Hands-on networking</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="12">
+<header class="ch-hero world-ocean">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-3">🌐 World 3 · Trust on the Internet</a>
+    <p class="ch-num">Chapter 12</p>
+    <h1 class="ch-title">Networking Essentials for Cryptography</h1>
+    <p class="ch-hook"><span>🤔</span> Your messages are chopped into postcards and passed hand to hand by 10 to 20 strangers in different countries. What can each of them read?</p>
+    <ul class="ch-stats"><li>⏱️ ~7 min</li><li>📚 9 sections</li><li>🎮 3 interactive</li><li>⭐ 220 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="12" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"><p>To understand HTTPS, VPNs and Wi-Fi security, you need a mental picture of how data actually travels across the internet. This chapter gives you just enough.</p>
+</div>
+<section class="sec sec-12-1" id="s-12-1" data-sec="s-12-1">
+<h2 class="sec-title"><span class="sec-num">12.1</span><span class="sec-text">🌐 Packets: the internet is a postal system</span><a class="sec-anchor" href="#s-12-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>When you load a web page, your data isn&#39;t sent as one continuous stream. It&#39;s chopped into small pieces called <strong>packets</strong> (typically up to about 1,500 bytes each). Each packet is like a postcard with:</p>
+<ul>
+<li>a <strong>destination address</strong> (where it&#39;s going),</li>
+<li>a <strong>source address</strong> (where replies should go),</li>
+<li>a <strong>sequence number</strong> (so pieces can be put back in order),</li>
+<li>and a chunk of the actual data.</li>
+</ul>
+<p>Packets hop through many <strong>routers</strong> on their way, like letters passing through sorting offices. Different packets may take different routes. The receiving computer reassembles them.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> Your laptop ──► café Wi-Fi router ──► internet provider ──► backbone routers ──► ... ──► server
+                     (hop 1)              (hop 2)              (hops 3–15)</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>Here&#39;s the security point: <strong>every one of those hops can read and modify any packet that isn&#39;t protected by cryptography.</strong> A typical connection crosses 10 to 20 devices owned by different organizations, in different countries.</p>
+</div><div class="widget" data-w="packets"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-12-2" id="s-12-2" data-sec="s-12-2">
+<h2 class="sec-title"><span class="sec-num">12.2</span><span class="sec-text">🌐 The layers of networking</span><a class="sec-anchor" href="#s-12-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Networking is organized in <strong>layers</strong>. Each layer has one job and relies on the layer below it, like a letter (your message) inside an envelope (addressing) inside a mail truck (delivery).</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Layer</th>
+<th>Its job</th>
+<th>Postal analogy</th>
+<th>Examples</th>
+<th>Cryptography at this layer</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Application</strong></td>
+<td>What programs say to each other</td>
+<td>The letter&#39;s contents</td>
+<td>HTTP (web), SMTP (email), DNS, SSH</td>
+<td>PGP, S/MIME, Signal, DNSSEC, JWTs</td>
+</tr>
+<tr>
+<td><strong>Security</strong> (between application and transport)</td>
+<td>Encrypt and authenticate the conversation</td>
+<td>Sealing the letter in a tamper-proof envelope</td>
+<td><strong>TLS</strong></td>
+<td>TLS, the crypto inside QUIC</td>
+</tr>
+<tr>
+<td><strong>Transport</strong></td>
+<td>Conversations between specific programs; reliable delivery</td>
+<td>Registered mail with numbered pages</td>
+<td><strong>TCP</strong>, <strong>UDP</strong>, QUIC</td>
+<td>(QUIC has TLS built in)</td>
+</tr>
+<tr>
+<td><strong>Network / Internet</strong></td>
+<td>Addresses and routing across the world</td>
+<td>Street addresses and sorting offices</td>
+<td><strong>IP</strong> (IPv4, IPv6)</td>
+<td><strong>IPsec</strong>, <strong>WireGuard</strong> (VPNs)</td>
+</tr>
+<tr>
+<td><strong>Link / Physical</strong></td>
+<td>Moving bits over one hop: cable, radio, fiber</td>
+<td>The mail truck on one road</td>
+<td>Ethernet, <strong>Wi-Fi</strong>, 5G</td>
+<td><strong>WPA2/WPA3</strong>, MACsec, cellular encryption</td>
+</tr>
+</tbody></table></div>
+<p>(You may also see the 7-layer &quot;OSI model&quot; in textbooks. It splits these into finer pieces but describes the same idea.)</p>
+<p>The key question for any security tool is: <strong>which layer does it protect, and between which two points?</strong></p>
+<ul>
+<li><strong>Wi-Fi encryption (WPA2/WPA3)</strong> protects only the radio hop between your device and the Wi-Fi router. After the router, it&#39;s gone.</li>
+<li><strong>A VPN</strong> protects everything between your device and the VPN server. After the VPN server, it&#39;s gone.</li>
+<li><strong>TLS (HTTPS)</strong> protects one application&#39;s conversation all the way from your browser to the website&#39;s server.</li>
+<li><strong>End-to-end encryption (Signal, WhatsApp)</strong> protects a message all the way from your device to your friend&#39;s device, so even the company running the service can&#39;t read it.</li>
+</ul>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-12-3" id="s-12-3" data-sec="s-12-3">
+<h2 class="sec-title"><span class="sec-num">12.3</span><span class="sec-text">🌐 Encapsulation: envelopes inside envelopes</span><a class="sec-anchor" href="#s-12-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>As data goes down the layers, each layer wraps it in its own header, like nesting envelopes:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>┌─────────────────────────────────────────────────────────────────────────────┐
+│ Wi-Fi frame header (device addresses)                                        │
+│  ┌───────────────────────────────────────────────────────────────────────┐  │
+│  │ IP header: from 192.168.1.20 → to 203.0.113.10                         │  │
+│  │  ┌─────────────────────────────────────────────────────────────────┐  │  │
+│  │  │ TCP header: from port 51544 → to port 443, sequence no. 1001    │  │  │
+│  │  │  ┌───────────────────────────────────────────────────────────┐  │  │  │
+│  │  │  │ TLS record header (type, length)                          │  │  │  │
+│  │  │  │  ┌─────────────────────────────────────────────────────┐  │  │  │  │
+│  │  │  │  │ 🔒 ENCRYPTED: &quot;GET /account HTTP/1.1                │  │  │  │  │
+│  │  │  │  │    Host: bank.example  Cookie: session=8f2a...&quot;     │  │  │  │  │
+│  │  │  │  └─────────────────────────────────────────────────────┘  │  │  │  │
+│  │  │  └───────────────────────────────────────────────────────────┘  │  │  │
+│  │  └─────────────────────────────────────────────────────────────────┘  │  │
+│  └───────────────────────────────────────────────────────────────────────┘  │
+└─────────────────────────────────────────────────────────────────────────────┘</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>With HTTPS, routers can still read the <strong>outer</strong> envelopes (IP addresses and ports), because they need them to deliver the packet. Only the innermost part, the actual web request, is encrypted.</p>
+</div><div class="widget" data-w="encap"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-12-4" id="s-12-4" data-sec="s-12-4">
+<h2 class="sec-title"><span class="sec-num">12.4</span><span class="sec-text">🌐 IP addresses and ports</span><a class="sec-anchor" href="#s-12-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><ul>
+<li>An <strong>IP address</strong> identifies a computer on a network, like a building&#39;s street address. IPv4 looks like <code>203.0.113.10</code>; IPv6 looks like <code>2001:db8:85a3::8a2e:370:7334</code>.</li>
+<li>A <strong>port</strong> identifies a specific program on that computer, like an apartment number in the building. Web servers listen on port 443 for HTTPS.</li>
+</ul>
+<p>Ports you&#39;ll meet in this guide:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Port</th>
+<th>Protocol</th>
+<th>Protected by crypto?</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>80 (TCP)</td>
+<td>HTTP (web, unencrypted)</td>
+<td class="st-bad">❌ No</td>
+</tr>
+<tr>
+<td><strong>443</strong> (TCP, and UDP for HTTP/3)</td>
+<td><strong>HTTPS</strong></td>
+<td class="st-ok">✅ TLS</td>
+</tr>
+<tr>
+<td><strong>22</strong> (TCP)</td>
+<td><strong>SSH</strong> (remote login)</td>
+<td class="st-ok">✅ SSH protocol</td>
+</tr>
+<tr>
+<td>53 (UDP/TCP)</td>
+<td>DNS (name lookups)</td>
+<td class="st-bad">❌ No (unless DNSSEC for authenticity)</td>
+</tr>
+<tr>
+<td>853 (TCP)</td>
+<td>DNS over TLS</td>
+<td class="st-ok">✅ TLS</td>
+</tr>
+<tr>
+<td>25, 587, 465 (TCP)</td>
+<td>SMTP (sending email)</td>
+<td class="st-warn">⚠️ Optional TLS (STARTTLS)</td>
+</tr>
+<tr>
+<td>993 (TCP)</td>
+<td>IMAPS (reading email)</td>
+<td class="st-ok">✅ TLS</td>
+</tr>
+<tr>
+<td>500, 4500 (UDP)</td>
+<td>IPsec VPN key exchange (IKE)</td>
+<td class="st-ok">✅ IPsec</td>
+</tr>
+<tr>
+<td>51820 (UDP)</td>
+<td>WireGuard VPN (default)</td>
+<td class="st-ok">✅ WireGuard</td>
+</tr>
+<tr>
+<td>1194 (UDP/TCP)</td>
+<td>OpenVPN</td>
+<td class="st-ok">✅ TLS-based</td>
+</tr>
+</tbody></table></div>
+<p>Most homes and offices use <strong>private IP addresses</strong> (like <code>192.168.1.20</code>) internally, and the router translates them to one public address (this is called <strong>NAT</strong>, Network Address Translation). That&#39;s why many devices can share one internet connection.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-12-5" id="s-12-5" data-sec="s-12-5">
+<h2 class="sec-title"><span class="sec-num">12.5</span><span class="sec-text">🌐 TCP and UDP</span><a class="sec-anchor" href="#s-12-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>There are two main ways to send data between programs:</p>
+<p><strong>TCP (Transmission Control Protocol)</strong>: reliable, ordered delivery. Lost packets are re-sent, and everything arrives in order. Used by the web (HTTP/1.1, HTTP/2), email and SSH. Before sending data, TCP sets up a connection with a <strong>three-way handshake</strong>:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> Client                                 Server
+   │ ──── SYN (&quot;Can we talk?&quot;) ─────────►  │
+   │ ◄─── SYN-ACK (&quot;Yes, can you hear me?&quot;)│
+   │ ──── ACK (&quot;Yes!&quot;) ─────────────────►  │
+   │                                       │
+   │   connection open — now TLS can start │</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>That&#39;s one full <strong>round trip</strong> (there and back) before any data flows. Round trips matter because they add delay: from Europe to a server in the US, one round trip takes roughly 80–150 milliseconds. Fewer round trips = faster websites, which is why TLS 1.3 worked hard to cut them.</p>
+<p><strong>UDP (User Datagram Protocol)</strong>: fire-and-forget. No handshake, no guaranteed delivery or order. Faster and simpler. Used by DNS, video calls, online games, WireGuard and <strong>QUIC</strong> (the base of HTTP/3).</p>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>TCP vs. UDP</h4></div><div class="pc-grid">
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>TCP</h5><p class="pc-tag">Reliable, ordered</p></header>
+<ul class="pros"><li>Retransmits lost packets</li><li>Simple for apps</li></ul>
+<ul class="cons"><li>Handshake round trip</li><li>Head-of-line blocking</li></ul>
+<footer><b>Best for:</b> HTTP/1.1, HTTP/2, SSH, email</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>UDP</h5><p class="pc-tag">Fire-and-forget</p></header>
+<ul class="pros"><li>No handshake; low latency</li><li>Base for QUIC and WireGuard</li></ul>
+<ul class="cons"><li>No delivery or order guarantee</li><li>Often blocked by strict firewalls</li></ul>
+<footer><b>Best for:</b> DNS, video calls, games, HTTP/3</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-12-6" id="s-12-6" data-sec="s-12-6">
+<h2 class="sec-title"><span class="sec-num">12.6</span><span class="sec-text">🌐 DNS: the internet&#39;s phone book</span><a class="sec-anchor" href="#s-12-6" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Computers connect using IP addresses, but people use names like <code>example.com</code>. <strong>DNS</strong> (Domain Name System) translates names into addresses.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> Your browser: &quot;What's the IP address of www.example.com?&quot;
+       │
+       ▼
+ 1. Check its own cache, then the operating system's cache
+       │ (not found)
+       ▼
+ 2. Ask a DNS resolver (your internet provider's, or a public one like 1.1.1.1 or 8.8.8.8)
+       │
+       ├──► 3. Resolver asks a ROOT server:      &quot;Who handles .com?&quot;
+       ├──► 4. Resolver asks the .com server:    &quot;Who handles example.com?&quot;
+       ├──► 5. Resolver asks example.com's server: &quot;What's www.example.com?&quot;
+       │                                          → &quot;172.66.147.243&quot;
+       ▼
+ 6. Browser connects to 172.66.147.243</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>Traditional DNS has two big security problems:</p>
+<ul>
+<li><strong>No privacy:</strong> queries travel unencrypted, so your internet provider, café Wi-Fi operator or anyone on the path sees every site you look up.</li>
+<li><strong>No authenticity:</strong> an attacker can send fake answers (&quot;bank.com is at <em>my</em> address&quot;). This is called <strong>DNS spoofing</strong> or <strong>cache poisoning</strong>.</li>
+</ul>
+<p>HTTPS limits the damage of fake DNS answers: even if you&#39;re sent to Mallory&#39;s server, Mallory doesn&#39;t have a valid certificate for your bank, so the browser shows an error. Chapter <a class="xref" href="chapter-15.html">15</a> covers DNSSEC (authenticity) and DNS over HTTPS/TLS (privacy).</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-12-7" id="s-12-7" data-sec="s-12-7">
+<h2 class="sec-title"><span class="sec-num">12.7</span><span class="sec-text">🌐 HTTP: how browsers talk to websites</span><a class="sec-anchor" href="#s-12-7" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>When your browser loads a page, it sends an HTTP <strong>request</strong>, and the server returns a <strong>response</strong>:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>REQUEST (browser → server)                 RESPONSE (server → browser)
+GET /account HTTP/1.1                      HTTP/1.1 200 OK
+Host: bank.example                         Content-Type: text/html
+Cookie: session=8f2a6c1d9e...              Set-Cookie: session=8f2a6c1d9e...; Secure; HttpOnly
+User-Agent: Mozilla/5.0 ...
+                                           &lt;html&gt; Your balance: $1,234.56 ...</pre></div></figure><p>The <strong>cookie</strong> is your login session: whoever presents it is treated as you.</p>
+<div class="callout story"><p>📜 <strong>True story: Firesheep (2010).</strong> A browser add-on called Firesheep let anyone on a café Wi-Fi network see other people&#39;s unencrypted session cookies for sites like Facebook and Twitter, then log in as them with <strong>one click</strong>. It caused a public outcry, and within a few years major sites switched to HTTPS everywhere, not just on login pages.</p></div>
+<p><strong>HTTPS is simply HTTP sent inside a TLS-encrypted connection.</strong> Same requests, same responses; nobody on the path can read or change them.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-12-8" id="s-12-8" data-sec="s-12-8">
+<h2 class="sec-title"><span class="sec-num">12.8</span><span class="sec-text">🌐 What others can see, with and without HTTPS</span><a class="sec-anchor" href="#s-12-8" aria-label="Link to this section">#</a></h2>
+<div class="prose"><figure class="sketch diagram"><div class="sketch-scroll"><pre> You ──► Wi-Fi ──► Internet provider ──► Internet backbone ──► Website's host ──► Website
+          👀              👀                     👀                   👀
+     Each of these can observe (and, if unprotected, modify) your traffic.</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Information</th>
+<th>Plain HTTP</th>
+<th>HTTPS</th>
+<th>HTTPS + encrypted DNS + ECH</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Your IP address and the server&#39;s IP address</td>
+<td class="st-seen">👀 Visible</td>
+<td class="st-seen">👀 Visible</td>
+<td class="st-seen">👀 Visible</td>
+</tr>
+<tr>
+<td>The website&#39;s domain name (<code>bank.example</code>)</td>
+<td class="st-seen">👀 Visible</td>
+<td class="st-seen">👀 Visible (via DNS and the SNI field)</td>
+<td class="st-hidden">🔒 Mostly hidden</td>
+</tr>
+<tr>
+<td>The page path (<code>/account/statements?id=77</code>)</td>
+<td class="st-seen">👀 Visible</td>
+<td class="st-hidden">🔒 Hidden</td>
+<td class="st-hidden">🔒 Hidden</td>
+</tr>
+<tr>
+<td>Page content, forms, passwords</td>
+<td class="st-seen">👀 Visible</td>
+<td class="st-hidden">🔒 Hidden</td>
+<td class="st-hidden">🔒 Hidden</td>
+</tr>
+<tr>
+<td>Cookies and headers</td>
+<td class="st-seen">👀 Visible</td>
+<td class="st-hidden">🔒 Hidden</td>
+<td class="st-hidden">🔒 Hidden</td>
+</tr>
+<tr>
+<td>Amount of data and timing</td>
+<td class="st-seen">👀 Visible</td>
+<td class="st-seen">👀 Visible</td>
+<td class="st-seen">👀 Visible</td>
+</tr>
+<tr>
+<td>Can someone <strong>modify</strong> the page in transit?</td>
+<td class="st-warn">⚠️ Yes</td>
+<td class="st-bad">❌ No (detected)</td>
+<td class="st-bad">❌ No</td>
+</tr>
+</tbody></table></div>
+<p>To hide the IP addresses as well, you need a VPN (which moves trust to the VPN provider) or Tor.</p>
+</div><div class="widget" data-w="seeview"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-12-9" id="s-12-9" data-sec="s-12-9">
+<h2 class="sec-title"><span class="sec-num">12.9</span><span class="sec-text">Hands-on networking</span><a class="sec-anchor" href="#s-12-9" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p class="lab-label">🧪 <strong>Try it yourself:</strong></p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># Look up a domain&#x27;s IP address (DNS)</span>
+dig +short example.com          <span class="hljs-comment"># or: nslookup example.com</span>
+
+<span class="hljs-comment"># See the route your packets take, hop by hop</span>
+traceroute example.com          <span class="hljs-comment"># Windows: tracert example.com</span>
+
+<span class="hljs-comment"># Check whether a server&#x27;s HTTPS port is open</span>
+nc -vz example.com 443
+
+<span class="hljs-comment"># Watch a plain HTTP request and response (everything readable)</span>
+curl -v http://example.com -o /dev/null
+
+<span class="hljs-comment"># Watch an HTTPS connection: DNS → TCP → TLS → HTTP</span>
+curl -v https://example.com -o /dev/null</code></pre></div><p>Part of the <code>curl -v https://...</code> output looks like this (lines start with <code>*</code> for connection info):</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>* Host example.com:443 was resolved.
+* IPv4: 172.66.147.243, 104.20.23.154               ← DNS answer
+*   Trying 172.66.147.243:443...
+* Connected to example.com (172.66.147.243) port 443 ← TCP handshake done
+* ALPN: curl offers h2,http/1.1
+* SSL connection using TLSv1.3 / AEAD-CHACHA20-POLY1305-SHA256   ← TLS handshake done
+* ALPN: server accepted h2                          ← will speak HTTP/2</pre></div></figure><p>To <em>see</em> packets for yourself, install <strong><a href="https://www.wireshark.org" target="_blank" rel="noopener">Wireshark</a></strong>, a free tool that shows every packet on your network. Capture while visiting an <code>http://</code> site and an <code>https://</code> site, and compare what&#39;s readable.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 12</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 12 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-ocean" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 13</p>
+<h3>Certificates and PKI: The Internet's ID Cards</h3>
+<p class="next-hook">Anyone can generate a key and claim to be your bank. So who vouches that this key really belongs to bank.com?</p>
+<div class="next-actions"><a class="btn big" href="chapter-13.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-11.html">← Digital Signatures: Unforgeable Digital Ink</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":12,"title":"Networking Essentials for Cryptography","quiz":[{"q":"Which port do web servers use for HTTPS?","o":["80","22","443","53"],"a":2,"why":"Port 443 (TCP, and UDP for HTTP/3). Port 80 is plain, unencrypted HTTP."},{"q":"Which gives reliable, ordered delivery with a three-way handshake?","o":["UDP","TCP","DNS","QUIC"],"a":1,"why":"TCP: SYN, SYN-ACK, ACK. UDP is fire-and-forget (used by DNS, WireGuard and QUIC)."},{"q":"DNS is…","o":["the internet’s phone book: names → IP addresses","an encryption protocol","a type of certificate","a VPN"],"a":0,"why":"Classic DNS is unencrypted and unauthenticated, which is why DNSSEC, DoT and DoH exist."},{"q":"With plain HTTPS, what can the café Wi-Fi still see?","o":["Your password","The page path and cookies","The domain name and IP addresses (plus data size and timing)","Nothing at all"],"a":2,"why":"Contents, paths and cookies are hidden, but IPs, the domain (via DNS and SNI) and traffic volume are visible."}],"fragment":"packet","secs":["s-12-1","s-12-2","s-12-3","s-12-4","s-12-5","s-12-6","s-12-7","s-12-8","s-12-9"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-d.js?v=86fb719f26"></script>
+</body>
+</html>

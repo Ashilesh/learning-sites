@@ -1,0 +1,504 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 9: Public-Key Cryptography: The Two-Key Revolution · CryptoSketch</title>
+<meta name="description" content="For 3,000 years, sharing a secret meant meeting first. Then someone invented a padlock anyone can snap shut, but only you can open.">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-coral">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">🗝️ In this chapter</p><ol><li><a href="#s-9-1" data-sec="s-9-1"><span class="st-num">9.1</span><span class="st-t">The big idea</span></a></li><li><a href="#s-9-2" data-sec="s-9-2"><span class="st-num">9.2</span><span class="st-t">Two superpowers</span></a></li><li><a href="#s-9-3" data-sec="s-9-3"><span class="st-num">9.3</span><span class="st-t">RSA: how it works, with a toy example</span></a></li><li><a href="#s-9-4" data-sec="s-9-4"><span class="st-num">9.4</span><span class="st-t">Real-world RSA</span></a></li><li><a href="#s-9-5" data-sec="s-9-5"><span class="st-num">9.5</span><span class="st-t">Elliptic-curve cryptography (ECC): smaller and faster</span></a></li><li><a href="#s-9-6" data-sec="s-9-6"><span class="st-num">9.6</span><span class="st-t">Hybrid encryption: how public-key crypto is really used</span></a></li><li><a href="#s-9-7" data-sec="s-9-7"><span class="st-num">9.7</span><span class="st-t">What key files look like</span></a></li><li><a href="#s-9-8" data-sec="s-9-8"><span class="st-num">9.8</span><span class="st-t">Hands-on with RSA</span></a></li><li><a href="#s-9-9" data-sec="s-9-9"><span class="st-num">9.9</span><span class="st-t">Symmetric vs. asymmetric at a glance</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="9">
+<header class="ch-hero world-coral">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-2">🧱 World 2 · The Building Blocks</a>
+    <p class="ch-num">Chapter 9</p>
+    <h1 class="ch-title">Public-Key Cryptography: The Two-Key Revolution</h1>
+    <p class="ch-hook"><span>🤔</span> For 3,000 years, sharing a secret meant meeting first. Then someone invented a padlock anyone can snap shut, but only you can open.</p>
+    <ul class="ch-stats"><li>⏱️ ~8 min</li><li>📚 9 sections</li><li>🎮 4 interactive</li><li>⭐ 235 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="9" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"></div>
+<section class="sec sec-9-1" id="s-9-1" data-sec="s-9-1">
+<h2 class="sec-title"><span class="sec-num">9.1</span><span class="sec-text">The big idea</span><a class="sec-anchor" href="#s-9-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>For thousands of years, encryption had one rule: <strong>the same key locks and unlocks</strong>. In the 1970s, cryptographers discovered something that seemed impossible: a system with <strong>two different keys</strong>.</p>
+<ul>
+<li>A <strong>public key</strong> that you can give to anyone, publish on a website, print on a T-shirt.</li>
+<li>A <strong>private key</strong> that you keep secret and never share.</li>
+</ul>
+<p>The two keys are created together as a <strong>key pair</strong> and are mathematically linked: what one does, only the other can undo. But knowing the public key doesn&#39;t let anyone work out the private key.</p>
+<p><strong>Analogy: open padlocks.</strong> Bob buys a hundred identical padlocks and keeps the only key. He hands out <strong>open</strong> padlocks to anyone who asks (that&#39;s his public key). Alice puts her letter in a box and snaps one of Bob&#39;s padlocks shut. Now <em>nobody</em>, not even Alice, can open the box, except Bob with his key (his private key).</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>   Bob hands out open padlocks              Alice locks a box               Only Bob can open it
+   (his PUBLIC key) to everyone             with Bob's padlock              (with his PRIVATE key)
+
+        🔓 🔓 🔓 🔓 🔓          ──►            📦🔒                ──►          🔑 → 📦🔓
+   &quot;Take one, they're free!&quot;                 (even Alice can't
+                                              reopen it now)</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p><strong>Analogy 2: a mailbox with a slot.</strong> Anyone can drop a letter through the slot (public key). Only the owner, with the key to the box, can take letters out (private key).</p>
+<p>This solves the key distribution problem from Chapter <a class="xref" href="chapter-05.html">5</a>. Alice and Bob never need to meet or share a secret in advance.</p>
+</div><div class="widget" data-w="padlock"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-9-2" id="s-9-2" data-sec="s-9-2">
+<h2 class="sec-title"><span class="sec-num">9.2</span><span class="sec-text">Two superpowers</span><a class="sec-anchor" href="#s-9-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Key pairs can be used in two directions, and each gives a different superpower:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Superpower</th>
+<th>Who uses which key</th>
+<th>What it gives</th>
+<th>Analogy</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Encryption</strong></td>
+<td>Anyone <strong>encrypts</strong> with Bob&#39;s <strong>public</strong> key; only Bob <strong>decrypts</strong> with his <strong>private</strong> key</td>
+<td>Confidentiality without a shared secret</td>
+<td>Snapping Bob&#39;s padlock shut</td>
+</tr>
+<tr>
+<td><strong>Digital signature</strong></td>
+<td>Bob <strong>signs</strong> with his <strong>private</strong> key; anyone <strong>verifies</strong> with his <strong>public</strong> key</td>
+<td>Proof that Bob created or approved something</td>
+<td>A seal only Bob can make, but anyone can check</td>
+</tr>
+</tbody></table></div>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>ENCRYPTION                                     SIGNATURE
+  Alice                         Bob             Bob                           Anyone
+    │  encrypt with              │                │  sign with                   │
+    │  Bob's PUBLIC key          │                │  Bob's PRIVATE key           │
+    └──────── ciphertext ───────►│                └──── message + signature ────►│
+                    decrypt with Bob's PRIVATE key       verify with Bob's PUBLIC key</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><aside class="callout key"><p>💡 <strong>Key idea:</strong> The <strong>private key</strong> is the one that does the &quot;special&quot; thing: decrypting, or signing. Guard it with your life. The <strong>public key</strong> can be shared with the whole world.</p>
+</aside>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-9-3" id="s-9-3" data-sec="s-9-3">
+<h2 class="sec-title"><span class="sec-num">9.3</span><span class="sec-text">RSA: how it works, with a toy example</span><a class="sec-anchor" href="#s-9-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p><strong>RSA</strong> (named after Rivest, Shamir and Adleman, 1977) was the first widely used public-key system and is still common. Its security rests on the factoring problem from Chapter <a class="xref" href="chapter-03.html">3</a>: multiplying two primes is easy; splitting the result back into those primes is extremely hard.</p>
+<p>Here&#39;s RSA with tiny numbers you can check on a calculator. (Real RSA uses numbers over 600 digits long.)</p>
+<p><strong>Step 1: Bob creates his key pair.</strong></p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Step</th>
+<th>What Bob does</th>
+<th>Toy value</th>
+<th>Public or secret?</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1</td>
+<td>Pick two random primes <code>p</code> and <code>q</code></td>
+<td><code>p = 61</code>, <code>q = 53</code></td>
+<td class="st-hidden">🔒 Secret</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Multiply them: <code>n = p × q</code></td>
+<td><code>n = 3233</code></td>
+<td>🌍 Public</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Compute <code>φ = (p − 1) × (q − 1)</code></td>
+<td><code>φ = 60 × 52 = 3120</code></td>
+<td class="st-hidden">🔒 Secret</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Choose a public exponent <code>e</code> that shares no factors with φ</td>
+<td><code>e = 17</code></td>
+<td>🌍 Public</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Find the private exponent <code>d</code> so that <code>(e × d) mod φ = 1</code></td>
+<td><code>d = 2753</code> (check: 17 × 2753 = 46801 = 15 × 3120 + 1 ✓)</td>
+<td class="st-hidden">🔒 Secret</td>
+</tr>
+</tbody></table></div>
+<ul>
+<li>Bob&#39;s <strong>public key</strong> is <code>(n = 3233, e = 17)</code>.</li>
+<li>Bob&#39;s <strong>private key</strong> is <code>d = 2753</code> (he also keeps <code>p</code>, <code>q</code> and <code>φ</code> secret, or throws them away).</li>
+</ul>
+<p><strong>Step 2: Alice encrypts a message.</strong> Messages must be numbers, so suppose her message is <code>m = 65</code> (the letter &quot;A&quot; in ASCII).</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>ciphertext  c = m^e mod n  =  65^17 mod 3233  =  2790</pre></div></figure><p>She sends <code>2790</code>.</p>
+<p><strong>Step 3: Bob decrypts.</strong></p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>message  m = c^d mod n  =  2790^2753 mod 3233  =  65   ✓</pre></div></figure><p><strong>Why it&#39;s secure:</strong> to calculate <code>d</code>, you need <code>φ</code>, and to get <code>φ</code>, you need <code>p</code> and <code>q</code>. The only known way to get them from the public <code>n</code> is to <strong>factor</strong> it. For <code>3233</code> that&#39;s easy (try dividing by small primes). For a 617-digit <code>n</code>, it&#39;s beyond all the computers on Earth.</p>
+<p class="lab-label">🧪 <strong>Try it yourself</strong> (Python, toy RSA; never use tiny numbers like this for real):</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs">p, q = <span class="hljs-number">61</span>, <span class="hljs-number">53</span>
+n = p * q                 <span class="hljs-comment"># 3233  (public)</span>
+phi = (p - <span class="hljs-number">1</span>) * (q - <span class="hljs-number">1</span>)   <span class="hljs-comment"># 3120  (secret)</span>
+e = <span class="hljs-number">17</span>                    <span class="hljs-comment"># public exponent</span>
+d = <span class="hljs-built_in">pow</span>(e, -<span class="hljs-number">1</span>, phi)       <span class="hljs-comment"># 2753  (private exponent: the modular inverse of e)</span>
+
+m = <span class="hljs-number">65</span>
+c = <span class="hljs-built_in">pow</span>(m, e, n)          <span class="hljs-comment"># encrypt</span>
+<span class="hljs-built_in">print</span>(c)                  <span class="hljs-comment"># 2790</span>
+<span class="hljs-built_in">print</span>(<span class="hljs-built_in">pow</span>(c, d, n))       <span class="hljs-comment"># decrypt → 65</span></code></pre></div><div class="callout math"><p>🧮 <strong>Math corner:</strong> why does decryption undo encryption? Because <code>e × d</code> is &quot;1 more than a multiple of φ,&quot; and a theorem by Euler says that raising a number to a multiple of φ (mod n) gives 1. So <code>(m^e)^d = m^(e×d) = m^(1 + k×φ) = m × 1 = m</code> (mod n). That&#39;s the whole trick.</p></div>
+</div><div class="widget" data-w="toyrsa"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-9-4" id="s-9-4" data-sec="s-9-4">
+<h2 class="sec-title"><span class="sec-num">9.4</span><span class="sec-text">Real-world RSA</span><a class="sec-anchor" href="#s-9-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Textbook RSA (exactly as above) is <strong>not secure</strong> on its own:</p>
+<ul>
+<li><strong>It&#39;s deterministic.</strong> The same message always gives the same ciphertext. If Mallory suspects the message is &quot;YES&quot; or &quot;NO,&quot; she encrypts both with the public key and compares.</li>
+<li><strong>It&#39;s malleable.</strong> Multiplying ciphertexts multiplies the hidden messages, which can be abused.</li>
+</ul>
+<p>So real RSA adds <strong>padding</strong>: carefully structured randomness mixed in before encryption.</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Use</th>
+<th>Padding scheme</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Encryption</td>
+<td><strong>RSA-OAEP</strong></td>
+<td class="st-ok">✅ Use this</td>
+</tr>
+<tr>
+<td>Encryption</td>
+<td>PKCS#1 v1.5</td>
+<td class="st-bad">❌ Avoid; vulnerable to Bleichenbacher-style attacks (1998, and again as &quot;ROBOT&quot; in 2017)</td>
+</tr>
+<tr>
+<td>Signatures</td>
+<td><strong>RSA-PSS</strong></td>
+<td class="st-ok">✅ Preferred</td>
+</tr>
+<tr>
+<td>Signatures</td>
+<td>PKCS#1 v1.5</td>
+<td class="st-warn">⚠️ Still common in certificates and acceptable for signatures</td>
+</tr>
+</tbody></table></div>
+<p>Other practical facts:</p>
+<ul>
+<li><strong>Key size:</strong> 2048 bits is the minimum today. 3072 bits gives 128-bit security. 4096 is common for long-lived keys.</li>
+<li><strong>Public exponent:</strong> almost always <code>e = 65537</code>.</li>
+<li><strong>It&#39;s slow,</strong> especially decryption and key generation, compared with symmetric crypto or elliptic curves.</li>
+<li><strong>It can only encrypt small messages.</strong> A 3072-bit RSA key with OAEP-SHA256 can encrypt at most 318 bytes. So in practice RSA encrypts a <em>key</em>, not the data (see hybrid encryption below).</li>
+</ul>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>RSA paddings</h4></div><div class="pc-grid">
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>Textbook RSA</h5><p class="pc-tag">c = mᵉ mod n</p></header>
+<ul class="pros"><li>Great for learning the math</li></ul>
+<ul class="cons"><li>Deterministic: guess-and-compare</li><li>Malleable: ciphertexts multiply</li></ul>
+<footer><b>Best for:</b> Classroom only</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>RSA-OAEP</h5><p class="pc-tag">Randomized encryption padding</p></header>
+<ul class="pros"><li>Provably secure (in the random oracle model)</li><li>Widely supported</li></ul>
+<ul class="cons"><li>Max ~318 bytes with a 3072-bit key</li><li>Slow decryption</li></ul>
+<footer><b>Best for:</b> Wrapping a symmetric key</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>PKCS#1 v1.5 (encryption)</h5><p class="pc-tag">1990s padding</p></header>
+<ul class="pros"><li>Everywhere in old systems</li></ul>
+<ul class="cons"><li>Bleichenbacher (1998) and ROBOT (2017) attacks</li></ul>
+<footer><b>Best for:</b> Nothing new</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>RSA-PSS</h5><p class="pc-tag">Randomized signature padding</p></header>
+<ul class="pros"><li>Security proof</li><li>Used by TLS 1.3</li></ul>
+<ul class="cons"><li>Big signatures (384 B at 3072 bits)</li></ul>
+<footer><b>Best for:</b> RSA signatures</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-9-5" id="s-9-5" data-sec="s-9-5">
+<h2 class="sec-title"><span class="sec-num">9.5</span><span class="sec-text">Elliptic-curve cryptography (ECC): smaller and faster</span><a class="sec-anchor" href="#s-9-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Remember the billiard ball bouncing around a curve from Chapter <a class="xref" href="chapter-03.html">3</a>? That&#39;s ECC:</p>
+<ul>
+<li><strong>Private key:</strong> a random number <code>k</code> (how many bounces).</li>
+<li><strong>Public key:</strong> the point <code>k × G</code> where the ball lands.</li>
+</ul>
+<p>ECC gives the same security as RSA with <strong>far smaller keys</strong>, which means faster handshakes, less data and less battery use.</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th></th>
+<th>RSA-3072</th>
+<th>ECC (P-256 or Curve25519)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Security level</td>
+<td>~128 bits</td>
+<td>~128 bits</td>
+</tr>
+<tr>
+<td>Public key size</td>
+<td>384 bytes</td>
+<td>32–65 bytes</td>
+</tr>
+<tr>
+<td>Signature size</td>
+<td>384 bytes</td>
+<td>64 bytes</td>
+</tr>
+<tr>
+<td>Key generation</td>
+<td>Slow (must find big primes)</td>
+<td>Instant (pick a random number)</td>
+</tr>
+</tbody></table></div>
+<p>The curves you&#39;ll see:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Curve</th>
+<th>Also called</th>
+<th>Where it&#39;s used</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>P-256</strong></td>
+<td>secp256r1, prime256v1</td>
+<td>Most TLS certificates, Apple and Android hardware keys, passkeys, US government</td>
+</tr>
+<tr>
+<td>P-384</td>
+<td>secp384r1</td>
+<td>Higher-security government and CA root keys</td>
+</tr>
+<tr>
+<td><strong>secp256k1</strong></td>
+<td>—</td>
+<td>Bitcoin and Ethereum</td>
+</tr>
+<tr>
+<td><strong>Curve25519</strong></td>
+<td>X25519 (key exchange), Ed25519 (signatures)</td>
+<td>TLS, SSH, Signal, WireGuard, Tor. Designed by Daniel J. Bernstein to be fast and hard to implement incorrectly.</td>
+</tr>
+</tbody></table></div>
+<p>ECC doesn&#39;t encrypt messages directly the way RSA does. Instead, it&#39;s used for <strong>key exchange</strong> (Chapter <a class="xref" href="chapter-10.html">10</a>) and <strong>signatures</strong> (Chapter <a class="xref" href="chapter-11.html">11</a>), and encryption is built from key exchange plus symmetric encryption.</p>
+</div><div class="widget" data-w="sizes"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Public-key families and curves</h4></div><div class="pc-grid">
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>RSA</h5><p class="pc-tag">Factoring, 1977</p></header>
+<ul class="pros"><li>Universally supported</li><li>Encrypt and sign with one algorithm</li><li>Fast verification</li></ul>
+<ul class="cons"><li>Huge keys (3072 bits for 128-bit security)</li><li>Slow key generation and decryption</li><li>Broken by quantum computers</li></ul>
+<footer><b>Best for:</b> Legacy compatibility, certificates</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>P-256</h5><p class="pc-tag">NIST curve, secp256r1</p></header>
+<ul class="pros"><li>In every TLS stack and secure chip</li><li>Passkeys and government use</li></ul>
+<ul class="cons"><li>Easy to implement unsafely</li><li>Some distrust its unexplained constants</li></ul>
+<footer><b>Best for:</b> TLS certificates, passkeys, hardware</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Curve25519</h5><p class="pc-tag">X25519 / Ed25519</p></header>
+<ul class="pros"><li>Fast, 32-byte keys</li><li>Designed to be hard to misuse</li><li>Explainable constants</li></ul>
+<ul class="cons"><li>Not in some older FIPS/hardware stacks</li></ul>
+<footer><b>Best for:</b> TLS, SSH, Signal, WireGuard, Tor</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>secp256k1</h5><p class="pc-tag">Koblitz curve</p></header>
+<ul class="pros"><li>Efficient; huge real-world deployment</li></ul>
+<ul class="cons"><li>Little use outside cryptocurrencies</li></ul>
+<footer><b>Best for:</b> Bitcoin and Ethereum</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-9-6" id="s-9-6" data-sec="s-9-6">
+<h2 class="sec-title"><span class="sec-num">9.6</span><span class="sec-text">Hybrid encryption: how public-key crypto is really used</span><a class="sec-anchor" href="#s-9-6" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Public-key crypto is slow and can only handle small amounts of data. Symmetric crypto is fast but has the key distribution problem. So real systems use <strong>both</strong>:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> ALICE (sender)                                              BOB (receiver)
+
+ 1. Generate a random one-time AES key  🔑
+ 2. Encrypt the big file with AES-GCM using 🔑
+                    ──────── encrypted file ─────────►
+ 3. Encrypt 🔑 with Bob's PUBLIC key
+                    ──────── encrypted 🔑 ───────────►   4. Decrypt 🔑 with his PRIVATE key
+                                                         5. Decrypt the file with 🔑</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>It&#39;s like sending a heavy safe by ordinary post (fast and cheap) and sending its small key inside a tiny envelope that only Bob can open.</p>
+<p>This pattern is used by PGP email, S/MIME, the <code>age</code> file-encryption tool, cloud key management services (&quot;envelope encryption,&quot; Chapter <a class="xref" href="chapter-19.html">19</a>) and a modern standard called <strong>HPKE</strong> (Hybrid Public Key Encryption, RFC 9180).</p>
+<p>The public-key step in step 3 is often called a <strong>KEM</strong> (Key Encapsulation Mechanism): instead of &quot;encrypting a message,&quot; it generates a fresh random key and wraps it for the recipient. You&#39;ll see KEMs again in Chapters <a class="xref" href="chapter-10.html">10</a> and <a class="xref" href="chapter-17.html">17</a>.</p>
+</div><div class="widget" data-w="hybrid"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-9-7" id="s-9-7" data-sec="s-9-7">
+<h2 class="sec-title"><span class="sec-num">9.7</span><span class="sec-text">What key files look like</span><a class="sec-anchor" href="#s-9-7" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Keys are usually stored as <strong>PEM</strong> files: Base64-encoded binary data between header lines.</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>-----BEGIN PUBLIC KEY-----
+MIIBojANBgkqhkiG9w0BAQEFAAOCAY8AMIIBigKCAYEApV0HwzTlD3143GMl/3OG
+... (more Base64 lines) ...
+-----END PUBLIC KEY-----</pre></div></figure><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Header</th>
+<th>What it is</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>-----BEGIN PUBLIC KEY-----</code></td>
+<td>A public key (safe to share)</td>
+</tr>
+<tr>
+<td><code>-----BEGIN PRIVATE KEY-----</code></td>
+<td>An <strong>unprotected</strong> private key (keep secret!)</td>
+</tr>
+<tr>
+<td><code>-----BEGIN ENCRYPTED PRIVATE KEY-----</code></td>
+<td>A private key protected by a password</td>
+</tr>
+<tr>
+<td><code>-----BEGIN RSA PRIVATE KEY-----</code></td>
+<td>Older RSA-specific format</td>
+</tr>
+<tr>
+<td><code>-----BEGIN CERTIFICATE-----</code></td>
+<td>A certificate (Chapter <a class="xref" href="chapter-13.html">13</a>)</td>
+</tr>
+<tr>
+<td><code>-----BEGIN OPENSSH PRIVATE KEY-----</code></td>
+<td>An SSH private key (Chapter <a class="xref" href="chapter-15.html">15</a>)</td>
+</tr>
+</tbody></table></div>
+<p>Inside the Base64 is a binary structure called <strong>DER</strong> (built with a format called ASN.1), which lists the algorithm and the key&#39;s numbers. SSH public keys use their own one-line format, like <code>ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAA... alice@laptop</code>.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-9-8" id="s-9-8" data-sec="s-9-8">
+<h2 class="sec-title"><span class="sec-num">9.8</span><span class="sec-text">Hands-on with RSA</span><a class="sec-anchor" href="#s-9-8" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p class="lab-label">🧪 <strong>Try it yourself</strong> (OpenSSL):</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># 1. Generate a 3072-bit RSA private key</span>
+openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 -out alice_private.pem
+
+<span class="hljs-comment"># 2. Extract the public key (this is the part you share)</span>
+openssl pkey -<span class="hljs-keyword">in</span> alice_private.pem -pubout -out alice_public.pem
+<span class="hljs-built_in">cat</span> alice_public.pem
+
+<span class="hljs-comment"># 3. Look inside the private key: you&#x27;ll see the modulus (n), exponents (e, d) and primes (p, q)</span>
+openssl pkey -<span class="hljs-keyword">in</span> alice_private.pem -text -noout | <span class="hljs-built_in">head</span> -20
+
+<span class="hljs-comment"># 4. Someone encrypts a short note with Alice&#x27;s PUBLIC key (using OAEP padding)</span>
+<span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;Top secret: the cake is in the fridge&quot;</span> &gt; note.txt
+openssl pkeyutl -encrypt -pubin -inkey alice_public.pem \
+  -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 \
+  -<span class="hljs-keyword">in</span> note.txt -out note.enc
+<span class="hljs-built_in">ls</span> -l note.enc      <span class="hljs-comment"># 384 bytes: always the size of the key, whatever the message length</span>
+
+<span class="hljs-comment"># 5. Alice decrypts with her PRIVATE key</span>
+openssl pkeyutl -decrypt -inkey alice_private.pem \
+  -pkeyopt rsa_padding_mode:oaep -pkeyopt rsa_oaep_md:sha256 \
+  -<span class="hljs-keyword">in</span> note.enc
+<span class="hljs-comment"># Top secret: the cake is in the fridge</span></code></pre></div><p>To protect the private key with a password, add a cipher when generating it (OpenSSL will prompt for the password):</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs">openssl genpkey -algorithm RSA -pkeyopt rsa_keygen_bits:3072 -aes-256-cbc -out protected.pem</code></pre></div><p>The same thing in Python:</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">from</span> cryptography.hazmat.primitives.asymmetric <span class="hljs-keyword">import</span> rsa, padding
+<span class="hljs-keyword">from</span> cryptography.hazmat.primitives <span class="hljs-keyword">import</span> hashes
+
+private_key = rsa.generate_private_key(public_exponent=<span class="hljs-number">65537</span>, key_size=<span class="hljs-number">3072</span>)
+public_key = private_key.public_key()
+
+oaep = padding.OAEP(mgf=padding.MGF1(hashes.SHA256()), algorithm=hashes.SHA256(), label=<span class="hljs-literal">None</span>)
+ciphertext = public_key.encrypt(<span class="hljs-string">b&quot;The cake is in the fridge&quot;</span>, oaep)
+<span class="hljs-built_in">print</span>(<span class="hljs-built_in">len</span>(ciphertext))                       <span class="hljs-comment"># 384</span>
+<span class="hljs-built_in">print</span>(private_key.decrypt(ciphertext, oaep)) <span class="hljs-comment"># b&#x27;The cake is in the fridge&#x27;</span></code></pre></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-9-9" id="s-9-9" data-sec="s-9-9">
+<h2 class="sec-title"><span class="sec-num">9.9</span><span class="sec-text">Symmetric vs. asymmetric at a glance</span><a class="sec-anchor" href="#s-9-9" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th></th>
+<th>Symmetric</th>
+<th>Asymmetric (public-key)</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Keys</td>
+<td>One shared secret key</td>
+<td>A public key + a private key</td>
+</tr>
+<tr>
+<td>Speed</td>
+<td>Very fast (GB/s)</td>
+<td>Slow (hundreds to thousands of operations per second)</td>
+</tr>
+<tr>
+<td>Data size</td>
+<td>Any</td>
+<td>Tiny (a key or a hash)</td>
+</tr>
+<tr>
+<td>Key distribution</td>
+<td>The big problem</td>
+<td>Solved: publish the public key</td>
+</tr>
+<tr>
+<td>Main uses</td>
+<td>Encrypting data</td>
+<td>Key exchange, signatures, encrypting keys</td>
+</tr>
+<tr>
+<td>Examples</td>
+<td>AES, ChaCha20</td>
+<td>RSA, ECC (X25519, Ed25519, P-256), ML-KEM, ML-DSA</td>
+</tr>
+<tr>
+<td>Typical key size (128-bit security)</td>
+<td>128 bits</td>
+<td>RSA 3072 bits; ECC 256 bits</td>
+</tr>
+</tbody></table></div>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Symmetric vs. asymmetric</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Symmetric</h5><p class="pc-tag">One shared key</p></header>
+<ul class="pros"><li>Gigabytes per second</li><li>Small keys; quantum-resistant with 256 bits</li></ul>
+<ul class="cons"><li>Key distribution problem</li><li>n(n−1)/2 keys for n people</li></ul>
+<footer><b>Best for:</b> Encrypting the actual data</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Asymmetric</h5><p class="pc-tag">Public + private key</p></header>
+<ul class="pros"><li>Talk securely with strangers</li><li>Signatures and non-repudiation</li></ul>
+<ul class="cons"><li>Thousands of times slower</li><li>Only tiny data; today’s algorithms fall to quantum</li></ul>
+<footer><b>Best for:</b> Key exchange, signatures, wrapping keys</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 9</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 9 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-coral" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 10</p>
+<h3>Key Exchange: Agreeing on a Secret in Public</h3>
+<p class="next-hook">Two strangers shout numbers across a crowded room, and end up sharing a secret that nobody else in the room can work out.</p>
+<div class="next-actions"><a class="btn big" href="chapter-10.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-08.html">← Passwords and Key Derivation</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":9,"title":"Public-Key Cryptography: The Two-Key Revolution","quiz":[{"q":"Toy RSA with p = 61 and q = 53. What is n?","o":["3120","3233","114","2753"],"a":1,"why":"n = p × q = 3233 is public. φ = 60 × 52 = 3120 stays secret."},{"q":"Who can decrypt a message encrypted with Bob’s public key?","o":["Anyone","Only Bob, with his private key","Alice, who encrypted it","The certificate authority"],"a":1,"why":"Once the padlock snaps shut, even Alice can’t reopen the box."},{"q":"Why do real systems use hybrid encryption?","o":["RSA cannot decrypt","Public-key crypto is slow and handles tiny data, so it wraps an AES key","AES is insecure","For legal reasons"],"a":1,"why":"Send the heavy safe by ordinary post (AES) and its small key in an envelope only Bob can open (public key)."},{"q":"Which RSA encryption padding should you use?","o":["None (textbook RSA)","PKCS#1 v1.5","OAEP","ECB"],"a":2,"why":"RSA-OAEP. PKCS#1 v1.5 encryption is vulnerable to Bleichenbacher-style attacks (ROBOT)."}],"fragment":"trapdoor","secs":["s-9-1","s-9-2","s-9-3","s-9-4","s-9-5","s-9-6","s-9-7","s-9-8","s-9-9"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-c.js?v=86fb719f26"></script>
+</body>
+</html>

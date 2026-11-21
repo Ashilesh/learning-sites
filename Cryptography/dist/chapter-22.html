@@ -1,0 +1,689 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 22: Glossary · CryptoSketch</title>
+<meta name="description" content="Every term in the guide, decoded. Flip the flashcards and find out how many you know cold.">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-grape">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">📖 In this chapter</p><ol><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="22">
+<header class="ch-hero world-grape">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-6">📚 World 6 · Reference</a>
+    <p class="ch-num">Chapter 22</p>
+    <h1 class="ch-title">Glossary</h1>
+    <p class="ch-hook"><span>🤔</span> Every term in the guide, decoded. Flip the flashcards and find out how many you know cold.</p>
+    <ul class="ch-stats"><li>⏱️ ~10 min</li><li>📚 0 sections</li><li>🎮 1 interactive</li><li>⭐ 145 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="22" aria-hidden="true"></div>
+</header>
+<div class="widget" data-w="flashcards"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="prose ch-intro"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>ACME</strong></td>
+<td>Protocol for automatically obtaining and renewing certificates (used by Let&#39;s Encrypt)</td>
+</tr>
+<tr>
+<td><strong>AEAD</strong></td>
+<td>Authenticated Encryption with Associated Data: encryption that also detects tampering (AES-GCM, ChaCha20-Poly1305)</td>
+</tr>
+<tr>
+<td><strong>AES</strong></td>
+<td>Advanced Encryption Standard, the world&#39;s most-used symmetric block cipher</td>
+</tr>
+<tr>
+<td><strong>ALPN</strong></td>
+<td>TLS extension for choosing the application protocol (HTTP/2, HTTP/1.1)</td>
+</tr>
+<tr>
+<td><strong>Argon2id</strong></td>
+<td>Recommended memory-hard password-hashing algorithm</td>
+</tr>
+<tr>
+<td><strong>ARQC</strong></td>
+<td>Authorization Request Cryptogram: the one-time MAC a payment chip computes for each transaction</td>
+</tr>
+<tr>
+<td><strong>ASN.1 / DER</strong></td>
+<td>The binary structure and encoding used inside keys and certificates</td>
+</tr>
+<tr>
+<td><strong>Associated data</strong></td>
+<td>Data that&#39;s authenticated but not encrypted, like a packet header</td>
+</tr>
+<tr>
+<td><strong>Asymmetric cryptography</strong></td>
+<td>Public-key cryptography: a public key and a private key</td>
+</tr>
+<tr>
+<td><strong>Attestation</strong></td>
+<td>A device proving, with a key locked in hardware, which software it booted</td>
+</tr>
+<tr>
+<td><strong>Authentication</strong></td>
+<td>Proving who someone (or something) is</td>
+</tr>
+<tr>
+<td><strong>Avalanche effect</strong></td>
+<td>A tiny input change completely changes a hash or ciphertext</td>
+</tr>
+<tr>
+<td><strong>Base64</strong></td>
+<td>An encoding that turns bytes into text. Not encryption.</td>
+</tr>
+<tr>
+<td><strong>bcrypt</strong></td>
+<td>A widely used password-hashing algorithm</td>
+</tr>
+<tr>
+<td><strong>Birthday paradox</strong></td>
+<td>Collisions appear after about 2^(n/2) tries, not 2ⁿ</td>
+</tr>
+<tr>
+<td><strong>Block cipher</strong></td>
+<td>Encrypts fixed-size blocks (AES uses 16 bytes)</td>
+</tr>
+<tr>
+<td><strong>Brute force</strong></td>
+<td>Trying every possible key or password</td>
+</tr>
+<tr>
+<td><strong>CA (Certificate Authority)</strong></td>
+<td>An organization trusted to sign certificates</td>
+</tr>
+<tr>
+<td><strong>CAA record</strong></td>
+<td>DNS record listing which CAs may issue certificates for a domain</td>
+</tr>
+<tr>
+<td><strong>CBC</strong></td>
+<td>Cipher Block Chaining, an older block cipher mode</td>
+</tr>
+<tr>
+<td><strong>Certificate (X.509)</strong></td>
+<td>A signed document binding a public key to an identity</td>
+</tr>
+<tr>
+<td><strong>Certificate chain</strong></td>
+<td>Leaf → intermediate(s) → root, each signed by the next</td>
+</tr>
+<tr>
+<td><strong>Certificate Transparency (CT)</strong></td>
+<td>Public, append-only logs of all publicly trusted certificates</td>
+</tr>
+<tr>
+<td><strong>ChaCha20-Poly1305</strong></td>
+<td>A modern AEAD built from a stream cipher and a MAC</td>
+</tr>
+<tr>
+<td><strong>Cipher</strong></td>
+<td>An algorithm for encryption and decryption</td>
+</tr>
+<tr>
+<td><strong>Cipher suite</strong></td>
+<td>A named set of algorithms used together in TLS</td>
+</tr>
+<tr>
+<td><strong>Ciphertext</strong></td>
+<td>Encrypted, unreadable data</td>
+</tr>
+<tr>
+<td><strong>Collision</strong></td>
+<td>Two different inputs with the same hash</td>
+</tr>
+<tr>
+<td><strong>Constant time</strong></td>
+<td>Code whose running time doesn&#39;t depend on secret values</td>
+</tr>
+<tr>
+<td><strong>CRL</strong></td>
+<td>Certificate Revocation List</td>
+</tr>
+<tr>
+<td><strong>Crypto agility</strong></td>
+<td>The ability to swap algorithms without redesigning a system</td>
+</tr>
+<tr>
+<td><strong>CSPRNG</strong></td>
+<td>Cryptographically Secure Pseudo-Random Number Generator</td>
+</tr>
+<tr>
+<td><strong>CSR</strong></td>
+<td>Certificate Signing Request: a public key plus requested names, sent to a CA</td>
+</tr>
+<tr>
+<td><strong>DEK / KEK</strong></td>
+<td>Data-Encryption Key / Key-Encryption Key (envelope encryption)</td>
+</tr>
+<tr>
+<td><strong>Differential cryptanalysis</strong></td>
+<td>Breaking a cipher by tracking how chosen input differences spread to the output</td>
+</tr>
+<tr>
+<td><strong>Diffie-Hellman (DH)</strong></td>
+<td>The original public key-exchange method</td>
+</tr>
+<tr>
+<td><strong>Digital signature</strong></td>
+<td>Proof of origin and integrity that anyone can verify with a public key</td>
+</tr>
+<tr>
+<td><strong>DKIM</strong></td>
+<td>Email standard in which sending servers sign messages</td>
+</tr>
+<tr>
+<td><strong>DMARC</strong></td>
+<td>Email policy telling receivers how to handle failed SPF/DKIM checks</td>
+</tr>
+<tr>
+<td><strong>DNSSEC</strong></td>
+<td>Digital signatures for DNS records</td>
+</tr>
+<tr>
+<td><strong>DoH / DoT</strong></td>
+<td>DNS over HTTPS / DNS over TLS: encrypted DNS lookups</td>
+</tr>
+<tr>
+<td><strong>Double Ratchet</strong></td>
+<td>Signal&#39;s algorithm that gives every message a new key</td>
+</tr>
+<tr>
+<td><strong>DV / OV / EV</strong></td>
+<td>Domain, Organization and Extended Validation certificate levels</td>
+</tr>
+<tr>
+<td><strong>E2EE</strong></td>
+<td>End-to-end encryption: only the communicating users can read messages</td>
+</tr>
+<tr>
+<td><strong>ECB</strong></td>
+<td>Electronic Codebook mode. Insecure; never use it.</td>
+</tr>
+<tr>
+<td><strong>ECC</strong></td>
+<td>Elliptic-curve cryptography</td>
+</tr>
+<tr>
+<td><strong>ECDH / ECDHE</strong></td>
+<td>Elliptic-curve Diffie-Hellman (ephemeral)</td>
+</tr>
+<tr>
+<td><strong>ECDSA</strong></td>
+<td>Elliptic-curve digital signature algorithm</td>
+</tr>
+<tr>
+<td><strong>ECH</strong></td>
+<td>Encrypted Client Hello: hides which website you&#39;re connecting to</td>
+</tr>
+<tr>
+<td><strong>Ed25519</strong></td>
+<td>A fast, safe signature algorithm on Curve25519</td>
+</tr>
+<tr>
+<td><strong>EMV</strong></td>
+<td>The chip-card payment standard (Europay, Mastercard, Visa)</td>
+</tr>
+<tr>
+<td><strong>Encoding</strong></td>
+<td>Changing data format (Base64, hex). Not security.</td>
+</tr>
+<tr>
+<td><strong>Entropy</strong></td>
+<td>A measure of unpredictability, in bits</td>
+</tr>
+<tr>
+<td><strong>Envelope encryption</strong></td>
+<td>Encrypting data with a DEK, and the DEK with a KEK</td>
+</tr>
+<tr>
+<td><strong>Ephemeral key</strong></td>
+<td>A temporary key used for one session and then deleted</td>
+</tr>
+<tr>
+<td><strong>EUF-CMA</strong></td>
+<td>Unforgeability under chosen-message attack: the standard security goal for MACs and signatures</td>
+</tr>
+<tr>
+<td><strong>Feistel network</strong></td>
+<td>Cipher design that splits the block in two and mixes one half into the other each round (DES)</td>
+</tr>
+<tr>
+<td><strong>FIDO2 / WebAuthn</strong></td>
+<td>Standards behind passkeys and security keys</td>
+</tr>
+<tr>
+<td><strong>FIPS</strong></td>
+<td>US federal standards (e.g. FIPS 197 = AES, FIPS 203 = ML-KEM, FIPS 140-3 = module certification)</td>
+</tr>
+<tr>
+<td><strong>Forward secrecy</strong></td>
+<td>Stealing a long-term key later doesn&#39;t expose past sessions</td>
+</tr>
+<tr>
+<td><strong>GCM</strong></td>
+<td>Galois/Counter Mode, an AEAD mode for block ciphers</td>
+</tr>
+<tr>
+<td><strong>Hash function</strong></td>
+<td>A one-way function producing a fixed-size fingerprint</td>
+</tr>
+<tr>
+<td><strong>HKDF</strong></td>
+<td>HMAC-based key derivation function</td>
+</tr>
+<tr>
+<td><strong>HMAC</strong></td>
+<td>Hash-based Message Authentication Code</td>
+</tr>
+<tr>
+<td><strong>Homomorphic encryption</strong></td>
+<td>Computing on encrypted data without decrypting it</td>
+</tr>
+<tr>
+<td><strong>HPKE</strong></td>
+<td>Hybrid Public Key Encryption, a modern standard (RFC 9180)</td>
+</tr>
+<tr>
+<td><strong>HSM</strong></td>
+<td>Hardware Security Module: tamper-resistant hardware for keys</td>
+</tr>
+<tr>
+<td><strong>HSTS</strong></td>
+<td>A header that forces browsers to use HTTPS for a site</td>
+</tr>
+<tr>
+<td><strong>HTTPS</strong></td>
+<td>HTTP over TLS</td>
+</tr>
+<tr>
+<td><strong>Hybrid encryption</strong></td>
+<td>Public-key crypto to protect a key + symmetric crypto for the data</td>
+</tr>
+<tr>
+<td><strong>IND-CPA / IND-CCA</strong></td>
+<td>Security games: ciphertexts reveal nothing even if the attacker can get chosen messages encrypted (CPA) or chosen ciphertexts decrypted (CCA)</td>
+</tr>
+<tr>
+<td><strong>IV</strong></td>
+<td>Initialization Vector: a starting value for some cipher modes</td>
+</tr>
+<tr>
+<td><strong>JWT</strong></td>
+<td>JSON Web Token: signed (not encrypted, by default) data for authentication</td>
+</tr>
+<tr>
+<td><strong>KDF</strong></td>
+<td>Key Derivation Function</td>
+</tr>
+<tr>
+<td><strong>KEM</strong></td>
+<td>Key Encapsulation Mechanism: a public-key way to create and wrap a shared key</td>
+</tr>
+<tr>
+<td><strong>Kerberos</strong></td>
+<td>Ticket-based single sign-on protocol behind Windows Active Directory</td>
+</tr>
+<tr>
+<td><strong>Kerckhoffs&#39;s principle</strong></td>
+<td>A system must be secure even if everything but the key is public</td>
+</tr>
+<tr>
+<td><strong>Key</strong></td>
+<td>The secret value that controls encryption, decryption or signing</td>
+</tr>
+<tr>
+<td><strong>Key exchange</strong></td>
+<td>Agreeing on a shared secret over an open channel</td>
+</tr>
+<tr>
+<td><strong>KMS</strong></td>
+<td>Key Management Service (e.g. in the cloud)</td>
+</tr>
+<tr>
+<td><strong>Lattice cryptography</strong></td>
+<td>Post-quantum cryptography based on hard problems in multi-dimensional grids</td>
+</tr>
+<tr>
+<td><strong>Linear cryptanalysis</strong></td>
+<td>Breaking a cipher using slightly biased relationships between plaintext, ciphertext and key bits</td>
+</tr>
+<tr>
+<td><strong>MAC</strong></td>
+<td>Message Authentication Code: a keyed integrity tag</td>
+</tr>
+<tr>
+<td><strong>Malleability</strong></td>
+<td>Ability to change ciphertext in a way that predictably changes plaintext</td>
+</tr>
+<tr>
+<td><strong>Man-in-the-middle (MITM)</strong></td>
+<td>An attacker who intercepts and relays communication, impersonating both sides</td>
+</tr>
+<tr>
+<td><strong>Measured boot</strong></td>
+<td>Recording a hash of every startup stage in a TPM&#39;s PCR registers</td>
+</tr>
+<tr>
+<td><strong>Merkle tree</strong></td>
+<td>A tree of hashes summarizing lots of data with one root hash</td>
+</tr>
+<tr>
+<td><strong>MFA</strong></td>
+<td>Multi-factor authentication</td>
+</tr>
+<tr>
+<td><strong>ML-KEM / ML-DSA / SLH-DSA</strong></td>
+<td>NIST&#39;s post-quantum key-encapsulation and signature standards</td>
+</tr>
+<tr>
+<td><strong>Mode of operation</strong></td>
+<td>How a block cipher is applied to data longer than one block</td>
+</tr>
+<tr>
+<td><strong>mTLS</strong></td>
+<td>Mutual TLS: both client and server present certificates</td>
+</tr>
+<tr>
+<td><strong>Nonce</strong></td>
+<td>&quot;Number used once&quot;: must never repeat with the same key</td>
+</tr>
+<tr>
+<td><strong>Non-repudiation</strong></td>
+<td>The signer can&#39;t credibly deny having signed</td>
+</tr>
+<tr>
+<td><strong>OAEP / PSS</strong></td>
+<td>Secure padding schemes for RSA encryption / signatures</td>
+</tr>
+<tr>
+<td><strong>OAuth 2.0</strong></td>
+<td>Standard for granting an app limited access to an account (authorization, not login)</td>
+</tr>
+<tr>
+<td><strong>OCSP</strong></td>
+<td>Online protocol for checking whether a certificate is revoked</td>
+</tr>
+<tr>
+<td><strong>One-time pad</strong></td>
+<td>Perfectly secure cipher with a truly random, single-use key as long as the message</td>
+</tr>
+<tr>
+<td><strong>One-way function</strong></td>
+<td>Easy to compute, infeasible to reverse</td>
+</tr>
+<tr>
+<td><strong>Onion routing</strong></td>
+<td>Wrapping traffic in layers of encryption across several relays so no single relay knows both ends</td>
+</tr>
+<tr>
+<td><strong>OpenID Connect (OIDC)</strong></td>
+<td>Login standard built on OAuth 2.0; issues a signed ID token</td>
+</tr>
+<tr>
+<td><strong>PAKE</strong></td>
+<td>Password-Authenticated Key Exchange (e.g. SAE in WPA3)</td>
+</tr>
+<tr>
+<td><strong>Passkey</strong></td>
+<td>A public-key credential replacing a password</td>
+</tr>
+<tr>
+<td><strong>PBKDF2</strong></td>
+<td>A password-based key derivation function</td>
+</tr>
+<tr>
+<td><strong>PEM</strong></td>
+<td>Base64 text format for keys and certificates (<code>-----BEGIN ...-----</code>)</td>
+</tr>
+<tr>
+<td><strong>Pepper</strong></td>
+<td>A secret added to passwords before hashing, stored separately from the database</td>
+</tr>
+<tr>
+<td><strong>PKCE</strong></td>
+<td>Proof Key for Code Exchange: makes a stolen OAuth authorization code useless</td>
+</tr>
+<tr>
+<td><strong>PKCS#12 (.p12/.pfx)</strong></td>
+<td>Password-protected bundle of a certificate, private key and chain</td>
+</tr>
+<tr>
+<td><strong>PKI</strong></td>
+<td>Public Key Infrastructure: the system of CAs, certificates and rules</td>
+</tr>
+<tr>
+<td><strong>Plaintext</strong></td>
+<td>Readable, unencrypted data</td>
+</tr>
+<tr>
+<td><strong>Post-quantum cryptography (PQC)</strong></td>
+<td>Algorithms believed secure against quantum computers</td>
+</tr>
+<tr>
+<td><strong>Preimage resistance</strong></td>
+<td>Can&#39;t find an input for a given hash</td>
+</tr>
+<tr>
+<td><strong>Private key</strong></td>
+<td>The secret half of a key pair</td>
+</tr>
+<tr>
+<td><strong>Public key</strong></td>
+<td>The shareable half of a key pair</td>
+</tr>
+<tr>
+<td><strong>Random oracle model</strong></td>
+<td>Proof technique that treats a hash function as a perfectly random function</td>
+</tr>
+<tr>
+<td><strong>Reduction</strong></td>
+<td>A proof that breaking a scheme would also solve a problem believed to be hard</td>
+</tr>
+<tr>
+<td><strong>Replay attack</strong></td>
+<td>Re-sending a previously captured valid message</td>
+</tr>
+<tr>
+<td><strong>Revocation</strong></td>
+<td>Cancelling a certificate before it expires</td>
+</tr>
+<tr>
+<td><strong>Root CA</strong></td>
+<td>A self-signed CA certificate trusted directly by devices</td>
+</tr>
+<tr>
+<td><strong>RSA</strong></td>
+<td>Public-key algorithm based on the difficulty of factoring</td>
+</tr>
+<tr>
+<td><strong>Salt</strong></td>
+<td>Random, non-secret value making each password hash unique</td>
+</tr>
+<tr>
+<td><strong>SAML</strong></td>
+<td>XML-based single sign-on standard common in enterprises</td>
+</tr>
+<tr>
+<td><strong>SAN</strong></td>
+<td>Subject Alternative Name: the names a certificate is valid for</td>
+</tr>
+<tr>
+<td><strong>scrypt</strong></td>
+<td>A memory-hard password-hashing / key-derivation algorithm</td>
+</tr>
+<tr>
+<td><strong>Secret sharing</strong></td>
+<td>Splitting a secret so only a threshold of shares can rebuild it</td>
+</tr>
+<tr>
+<td><strong>Secure Boot</strong></td>
+<td>Each startup stage verifies the digital signature of the next</td>
+</tr>
+<tr>
+<td><strong>Semantic security</strong></td>
+<td>A ciphertext reveals nothing useful about the plaintext except its length</td>
+</tr>
+<tr>
+<td><strong>Session key</strong></td>
+<td>A temporary symmetric key for one connection</td>
+</tr>
+<tr>
+<td><strong>SHA-2 / SHA-3</strong></td>
+<td>Families of secure hash functions</td>
+</tr>
+<tr>
+<td><strong>Side-channel attack</strong></td>
+<td>Learning secrets from timing, power, sound or other physical effects</td>
+</tr>
+<tr>
+<td><strong>SNI</strong></td>
+<td>Server Name Indication: the website name sent in the TLS ClientHello</td>
+</tr>
+<tr>
+<td><strong>SPF</strong></td>
+<td>Email standard listing servers allowed to send for a domain</td>
+</tr>
+<tr>
+<td><strong>SPN</strong></td>
+<td>Substitution–permutation network: cipher design of repeated substitution and mixing layers (AES)</td>
+</tr>
+<tr>
+<td><strong>SSH</strong></td>
+<td>Secure Shell protocol for remote access</td>
+</tr>
+<tr>
+<td><strong>Steganography</strong></td>
+<td>Hiding the existence of a message inside innocent-looking data</td>
+</tr>
+<tr>
+<td><strong>Stream cipher</strong></td>
+<td>Encrypts by XORing data with a generated keystream</td>
+</tr>
+<tr>
+<td><strong>Symmetric cryptography</strong></td>
+<td>The same key encrypts and decrypts</td>
+</tr>
+<tr>
+<td><strong>TLS</strong></td>
+<td>Transport Layer Security, the protocol behind HTTPS</td>
+</tr>
+<tr>
+<td><strong>TOFU</strong></td>
+<td>Trust on first use (e.g. SSH host keys)</td>
+</tr>
+<tr>
+<td><strong>Tokenization (payments)</strong></td>
+<td>Replacing a card number with a substitute number tied to one device or merchant</td>
+</tr>
+<tr>
+<td><strong>Tor</strong></td>
+<td>The Onion Router: a volunteer network for anonymous browsing using onion routing</td>
+</tr>
+<tr>
+<td><strong>TOTP</strong></td>
+<td>Time-based one-time password (authenticator app codes)</td>
+</tr>
+<tr>
+<td><strong>TPM</strong></td>
+<td>Trusted Platform Module: a security chip in PCs</td>
+</tr>
+<tr>
+<td><strong>Trapdoor function</strong></td>
+<td>A one-way function with a secret shortcut for reversing it</td>
+</tr>
+<tr>
+<td><strong>Trust store</strong></td>
+<td>The list of root certificates a device trusts</td>
+</tr>
+<tr>
+<td><strong>VPN</strong></td>
+<td>Virtual Private Network: an encrypted tunnel for network traffic</td>
+</tr>
+<tr>
+<td><strong>WPA2 / WPA3</strong></td>
+<td>Wi-Fi security standards</td>
+</tr>
+<tr>
+<td><strong>X25519</strong></td>
+<td>Key exchange on Curve25519</td>
+</tr>
+<tr>
+<td><strong>X25519MLKEM768</strong></td>
+<td>Hybrid classical + post-quantum key exchange used in TLS</td>
+</tr>
+<tr>
+<td><strong>XOR (⊕)</strong></td>
+<td>Bit operation: same → 0, different → 1. The core of many ciphers.</td>
+</tr>
+<tr>
+<td><strong>Zero-knowledge proof</strong></td>
+<td>Proving a statement without revealing anything else</td>
+</tr>
+</tbody></table></div>
+</div>
+
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 22</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 22 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-grape" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Appendix</p>
+<h3>Where to Learn More</h3>
+
+<div class="next-actions"><a class="btn big" href="appendix.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-21.html">← Cheat Sheet: What to Use Today</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":22,"title":"Glossary","quiz":[{"q":"AEAD stands for…","o":["Advanced Encryption And Decryption","Authenticated Encryption with Associated Data","Asymmetric Elliptic Algorithm Design","Automatic Encrypted Archive Data"],"a":1,"why":"Encryption that also detects tampering: AES-GCM, ChaCha20-Poly1305."},{"q":"A CSPRNG is…","o":["a certificate format","a cryptographically secure pseudo-random number generator","a cipher suite","a key-exchange protocol"],"a":1,"why":"Seeded with true randomness and unpredictable even after lots of output."},{"q":"A KEM…","o":["generates a fresh secret and wraps it for someone’s public key","hashes passwords","signs certificates","compresses traffic"],"a":0,"why":"Key Encapsulation Mechanism. ML-KEM is the post-quantum one."},{"q":"Forward secrecy means…","o":["keys move forward in time","stealing a long-term key later can’t decrypt past sessions","messages are sent faster","certificates renew automatically"],"a":1,"why":"Ephemeral keys are deleted after each session."}],"fragment":"cypherpunk","secs":[]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-d.js?v=86fb719f26"></script>
+</body>
+</html>

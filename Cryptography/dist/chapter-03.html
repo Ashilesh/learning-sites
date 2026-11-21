@@ -1,0 +1,444 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 3: The Math Toolbox, Gently · CryptoSketch</title>
+<meta name="description" content="5⁶ mod 23 takes a split second to compute. Running it backwards, with big numbers, would outlast the universe. Welcome to the one-way street that guards the internet.">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-sun">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">🧮 In this chapter</p><ol><li><a href="#s-3-1" data-sec="s-3-1"><span class="st-num">3.1</span><span class="st-t">Bits, bytes and hexadecimal</span></a></li><li><a href="#s-3-2" data-sec="s-3-2"><span class="st-num">3.2</span><span class="st-t">Base64: text-friendly bytes (not encryption!)</span></a></li><li><a href="#s-3-3" data-sec="s-3-3"><span class="st-num">3.3</span><span class="st-t">XOR: the most important operation in cryptography</span></a></li><li><a href="#s-3-4" data-sec="s-3-4"><span class="st-num">3.4</span><span class="st-t">Modular arithmetic: clock math</span></a></li><li><a href="#s-3-5" data-sec="s-3-5"><span class="st-num">3.5</span><span class="st-t">Modular exponentiation: easy forward, hard backward</span></a></li><li><a href="#s-3-6" data-sec="s-3-6"><span class="st-num">3.6</span><span class="st-t">Prime numbers and the factoring problem</span></a></li><li><a href="#s-3-7" data-sec="s-3-7"><span class="st-num">3.7</span><span class="st-t">One-way functions and trapdoors</span></a></li><li><a href="#s-3-8" data-sec="s-3-8"><span class="st-num">3.8</span><span class="st-t">Elliptic curves: billiards on a strange table</span></a></li><li><a href="#s-3-9" data-sec="s-3-9"><span class="st-num">3.9</span><span class="st-t">How big is "big"? Thinking about key sizes</span></a></li><li><a href="#s-3-10" data-sec="s-3-10"><span class="st-num">3.10</span><span class="st-t">Comparing security levels</span></a></li><li><a href="#s-3-11" data-sec="s-3-11"><span class="st-num">3.11</span><span class="st-t">The "hard problems" that modern crypto stands on</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="3">
+<header class="ch-hero world-sun">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-1">🏝️ World 1 · Foundations</a>
+    <p class="ch-num">Chapter 3</p>
+    <h1 class="ch-title">The Math Toolbox, Gently</h1>
+    <p class="ch-hook"><span>🤔</span> 5⁶ mod 23 takes a split second to compute. Running it backwards, with big numbers, would outlast the universe. Welcome to the one-way street that guards the internet.</p>
+    <ul class="ch-stats"><li>⏱️ ~9 min</li><li>📚 11 sections</li><li>🎮 9 interactive</li><li>⭐ 320 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="3" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"><p>You don&#39;t need to <em>do</em> this math. But knowing the handful of ideas below makes the rest of the guide click. Each section gives an analogy first.</p>
+</div>
+<section class="sec sec-3-1" id="s-3-1" data-sec="s-3-1">
+<h2 class="sec-title"><span class="sec-num">3.1</span><span class="sec-text">Bits, bytes and hexadecimal</span><a class="sec-anchor" href="#s-3-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Computers store everything as <strong>bits</strong>: 0 or 1, like a light switch that&#39;s off or on.</p>
+<ul>
+<li>8 bits = 1 <strong>byte</strong>. One byte can hold 256 different values (0 to 255).</li>
+<li>A letter like <code>A</code> is stored as the number 65, which in bits is <code>01000001</code>.</li>
+</ul>
+<p>Long strings of 0s and 1s are hard to read, so we often write bytes in <strong>hexadecimal</strong> (&quot;hex&quot;), which uses 16 symbols: <code>0-9</code> then <code>a-f</code> (a=10 … f=15). Each hex symbol stands for exactly 4 bits, so <strong>one byte = two hex characters</strong>.</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Character</th>
+<th>Decimal</th>
+<th>Binary (bits)</th>
+<th>Hex</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>A</code></td>
+<td>65</td>
+<td><code>0100 0001</code></td>
+<td><code>41</code></td>
+</tr>
+<tr>
+<td><code>H</code></td>
+<td>72</td>
+<td><code>0100 1000</code></td>
+<td><code>48</code></td>
+</tr>
+<tr>
+<td><code>i</code></td>
+<td>105</td>
+<td><code>0110 1001</code></td>
+<td><code>69</code></td>
+</tr>
+</tbody></table></div>
+<p>Useful conversions for this guide:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Key size</th>
+<th>Bytes</th>
+<th>Hex characters</th>
+<th>Example use</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>128 bits</td>
+<td>16</td>
+<td>32</td>
+<td>AES-128 key</td>
+</tr>
+<tr>
+<td>256 bits</td>
+<td>32</td>
+<td>64</td>
+<td>AES-256 key, SHA-256 output, X25519 key</td>
+</tr>
+<tr>
+<td>2048 bits</td>
+<td>256</td>
+<td>512</td>
+<td>RSA-2048 modulus</td>
+</tr>
+</tbody></table></div>
+<p>So when you see a long string like <code>2cf24dba5fb0a30e26e8...</code> (64 hex characters), you now know it&#39;s 256 bits.</p>
+</div><div class="widget" data-w="bits"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-3-2" id="s-3-2" data-sec="s-3-2">
+<h2 class="sec-title"><span class="sec-num">3.2</span><span class="sec-text">Base64: text-friendly bytes (not encryption!)</span><a class="sec-anchor" href="#s-3-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Many systems (email, web pages, config files) can only safely carry text. <strong>Base64</strong> turns any bytes into letters, digits, <code>+</code> and <code>/</code>, so binary data like keys and certificates can be pasted into text. It takes 3 bytes (24 bits) at a time and writes them as 4 characters (6 bits each). The <code>=</code> at the end is padding.</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>&quot;Hi&quot;  →  bytes 48 69  →  bits 010010 000110 1001(00)  →  &quot;SGk=&quot;</pre></div></figure><p>You&#39;ll see Base64 everywhere in cryptography: in certificate files (<code>-----BEGIN CERTIFICATE-----</code>), SSH keys, JSON Web Tokens and more. Remember: anyone can decode it.</p>
+</div><div class="widget" data-w="base64"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-3-3" id="s-3-3" data-sec="s-3-3">
+<h2 class="sec-title"><span class="sec-num">3.3</span><span class="sec-text">XOR: the most important operation in cryptography</span><a class="sec-anchor" href="#s-3-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p><strong>XOR</strong> (&quot;exclusive or,&quot; written ⊕) compares two bits:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>A</th>
+<th>B</th>
+<th>A ⊕ B</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>0</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>0</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>1</td>
+<td>0</td>
+<td>1</td>
+</tr>
+<tr>
+<td>1</td>
+<td>1</td>
+<td>0</td>
+</tr>
+</tbody></table></div>
+<p>The rule: <strong>&quot;different gives 1, same gives 0.&quot;</strong></p>
+<p>Another way to see it: <strong>a key bit of 1 flips the message bit; a key bit of 0 leaves it alone.</strong></p>
+<p>The magic property: <strong>XOR-ing with the same key twice gets you back where you started.</strong></p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>Message  'H':   0 1 0 0 1 0 0 0
+Key:            1 0 1 1 0 0 1 1
+                ───────────────  XOR
+Ciphertext:     1 1 1 1 1 0 1 1
+
+Ciphertext:     1 1 1 1 1 0 1 1
+Key:            1 0 1 1 0 0 1 1
+                ───────────────  XOR
+Message:        0 1 0 0 1 0 0 0   = 'H' again!</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>In math: <code>(M ⊕ K) ⊕ K = M</code>. Encryption and decryption are the same operation. XOR is the heart of the one-time pad, of stream ciphers like ChaCha20, and of AES in its common modes.</p>
+<p class="lab-label">🧪 <strong>Try it yourself</strong> (Python):</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs">message = <span class="hljs-string">b&quot;HI&quot;</span>
+key     = <span class="hljs-string">b&quot;\x9c\x3f&quot;</span>                       <span class="hljs-comment"># two random-looking bytes</span>
+cipher  = <span class="hljs-built_in">bytes</span>(m ^ k <span class="hljs-keyword">for</span> m, k <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(message, key))
+<span class="hljs-built_in">print</span>(cipher.<span class="hljs-built_in">hex</span>())                          <span class="hljs-comment"># d476</span>
+<span class="hljs-built_in">print</span>(<span class="hljs-built_in">bytes</span>(c ^ k <span class="hljs-keyword">for</span> c, k <span class="hljs-keyword">in</span> <span class="hljs-built_in">zip</span>(cipher, key)))   <span class="hljs-comment"># b&#x27;HI&#x27;</span></code></pre></div><aside class="callout warn"><p>⚠️ <strong>Watch out (the &quot;two-time pad&quot;):</strong> if you XOR two <em>different</em> messages with the <em>same</em> key, an attacker can XOR the two ciphertexts together. The key cancels out (<code>K ⊕ K = 0</code>), leaving <code>M1 ⊕ M2</code>, which is often easy to untangle. That&#39;s the Venona mistake again.</p>
+</aside>
+</div><div class="widget" data-w="xor"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-3-4" id="s-3-4" data-sec="s-3-4">
+<h2 class="sec-title"><span class="sec-num">3.4</span><span class="sec-text">Modular arithmetic: clock math</span><a class="sec-anchor" href="#s-3-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>You already do modular arithmetic when you read a clock. If it&#39;s 9 o&#39;clock and you add 5 hours, it&#39;s 2 o&#39;clock, not 14. The numbers &quot;wrap around&quot; at 12.</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>            12
+        11      1
+      10          2      9 + 5 = 14  →  wraps to 2
+      9     ●     3      we write:  9 + 5 ≡ 2 (mod 12)
+      8           4
+        7       5
+            6</pre></div></figure><p><code>a mod n</code> means &quot;the remainder after dividing <code>a</code> by <code>n</code>&quot;:</p>
+<ul>
+<li><code>14 mod 12 = 2</code></li>
+<li><code>17 mod 5 = 2</code> (because 17 = 3×5 + 2)</li>
+<li><code>100 mod 7 = 2</code> (because 100 = 14×7 + 2)</li>
+</ul>
+<p>Why cryptographers love it:</p>
+<ul>
+<li>Numbers stay inside a fixed range, no matter how big the calculation gets.</li>
+<li>Wrapping around <strong>hides information</strong>. If I tell you <code>x mod 12 = 2</code>, <code>x</code> could be 2, 14, 26, 38, 1,000,010… You can&#39;t tell which.</li>
+</ul>
+</div><div class="widget" data-w="clock"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-3-5" id="s-3-5" data-sec="s-3-5">
+<h2 class="sec-title"><span class="sec-num">3.5</span><span class="sec-text">Modular exponentiation: easy forward, hard backward</span><a class="sec-anchor" href="#s-3-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Raising a number to a power, then taking the remainder:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>5⁶ mod 23  =  15625 mod 23  =  8</pre></div></figure><p>Computers can do this incredibly fast even with numbers that have <strong>hundreds of digits</strong>, using a shortcut called &quot;square-and-multiply.&quot;</p>
+<p>But <strong>going backwards</strong> is a different story. If I tell you:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>5^x mod 23 = 8.   What is x?</pre></div></figure><p>There&#39;s no shortcut. You basically have to try values of <code>x</code> until you hit 8. With small numbers that&#39;s quick (the answer is 6). With numbers 600 digits long, it would take every computer on Earth longer than the age of the universe. This is called the <strong>discrete logarithm problem</strong>, and it&#39;s the foundation of Diffie-Hellman key exchange (Chapter <a class="xref" href="chapter-10.html">10</a>).</p>
+</div><div class="widget" data-w="modexp"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-3-6" id="s-3-6" data-sec="s-3-6">
+<h2 class="sec-title"><span class="sec-num">3.6</span><span class="sec-text">Prime numbers and the factoring problem</span><a class="sec-anchor" href="#s-3-6" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A <strong>prime number</strong> can only be divided evenly by 1 and itself: 2, 3, 5, 7, 11, 13, 17, 19, 23, …</p>
+<p>Here&#39;s a lopsided puzzle:</p>
+<ul>
+<li><strong>Easy:</strong> multiply two primes. <code>61 × 53 = 3233</code>. A calculator does it instantly, even for primes with 300+ digits.</li>
+<li><strong>Hard:</strong> given <code>3233</code>, find the two primes that made it. For a 4-digit number you can try divisors. For a 617-digit number (the size used in RSA-2048), the best known methods running on all the world&#39;s computers would take far longer than a human lifetime.</li>
+</ul>
+<div class="callout story"><p>📜 <strong>True story:</strong> the largest RSA-style number publicly factored is <strong>RSA-250</strong> (250 digits, 829 bits), cracked in 2020 using about 2,700 years of computer-core time. Real RSA keys use 617 digits or more.</p></div>
+<p>This &quot;easy to multiply, hard to factor&quot; gap is what keeps <strong>RSA</strong> secure (Chapter <a class="xref" href="chapter-09.html">9</a>).</p>
+</div><div class="widget" data-w="factor"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-3-7" id="s-3-7" data-sec="s-3-7">
+<h2 class="sec-title"><span class="sec-num">3.7</span><span class="sec-text">One-way functions and trapdoors</span><a class="sec-anchor" href="#s-3-7" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A <strong>one-way function</strong> is easy to compute but practically impossible to reverse:</p>
+<ul>
+<li>🥚 Scrambling an egg: easy. Unscrambling it: impossible.</li>
+<li>🎨 Mixing two paints: easy. Separating them back out: impossible.</li>
+<li>📞 An old phone book: finding a number from a name is easy, finding a name from a number means reading the whole book.</li>
+</ul>
+<p>Hash functions (Chapter <a class="xref" href="chapter-06.html">6</a>) are one-way functions.</p>
+<p>A <strong>trapdoor function</strong> is a one-way function with a secret shortcut. A padlock is the perfect analogy: <strong>anyone</strong> can snap it shut (easy direction), but only the person with the <strong>key</strong> can open it (the trapdoor). RSA is a trapdoor function: anyone can encrypt with the public key, but only the private key holder knows the shortcut back.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-3-8" id="s-3-8" data-sec="s-3-8">
+<h2 class="sec-title"><span class="sec-num">3.8</span><span class="sec-text">Elliptic curves: billiards on a strange table</span><a class="sec-anchor" href="#s-3-8" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>An <strong>elliptic curve</strong> is a curve defined by an equation like:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>y² = x³ + 7          (this is the curve Bitcoin uses, called secp256k1)</pre></div></figure><p>Drawn on ordinary graph paper, it looks like this:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>          y
+          │         .·
+          │      .·´
+          │    .´
+          │  .´
+      .-─-│-´          ← the curve is symmetric
+     (    │              above and below the x-axis
+      `-─-│-.
+          │  `.
+          │    `.
+          │      `·.
+          │         `·</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>The curve has a special &quot;addition&quot; rule for points: draw a straight line through two points on the curve; it hits the curve at exactly one more point; flip that point over the x-axis. The result is the &quot;sum.&quot;</p>
+<p>Now imagine a billiard ball starting at a known point <code>G</code> and bouncing around the curve following this rule <code>k</code> times. That&#39;s called <strong>scalar multiplication</strong>: <code>k × G</code>.</p>
+<ul>
+<li><strong>Easy:</strong> given <code>k</code> and <code>G</code>, compute where the ball ends up. (There are shortcuts, like doubling, that make even <code>k</code> ≈ 2²⁵⁶ fast.)</li>
+<li><strong>Hard:</strong> given only the start <code>G</code> and end point, figure out how many bounces <code>k</code> it took.</li>
+</ul>
+<p>In real cryptography the curve is drawn over &quot;clock math&quot; (modular arithmetic), so instead of a smooth curve, it&#39;s a scattered cloud of points with no visible pattern, which makes the reverse problem even harder.</p>
+<p>Your <strong>private key is <code>k</code></strong> (a big random number). Your <strong>public key is the end point <code>k × G</code></strong>. This is the <strong>elliptic curve discrete logarithm problem</strong>, and it secures ECDH, ECDSA and Ed25519. The big win: elliptic curves give the same security as RSA with <strong>much smaller keys</strong> (256 bits vs. 3072 bits).</p>
+</div><div class="widget" data-w="ecurve"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-3-9" id="s-3-9" data-sec="s-3-9">
+<h2 class="sec-title"><span class="sec-num">3.9</span><span class="sec-text">How big is &quot;big&quot;? Thinking about key sizes</span><a class="sec-anchor" href="#s-3-9" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Cryptographic security is measured in <strong>bits</strong>. A key with <em>n</em> bits has 2ⁿ possibilities, and <strong>every extra bit doubles</strong> the attacker&#39;s work.</p>
+<p>Imagine an attacker who can test <strong>one trillion keys per second</strong> (a very powerful setup). Time to try every key:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Key size</th>
+<th>Number of keys</th>
+<th>Time to try them all</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>40 bits</td>
+<td>~1.1 trillion</td>
+<td>~1 second</td>
+</tr>
+<tr>
+<td>56 bits (DES)</td>
+<td>~72 quadrillion</td>
+<td>~20 hours</td>
+</tr>
+<tr>
+<td>64 bits</td>
+<td>~18 quintillion</td>
+<td>~7 months</td>
+</tr>
+<tr>
+<td>80 bits</td>
+<td>~1.2 × 10²⁴</td>
+<td>~38,000 years</td>
+</tr>
+<tr>
+<td><strong>128 bits</strong> (AES-128)</td>
+<td>~3.4 × 10³⁸</td>
+<td>~10 <strong>quintillion</strong> years</td>
+</tr>
+<tr>
+<td><strong>256 bits</strong> (AES-256)</td>
+<td>~1.2 × 10⁷⁷</td>
+<td>~4 × 10⁵⁷ years</td>
+</tr>
+</tbody></table></div>
+<p>For perspective: the universe is about 14 billion (1.4 × 10¹⁰) years old. Even with a <strong>billion</strong> computers each testing a <strong>billion</strong> keys per second, trying all 128-bit keys would take about <strong>780 times the age of the universe</strong>.</p>
+<aside class="callout key"><p>💡 <strong>Key idea:</strong> 128-bit security is beyond the reach of brute force with any conventional computer that could ever be built. When 128-bit crypto fails, it&#39;s because of a flaw or a mistake, not because someone tried every key.</p>
+</aside>
+</div><div class="widget" data-w="keysize"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-3-10" id="s-3-10" data-sec="s-3-10">
+<h2 class="sec-title"><span class="sec-num">3.10</span><span class="sec-text">Comparing security levels</span><a class="sec-anchor" href="#s-3-10" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Different algorithms need different key sizes for the same strength. Here&#39;s an approximate equivalence table, based on guidance from the US National Institute of Standards and Technology (NIST):</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Security level</th>
+<th>Symmetric cipher</th>
+<th>Hash (for collisions)</th>
+<th>RSA / classic Diffie-Hellman</th>
+<th>Elliptic curve</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>80 bits (broken/legacy)</td>
+<td>—</td>
+<td>SHA-1 (broken)</td>
+<td>1024 bits</td>
+<td>160 bits</td>
+</tr>
+<tr>
+<td>112 bits (minimum today)</td>
+<td>3DES (retired)</td>
+<td>SHA-224</td>
+<td>2048 bits</td>
+<td>224 bits</td>
+</tr>
+<tr>
+<td><strong>128 bits</strong> (standard)</td>
+<td><strong>AES-128</strong></td>
+<td><strong>SHA-256</strong></td>
+<td><strong>3072 bits</strong></td>
+<td><strong>256 bits</strong> (P-256, X25519)</td>
+</tr>
+<tr>
+<td>192 bits</td>
+<td>AES-192</td>
+<td>SHA-384</td>
+<td>7680 bits</td>
+<td>384 bits</td>
+</tr>
+<tr>
+<td>256 bits</td>
+<td>AES-256</td>
+<td>SHA-512</td>
+<td>15360 bits</td>
+<td>512+ bits</td>
+</tr>
+</tbody></table></div>
+<p>Notice how RSA keys have to grow enormously, while elliptic-curve keys grow gently. That&#39;s why the world has been moving from RSA to elliptic curves.</p>
+</div><div class="widget" data-w="keygrowth"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-3-11" id="s-3-11" data-sec="s-3-11">
+<h2 class="sec-title"><span class="sec-num">3.11</span><span class="sec-text">The &quot;hard problems&quot; that modern crypto stands on</span><a class="sec-anchor" href="#s-3-11" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Every public-key algorithm relies on some math problem that nobody knows how to solve quickly:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Hard problem</th>
+<th>Plain description</th>
+<th>Algorithms that rely on it</th>
+<th>Safe from quantum computers?</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Integer factoring</td>
+<td>Find the primes that were multiplied together</td>
+<td>RSA</td>
+<td class="st-bad">❌ No</td>
+</tr>
+<tr>
+<td>Discrete logarithm</td>
+<td>Find the exponent in <code>gˣ mod p</code></td>
+<td>Diffie-Hellman, DSA</td>
+<td class="st-bad">❌ No</td>
+</tr>
+<tr>
+<td>Elliptic-curve discrete log</td>
+<td>Count the bounces on the curve</td>
+<td>ECDH, ECDSA, Ed25519, X25519</td>
+<td class="st-bad">❌ No</td>
+</tr>
+<tr>
+<td>Lattice problems</td>
+<td>Find a hidden point in a huge, noisy multi-dimensional grid</td>
+<td>ML-KEM (Kyber), ML-DSA (Dilithium)</td>
+<td class="st-ok">✅ Believed yes</td>
+</tr>
+<tr>
+<td>Hash-function security</td>
+<td>Reverse a hash function</td>
+<td>SLH-DSA (SPHINCS+)</td>
+<td class="st-ok">✅ Believed yes</td>
+</tr>
+</tbody></table></div>
+<p>The &quot;quantum&quot; column is why the industry is in the middle of a major upgrade. Chapter <a class="xref" href="chapter-17.html">17</a> explains it.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 3</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 3 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-sun" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 4</p>
+<h3>Randomness: The Secret Ingredient</h3>
+<p class="next-hook">A 256-bit key can secretly have the strength of a 15-bit one. Two deleted lines of code did exactly that to a whole operating system’s keys for two years.</p>
+<div class="next-actions"><a class="btn big" href="chapter-04.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-02.html">← A Quick Trip Through History</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":3,"title":"The Math Toolbox, Gently","quiz":[{"q":"One byte is written as how many hex characters?","o":["1","2","4","8"],"a":1,"why":"Each hex symbol stands for 4 bits, so 8 bits = 2 hex characters. A 256-bit value is 64 hex characters."},{"q":"(M ⊕ K) ⊕ K equals…","o":["K","0","M","M ⊕ K"],"a":2,"why":"XOR-ing with the same key twice gets you back where you started. Encryption and decryption are the same operation."},{"q":"17 mod 5 = ?","o":["2","3","12","0"],"a":0,"why":"17 = 3 × 5 + 2, so the remainder is 2."},{"q":"For 128-bit security an elliptic-curve key is ~256 bits. How big must an RSA key be?","o":["256 bits","1024 bits","3072 bits","15360 bits"],"a":2,"why":"RSA keys grow enormously while ECC keys grow gently. That is why the world is moving to elliptic curves."}],"fragment":"modulo","secs":["s-3-1","s-3-2","s-3-3","s-3-4","s-3-5","s-3-6","s-3-7","s-3-8","s-3-9","s-3-10","s-3-11"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-a.js?v=86fb719f26"></script>
+</body>
+</html>

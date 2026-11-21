@@ -1,0 +1,429 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 15: Secure Connections: SSH, VPNs, Wi-Fi and DNS · CryptoSketch</title>
+<meta name="description" content="SSH, VPNs, Wi-Fi and DNS look like four different worlds. Underneath, they’re the same handful of building blocks snapped together in different shapes.">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-mint">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">🚇 In this chapter</p><ol><li><a href="#s-15-1" data-sec="s-15-1"><span class="st-num">15.1</span><span class="st-t">SSH: secure remote access</span></a></li><li><a href="#s-15-2" data-sec="s-15-2"><span class="st-num">15.2</span><span class="st-t">VPNs: encrypted tunnels</span></a></li><li><a href="#s-15-3" data-sec="s-15-3"><span class="st-num">15.3</span><span class="st-t">Wi-Fi security</span></a></li><li><a href="#s-15-4" data-sec="s-15-4"><span class="st-num">15.4</span><span class="st-t">DNS security: DNSSEC, DoT and DoH</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="15">
+<header class="ch-hero world-mint">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-4">🏙️ World 4 · Cryptography in the Real World</a>
+    <p class="ch-num">Chapter 15</p>
+    <h1 class="ch-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</h1>
+    <p class="ch-hook"><span>🤔</span> SSH, VPNs, Wi-Fi and DNS look like four different worlds. Underneath, they’re the same handful of building blocks snapped together in different shapes.</p>
+    <ul class="ch-stats"><li>⏱️ ~8 min</li><li>📚 4 sections</li><li>⭐ 150 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="15" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"></div>
+<section class="sec sec-15-1" id="s-15-1" data-sec="s-15-1">
+<h2 class="sec-title"><span class="sec-num">15.1</span><span class="sec-text">SSH: secure remote access</span><a class="sec-anchor" href="#s-15-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p><strong>SSH (Secure Shell)</strong> lets you log in to and control a remote computer over an encrypted connection. Developers and system administrators use it constantly: managing servers, copying files (<code>scp</code>, <code>sftp</code>), pushing code to GitHub, and creating encrypted tunnels. It runs on TCP port 22.</p>
+<div class="callout story"><p>📜 <strong>Origin story:</strong> in 1995, Finnish researcher Tatu Ylönen&#39;s university network was hit by a password-sniffing attack. The tools of the time (Telnet, rlogin) sent passwords in plain text. He wrote SSH to replace them, and within a few years it had replaced them almost everywhere.</p></div>
+<h4 id="how-an-ssh-connection-works" class="h4">How an SSH connection works</h4>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> Your laptop (client)                                         Server
+      │ ── TCP connect to port 22 ─────────────────────────────► │
+      │ ◄─► 1. Agree on algorithms                                │
+      │ ◄─► 2. KEY EXCHANGE (e.g. mlkem768x25519 or curve25519)   │
+      │        → shared secret → session keys (Chapters 8, 10)    │
+      │ ◄── 3. Server proves its identity: signs the exchange     │
+      │        with its HOST KEY (Chapter 11)                     │
+      │     4. Client checks that host key against known_hosts    │
+      │ ══════════════ encrypted channel ═════════════════════════│
+      │ ── 5. USER authentication: password, or (better) a        │
+      │        signature made with your private key ────────────► │
+      │                    checks ~/.ssh/authorized_keys          │
+      │ ══════════════ your shell session ════════════════════════│</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p><strong>Step 4 is &quot;trust on first use&quot; (TOFU).</strong> SSH has no certificate authority by default. The first time you connect to a server, you see:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>The authenticity of host 'server.example (203.0.113.10)' can't be established.
+ED25519 key fingerprint is SHA256:3dX8pU1n0QxA0fJ8yJ3E3m9R0Yv5H2QwF6ZB8cKX2sE.
+Are you sure you want to continue connecting (yes/no/[fingerprint])?</pre></div></figure><p>If you answer &quot;yes,&quot; SSH saves the server&#39;s public key in <code>~/.ssh/known_hosts</code>. Next time, it checks the key matches. If it ever changes, you get a loud warning:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+IT IS POSSIBLE THAT SOMEONE IS DOING SOMETHING NASTY!</pre></div></figure><p>That could be harmless (the server was reinstalled) or a man-in-the-middle attack. Check with the server&#39;s administrator before continuing. Ideally, verify the fingerprint through another channel the very first time, too.</p>
+<p><strong>Step 5: key-based login</strong> is safer than passwords. Your public key goes in the server&#39;s <code>~/.ssh/authorized_keys</code> file. When you log in, your SSH client <strong>signs</strong> data unique to this session with your private key, and the server verifies it with your public key. Your private key never leaves your laptop, so there&#39;s nothing for a fake server to steal.</p>
+<p>Larger organizations often use <strong>SSH certificates</strong>: an internal SSH CA signs user and host keys, which removes the &quot;trust on first use&quot; prompt and makes revoking access easy.</p>
+<h4 id="sshs-modern-algorithms" class="h4">SSH&#39;s modern algorithms</h4>
+<p>Run <code>ssh -Q kex</code> to see the key exchanges your SSH supports. Recent OpenSSH versions (10.0 and later) use the post-quantum hybrid <strong><code>mlkem768x25519-sha256</code></strong> by default, with <code>curve25519-sha256</code> as a fallback. For encryption, they use <strong><code>chacha20-poly1305@openssh.com</code></strong> or <strong>AES-GCM</strong>.</p>
+<p class="lab-label">🧪 <strong>Try it yourself:</strong></p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># Create a modern SSH key pair (you&#x27;ll be asked for a passphrase: use one!)</span>
+ssh-keygen -t ed25519 -C <span class="hljs-string">&quot;alice@laptop&quot;</span>
+<span class="hljs-comment"># Creates ~/.ssh/id_ed25519      (PRIVATE: never share)</span>
+<span class="hljs-comment">#     and ~/.ssh/id_ed25519.pub  (PUBLIC: give this to servers, GitHub, etc.)</span>
+
+<span class="hljs-built_in">cat</span> ~/.ssh/id_ed25519.pub
+<span class="hljs-comment"># ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAI... alice@laptop</span>
+
+<span class="hljs-comment"># Show your key&#x27;s fingerprint</span>
+ssh-keygen -lf ~/.ssh/id_ed25519.pub
+
+<span class="hljs-comment"># Install your public key on a server you can already log in to</span>
+ssh-copy-id user@server.example
+
+<span class="hljs-comment"># Watch the algorithm negotiation in detail</span>
+ssh -v user@server.example 2&gt;&amp;1 | grep -iE <span class="hljs-string">&quot;kex: algorithm|host key algorithm|cipher&quot;</span>
+
+<span class="hljs-comment"># Load your key into the SSH agent so you type the passphrase only once per session</span>
+ssh-add ~/.ssh/id_ed25519</code></pre></div><p>For extra protection, you can keep SSH keys on a hardware security key: <code>ssh-keygen -t ed25519-sk</code> creates a key that requires a physical touch on a FIDO2 device (like a YubiKey) for every login.</p>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>SSH authentication</h4></div><div class="pc-grid">
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>Password login</h5><p class="pc-tag">Type a password</p></header>
+<ul class="pros"><li>Nothing to set up</li></ul>
+<ul class="cons"><li>Brute-forced by bots 24/7</li><li>Phishable, reusable</li></ul>
+<footer><b>Best for:</b> Disable on servers</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Ed25519 key</h5><p class="pc-tag">ssh-keygen -t ed25519</p></header>
+<ul class="pros"><li>Can’t be guessed; short keys</li><li>Works with agents</li></ul>
+<ul class="cons"><li>Private key file must be protected with a passphrase</li></ul>
+<footer><b>Best for:</b> Everyday SSH</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>ed25519-sk (hardware)</h5><p class="pc-tag">Key lives on a YubiKey</p></header>
+<ul class="pros"><li>Private key can’t be copied off the device</li><li>Requires a physical touch</li></ul>
+<ul class="cons"><li>Need the device with you; buy a backup</li></ul>
+<footer><b>Best for:</b> Admins and high-value servers</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>SSH certificates</h5><p class="pc-tag">A CA signs user/host keys</p></header>
+<ul class="pros"><li>No TOFU prompts; short-lived access</li></ul>
+<ul class="cons"><li>You need to run an SSH CA</li></ul>
+<footer><b>Best for:</b> Larger fleets</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-15-2" id="s-15-2" data-sec="s-15-2">
+<h2 class="sec-title"><span class="sec-num">15.2</span><span class="sec-text">VPNs: encrypted tunnels</span><a class="sec-anchor" href="#s-15-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A <strong>VPN (Virtual Private Network)</strong> wraps all your network traffic in an encrypted tunnel to a VPN server, which then forwards it to the internet.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>                         ENCRYPTED TUNNEL
+ Your device ════════════════════════════════════► VPN server ───────► Internet / company network
+   (café Wi-Fi and your internet provider see       (decrypts and
+    only encrypted packets to the VPN server)        forwards traffic)</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>Common uses:</p>
+<ul>
+<li><strong>Remote work:</strong> connect to a company&#39;s internal network from home.</li>
+<li><strong>Site-to-site:</strong> link two office networks over the internet.</li>
+<li><strong>Public Wi-Fi:</strong> stop the local network from seeing your traffic.</li>
+<li><strong>Changing your apparent location:</strong> websites see the VPN server&#39;s IP address.</li>
+</ul>
+<p><strong>What a VPN does and doesn&#39;t do:</strong></p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>✅ A VPN does</th>
+<th>❌ A VPN does not</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Hide your traffic from the local network and your internet provider</td>
+<td>Hide your traffic from the <strong>VPN provider</strong>, who can now see what your internet provider used to see</td>
+</tr>
+<tr>
+<td>Hide your real IP address from websites</td>
+<td>Make you anonymous (logins, cookies and browser fingerprints still identify you)</td>
+</tr>
+<tr>
+<td>Protect unencrypted protocols on untrusted networks</td>
+<td>Protect you from phishing, malware or bad passwords</td>
+</tr>
+<tr>
+<td>Give access to private networks</td>
+<td>Replace HTTPS (you still need it after the VPN server)</td>
+</tr>
+</tbody></table></div>
+<p><strong>VPN protocols:</strong></p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Protocol</th>
+<th>Layer</th>
+<th>Crypto</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>WireGuard</strong></td>
+<td>Network</td>
+<td>Curve25519, ChaCha20-Poly1305, BLAKE2s, HKDF (the Noise protocol framework)</td>
+<td class="st-ok">✅ Modern, fast, about 4,000 lines of code. Built into Linux since 2020. Basis of Tailscale and many commercial VPNs.</td>
+</tr>
+<tr>
+<td><strong>IPsec</strong> (IKEv2 + ESP)</td>
+<td>Network</td>
+<td>AES-GCM, ECDH, certificates or pre-shared keys</td>
+<td class="st-ok">✅ Built into most operating systems and routers; complex to configure</td>
+</tr>
+<tr>
+<td><strong>OpenVPN</strong></td>
+<td>Application (TLS-based)</td>
+<td>TLS 1.2/1.3</td>
+<td class="st-ok">✅ Flexible, widely supported, slower</td>
+</tr>
+<tr>
+<td>L2TP/IPsec</td>
+<td>Network</td>
+<td>IPsec</td>
+<td class="st-warn">⚠️ Legacy</td>
+</tr>
+<tr>
+<td>PPTP</td>
+<td>—</td>
+<td>MS-CHAPv2, RC4</td>
+<td class="st-bad">❌ Broken; never use</td>
+</tr>
+</tbody></table></div>
+<p>WireGuard&#39;s design is interesting because it has <strong>no algorithm negotiation</strong>. Every connection uses the same fixed, modern algorithms. That removes a whole class of &quot;downgrade&quot; attacks, where an attacker tricks both sides into using weaker options. If the algorithms ever need changing, the protocol version changes.</p>
+<p>Each WireGuard device has a key pair, much like SSH. A client configuration looks like this:</p>
+<div class="code-card lang-ini"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Config</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-section">[Interface]</span>
+<span class="hljs-attr">PrivateKey</span> = &lt;this device<span class="hljs-string">&#x27;s private key&gt;
+Address    = 10.0.0.2/32
+
+[Peer]
+PublicKey  = &lt;the server&#x27;</span>s public key&gt;
+<span class="hljs-attr">Endpoint</span>   = vpn.example.com:<span class="hljs-number">51820</span>
+<span class="hljs-attr">AllowedIPs</span> = <span class="hljs-number">0.0</span>.<span class="hljs-number">0.0</span>/<span class="hljs-number">0</span>          <span class="hljs-comment"># send all traffic through the tunnel</span></code></pre></div><div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># Generate a WireGuard key pair (requires wireguard-tools)</span>
+wg genkey | <span class="hljs-built_in">tee</span> privatekey | wg pubkey &gt; publickey</code></pre></div></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>VPN protocols</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>WireGuard</h5><p class="pc-tag">~4,000 lines, fixed modern crypto</p></header>
+<ul class="pros"><li>Tiny, fast, easy to audit</li><li>No negotiation → no downgrades</li></ul>
+<ul class="cons"><li>UDP only</li><li>Static IP assignments need extra tooling</li></ul>
+<footer><b>Best for:</b> Most new VPNs</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>IPsec / IKEv2</h5><p class="pc-tag">Network layer standard</p></header>
+<ul class="pros"><li>Built into every OS and router</li><li>Great for site-to-site</li></ul>
+<ul class="cons"><li>Complex configuration</li><li>Huge spec</li></ul>
+<footer><b>Best for:</b> Enterprise and mobile</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>OpenVPN</h5><p class="pc-tag">TLS-based</p></header>
+<ul class="pros"><li>Flexible; works over TCP 443</li></ul>
+<ul class="cons"><li>Slower; large code base</li></ul>
+<footer><b>Best for:</b> Restrictive networks</footer></article>
+<article class="pc-card v-legacy"><header><span class="pc-verdict">⚠️ Legacy</span><h5>L2TP/IPsec</h5><p class="pc-tag">Older combo</p></header>
+<ul class="pros"><li>Widely supported</li></ul>
+<ul class="cons"><li>Double encapsulation; often weak pre-shared keys</li></ul>
+<footer><b>Best for:</b> Legacy clients</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>PPTP</h5><p class="pc-tag">MS-CHAPv2 + RC4</p></header>
+<ul class="pros"><li>Ancient and easy</li></ul>
+<ul class="cons"><li>Completely broken</li></ul>
+<footer><b>Best for:</b> Never</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-15-3" id="s-15-3" data-sec="s-15-3">
+<h2 class="sec-title"><span class="sec-num">15.3</span><span class="sec-text">Wi-Fi security</span><a class="sec-anchor" href="#s-15-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Wi-Fi is radio. Anyone within range, including someone in a car outside, can capture every packet. Wi-Fi encryption protects the hop between your device and the access point (router).</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Standard</th>
+<th>Year</th>
+<th>Encryption</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Open network</td>
+<td>—</td>
+<td>None</td>
+<td class="st-bad">❌ Anyone nearby can read unencrypted traffic</td>
+</tr>
+<tr>
+<td><strong>WEP</strong></td>
+<td>1997</td>
+<td>RC4 with a tiny 24-bit IV that repeats</td>
+<td class="st-bad">❌ Crackable in minutes</td>
+</tr>
+<tr>
+<td><strong>WPA</strong> (TKIP)</td>
+<td>2003</td>
+<td>Patched RC4, as a stopgap</td>
+<td class="st-bad">❌ Obsolete</td>
+</tr>
+<tr>
+<td><strong>WPA2</strong></td>
+<td>2004</td>
+<td>AES-CCMP</td>
+<td class="st-warn">⚠️ OK with a strong password; weaknesses below</td>
+</tr>
+<tr>
+<td><strong>WPA3</strong></td>
+<td>2018</td>
+<td>AES with SAE key exchange</td>
+<td class="st-ok">✅ Use it if your devices support it</td>
+</tr>
+<tr>
+<td><strong>Enhanced Open (OWE)</strong></td>
+<td>2018</td>
+<td>Encryption on open networks, no password</td>
+<td class="st-ok">✅ Better than open; protects against passive snooping</td>
+</tr>
+</tbody></table></div>
+<h4 id="wpa2-personal-and-the-4-way-handshake" class="h4">WPA2-Personal and the 4-way handshake</h4>
+<p>With a home Wi-Fi password (a &quot;pre-shared key&quot;):</p>
+<ol>
+<li>Both your device and the router turn the password into a 256-bit key, the <strong>PMK</strong> (Pairwise Master Key), using <strong>PBKDF2</strong> (Chapter <a class="xref" href="chapter-08.html">8</a>) with the network name (SSID) as the salt and 4,096 iterations.</li>
+<li>When you connect, they perform a <strong>4-way handshake</strong>: they exchange fresh random numbers (nonces) and each derives a temporary session key, the <strong>PTK</strong>, from the PMK, both nonces and both devices&#39; hardware addresses. Each side proves it knows the PMK with a MIC (a MAC) without ever sending the password.</li>
+</ol>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> Your phone                                      Router
+     │ ◄──── 1. ANonce (router's random number) ─── │
+     │                                              │  Both compute:
+     │ ───── 2. SNonce + MIC ─────────────────────► │  PTK = KDF(PMK, ANonce, SNonce,
+     │ ◄──── 3. group key (encrypted) + MIC ─────── │        phone address, router address)
+     │ ───── 4. ACK + MIC ────────────────────────► │
+     │ ═════════ traffic encrypted with AES-CCMP ═══│</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>WPA2-Personal&#39;s weaknesses:</p>
+<ul>
+<li><strong>Offline password guessing:</strong> an attacker who records a handshake (or forces your device to reconnect) can try millions of passwords per second on their own computer, checking each guess against the captured MIC. Short or common Wi-Fi passwords fall quickly.</li>
+<li><strong>No forward secrecy:</strong> anyone who knows the Wi-Fi password and captured your handshake can decrypt your traffic.</li>
+<li>📜 <strong>KRACK (2017):</strong> researchers showed that by replaying handshake messages, an attacker could make devices <strong>reinstall</strong> a key and reset nonces, causing nonce reuse. It was fixed with software updates.</li>
+</ul>
+<h4 id="wpa3-and-sae" class="h4">WPA3 and SAE</h4>
+<p>WPA3-Personal replaces the 4-way handshake&#39;s password step with <strong>SAE (Simultaneous Authentication of Equals)</strong>, also called &quot;Dragonfly.&quot; It&#39;s a <strong>PAKE</strong> (password-authenticated key exchange, Chapter <a class="xref" href="chapter-17.html">17</a>): a Diffie-Hellman-style exchange woven together with the password.</p>
+<ul>
+<li><strong>Offline guessing is no longer possible.</strong> Each password guess requires a live exchange with the router.</li>
+<li><strong>Forward secrecy:</strong> learning the password later doesn&#39;t decrypt past traffic.</li>
+</ul>
+<p>(Some early WPA3 implementations had flaws, known as &quot;Dragonblood&quot; (2019), which were patched.)</p>
+<h4 id="enterprise-wi-fi" class="h4">Enterprise Wi-Fi</h4>
+<p>Companies and universities use <strong>WPA2/WPA3-Enterprise</strong> (802.1X). Each person logs in with their own username and password or certificate, checked by a central server (RADIUS) through a method like EAP-TLS. The worldwide university network <strong>eduroam</strong> works this way.</p>
+<div class="callout warn"><p>⚠️ <strong>Watch out:</strong> on enterprise Wi-Fi, your device must check the login server&#39;s <strong>certificate</strong>. If it doesn&#39;t, an attacker can set up an &quot;evil twin&quot; access point with the same name and collect people&#39;s passwords.</p></div>
+<p><strong>Wi-Fi checklist for your home:</strong> use WPA3 (or WPA2-AES if needed), a long random passphrase, turn off <strong>WPS</strong> (its 8-digit PIN can be brute-forced), and keep the router&#39;s firmware updated.</p>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Wi-Fi security</h4></div><div class="pc-grid">
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>Open</h5><p class="pc-tag">No encryption</p></header>
+<ul class="pros"><li>Easy to join</li></ul>
+<ul class="cons"><li>Anyone nearby reads unencrypted traffic</li></ul>
+<footer><b>Best for:</b> Only with HTTPS/VPN on top</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>WEP</h5><p class="pc-tag">RC4 + 24-bit IV</p></header>
+<ul class="pros"><li>None today</li></ul>
+<ul class="cons"><li>Cracked in minutes</li></ul>
+<footer><b>Best for:</b> Never</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>WPA (TKIP)</h5><p class="pc-tag">Patched RC4 stopgap</p></header>
+<ul class="pros"><li>Was better than WEP</li></ul>
+<ul class="cons"><li>Obsolete</li></ul>
+<footer><b>Best for:</b> Never</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>WPA2-AES</h5><p class="pc-tag">AES-CCMP, 4-way handshake</p></header>
+<ul class="pros"><li>Supported by every device</li></ul>
+<ul class="cons"><li>Captured handshakes allow offline guessing</li><li>KRACK (patched)</li></ul>
+<footer><b>Best for:</b> Old devices, with a long passphrase</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>WPA3 (SAE)</h5><p class="pc-tag">Dragonfly PAKE</p></header>
+<ul class="pros"><li>No offline guessing</li><li>Forward secrecy</li></ul>
+<ul class="cons"><li>Older devices can’t join</li><li>Early Dragonblood bugs (patched)</li></ul>
+<footer><b>Best for:</b> Every home and office</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Enterprise (802.1X)</h5><p class="pc-tag">Per-user login via RADIUS</p></header>
+<ul class="pros"><li>Individual credentials; easy revocation</li></ul>
+<ul class="cons"><li>Devices must check the server certificate (evil twins!)</li></ul>
+<footer><b>Best for:</b> Companies and universities (eduroam)</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-15-4" id="s-15-4" data-sec="s-15-4">
+<h2 class="sec-title"><span class="sec-num">15.4</span><span class="sec-text">DNS security: DNSSEC, DoT and DoH</span><a class="sec-anchor" href="#s-15-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Remember the two problems with DNS from Chapter <a class="xref" href="chapter-12.html">12</a>: <strong>no authenticity</strong> (fake answers) and <strong>no privacy</strong> (everyone sees your lookups). There&#39;s a separate fix for each.</p>
+<h4 id="dnssec-signed-dns-answers-authenticity" class="h4">DNSSEC: signed DNS answers (authenticity)</h4>
+<p><strong>DNSSEC</strong> adds digital signatures to DNS records. Each zone (like <code>example.com</code>) signs its records with its own key, and the parent zone (<code>.com</code>) vouches for that key, all the way up to the <strong>root zone</strong>, whose key is the trust anchor built into resolvers.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>   Root zone &quot;.&quot;  ── signs a fingerprint (DS record) of ──►  &quot;.com&quot; key
+   &quot;.com&quot; zone    ── signs a fingerprint (DS record) of ──►  &quot;example.com&quot; key
+   &quot;example.com&quot;  ── signs its own records (RRSIG) ───────►  &quot;www.example.com = 172.66.147.243&quot;</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>It&#39;s a chain of trust, like certificates, but for DNS. DNSSEC protects against forged answers. It does <strong>not</strong> encrypt anything: everyone can still see your queries.</p>
+<div class="callout story"><p>📜 <strong>The root key ceremony:</strong> the root zone&#39;s signing key is managed in highly scripted public ceremonies, held in secure facilities in the US, where a group of trusted community representatives from around the world each bring part of what&#39;s needed to access the key&#39;s hardware. The ceremonies are filmed and streamed.</p></div>
+<p class="lab-label">🧪 <strong>Try it yourself:</strong></p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># Ask a validating resolver for a signed answer</span>
+dig +dnssec cloudflare.com A @1.1.1.1
+<span class="hljs-comment"># cloudflare.com.  254  IN  A      104.16.132.229</span>
+<span class="hljs-comment"># cloudflare.com.  254  IN  RRSIG  A 13 2 300 ...   ← the signature (algorithm 13 = ECDSA P-256)</span>
+<span class="hljs-comment">#</span>
+<span class="hljs-comment"># ;; flags: qr rd ra ad;   ← &quot;ad&quot; = Authenticated Data: the resolver validated the signature</span></code></pre></div><h4 id="dns-over-tls-and-dns-over-https-privacy" class="h4">DNS over TLS and DNS over HTTPS (privacy)</h4>
+<p><strong>DoT</strong> (DNS over TLS, port 853) and <strong>DoH</strong> (DNS over HTTPS, port 443) wrap DNS queries in TLS, so the local network and your internet provider can&#39;t see or tamper with them. Your chosen resolver (for example 1.1.1.1, 8.8.8.8 or 9.9.9.9) still sees your queries, so you&#39;re moving trust rather than eliminating it. Modern browsers and operating systems support both.</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th></th>
+<th>Plain DNS</th>
+<th>DNSSEC</th>
+<th>DoT / DoH</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Detects forged answers</td>
+<td class="st-bad">❌</td>
+<td class="st-ok">✅ (end to end, from the domain owner)</td>
+<td class="st-ok">✅ (between you and the resolver only)</td>
+</tr>
+<tr>
+<td>Hides your queries from the local network</td>
+<td class="st-bad">❌</td>
+<td class="st-bad">❌</td>
+<td class="st-ok">✅</td>
+</tr>
+<tr>
+<td>Who must deploy it</td>
+<td>—</td>
+<td>Domain owners and resolvers</td>
+<td>You (or your browser/OS) and the resolver</td>
+</tr>
+</tbody></table></div>
+<p>They work well <strong>together</strong>: DNSSEC proves the answer is genuine; DoH/DoT keeps the question private.</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># Ask Cloudflare&#x27;s resolver over HTTPS</span>
+curl -s -H <span class="hljs-string">&#x27;accept: application/dns-json&#x27;</span> \
+  <span class="hljs-string">&#x27;https://cloudflare-dns.com/dns-query?name=example.com&amp;type=A&#x27;</span>
+<span class="hljs-comment"># {&quot;Status&quot;:0, ..., &quot;AD&quot;:true, ..., &quot;Answer&quot;:[{&quot;name&quot;:&quot;example.com&quot;,&quot;type&quot;:1,&quot;TTL&quot;:297,&quot;data&quot;:&quot;172.66.147.243&quot;}, ...]}</span></code></pre></div></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>DNS security</h4></div><div class="pc-grid">
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>DNSSEC</h5><p class="pc-tag">Signed answers</p></header>
+<ul class="pros"><li>Detects forged DNS answers</li><li>Enables DANE</li></ul>
+<ul class="cons"><li>No privacy</li><li>Complex; outages from expired signatures</li></ul>
+<footer><b>Best for:</b> Authenticity of DNS data</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>DNS over TLS (DoT)</h5><p class="pc-tag">Port 853</p></header>
+<ul class="pros"><li>Encrypts lookups</li><li>Easy for networks to manage</li></ul>
+<ul class="cons"><li>Dedicated port is easy to block</li></ul>
+<footer><b>Best for:</b> Phones (Android Private DNS), routers</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>DNS over HTTPS (DoH)</h5><p class="pc-tag">Looks like normal HTTPS</p></header>
+<ul class="pros"><li>Encrypts lookups; hard to block</li></ul>
+<ul class="cons"><li>Moves trust to the resolver provider</li><li>Hides DNS from network admins</li></ul>
+<footer><b>Best for:</b> Browsers</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 15</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 15 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-mint" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 16</p>
+<h3>Everyday Security: Email, Messaging, Disks, Logins and Money</h3>
+<p class="next-hook">Your 6-digit authenticator code is an HMAC of the clock. Your passkey is a private key inside a chip. And a bitcoin is, at heart, just a signature.</p>
+<div class="next-actions"><a class="btn big" href="chapter-16.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-14.html">← TLS and HTTPS: Putting It All Together</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":15,"title":"Secure Connections: SSH, VPNs, Wi-Fi and DNS","quiz":[{"q":"How does SSH usually decide to trust a server the first time?","o":["A certificate authority","Trust on first use (TOFU)","Web of trust","It doesn’t check"],"a":1,"why":"It remembers the host key fingerprint and warns loudly if it ever changes."},{"q":"WireGuard avoids downgrade attacks because…","o":["it uses RSA-4096","it has no algorithm negotiation","it is closed source","it uses TCP"],"a":1,"why":"Every connection uses the same fixed modern algorithms. Changing them means a new protocol version."},{"q":"WPA3-Personal’s SAE handshake stops…","o":["evil-twin access points","offline password guessing","all attacks forever","DNS spoofing"],"a":1,"why":"SAE is a PAKE: every guess needs a live exchange with the router, and it adds forward secrecy."},{"q":"DNSSEC gives DNS answers…","o":["privacy","authenticity (signatures)","compression","speed"],"a":1,"why":"DNSSEC signs answers. Privacy comes from DNS over TLS or DNS over HTTPS."}],"fragment":"tunnel","secs":["s-15-1","s-15-2","s-15-3","s-15-4"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-d.js?v=86fb719f26"></script>
+</body>
+</html>

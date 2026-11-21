@@ -1,0 +1,17 @@
+{
+  "name": "crypto-sketchbook",
+  "version": "1.0.0",
+  "private": true,
+  "description": "A fun, interactive, sketchbook-style website built from Cryptography-Guide.md",
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "serve": "python3 -m http.server 8080 --directory dist",
+    "start": "node build.mjs && python3 -m http.server 8080 --directory dist"
+  },
+  "devDependencies": {
+    "highlight.js": "11.10.0",
+    "marked": "15.0.12",
+    "roughjs": "4.6.6"
+  }
+}

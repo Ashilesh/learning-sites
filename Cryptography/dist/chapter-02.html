@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 2: A Quick Trip Through History · CryptoSketch</title>
+<meta name="description" content="A cipher with 400 septillion possible keys was cracked in the 9th century, with pen and paper. How?">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-sun">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">🏛️ In this chapter</p><ol><li><a href="#s-2-1" data-sec="s-2-1"><span class="st-num">2.1</span><span class="st-t">The Caesar cipher (about 50 BC)</span></a></li><li><a href="#s-2-2" data-sec="s-2-2"><span class="st-num">2.2</span><span class="st-t">Substitution ciphers and frequency analysis (9th century)</span></a></li><li><a href="#s-2-3" data-sec="s-2-3"><span class="st-num">2.3</span><span class="st-t">The Vigenère cipher (1500s): "the indecipherable cipher"</span></a></li><li><a href="#s-2-4" data-sec="s-2-4"><span class="st-num">2.4</span><span class="st-t">The Enigma machine (World War II)</span></a></li><li><a href="#s-2-5" data-sec="s-2-5"><span class="st-num">2.5</span><span class="st-t">The one-time pad: perfect secrecy (with a catch)</span></a></li><li><a href="#s-2-6" data-sec="s-2-6"><span class="st-num">2.6</span><span class="st-t">The computer age</span></a></li><li><a href="#s-2-7" data-sec="s-2-7"><span class="st-num">2.7</span><span class="st-t">Lessons from history, in one list</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="2">
+<header class="ch-hero world-sun">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-1">🏝️ World 1 · Foundations</a>
+    <p class="ch-num">Chapter 2</p>
+    <h1 class="ch-title">A Quick Trip Through History</h1>
+    <p class="ch-hook"><span>🤔</span> A cipher with 400 septillion possible keys was cracked in the 9th century, with pen and paper. How?</p>
+    <ul class="ch-stats"><li>⏱️ ~6 min</li><li>📚 7 sections</li><li>🎮 5 interactive</li><li>⭐ 240 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="2" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"><p>Old ciphers are easy to understand and easy to break. Each one teaches a lesson that still matters today.</p>
+</div>
+<section class="sec sec-2-1" id="s-2-1" data-sec="s-2-1">
+<h2 class="sec-title"><span class="sec-num">2.1</span><span class="sec-text">The Caesar cipher (about 50 BC)</span><a class="sec-anchor" href="#s-2-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Julius Caesar reportedly protected military messages by shifting every letter three places down the alphabet:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>Plain:   A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+Cipher:  D E F G H I J K L M N O P Q R S T U V W X Y Z A B C</pre></div></figure><p>So:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>Plaintext:   A T T A C K   A T   D A W N
+Ciphertext:  D W W D F N   D W   G D Z Q</pre></div></figure><p>The <strong>algorithm</strong> is &quot;shift letters.&quot; The <strong>key</strong> is &quot;3.&quot;</p>
+<p><strong>How to break it:</strong> there are only 25 possible shifts. An attacker just tries them all. This is a <strong>brute-force attack</strong>: trying every possible key.</p>
+<p class="lab-label">🧪 <strong>Try it yourself</strong> (Python): encrypt, decrypt and brute-force a Caesar cipher.</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">def</span> <span class="hljs-title function_">caesar</span>(<span class="hljs-params">text, shift</span>):
+    out = <span class="hljs-string">&quot;&quot;</span>
+    <span class="hljs-keyword">for</span> ch <span class="hljs-keyword">in</span> text.upper():
+        <span class="hljs-keyword">if</span> ch.isalpha():
+            out += <span class="hljs-built_in">chr</span>((<span class="hljs-built_in">ord</span>(ch) - <span class="hljs-built_in">ord</span>(<span class="hljs-string">&#x27;A&#x27;</span>) + shift) % <span class="hljs-number">26</span> + <span class="hljs-built_in">ord</span>(<span class="hljs-string">&#x27;A&#x27;</span>))
+        <span class="hljs-keyword">else</span>:
+            out += ch
+    <span class="hljs-keyword">return</span> out
+
+secret = caesar(<span class="hljs-string">&quot;ATTACK AT DAWN&quot;</span>, <span class="hljs-number">3</span>)
+<span class="hljs-built_in">print</span>(secret)                 <span class="hljs-comment"># DWWDFN DW GDZQ</span>
+<span class="hljs-built_in">print</span>(caesar(secret, -<span class="hljs-number">3</span>))     <span class="hljs-comment"># ATTACK AT DAWN</span>
+
+<span class="hljs-comment"># Brute force: try every key</span>
+<span class="hljs-keyword">for</span> shift <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, <span class="hljs-number">26</span>):
+    <span class="hljs-built_in">print</span>(shift, caesar(secret, -shift))
+<span class="hljs-comment"># ...</span>
+<span class="hljs-comment"># 3 ATTACK AT DAWN   &lt;- the only line that makes sense</span></code></pre></div><aside class="callout key"><p>💡 <strong>Lesson 1:</strong> If the number of possible keys is small, the cipher is broken, no matter how clever it looks.</p>
+</aside>
+</div><div class="widget" data-w="caesar"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-2-2" id="s-2-2" data-sec="s-2-2">
+<h2 class="sec-title"><span class="sec-num">2.2</span><span class="sec-text">Substitution ciphers and frequency analysis (9th century)</span><a class="sec-anchor" href="#s-2-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Instead of shifting, scramble the whole alphabet randomly:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>Plain:   A B C D E F G H I J K L M N O P Q R S T U V W X Y Z
+Cipher:  Q W E R T Y U I O P A S D F G H J K L Z X C V B N M</pre></div></figure><p>Now there are 26! (26 × 25 × 24 × … × 1) possible keys, about <strong>403 septillion</strong> (4 × 10²⁶). Trying them all is hopeless by hand.</p>
+<p>It was still broken, by the Arab scholar <strong>Al-Kindi</strong> around 850 AD. His insight: in any language, some letters appear more often than others. In English, <strong>E</strong> is the most common letter (about 12.7% of letters), followed by <strong>T, A, O, I, N</strong>.</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>Letter frequency in English (approximate)
+E ████████████▋ 12.7%
+T █████████     9.1%
+A ████████▏     8.2%
+O ███████▌      7.5%
+I ███████       7.0%
+N ██████▋       6.7%
+...
+Z ▏             0.07%</pre></div></figure><p>If the most common symbol in a long ciphertext is <code>T</code>, it probably stands for <code>E</code>. Work through the frequent letters, guess short words like &quot;THE&quot; and &quot;AND,&quot; and the whole message unravels.</p>
+<aside class="callout key"><p>💡 <strong>Lesson 2:</strong> A huge key space isn&#39;t enough. If the ciphertext leaks <strong>patterns</strong> from the plaintext, attackers will exploit them. Modern ciphers must make ciphertext look completely random.</p>
+</aside>
+</div><div class="widget" data-w="freq"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-2-3" id="s-2-3" data-sec="s-2-3">
+<h2 class="sec-title"><span class="sec-num">2.3</span><span class="sec-text">The Vigenère cipher (1500s): &quot;the indecipherable cipher&quot;</span><a class="sec-anchor" href="#s-2-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Use a keyword to apply a <em>different</em> Caesar shift to each letter. With the keyword <code>LEMON</code> (L=11, E=4, M=12, O=14, N=13):</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>Plaintext:  A T T A C K A T D A W N
+Keyword:    L E M O N L E M O N L E
+Ciphertext: L X F O P V E F R N H R</pre></div></figure><p>The two <code>T</code>s in &quot;ATTACK&quot; become different letters (<code>X</code> and <code>F</code>), which defeats simple frequency analysis. It was called &quot;le chiffre indéchiffrable&quot; for 300 years.</p>
+<p>It was broken in the 1800s (by Charles Babbage and Friedrich Kasiski). Because the keyword <strong>repeats</strong>, patterns reappear at regular intervals. Find the keyword length, split the text into groups, and each group is just a Caesar cipher.</p>
+<aside class="callout key"><p>💡 <strong>Lesson 3:</strong> Repetition is the enemy. Any time a key or pattern repeats, an attacker gets a foothold. You&#39;ll see this again with &quot;nonce reuse&quot; in Chapters <a class="xref" href="chapter-04.html">4</a> and <a class="xref" href="chapter-05.html">5</a>.</p>
+</aside>
+</div><div class="widget" data-w="vigenere"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-2-4" id="s-2-4" data-sec="s-2-4">
+<h2 class="sec-title"><span class="sec-num">2.4</span><span class="sec-text">The Enigma machine (World War II)</span><a class="sec-anchor" href="#s-2-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>The German military used Enigma, an electro-mechanical machine with rotating wheels (rotors). Each key press moved the rotors, so the substitution changed with <strong>every single letter</strong>. A typical configuration had about <strong>159 quintillion</strong> (1.59 × 10²⁰) possible settings.</p>
+<p>It was broken anyway: first by Polish mathematicians (Marian Rejewski and colleagues, in the 1930s), then at Bletchley Park in Britain by Alan Turing, Gordon Welchman and thousands of others. They used early computing machines (&quot;bombes&quot;) plus three weaknesses:</p>
+<ol>
+<li><strong>A design flaw:</strong> Enigma never encrypted a letter as itself. That small pattern ruled out huge numbers of possibilities.</li>
+<li><strong>Predictable messages (&quot;cribs&quot;):</strong> many messages contained standard phrases such as weather reports, so analysts could guess parts of the plaintext.</li>
+<li><strong>Human mistakes:</strong> operators reused settings or picked lazy ones.</li>
+</ol>
+<aside class="callout key"><p>💡 <strong>Lesson 4:</strong> Systems usually fail through <strong>design shortcuts and human habits</strong>, not because someone tried every key. This is still true. Chapter <a class="xref" href="chapter-18.html">18</a> is full of modern examples.</p>
+</aside>
+</div><div class="widget" data-w="enigma"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-2-5" id="s-2-5" data-sec="s-2-5">
+<h2 class="sec-title"><span class="sec-num">2.5</span><span class="sec-text">The one-time pad: perfect secrecy (with a catch)</span><a class="sec-anchor" href="#s-2-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>There is exactly one cipher that is <strong>mathematically proven unbreakable</strong>: the one-time pad.</p>
+<p>The rules:</p>
+<ol>
+<li>The key is <strong>truly random</strong>.</li>
+<li>The key is <strong>as long as the message</strong>.</li>
+<li>The key is used <strong>once</strong> and then destroyed.</li>
+</ol>
+<p>You combine each letter (or bit) of the message with the matching letter (or bit) of the key. Without the key, every possible plaintext of that length is equally likely. The ciphertext <code>XMCKL</code> could be &quot;HELLO,&quot; &quot;PIZZA&quot; or &quot;TANKS.&quot; There is no way to tell, even with infinite computing power. Claude Shannon proved this in 1949.</p>
+<p><strong>The catch:</strong> you need a secret key as long as everything you&#39;ll ever send, and you must deliver it securely in advance. If you can do that, you could almost deliver the message itself that way. That&#39;s why one-time pads are used only in rare cases, such as the Cold War Moscow–Washington hotline.</p>
+<div class="callout story"><p>📜 <strong>True story: Venona.</strong> During the 1940s, the Soviet Union, under wartime pressure, printed some one-time pad pages <strong>twice</strong>. US analysts noticed, and over decades decrypted thousands of Soviet messages, exposing spies including those in the atomic bomb project. Reusing a &quot;one-time&quot; pad destroyed its perfect security.</p></div>
+<aside class="callout key"><p>💡 <strong>Lesson 5:</strong> &quot;One-time&quot; really means <strong>one time</strong>. Reusing a key that was meant to be used once is one of the most common ways cryptography fails.</p>
+</aside>
+</div><div class="widget" data-w="otp"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Classical ciphers: the scorecard</h4></div><div class="pc-grid">
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>Caesar cipher</h5><p class="pc-tag">Shift every letter by k</p></header>
+<ul class="pros"><li>Dead simple; great for teaching</li><li>Encrypt and decrypt by hand</li></ul>
+<ul class="cons"><li>Only 25 keys: brute-forced in seconds</li><li>Keeps letter frequencies intact</li></ul>
+<footer><b>Best for:</b> Puzzles and kids’ secret notes</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>Substitution</h5><p class="pc-tag">Scramble the whole alphabet</p></header>
+<ul class="pros"><li>26! ≈ 4 × 10²⁶ keys</li><li>Defeats brute force by hand</li></ul>
+<ul class="cons"><li>Frequency analysis breaks it (Al-Kindi, ~850 AD)</li><li>Same letter → same symbol every time</li></ul>
+<footer><b>Best for:</b> Newspaper cryptograms</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>Vigenère</h5><p class="pc-tag">A different shift per letter</p></header>
+<ul class="pros"><li>Flattens simple letter frequencies</li><li>Resisted attack for ~300 years</li></ul>
+<ul class="cons"><li>The keyword repeats → Kasiski / Babbage attack</li><li>Short keywords fall quickly</li></ul>
+<footer><b>Best for:</b> History lessons</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>Enigma</h5><p class="pc-tag">Rotors change the substitution each key press</p></header>
+<ul class="pros"><li>~1.59 × 10²⁰ settings</li><li>Different substitution for every letter</li></ul>
+<ul class="cons"><li>Never encrypted a letter as itself</li><li>Predictable cribs and lazy operators</li></ul>
+<footer><b>Best for:</b> Museums and movies</footer></article>
+<article class="pc-card v-idea"><header><span class="pc-verdict">💡 Concept</span><h5>One-time pad</h5><p class="pc-tag">Truly random key as long as the message, used once</p></header>
+<ul class="pros"><li>Mathematically proven unbreakable (Shannon, 1949)</li><li>Secure even against infinite computing power</li></ul>
+<ul class="cons"><li>Key must be as long as all your messages</li><li>Must be delivered securely in advance</li><li>Reuse destroys it (Venona)</li></ul>
+<footer><b>Best for:</b> Rare diplomatic hotlines</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-2-6" id="s-2-6" data-sec="s-2-6">
+<h2 class="sec-title"><span class="sec-num">2.6</span><span class="sec-text">The computer age</span><a class="sec-anchor" href="#s-2-6" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Modern cryptography began when computers made it possible to do enormous amounts of scrambling very fast. A few milestones:</p>
+<ol class="timeline"><li class="tl-item c0"><span class="tl-year">1949</span><div class="tl-body"><h5>Claude Shannon publishes the mathematical theory of secrecy</h5><p><b>Why it matters:</b> Crypto becomes a science</p></div></li><li class="tl-item c1"><span class="tl-year">1973</span><div class="tl-body"><h5>Clifford Cocks at British intelligence (GCHQ) secretly invents what we now call RSA</h5><p><b>Why it matters:</b> Kept classified until 1997</p></div></li><li class="tl-item c2"><span class="tl-year">1976</span><div class="tl-body"><h5>Whitfield Diffie and Martin Hellman publish &quot;New Directions in Cryptography&quot;</h5><p><b>Why it matters:</b> Public-key cryptography and key exchange are born (Chapter <a class="xref" href="chapter-10.html">10</a>)</p></div></li><li class="tl-item c3"><span class="tl-year">1977</span><div class="tl-body"><h5>DES becomes the US standard cipher; RSA is published by Rivest, Shamir and Adleman</h5><p><b>Why it matters:</b> Strong crypto becomes available to businesses</p></div></li><li class="tl-item c4"><span class="tl-year">1985</span><div class="tl-body"><h5>Elliptic-curve cryptography proposed (Koblitz, Miller)</h5><p><b>Why it matters:</b> Smaller, faster public keys</p></div></li><li class="tl-item c5"><span class="tl-year">1991</span><div class="tl-body"><h5>Phil Zimmermann releases PGP</h5><p><b>Why it matters:</b> Strong email encryption for everyone</p></div></li><li class="tl-item c0"><span class="tl-year">1995</span><div class="tl-body"><h5>Netscape releases SSL</h5><p><b>Why it matters:</b> The ancestor of HTTPS</p></div></li><li class="tl-item c1"><span class="tl-year">1998</span><div class="tl-body"><h5>The EFF builds &quot;Deep Crack&quot; and breaks DES in 56 hours</h5><p><b>Why it matters:</b> 56-bit keys are officially too short</p></div></li><li class="tl-item c2"><span class="tl-year">2001</span><div class="tl-body"><h5>AES becomes the new standard</h5><p><b>Why it matters:</b> Still the world&#39;s most-used cipher</p></div></li><li class="tl-item c3"><span class="tl-year">2008</span><div class="tl-body"><h5>The Bitcoin paper is published</h5><p><b>Why it matters:</b> Cryptography as the basis for money</p></div></li><li class="tl-item c4"><span class="tl-year">2013</span><div class="tl-body"><h5>Snowden revelations about mass surveillance</h5><p><b>Why it matters:</b> Big push to encrypt everything</p></div></li><li class="tl-item c5"><span class="tl-year">2015</span><div class="tl-body"><h5>Let&#39;s Encrypt launches free, automated certificates</h5><p><b>Why it matters:</b> HTTPS becomes the default for the web</p></div></li><li class="tl-item c0"><span class="tl-year">2018</span><div class="tl-body"><h5>TLS 1.3 is published</h5><p><b>Why it matters:</b> Faster, simpler, safer HTTPS</p></div></li><li class="tl-item c1"><span class="tl-year">2024</span><div class="tl-body"><h5>NIST publishes the first post-quantum standards</h5><p><b>Why it matters:</b> Preparing for quantum computers (Chapter <a class="xref" href="chapter-17.html">17</a>)</p></div></li></ol>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-2-7" id="s-2-7" data-sec="s-2-7">
+<h2 class="sec-title"><span class="sec-num">2.7</span><span class="sec-text">Lessons from history, in one list</span><a class="sec-anchor" href="#s-2-7" aria-label="Link to this section">#</a></h2>
+<div class="prose"><ol>
+<li><strong>Small key spaces get brute-forced.</strong> (Caesar)</li>
+<li><strong>Patterns leak.</strong> Ciphertext must look perfectly random. (Substitution)</li>
+<li><strong>Repetition is dangerous.</strong> (Vigenère, Venona)</li>
+<li><strong>Humans and shortcuts are the weakest link.</strong> (Enigma)</li>
+<li><strong>Secret designs don&#39;t stay secret.</strong> Rely only on the secrecy of the key. (Kerckhoffs)</li>
+</ol>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 2</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 2 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-sun" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 3</p>
+<h3>The Math Toolbox, Gently</h3>
+<p class="next-hook">5⁶ mod 23 takes a split second to compute. Running it backwards, with big numbers, would outlast the universe. Welcome to the one-way street that guards the internet.</p>
+<div class="next-actions"><a class="btn big" href="chapter-03.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-01.html">← What Is Cryptography?</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":2,"title":"A Quick Trip Through History","quiz":[{"q":"How many useful keys does a Caesar cipher have?","o":["3","25","26!","256"],"a":1,"why":"Only 25 shifts are possible, so an attacker just tries them all: a brute-force attack."},{"q":"Al-Kindi broke substitution ciphers using…","o":["brute force","frequency analysis","an early computer","a stolen key"],"a":1,"why":"Letters like E, T, A, O appear more often in English. Patterns in the plaintext leak into the ciphertext."},{"q":"Why did the Vigenère cipher eventually fall?","o":["Its keyword repeats","It only used 10 letters","The key was printed in newspapers","It encrypted letters as themselves"],"a":0,"why":"Repetition is the enemy. Find the keyword length and each group is just a Caesar cipher."},{"q":"The Venona project decrypted Soviet one-time-pad messages because…","o":["the pads were too short","some pad pages were printed twice","Enigma leaked them","the pads were not random"],"a":1,"why":"“One-time” really means one time. Reusing a pad destroys its perfect secrecy."}],"fragment":"caesar","secs":["s-2-1","s-2-2","s-2-3","s-2-4","s-2-5","s-2-6","s-2-7"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-a.js?v=86fb719f26"></script>
+</body>
+</html>

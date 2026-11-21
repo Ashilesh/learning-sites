@@ -1,0 +1,347 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 10: Key Exchange: Agreeing on a Secret in Public · CryptoSketch</title>
+<meta name="description" content="Two strangers shout numbers across a crowded room, and end up sharing a secret that nobody else in the room can work out.">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-coral">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">🎨 In this chapter</p><ol><li><a href="#s-10-1" data-sec="s-10-1"><span class="st-num">10.1</span><span class="st-t">The puzzle</span></a></li><li><a href="#s-10-2" data-sec="s-10-2"><span class="st-num">10.2</span><span class="st-t">The paint-mixing analogy</span></a></li><li><a href="#s-10-3" data-sec="s-10-3"><span class="st-num">10.3</span><span class="st-t">The real math, with tiny numbers</span></a></li><li><a href="#s-10-4" data-sec="s-10-4"><span class="st-num">10.4</span><span class="st-t">Diffie-Hellman in the real world</span></a></li><li><a href="#s-10-5" data-sec="s-10-5"><span class="st-num">10.5</span><span class="st-t">The catch: man-in-the-middle attacks</span></a></li><li><a href="#s-10-6" data-sec="s-10-6"><span class="st-num">10.6</span><span class="st-t">Ephemeral keys and forward secrecy</span></a></li><li><a href="#s-10-7" data-sec="s-10-7"><span class="st-num">10.7</span><span class="st-t">KEMs: a different style of key agreement</span></a></li><li><a href="#s-10-8" data-sec="s-10-8"><span class="st-num">10.8</span><span class="st-t">Post-quantum key exchange is already here</span></a></li><li><a href="#s-10-9" data-sec="s-10-9"><span class="st-num">10.9</span><span class="st-t">Hands-on with key exchange</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="10">
+<header class="ch-hero world-coral">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-2">🧱 World 2 · The Building Blocks</a>
+    <p class="ch-num">Chapter 10</p>
+    <h1 class="ch-title">Key Exchange: Agreeing on a Secret in Public</h1>
+    <p class="ch-hook"><span>🤔</span> Two strangers shout numbers across a crowded room, and end up sharing a secret that nobody else in the room can work out.</p>
+    <ul class="ch-stats"><li>⏱️ ~6 min</li><li>📚 9 sections</li><li>🎮 4 interactive</li><li>⭐ 235 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="10" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"></div>
+<section class="sec sec-10-1" id="s-10-1" data-sec="s-10-1">
+<h2 class="sec-title"><span class="sec-num">10.1</span><span class="sec-text">The puzzle</span><a class="sec-anchor" href="#s-10-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Alice and Bob have never met. Every word they send can be heard by Eve. Can they agree on a secret key that Eve doesn&#39;t learn?</p>
+<p>It sounds impossible. In 1976, Whitfield Diffie and Martin Hellman showed how to do it. Their method, <strong>Diffie-Hellman key exchange</strong>, runs every time you open a secure website, make a WhatsApp call or connect to a VPN.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-10-2" id="s-10-2" data-sec="s-10-2">
+<h2 class="sec-title"><span class="sec-num">10.2</span><span class="sec-text">The paint-mixing analogy</span><a class="sec-anchor" href="#s-10-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Imagine that mixing paint is easy, but <strong>separating mixed paint back into its colors is impossible</strong>.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>                   ALICE                    PUBLIC                     BOB
+                                        (Eve sees this)
+
+Common paint                            🟡 yellow
+(everyone knows)                            │
+                                ┌───────────┴───────────┐
+Secret colors          🔴 red (secret)                      🔵 blue (secret)
+                                │                       │
+Mix secret + common     🔴+🟡 = 🟠 orange             🔵+🟡 = 🟢 green
+                                │                       │
+Exchange in public              └──── 🟠 ─────►  ◄───── 🟢 ────┘
+                                     (Eve sees orange and green)
+
+Add own secret         🟢 + 🔴  =  🟤 brown               🟠 + 🔵  =  🟤 brown
+
+                         Both end up with the SAME secret color: 🟤 = 🟡+🔴+🔵</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>Eve saw yellow, orange and green. To make brown she needs red or blue, which never left Alice&#39;s or Bob&#39;s house. She can&#39;t &quot;unmix&quot; orange to get red.</p>
+</div><div class="widget" data-w="paint"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-10-3" id="s-10-3" data-sec="s-10-3">
+<h2 class="sec-title"><span class="sec-num">10.3</span><span class="sec-text">The real math, with tiny numbers</span><a class="sec-anchor" href="#s-10-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>In real Diffie-Hellman, &quot;mixing paint&quot; is modular exponentiation (Chapter <a class="xref" href="chapter-03.html">3</a>): easy forward, practically impossible backward.</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Step</th>
+<th>Alice</th>
+<th>Public (Eve sees)</th>
+<th>Bob</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>1. Agree on public numbers</td>
+<td></td>
+<td>prime <code>p = 23</code>, base <code>g = 5</code></td>
+<td></td>
+</tr>
+<tr>
+<td>2. Pick a secret</td>
+<td><code>a = 6</code> (secret)</td>
+<td></td>
+<td><code>b = 15</code> (secret)</td>
+</tr>
+<tr>
+<td>3. Compute public value</td>
+<td><code>A = 5⁶ mod 23 = 8</code></td>
+<td></td>
+<td><code>B = 5¹⁵ mod 23 = 19</code></td>
+</tr>
+<tr>
+<td>4. Exchange</td>
+<td>sends <code>A = 8</code> ──►</td>
+<td><code>A = 8</code>, <code>B = 19</code></td>
+<td>◄── sends <code>B = 19</code></td>
+</tr>
+<tr>
+<td>5. Compute shared secret</td>
+<td><code>B^a = 19⁶ mod 23 = 2</code></td>
+<td></td>
+<td><code>A^b = 8¹⁵ mod 23 = 2</code></td>
+</tr>
+</tbody></table></div>
+<p>Both get <strong>2</strong>. Eve knows <code>p = 23</code>, <code>g = 5</code>, <code>A = 8</code> and <code>B = 19</code>, but to find the secret she&#39;d need <code>a</code> or <code>b</code>, which means solving the discrete logarithm problem. With 23 that&#39;s easy. With a 2048-bit prime (617 digits), it&#39;s out of reach.</p>
+<div class="callout math"><p>🧮 <strong>Why both get the same answer:</strong> Alice computes <code>(g^b)^a</code> and Bob computes <code>(g^a)^b</code>. Both equal <code>g^(a×b)</code>, because multiplying exponents doesn&#39;t care about order. That&#39;s the entire trick.</p></div>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs">p, g = <span class="hljs-number">23</span>, <span class="hljs-number">5</span>
+a, b = <span class="hljs-number">6</span>, <span class="hljs-number">15</span>                 <span class="hljs-comment"># secrets</span>
+A = <span class="hljs-built_in">pow</span>(g, a, p)             <span class="hljs-comment"># 8   (Alice sends)</span>
+B = <span class="hljs-built_in">pow</span>(g, b, p)             <span class="hljs-comment"># 19  (Bob sends)</span>
+<span class="hljs-built_in">print</span>(<span class="hljs-built_in">pow</span>(B, a, p))          <span class="hljs-comment"># 2   (Alice&#x27;s result)</span>
+<span class="hljs-built_in">print</span>(<span class="hljs-built_in">pow</span>(A, b, p))          <span class="hljs-comment"># 2   (Bob&#x27;s result)</span></code></pre></div></div><div class="widget" data-w="dhtoy"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-10-4" id="s-10-4" data-sec="s-10-4">
+<h2 class="sec-title"><span class="sec-num">10.4</span><span class="sec-text">Diffie-Hellman in the real world</span><a class="sec-anchor" href="#s-10-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Variant</th>
+<th>Math</th>
+<th>Key size</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Finite-field DH (DHE)</strong></td>
+<td>Modular exponentiation with huge primes</td>
+<td>2048–4096 bits</td>
+<td>Older; still supported. Standard prime groups like <code>ffdhe2048</code> are defined in RFC 7919.</td>
+</tr>
+<tr>
+<td><strong>ECDH (ECDHE)</strong></td>
+<td>Elliptic curves, e.g. P-256</td>
+<td>256 bits</td>
+<td>Widely used in TLS</td>
+</tr>
+<tr>
+<td><strong>X25519</strong></td>
+<td>Curve25519</td>
+<td>32-byte keys</td>
+<td class="st-ok">✅ The most common choice today: fast, simple, safe</td>
+</tr>
+<tr>
+<td><strong>X25519MLKEM768</strong></td>
+<td>X25519 + post-quantum ML-KEM</td>
+<td>~1.2 KB of key data</td>
+<td class="st-ok">✅ The new default in browsers (<a class="xref" href="chapter-10.html#s-10-8">section 10.8</a>)</td>
+</tr>
+</tbody></table></div>
+<p>The &quot;E&quot; at the end of DHE or ECDHE means <strong>ephemeral</strong>, explained in <a class="xref" href="chapter-10.html#s-10-6">section 10.6</a>.</p>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Key-exchange variants</h4></div><div class="pc-grid">
+<article class="pc-card v-legacy"><header><span class="pc-verdict">⚠️ Legacy</span><h5>Finite-field DHE</h5><p class="pc-tag">Big primes, 2048–4096 bits</p></header>
+<ul class="pros"><li>Simple math, old and well understood</li><li>Forward secrecy when ephemeral</li></ul>
+<ul class="cons"><li>Large and slow</li><li>Weak or shared groups caused Logjam</li></ul>
+<footer><b>Best for:</b> Legacy compatibility</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>ECDHE (P-256)</h5><p class="pc-tag">Elliptic-curve DH</p></header>
+<ul class="pros"><li>Small and fast</li><li>FIPS-friendly</li></ul>
+<ul class="cons"><li>Must validate received points</li></ul>
+<footer><b>Best for:</b> Regulated environments</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>X25519</h5><p class="pc-tag">Curve25519 DH</p></header>
+<ul class="pros"><li>32-byte keys, very fast</li><li>Any 32 bytes is a valid key: fewer pitfalls</li></ul>
+<ul class="cons"><li>Not quantum-safe on its own</li></ul>
+<footer><b>Best for:</b> The default classical choice</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>X25519MLKEM768</h5><p class="pc-tag">Hybrid classical + post-quantum</p></header>
+<ul class="pros"><li>Attacker must break both</li><li>Stops harvest-now-decrypt-later</li><li>Default in major browsers</li></ul>
+<ul class="cons"><li>~1.2 KB of key data per handshake</li><li>Newer code paths</li></ul>
+<footer><b>Best for:</b> Any connection carrying long-lived secrets</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>Static RSA key transport</h5><p class="pc-tag">TLS_RSA_WITH_…</p></header>
+<ul class="pros"><li>Simple; old</li></ul>
+<ul class="cons"><li>No forward secrecy</li><li>Bleichenbacher/ROBOT</li><li>Removed from TLS 1.3</li></ul>
+<footer><b>Best for:</b> Nowhere</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-10-5" id="s-10-5" data-sec="s-10-5">
+<h2 class="sec-title"><span class="sec-num">10.5</span><span class="sec-text">The catch: man-in-the-middle attacks</span><a class="sec-anchor" href="#s-10-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Diffie-Hellman protects against <strong>Eve</strong> (who only listens). It does <strong>not</strong>, on its own, protect against <strong>Mallory</strong> (who can intercept and modify messages).</p>
+<p>Mallory sits in the middle and runs <strong>two</strong> separate key exchanges: one with Alice (pretending to be Bob) and one with Bob (pretending to be Alice).</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> Alice                         Mallory                          Bob
+   │──── A (meant for Bob) ─────►│                                │
+   │                             │───── M1 (posing as Alice) ────►│
+   │                             │◄──── B (meant for Alice) ──────│
+   │◄──── M2 (posing as Bob) ────│                                │
+   │                             │                                │
+ shares key K1 with Mallory    knows K1 AND K2        shares key K2 with Mallory
+
+ Alice encrypts with K1 → Mallory decrypts, READS, re-encrypts with K2 → Bob
+ Neither Alice nor Bob notices anything wrong.</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>Alice thinks she&#39;s talking securely to Bob. She is talking securely, <strong>to Mallory</strong>.</p>
+<p><strong>The fix: authentication.</strong> Alice needs to know that the value <code>B</code> really came from Bob. Ways to do that:</p>
+<ol>
+<li><strong>Digital signatures + certificates</strong> (how HTTPS does it): the server signs its key-exchange value with its long-term private key, and a certificate from a trusted authority proves that the public key belongs to that website. (Chapters <a class="xref" href="chapter-11.html">11</a>, <a class="xref" href="chapter-13.html">13</a> and <a class="xref" href="chapter-14.html">14</a>.)</li>
+<li><strong>Verify fingerprints in person or by another channel:</strong> Signal&#39;s &quot;safety numbers&quot; and SSH&#39;s &quot;host key fingerprint&quot; prompts (Chapters <a class="xref" href="chapter-15.html">15</a> and <a class="xref" href="chapter-16.html">16</a>).</li>
+<li><strong>A pre-shared secret or password,</strong> as in WPA3 Wi-Fi (Chapter <a class="xref" href="chapter-15.html">15</a>).</li>
+</ol>
+<aside class="callout key"><p>💡 <strong>Key idea:</strong> Key exchange gives you a <strong>shared secret</strong>. Authentication tells you <strong>who you share it with</strong>. You need both. Unauthenticated encryption is like whispering secrets to a stranger in a dark room.</p>
+</aside>
+</div><div class="widget" data-w="mitm"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-10-6" id="s-10-6" data-sec="s-10-6">
+<h2 class="sec-title"><span class="sec-num">10.6</span><span class="sec-text">Ephemeral keys and forward secrecy</span><a class="sec-anchor" href="#s-10-6" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Older HTTPS often used <strong>RSA key transport</strong>: the browser generated a secret, encrypted it with the server&#39;s long-term RSA public key, and sent it.</p>
+<p>That has a nasty weakness. Suppose an attacker <strong>records</strong> your encrypted traffic today. Years later, they steal (or legally demand) the server&#39;s private key. Now they can decrypt the recorded secret and <strong>every recorded conversation</strong>, going back years.</p>
+<p><strong>Ephemeral Diffie-Hellman</strong> fixes this. For every single connection:</p>
+<ol>
+<li>Both sides generate a <strong>brand-new</strong> Diffie-Hellman key pair.</li>
+<li>They derive the session key from it.</li>
+<li>When the connection ends, they <strong>delete</strong> the temporary private keys.</li>
+</ol>
+<p>The server&#39;s long-term key is used only to <strong>sign</strong> the exchange (to prove identity), not to protect the secret itself. If that long-term key is stolen later, the attacker can impersonate the server in the <em>future</em>, but they can&#39;t decrypt <em>past</em> sessions, because the ephemeral keys no longer exist anywhere.</p>
+<p>This property is called <strong>forward secrecy</strong> (or &quot;perfect forward secrecy,&quot; PFS).</p>
+<p>Analogy: instead of using the same padlock for every conversation, you use a disposable padlock for each one and melt it down afterwards.</p>
+<div class="callout story"><p>📜 <strong>Why it matters:</strong> documents leaked in 2013 described intelligence agencies recording vast amounts of encrypted internet traffic to decrypt later. The industry responded by switching to forward secrecy. <strong>TLS 1.3 (2018) requires it</strong>: RSA key transport was removed entirely.</p></div>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Ephemeral vs. static keys</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Ephemeral (DHE/ECDHE)</h5><p class="pc-tag">Fresh keys per session, then deleted</p></header>
+<ul class="pros"><li>Forward secrecy</li><li>A stolen server key can’t decrypt past recordings</li></ul>
+<ul class="cons"><li>A key exchange for every connection</li><li>Can’t passively decrypt for monitoring (a feature!)</li></ul>
+<footer><b>Best for:</b> Every modern protocol</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>Static</h5><p class="pc-tag">Same key for years</p></header>
+<ul class="pros"><li>Simpler</li><li>Enables passive decryption for debugging</li></ul>
+<ul class="cons"><li>One stolen key decrypts everything, past and future</li></ul>
+<footer><b>Best for:</b> Avoid for traffic encryption</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-10-7" id="s-10-7" data-sec="s-10-7">
+<h2 class="sec-title"><span class="sec-num">10.7</span><span class="sec-text">KEMs: a different style of key agreement</span><a class="sec-anchor" href="#s-10-7" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A <strong>Key Encapsulation Mechanism (KEM)</strong> reaches the same goal in a slightly different way. Instead of both sides contributing a value, one side generates a random secret and &quot;wraps&quot; it for the other side&#39;s public key:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> Bob                                                   Alice
+ KeyGen() → public key pk, secret key sk
+   ─────────────── pk ──────────────────────────────►
+                                                       Encapsulate(pk) → (shared secret S, ciphertext ct)
+   ◄────────────── ct ───────────────────────────────
+ Decapsulate(sk, ct) → shared secret S
+
+ Both now hold S.</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>This is the shape of the new post-quantum algorithm <strong>ML-KEM</strong> (formerly called Kyber), standardized by NIST in 2024 as FIPS 203.</p>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Diffie-Hellman vs. KEM</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Diffie-Hellman</h5><p class="pc-tag">Both sides contribute</p></header>
+<ul class="pros"><li>Symmetric, elegant</li><li>Tiny with X25519</li></ul>
+<ul class="cons"><li>No lattice-based DH is practical yet</li></ul>
+<footer><b>Best for:</b> Classical key agreement</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>KEM</h5><p class="pc-tag">One side wraps a fresh secret</p></header>
+<ul class="pros"><li>Fits post-quantum math (ML-KEM)</li><li>Clean API: encapsulate / decapsulate</li></ul>
+<ul class="cons"><li>Bigger messages (ML-KEM-768 ciphertext is 1,088 bytes)</li></ul>
+<footer><b>Best for:</b> Post-quantum and HPKE</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-10-8" id="s-10-8" data-sec="s-10-8">
+<h2 class="sec-title"><span class="sec-num">10.8</span><span class="sec-text">Post-quantum key exchange is already here</span><a class="sec-anchor" href="#s-10-8" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A large enough quantum computer could break X25519, ECDH and RSA (Chapter <a class="xref" href="chapter-17.html">17</a>). Nobody has one yet, but recorded traffic could be decrypted later (&quot;harvest now, decrypt later&quot;). So the industry is already using <strong>hybrid key exchange</strong>:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> shared secret = KDF( X25519 secret  +  ML-KEM-768 secret )
+                       ▲                        ▲
+            trusted classical crypto      new quantum-resistant crypto</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>An attacker would have to break <strong>both</strong> to recover the key. This hybrid, named <strong>X25519MLKEM768</strong>, is enabled by default in current Chrome, Edge and Firefox, in Cloudflare&#39;s network, and in OpenSSL 3.5 and later.</p>
+<p>You can see it yourself: when this guide&#39;s examples were tested, OpenSSL 3.6 connecting to <code>www.google.com</code> reported <code>Negotiated TLS1.3 group: X25519MLKEM768</code>.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-10-9" id="s-10-9" data-sec="s-10-9">
+<h2 class="sec-title"><span class="sec-num">10.9</span><span class="sec-text">Hands-on with key exchange</span><a class="sec-anchor" href="#s-10-9" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p class="lab-label">🧪 <strong>Try it yourself</strong> (OpenSSL): Alice and Bob each make a key pair, swap public keys, and compute the same secret.</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># Each person generates an X25519 key pair</span>
+openssl genpkey -algorithm X25519 -out alice_x.pem
+openssl genpkey -algorithm X25519 -out bob_x.pem
+
+<span class="hljs-comment"># Each extracts their public key and &quot;sends&quot; it to the other</span>
+openssl pkey -<span class="hljs-keyword">in</span> alice_x.pem -pubout -out alice_x_pub.pem
+openssl pkey -<span class="hljs-keyword">in</span> bob_x.pem   -pubout -out bob_x_pub.pem
+
+<span class="hljs-comment"># Alice combines HER private key with BOB&#x27;s public key</span>
+openssl pkeyutl -derive -inkey alice_x.pem -peerkey bob_x_pub.pem -out alice_secret.bin
+
+<span class="hljs-comment"># Bob combines HIS private key with ALICE&#x27;s public key</span>
+openssl pkeyutl -derive -inkey bob_x.pem -peerkey alice_x_pub.pem -out bob_secret.bin
+
+<span class="hljs-comment"># Compare: identical 32-byte secrets</span>
+xxd -p -c 64 alice_secret.bin
+xxd -p -c 64 bob_secret.bin
+cmp alice_secret.bin bob_secret.bin &amp;&amp; <span class="hljs-built_in">echo</span> <span class="hljs-string">&quot;SAME SECRET&quot;</span></code></pre></div><p>In Python, including the HKDF step that turns the raw shared secret into a proper encryption key:</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">from</span> cryptography.hazmat.primitives.asymmetric.x25519 <span class="hljs-keyword">import</span> X25519PrivateKey
+<span class="hljs-keyword">from</span> cryptography.hazmat.primitives.kdf.hkdf <span class="hljs-keyword">import</span> HKDF
+<span class="hljs-keyword">from</span> cryptography.hazmat.primitives <span class="hljs-keyword">import</span> hashes
+
+alice_private = X25519PrivateKey.generate()
+bob_private   = X25519PrivateKey.generate()
+
+<span class="hljs-comment"># Public keys are exchanged over the open internet</span>
+alice_public = alice_private.public_key()
+bob_public   = bob_private.public_key()
+
+alice_shared = alice_private.exchange(bob_public)
+bob_shared   = bob_private.exchange(alice_public)
+<span class="hljs-built_in">print</span>(alice_shared == bob_shared)            <span class="hljs-comment"># True</span>
+
+<span class="hljs-comment"># Never use the raw secret directly as a key: run it through a KDF</span>
+session_key = HKDF(algorithm=hashes.SHA256(), length=<span class="hljs-number">32</span>,
+                   salt=<span class="hljs-literal">None</span>, info=<span class="hljs-string">b&quot;my-chat-app v1&quot;</span>).derive(alice_shared)</code></pre></div><p>If you have OpenSSL 3.5 or later, you can also generate post-quantum keys and see how much bigger they are:</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs">openssl genpkey -algorithm ML-KEM-768 -out mlkem.pem
+openssl pkey -<span class="hljs-keyword">in</span> mlkem.pem -pubout -outform DER | <span class="hljs-built_in">wc</span> -c    <span class="hljs-comment"># ~1206 bytes (vs 44 for X25519)</span></code></pre></div></div><div class="widget" data-w="ecdh"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 10</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 10 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-coral" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 11</p>
+<h3>Digital Signatures: Unforgeable Digital Ink</h3>
+<p class="next-hook">How can anyone on Earth check that a file came from you, without being able to forge your signature themselves?</p>
+<div class="next-actions"><a class="btn big" href="chapter-11.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-09.html">← Public-Key Cryptography: The Two-Key Revolution</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":10,"title":"Key Exchange: Agreeing on a Secret in Public","quiz":[{"q":"p = 23, g = 5, Alice picks a = 6, Bob picks b = 15. The shared secret is…","o":["8","19","2","23"],"a":2,"why":"A = 8, B = 19. Alice: 19⁶ mod 23 = 2. Bob: 8¹⁵ mod 23 = 2."},{"q":"Unauthenticated Diffie-Hellman is vulnerable to…","o":["a man in the middle","birthday collisions","padding oracles","length extension"],"a":0,"why":"Mallory runs one exchange with Alice and another with Bob. Authentication (signatures, certificates) stops her."},{"q":"Forward secrecy comes from…","o":["longer RSA keys","ephemeral keys deleted after the session","certificates","SHA-512"],"a":1,"why":"If the temporary keys are gone, stealing the long-term key later cannot decrypt old recordings."},{"q":"X25519MLKEM768 combines…","o":["two RSA keys","classical X25519 with post-quantum ML-KEM","AES and SHA-256","Ed25519 and RSA"],"a":1,"why":"A hybrid: an attacker must break both. It is on by default in Chrome, Edge, Firefox and OpenSSL 3.5+."}],"fragment":"paint","secs":["s-10-1","s-10-2","s-10-3","s-10-4","s-10-5","s-10-6","s-10-7","s-10-8","s-10-9"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-c.js?v=86fb719f26"></script>
+</body>
+</html>

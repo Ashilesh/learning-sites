@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 6: Hash Functions: Digital Fingerprints · CryptoSketch</title>
+<meta name="description" content="Change one letter in a 4 GB movie and its fingerprint changes completely. Find two files with the same fingerprint and you can fake a Windows Update. 😱">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-coral">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">🫆 In this chapter</p><ol><li><a href="#s-6-1" data-sec="s-6-1"><span class="st-num">6.1</span><span class="st-t">What a hash function does</span></a></li><li><a href="#s-6-2" data-sec="s-6-2"><span class="st-num">6.2</span><span class="st-t">The avalanche effect</span></a></li><li><a href="#s-6-3" data-sec="s-6-3"><span class="st-num">6.3</span><span class="st-t">The properties of a good cryptographic hash</span></a></li><li><a href="#s-6-4" data-sec="s-6-4"><span class="st-num">6.4</span><span class="st-t">Collisions and the birthday paradox</span></a></li><li><a href="#s-6-5" data-sec="s-6-5"><span class="st-num">6.5</span><span class="st-t">The hash family tree</span></a></li><li><a href="#s-6-6" data-sec="s-6-6"><span class="st-num">6.6</span><span class="st-t">How a hash works inside (very briefly)</span></a></li><li><a href="#s-6-7" data-sec="s-6-7"><span class="st-num">6.7</span><span class="st-t">What hashes are used for</span></a></li><li><a href="#s-6-8" data-sec="s-6-8"><span class="st-num">6.8</span><span class="st-t">Hands-on with hashes</span></a></li><li><a href="#s-6-9" data-sec="s-6-9"><span class="st-num">6.9</span><span class="st-t">Common hash misconceptions</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="6">
+<header class="ch-hero world-coral">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-2">🧱 World 2 · The Building Blocks</a>
+    <p class="ch-num">Chapter 6</p>
+    <h1 class="ch-title">Hash Functions: Digital Fingerprints</h1>
+    <p class="ch-hook"><span>🤔</span> Change one letter in a 4 GB movie and its fingerprint changes completely. Find two files with the same fingerprint and you can fake a Windows Update. 😱</p>
+    <ul class="ch-stats"><li>⏱️ ~6 min</li><li>📚 9 sections</li><li>🎮 3 interactive</li><li>⭐ 220 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="6" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"></div>
+<section class="sec sec-6-1" id="s-6-1" data-sec="s-6-1">
+<h2 class="sec-title"><span class="sec-num">6.1</span><span class="sec-text">What a hash function does</span><a class="sec-anchor" href="#s-6-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A <strong>hash function</strong> takes any input (a word, a password, a 4 GB movie) and produces a short, fixed-size output called a <strong>hash</strong>, <strong>digest</strong> or <strong>fingerprint</strong>.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>  &quot;hello&quot;              ──►  [ SHA-256 ] ──►  2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
+  the complete works   ──►  [ SHA-256 ] ──►  (also exactly 64 hex characters)
+    of Shakespeare
+  a 4 GB movie         ──►  [ SHA-256 ] ──►  (also exactly 64 hex characters)</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>Analogies:</p>
+<ul>
+<li>👆 <strong>A fingerprint:</strong> a tiny pattern that identifies a whole person, but you can&#39;t rebuild the person from the fingerprint.</li>
+<li>🥩 <strong>A meat grinder:</strong> easy to put a steak in and get mince out; impossible to turn mince back into the steak.</li>
+</ul>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-6-2" id="s-6-2" data-sec="s-6-2">
+<h2 class="sec-title"><span class="sec-num">6.2</span><span class="sec-text">The avalanche effect</span><a class="sec-anchor" href="#s-6-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Change the input even slightly, and the output changes completely:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>hello    -&gt; 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824
+Hello    -&gt; 185f8db32271fe25f561a6fc938b2e264306ec304eda518007d1764826381969
+hello!   -&gt; ce06092fb948d9ffac7d1a376e404b26b7575bcc11ee05a4615fef4fec3a308b</pre></div></figure><p>One capital letter or one exclamation mark changes about half of the output bits. There&#39;s no way to tell from the hashes that the inputs were similar.</p>
+</div><div class="widget" data-w="avalanche"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-6-3" id="s-6-3" data-sec="s-6-3">
+<h2 class="sec-title"><span class="sec-num">6.3</span><span class="sec-text">The properties of a good cryptographic hash</span><a class="sec-anchor" href="#s-6-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Property</th>
+<th>Plain meaning</th>
+<th>Analogy</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Deterministic</strong></td>
+<td>Same input → same output, every time, on every computer</td>
+<td>Your fingerprint doesn&#39;t change</td>
+</tr>
+<tr>
+<td><strong>Fixed size</strong></td>
+<td>Output length never changes (SHA-256 is always 256 bits)</td>
+<td>Every fingerprint fits on the same card</td>
+</tr>
+<tr>
+<td><strong>Fast</strong></td>
+<td>Quick to compute (good for files; <em>bad</em> for passwords, see Chapter <a class="xref" href="chapter-08.html">8</a>)</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Avalanche effect</strong></td>
+<td>Tiny input change → completely different output</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Preimage resistance</strong> (one-way)</td>
+<td>Given a hash, you can&#39;t find an input that produces it</td>
+<td>Can&#39;t rebuild a person from a fingerprint</td>
+</tr>
+<tr>
+<td><strong>Second-preimage resistance</strong></td>
+<td>Given an input, you can&#39;t find a <em>different</em> input with the same hash</td>
+<td>Can&#39;t find a stranger with your exact fingerprint</td>
+</tr>
+<tr>
+<td><strong>Collision resistance</strong></td>
+<td>You can&#39;t find <em>any</em> two inputs with the same hash</td>
+<td>Can&#39;t find <em>any</em> two people with matching fingerprints</td>
+</tr>
+</tbody></table></div>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-6-4" id="s-6-4" data-sec="s-6-4">
+<h2 class="sec-title"><span class="sec-num">6.4</span><span class="sec-text">Collisions and the birthday paradox</span><a class="sec-anchor" href="#s-6-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>There are infinitely many possible inputs and only 2²⁵⁶ possible SHA-256 outputs, so <strong>collisions must exist</strong> (two different inputs with the same hash). The pigeonhole principle guarantees it. The requirement is that nobody can ever <strong>find</strong> one.</p>
+<p>How hard is finding a collision? The <strong>birthday paradox</strong> gives a surprising answer:</p>
+<aside class="callout quote"><p>In a room of just <strong>23 people</strong>, there&#39;s a better than 50% chance that two share a birthday.</p>
+</aside>
+<p>That seems too low because you&#39;re not looking for someone with <em>your</em> birthday; you&#39;re looking for <em>any</em> matching pair, and the number of pairs grows fast (23 people make 253 pairs).</p>
+<p>For hashes, it means you&#39;ll likely find a collision after about <strong>2^(n/2)</strong> tries, not 2ⁿ. So:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Hash</th>
+<th>Output size</th>
+<th>Collision resistance</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>MD5</td>
+<td>128 bits</td>
+<td>2⁶⁴ in theory (and broken far below that in practice)</td>
+</tr>
+<tr>
+<td>SHA-1</td>
+<td>160 bits</td>
+<td>2⁸⁰ in theory (broken in practice)</td>
+</tr>
+<tr>
+<td>SHA-256</td>
+<td>256 bits</td>
+<td>2¹²⁸ ✅</td>
+</tr>
+<tr>
+<td>SHA-512</td>
+<td>512 bits</td>
+<td>2²⁵⁶ ✅</td>
+</tr>
+</tbody></table></div>
+<p>That&#39;s why secure hashes have outputs <strong>twice as long</strong> as the security level they aim for.</p>
+</div><div class="widget" data-w="birthday"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-6-5" id="s-6-5" data-sec="s-6-5">
+<h2 class="sec-title"><span class="sec-num">6.5</span><span class="sec-text">The hash family tree</span><a class="sec-anchor" href="#s-6-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Hash</th>
+<th>Year</th>
+<th>Output size</th>
+<th>Status</th>
+<th>Notes</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>MD5</strong></td>
+<td>1992</td>
+<td>128 bits</td>
+<td class="st-bad">❌ Broken</td>
+<td>Collisions can be found in seconds on a laptop. OK only for non-security checksums.</td>
+</tr>
+<tr>
+<td><strong>SHA-1</strong></td>
+<td>1995</td>
+<td>160 bits</td>
+<td class="st-bad">❌ Broken</td>
+<td>First public collision in 2017 (&quot;SHAttered&quot;); being phased out everywhere</td>
+</tr>
+<tr>
+<td><strong>SHA-2</strong> family: SHA-224, <strong>SHA-256</strong>, SHA-384, <strong>SHA-512</strong></td>
+<td>2001</td>
+<td>224–512 bits</td>
+<td class="st-ok">✅ Secure</td>
+<td>The workhorse of the internet: TLS, certificates, Bitcoin</td>
+</tr>
+<tr>
+<td><strong>SHA-3</strong> (Keccak)</td>
+<td>2015</td>
+<td>224–512 bits</td>
+<td class="st-ok">✅ Secure</td>
+<td>Totally different internal design, a backup in case SHA-2 is ever broken</td>
+</tr>
+<tr>
+<td><strong>BLAKE2</strong></td>
+<td>2012</td>
+<td>up to 512 bits</td>
+<td class="st-ok">✅ Secure</td>
+<td>Faster than MD5 while being secure; used in WireGuard, Argon2</td>
+</tr>
+<tr>
+<td><strong>BLAKE3</strong></td>
+<td>2020</td>
+<td>any length</td>
+<td class="st-ok">✅ Secure</td>
+<td>Extremely fast and parallel</td>
+</tr>
+</tbody></table></div>
+<div class="callout story"><p>📜 <strong>True story: SHAttered (2017).</strong> Researchers from Google and the CWI institute in Amsterdam created two different PDF files with the same SHA-1 hash. It took about 9 quintillion (9 × 10¹⁸) SHA-1 computations, roughly 6,500 years of single-CPU time. By 2020, a stronger &quot;chosen-prefix&quot; collision cost only around $45,000 in rented computing. SHA-1 is dead for security.</p></div>
+<div class="callout story"><p>📜 <strong>True story: the Flame malware (2012).</strong> A cyber-espionage tool called Flame used an MD5 collision to forge a Microsoft code-signing certificate. Infected computers accepted Flame as a genuine Windows Update. Weak hashes aren&#39;t a theoretical problem.</p></div>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Hash functions</h4></div><div class="pc-grid">
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>MD5</h5><p class="pc-tag">1992, 128-bit</p></header>
+<ul class="pros"><li>Very fast</li><li>Fine as a non-security checksum</li></ul>
+<ul class="cons"><li>Collisions in seconds on a laptop</li><li>Used to forge a Microsoft certificate (Flame)</li></ul>
+<footer><b>Best for:</b> Detecting accidental corruption only</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>SHA-1</h5><p class="pc-tag">1995, 160-bit</p></header>
+<ul class="pros"><li>Still everywhere in old systems</li></ul>
+<ul class="cons"><li>SHAttered collision (2017)</li><li>Chosen-prefix collision for ~$45k (2020)</li></ul>
+<footer><b>Best for:</b> Nothing new</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>SHA-256 / SHA-512</h5><p class="pc-tag">SHA-2 family, 2001</p></header>
+<ul class="pros"><li>The internet’s workhorse</li><li>Hardware support (SHA-NI)</li><li>No practical attacks</li></ul>
+<ul class="cons"><li>Length-extension attack (use HMAC)</li><li>Too fast for passwords</li></ul>
+<footer><b>Best for:</b> TLS, certificates, Bitcoin, Git’s future</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>SHA-3</h5><p class="pc-tag">Keccak sponge, 2015</p></header>
+<ul class="pros"><li>Totally different design: a backup for SHA-2</li><li>Immune to length extension</li></ul>
+<ul class="cons"><li>Slower in software than SHA-2/BLAKE</li><li>Less hardware support</li></ul>
+<footer><b>Best for:</b> Diversity; KMAC; new standards</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>BLAKE2</h5><p class="pc-tag">2012</p></header>
+<ul class="pros"><li>Faster than MD5, yet secure</li><li>Built-in keyed mode</li></ul>
+<ul class="cons"><li>Not a NIST standard (matters for FIPS)</li></ul>
+<footer><b>Best for:</b> WireGuard, Argon2, file integrity</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>BLAKE3</h5><p class="pc-tag">2020</p></header>
+<ul class="pros"><li>Extremely fast and parallel</li><li>Any output length; built-in tree mode</li></ul>
+<ul class="cons"><li>Young; not FIPS</li><li>Smaller security margin (fewer rounds)</li></ul>
+<footer><b>Best for:</b> Hashing huge files fast</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-6-6" id="s-6-6" data-sec="s-6-6">
+<h2 class="sec-title"><span class="sec-num">6.6</span><span class="sec-text">How a hash works inside (very briefly)</span><a class="sec-anchor" href="#s-6-6" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p><strong>SHA-2 (and MD5, SHA-1): the Merkle–Damgård design.</strong> The message is padded and cut into blocks. Each block is mixed into a running internal &quot;state,&quot; like adding ingredients one at a time to a blender that never stops. The final state is the hash.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>  initial state ──► [mix] ──► [mix] ──► [mix] ──► [mix] ──► final hash
+                      ▲         ▲         ▲         ▲
+                   block 1   block 2   block 3   block 4 (+ padding)</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><div class="callout warn"><p>⚠️ This design has a quirk called the <strong>length-extension attack</strong>. Because the output <em>is</em> the final state, someone who knows <code>SHA256(secret + message)</code> can compute <code>SHA256(secret + message + padding + extra)</code> <strong>without knowing the secret</strong>. That&#39;s why &quot;hash the secret together with the message&quot; is not a safe way to authenticate messages. Use HMAC instead (Chapter <a class="xref" href="chapter-07.html">7</a>).</p></div>
+<p><strong>SHA-3: the sponge design.</strong> The input is &quot;absorbed&quot; into a big internal state, then the output is &quot;squeezed&quot; out. Part of the state is never output, which blocks length-extension attacks.</p>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Hash designs</h4></div><div class="pc-grid">
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>Merkle–Damgård</h5><p class="pc-tag">MD5, SHA-1, SHA-2</p></header>
+<ul class="pros"><li>Simple, well understood</li><li>Proven: collision-resistant if the compression is</li></ul>
+<ul class="cons"><li>Output = internal state → length extension</li></ul>
+<footer><b>Best for:</b> SHA-256 (with HMAC for keyed use)</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Sponge</h5><p class="pc-tag">SHA-3, absorb then squeeze</p></header>
+<ul class="pros"><li>Hidden capacity blocks length extension</li><li>Flexible output length (SHAKE)</li></ul>
+<ul class="cons"><li>Large state; slower in software</li></ul>
+<footer><b>Best for:</b> SHA-3, KMAC, ML-KEM internals</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-6-7" id="s-6-7" data-sec="s-6-7">
+<h2 class="sec-title"><span class="sec-num">6.7</span><span class="sec-text">What hashes are used for</span><a class="sec-anchor" href="#s-6-7" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Use</th>
+<th>How</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Verifying downloads</strong></td>
+<td>Compare the file&#39;s hash with the published one</td>
+</tr>
+<tr>
+<td><strong>Digital signatures</strong></td>
+<td>You sign the hash of a document, not the whole document (Chapter <a class="xref" href="chapter-11.html">11</a>)</td>
+</tr>
+<tr>
+<td><strong>Password storage</strong></td>
+<td>Only with special slow hashes (Chapter <a class="xref" href="chapter-08.html">8</a>)</td>
+</tr>
+<tr>
+<td><strong>Git</strong></td>
+<td>Every commit, file and folder is identified by its hash. Change one byte of history and every later ID changes.</td>
+</tr>
+<tr>
+<td><strong>Blockchains</strong></td>
+<td>Each block contains the hash of the previous one, forming a chain that can&#39;t be quietly edited</td>
+</tr>
+<tr>
+<td><strong>Deduplication</strong></td>
+<td>Cloud storage can detect identical files by hash and store them once</td>
+</tr>
+<tr>
+<td><strong>Message authentication</strong></td>
+<td>Inside HMAC (Chapter <a class="xref" href="chapter-07.html">7</a>)</td>
+</tr>
+<tr>
+<td><strong>Key derivation</strong></td>
+<td>Inside HKDF, PBKDF2 (Chapter <a class="xref" href="chapter-08.html">8</a>)</td>
+</tr>
+<tr>
+<td><strong>Certificate Transparency</strong></td>
+<td>Public logs of certificates organized as hash trees (Chapter <a class="xref" href="chapter-13.html">13</a>)</td>
+</tr>
+</tbody></table></div>
+<h4 id="merkle-trees-hashing-lots-of-data-efficiently" class="h4">Merkle trees: hashing lots of data efficiently</h4>
+<p>A <strong>Merkle tree</strong> hashes items in pairs, then hashes the pairs, and so on, until one <strong>root hash</strong> represents everything.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>                         Root hash
+                     H( H12  +  H34 )
+                    /                \
+              H12 = H(H1+H2)     H34 = H(H3+H4)
+               /       \           /       \
+            H1=H(A)  H2=H(B)   H3=H(C)  H4=H(D)
+              │        │         │        │
+            data A   data B    data C   data D</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>If anything in A, B, C or D changes, the root changes. And you can prove that &quot;C is included&quot; by sharing just H4 and H12 rather than all the data. Bitcoin, Git, Certificate Transparency and many file-sync systems use Merkle trees.</p>
+</div><div class="widget" data-w="merkle"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-6-8" id="s-6-8" data-sec="s-6-8">
+<h2 class="sec-title"><span class="sec-num">6.8</span><span class="sec-text">Hands-on with hashes</span><a class="sec-anchor" href="#s-6-8" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p class="lab-label">🧪 <strong>Try it yourself</strong> (command line):</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># macOS / Linux: hash a short string (printf avoids adding a newline)</span>
+<span class="hljs-built_in">printf</span> <span class="hljs-string">&#x27;hello&#x27;</span> | shasum -a 256
+<span class="hljs-comment"># 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824  -</span>
+
+<span class="hljs-comment"># Same thing with OpenSSL</span>
+<span class="hljs-built_in">printf</span> <span class="hljs-string">&#x27;hello&#x27;</span> | openssl dgst -sha256
+<span class="hljs-comment"># SHA2-256(stdin)= 2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824</span>
+
+<span class="hljs-comment"># Hash a file</span>
+shasum -a 256 some-download.iso          <span class="hljs-comment"># macOS</span>
+<span class="hljs-built_in">sha256sum</span> some-download.iso              <span class="hljs-comment"># Linux</span></code></pre></div><div class="code-card lang-powershell"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">PowerShell</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># Windows PowerShell</span>
+<span class="hljs-built_in">Get-FileHash</span> .\some<span class="hljs-literal">-download</span>.iso <span class="hljs-literal">-Algorithm</span> SHA256</code></pre></div><div class="callout warn"><p>⚠️ <code>echo &quot;hello&quot;</code> adds an invisible newline character, so its hash is different (<code>5891b5b5...</code>). That catches many people out.</p></div>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">import</span> hashlib
+
+<span class="hljs-keyword">for</span> text <span class="hljs-keyword">in</span> [<span class="hljs-string">&quot;hello&quot;</span>, <span class="hljs-string">&quot;Hello&quot;</span>, <span class="hljs-string">&quot;hello!&quot;</span>]:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">f&quot;<span class="hljs-subst">{text:<span class="hljs-number">8</span>}</span> -&gt; <span class="hljs-subst">{hashlib.sha256(text.encode()).hexdigest()}</span>&quot;</span>)
+
+<span class="hljs-comment"># Hash a large file without loading it all into memory</span>
+h = hashlib.sha256()
+<span class="hljs-keyword">with</span> <span class="hljs-built_in">open</span>(<span class="hljs-string">&quot;some-download.iso&quot;</span>, <span class="hljs-string">&quot;rb&quot;</span>) <span class="hljs-keyword">as</span> f:
+    <span class="hljs-keyword">for</span> chunk <span class="hljs-keyword">in</span> <span class="hljs-built_in">iter</span>(<span class="hljs-keyword">lambda</span>: f.read(<span class="hljs-number">65536</span>), <span class="hljs-string">b&quot;&quot;</span>):
+        h.update(chunk)
+<span class="hljs-built_in">print</span>(h.hexdigest())
+
+<span class="hljs-comment"># Other algorithms</span>
+<span class="hljs-built_in">print</span>(hashlib.sha3_256(<span class="hljs-string">b&quot;hello&quot;</span>).hexdigest())
+<span class="hljs-built_in">print</span>(hashlib.blake2b(<span class="hljs-string">b&quot;hello&quot;</span>, digest_size=<span class="hljs-number">32</span>).hexdigest())</code></pre></div><p><strong>Verifying a download properly.</strong> Linux distributions like Ubuntu publish a <code>SHA256SUMS</code> file next to their downloads:</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-built_in">sha256sum</span> -c SHA256SUMS --ignore-missing
+<span class="hljs-comment"># ubuntu-24.04-desktop-amd64.iso: OK</span></code></pre></div><div class="callout warn"><p>⚠️ <strong>Watch out:</strong> if an attacker hacks the download site, they can replace <strong>both</strong> the file and the checksum. A checksum on the same page only protects against accidental corruption. That&#39;s why projects also <strong>digitally sign</strong> the checksum file (Chapter <a class="xref" href="chapter-11.html">11</a>), and you verify the signature with a key you got some other way.</p></div>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-6-9" id="s-6-9" data-sec="s-6-9">
+<h2 class="sec-title"><span class="sec-num">6.9</span><span class="sec-text">Common hash misconceptions</span><a class="sec-anchor" href="#s-6-9" aria-label="Link to this section">#</a></h2>
+<div class="prose"><ul>
+<li>❌ <strong>&quot;Hashing is encryption.&quot;</strong> No. There&#39;s no key and no way to &quot;decrypt&quot; a hash.</li>
+<li>❌ <strong>&quot;Hashed data is anonymous.&quot;</strong> Not if the input is guessable. There are only about 10 billion 10-digit phone numbers. An attacker can hash them all in minutes and reverse any &quot;anonymized&quot; phone-number hash. Same for dates of birth, ID numbers, emails from a known list.</li>
+<li>❌ <strong>&quot;MD5 is fine for passwords.&quot;</strong> It&#39;s a terrible choice twice over: broken <em>and</em> far too fast (Chapter <a class="xref" href="chapter-08.html">8</a>).</li>
+</ul>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 6</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 6 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-coral" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 7</p>
+<h3>Message Authentication Codes: Tamper-Proof Seals</h3>
+<p class="next-hook">Mallory can change a message AND recompute its hash. So how does your server know a webhook really came from GitHub?</p>
+<div class="next-actions"><a class="btn big" href="chapter-07.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-05.html">← Symmetric Encryption: One Shared Key</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":6,"title":"Hash Functions: Digital Fingerprints","quiz":[{"q":"How many people do you need for a >50% chance that two share a birthday?","o":["23","183","365","50"],"a":0,"why":"23 people make 253 pairs. That is why collisions appear after about 2^(n/2) tries."},{"q":"SHA-256’s collision resistance is about…","o":["2³²","2⁶⁴","2¹²⁸","2²⁵⁶"],"a":2,"why":"The birthday paradox halves the exponent: 256-bit output → 128-bit collision security."},{"q":"Which of these is broken for security?","o":["SHA-256","SHA-3","SHA-1","BLAKE3"],"a":2,"why":"SHAttered (2017) produced two PDFs with the same SHA-1 hash. MD5 is broken too."},{"q":"To prove item C is in a 4-leaf Merkle tree you share…","o":["all the data","only the root","H4 and H12","nothing"],"a":2,"why":"With H(C), H4 and H12 the verifier can recompute the root without seeing A, B or D."}],"fragment":"avalanche","secs":["s-6-1","s-6-2","s-6-3","s-6-4","s-6-5","s-6-6","s-6-7","s-6-8","s-6-9"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-b.js?v=86fb719f26"></script>
+</body>
+</html>

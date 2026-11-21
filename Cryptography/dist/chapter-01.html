@@ -1,0 +1,364 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 1: What Is Cryptography? · CryptoSketch</title>
+<meta name="description" content="Your card number crosses café Wi-Fi, routers and a dozen strangers’ computers. So why can’t any of them read it?">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-sun">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">🔐 In this chapter</p><ol><li><a href="#s-1-1" data-sec="s-1-1"><span class="st-num">1.1</span><span class="st-t">A story to start: paying at a café</span></a></li><li><a href="#s-1-2" data-sec="s-1-2"><span class="st-num">1.2</span><span class="st-t">The definition</span></a></li><li><a href="#s-1-3" data-sec="s-1-3"><span class="st-num">1.3</span><span class="st-t">What cryptography protects: the five goals</span></a></li><li><a href="#s-1-4" data-sec="s-1-4"><span class="st-num">1.4</span><span class="st-t">Meet the cast</span></a></li><li><a href="#s-1-5" data-sec="s-1-5"><span class="st-num">1.5</span><span class="st-t">Basic vocabulary</span></a></li><li><a href="#s-1-6" data-sec="s-1-6"><span class="st-num">1.6</span><span class="st-t">Encoding vs. encryption vs. hashing (a very common mix-up)</span></a></li><li><a href="#s-1-7" data-sec="s-1-7"><span class="st-num">1.7</span><span class="st-t">Kerckhoffs's principle: the lock design is public, the key is secret</span></a></li><li><a href="#s-1-8" data-sec="s-1-8"><span class="st-num">1.8</span><span class="st-t">The big map: the cryptography toolbox</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="1">
+<header class="ch-hero world-sun">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-1">🏝️ World 1 · Foundations</a>
+    <p class="ch-num">Chapter 1</p>
+    <h1 class="ch-title">What Is Cryptography?</h1>
+    <p class="ch-hook"><span>🤔</span> Your card number crosses café Wi-Fi, routers and a dozen strangers’ computers. So why can’t any of them read it?</p>
+    <ul class="ch-stats"><li>⏱️ ~5 min</li><li>📚 8 sections</li><li>🎮 3 interactive</li><li>⭐ 215 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="1" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"></div>
+<section class="sec sec-1-1" id="s-1-1" data-sec="s-1-1">
+<h2 class="sec-title"><span class="sec-num">1.1</span><span class="sec-text">A story to start: paying at a café</span><a class="sec-anchor" href="#s-1-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>You&#39;re at a café, connected to the free Wi-Fi, and you buy a pair of shoes online. You type your card number and tap <strong>Pay</strong>.</p>
+<p>Think about what that means. Your card number leaves your phone as radio waves. Anyone in the café with a laptop can capture those waves. The café&#39;s router, the internet provider, and a dozen other computers between you and the shop all handle your data on the way.</p>
+<p>Yet your card number stays safe. In the fraction of a second before you tapped Pay, your phone:</p>
+<ol>
+<li><strong>Checked the shop&#39;s ID</strong>, to make sure it was really talking to the shop and not an impostor (certificates, Chapter <a class="xref" href="chapter-13.html">13</a>).</li>
+<li><strong>Agreed on a secret key with the shop</strong>, out loud, in front of everyone, without anyone else learning the key (key exchange, Chapter <a class="xref" href="chapter-10.html">10</a>).</li>
+<li><strong>Scrambled everything</strong> it sent using that key, so eavesdroppers see only gibberish (encryption, Chapter <a class="xref" href="chapter-05.html">5</a>).</li>
+<li><strong>Sealed every piece</strong> so that any tampering would be detected (MACs and authenticated encryption, Chapters <a class="xref" href="chapter-05.html">5</a> and <a class="xref" href="chapter-07.html">7</a>).</li>
+</ol>
+<p>All four steps are cryptography. This guide explains each one, then shows how they fit together.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-1-2" id="s-1-2" data-sec="s-1-2">
+<h2 class="sec-title"><span class="sec-num">1.2</span><span class="sec-text">The definition</span><a class="sec-anchor" href="#s-1-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p><strong>Cryptography</strong> is the science of protecting information from people who shouldn&#39;t see it or change it, even when those people can watch everything you send.</p>
+<p>The word comes from Greek: <em>kryptós</em> (&quot;hidden&quot;) + <em>graphein</em> (&quot;to write&quot;). So: &quot;hidden writing.&quot;</p>
+<p>Related words you&#39;ll hear:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Word</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Cryptography</strong></td>
+<td>Designing ways to protect information</td>
+</tr>
+<tr>
+<td><strong>Cryptanalysis</strong></td>
+<td>Breaking those protections (the attacker&#39;s science)</td>
+</tr>
+<tr>
+<td><strong>Cryptology</strong></td>
+<td>The whole field: both of the above</td>
+</tr>
+<tr>
+<td><strong>Crypto</strong></td>
+<td>Short for cryptography. (These days it also means cryptocurrency, which <em>uses</em> cryptography. See Chapter <a class="xref" href="chapter-16.html">16</a>.)</td>
+</tr>
+</tbody></table></div>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-1-3" id="s-1-3" data-sec="s-1-3">
+<h2 class="sec-title"><span class="sec-num">1.3</span><span class="sec-text">What cryptography protects: the five goals</span><a class="sec-anchor" href="#s-1-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Security people usually describe cryptography&#39;s job with a handful of goals. Each one answers a simple question:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Goal</th>
+<th>The question it answers</th>
+<th>Everyday analogy</th>
+<th>Main crypto tools</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Confidentiality</strong></td>
+<td>Can anyone else read this?</td>
+<td>A sealed, opaque envelope</td>
+<td>Encryption</td>
+</tr>
+<tr>
+<td><strong>Integrity</strong></td>
+<td>Has this been changed?</td>
+<td>The tamper-evident seal on a medicine bottle</td>
+<td>Hashes, MACs, signatures</td>
+</tr>
+<tr>
+<td><strong>Authentication</strong></td>
+<td>Who am I really talking to? Who sent this?</td>
+<td>Checking someone&#39;s ID card</td>
+<td>Certificates, signatures, MACs, passwords</td>
+</tr>
+<tr>
+<td><strong>Non-repudiation</strong></td>
+<td>Can the sender deny sending it later?</td>
+<td>A signature witnessed by a notary</td>
+<td>Digital signatures</td>
+</tr>
+<tr>
+<td><strong>Availability</strong></td>
+<td>Can I reach it when I need it?</td>
+<td>A shop that&#39;s open</td>
+<td><em>Mostly not crypto&#39;s job</em> (that&#39;s firewalls, backups, DDoS protection)</td>
+</tr>
+</tbody></table></div>
+<aside class="callout key"><p>💡 <strong>Key idea:</strong> Encryption alone only gives you confidentiality. A message can be perfectly secret and still be <strong>modified</strong>, <strong>replayed</strong> or <strong>sent by an impostor</strong>. Real systems combine several tools to get all the goals at once.</p>
+</aside>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-1-4" id="s-1-4" data-sec="s-1-4">
+<h2 class="sec-title"><span class="sec-num">1.4</span><span class="sec-text">Meet the cast</span><a class="sec-anchor" href="#s-1-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Cryptographers explain things with a standard cast of characters. You&#39;ll see them throughout this guide:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Character</th>
+<th>Role</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Alice</strong></td>
+<td>Wants to send a secret message</td>
+</tr>
+<tr>
+<td><strong>Bob</strong></td>
+<td>Wants to receive it</td>
+</tr>
+<tr>
+<td><strong>Eve</strong></td>
+<td>The <em>eavesdropper</em>. She can <strong>listen</strong> to everything but can&#39;t change anything. (Passive attacker.)</td>
+</tr>
+<tr>
+<td><strong>Mallory</strong></td>
+<td>The <em>malicious</em> attacker. She can <strong>listen, block, modify, replay and inject</strong> messages, and pretend to be Alice or Bob. (Active attacker.)</td>
+</tr>
+<tr>
+<td><strong>Trent</strong></td>
+<td>A <em>trusted third party</em> that both Alice and Bob trust, like a notary or a certificate authority</td>
+</tr>
+</tbody></table></div>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>   Alice  ───────────────── the internet ─────────────────►  Bob
+                         ▲                    ▲
+                         │                    │
+                   Eve listens          Mallory listens,
+                   (read-only)          changes, blocks,
+                                        and impersonates</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>On the internet you should always assume <strong>Mallory is on the line</strong>. Café Wi-Fi, a compromised router, a malicious app, a rogue employee at an internet provider: any of them could be Mallory.</p>
+</div><div class="widget" data-w="cast"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-1-5" id="s-1-5" data-sec="s-1-5">
+<h2 class="sec-title"><span class="sec-num">1.5</span><span class="sec-text">Basic vocabulary</span><a class="sec-anchor" href="#s-1-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Term</th>
+<th>Plain meaning</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Plaintext</strong></td>
+<td>The original, readable message</td>
+<td><code>MEET ME AT NOON</code></td>
+</tr>
+<tr>
+<td><strong>Ciphertext</strong></td>
+<td>The scrambled, unreadable version</td>
+<td><code>PHHW PH DW QRRQ</code></td>
+</tr>
+<tr>
+<td><strong>Cipher</strong> (or algorithm)</td>
+<td>The recipe for scrambling and unscrambling</td>
+<td>AES, ChaCha20, Caesar cipher</td>
+</tr>
+<tr>
+<td><strong>Key</strong></td>
+<td>The secret setting that makes the recipe unique to you</td>
+<td>A 256-bit random number</td>
+</tr>
+<tr>
+<td><strong>Encrypt</strong></td>
+<td>Plaintext + key → ciphertext</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Decrypt</strong></td>
+<td>Ciphertext + key → plaintext</td>
+<td></td>
+</tr>
+<tr>
+<td><strong>Key space</strong></td>
+<td>The total number of possible keys</td>
+<td>Caesar: 25. AES-256: about 10⁷⁷</td>
+</tr>
+</tbody></table></div>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>                  ┌──────────────┐
+  &quot;MEET ME&quot; ────► │   ENCRYPT    │ ────► &quot;PHHW PH&quot;      (anyone may see this)
+                  │  (algorithm) │
+                  └──────▲───────┘
+                         │
+                        KEY  (only Alice and Bob know it)
+
+                  ┌──────────────┐
+  &quot;PHHW PH&quot; ────► │   DECRYPT    │ ────► &quot;MEET ME&quot;
+                  └──────▲───────┘
+                         │
+                        KEY</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-1-6" id="s-1-6" data-sec="s-1-6">
+<h2 class="sec-title"><span class="sec-num">1.6</span><span class="sec-text">Encoding vs. encryption vs. hashing (a very common mix-up)</span><a class="sec-anchor" href="#s-1-6" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>These three are often confused, even by professionals. They are completely different things:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th></th>
+<th><strong>Encoding</strong></th>
+<th><strong>Encryption</strong></th>
+<th><strong>Hashing</strong></th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Purpose</td>
+<td>Change the <em>format</em> so data travels safely</td>
+<td>Keep data <em>secret</em></td>
+<td>Create a <em>fingerprint</em> of data</td>
+</tr>
+<tr>
+<td>Uses a key?</td>
+<td>No</td>
+<td>Yes</td>
+<td>No (keyed variants are called MACs)</td>
+</tr>
+<tr>
+<td>Reversible?</td>
+<td>Yes, by anyone</td>
+<td>Yes, only with the key</td>
+<td>No, it&#39;s one-way</td>
+</tr>
+<tr>
+<td>Example</td>
+<td>Base64, hex, URL encoding</td>
+<td>AES, ChaCha20, RSA</td>
+<td>SHA-256, SHA-3</td>
+</tr>
+<tr>
+<td>Analogy</td>
+<td>Translating English to Morse code</td>
+<td>Locking a letter in a safe</td>
+<td>Taking a fingerprint</td>
+</tr>
+</tbody></table></div>
+<p>Example: the text <code>Hello, World!</code> in Base64 is <code>SGVsbG8sIFdvcmxkIQ==</code>. It <em>looks</em> scrambled, but anyone can decode it instantly. It provides <strong>zero</strong> security.</p>
+<aside class="callout warn"><p>⚠️ <strong>Watch out:</strong> If someone says a password is &quot;encrypted with Base64,&quot; the password is not protected at all. Base64 is a format, like writing in capital letters.</p>
+</aside>
+</div><div class="widget" data-w="triad"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-1-7" id="s-1-7" data-sec="s-1-7">
+<h2 class="sec-title"><span class="sec-num">1.7</span><span class="sec-text">Kerckhoffs&#39;s principle: the lock design is public, the key is secret</span><a class="sec-anchor" href="#s-1-7" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>In 1883, Auguste Kerckhoffs wrote down a rule that still guides every modern system:</p>
+<aside class="callout quote"><p>A cryptosystem should be secure even if <strong>everything about it, except the key, is public.</strong></p>
+</aside>
+<p>Think of a high-quality door lock. Anyone can buy the same model, take it apart and study it. It&#39;s still secure, because your <strong>key</strong> is unique. Compare that with hiding your house key under the doormat: that&#39;s &quot;security through obscurity.&quot; It works only until someone finds out the trick.</p>
+<p>That&#39;s why the best algorithms (AES, SHA-256, RSA, Ed25519) are completely public, studied by thousands of experts for years. Secret, home-made algorithms usually turn out to be weak once someone looks closely.</p>
+<aside class="callout key"><p>💡 <strong>Key idea:</strong> In modern cryptography, <strong>everything is public except the key</strong>. If your security depends on attackers not knowing how your system works, it is not secure.</p>
+</aside>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-1-8" id="s-1-8" data-sec="s-1-8">
+<h2 class="sec-title"><span class="sec-num">1.8</span><span class="sec-text">The big map: the cryptography toolbox</span><a class="sec-anchor" href="#s-1-8" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Every tool in this guide fits somewhere on this map. Come back to it whenever you want to see how things relate.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>                        THE CRYPTOGRAPHY TOOLBOX
+ ┌─────────────────────────────────────────────────────────────────────┐
+ │ RANDOMNESS        the raw material every key is made from    (Ch 4) │
+ ├─────────────────────────────────────────────────────────────────────┤
+ │ SYMMETRIC (one shared secret key)                                   │
+ │   Encryption ........ AES, ChaCha20           → secrecy       (Ch 5)│
+ │   Hash functions .... SHA-256, SHA-3          → fingerprints  (Ch 6)│
+ │   MACs .............. HMAC, Poly1305          → tamper seals  (Ch 7)│
+ │   Passwords/KDFs .... Argon2, bcrypt, HKDF    → safe passwords(Ch 8)│
+ ├─────────────────────────────────────────────────────────────────────┤
+ │ ASYMMETRIC (a public key + a private key)                           │
+ │   Public-key encryption .. RSA, ECC           → secrecy w/o meeting │
+ │   Key exchange ........... Diffie-Hellman, ML-KEM → shared secrets  │
+ │   Digital signatures ..... Ed25519, ECDSA, RSA → proof of origin    │
+ │                                                        (Ch 9-11)    │
+ ├─────────────────────────────────────────────────────────────────────┤
+ │ TRUST                                                               │
+ │   Certificates / PKI ..... X.509, CAs          → ID cards for keys  │
+ │                                                           (Ch 13)   │
+ ├─────────────────────────────────────────────────────────────────────┤
+ │ PROTOCOLS (combine everything above)                                │
+ │   TLS/HTTPS, SSH, VPNs, Wi-Fi, Signal, email, passkeys  (Ch 14-16)  │
+ └─────────────────────────────────────────────────────────────────────┘</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure></div><div class="widget" data-w="toolbox"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 1</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 1 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-sun" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 2</p>
+<h3>A Quick Trip Through History</h3>
+<p class="next-hook">A cipher with 400 septillion possible keys was cracked in the 9th century, with pen and paper. How?</p>
+<div class="next-actions"><a class="btn big" href="chapter-02.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="start.html">← Start here</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":1,"title":"What Is Cryptography?","quiz":[{"q":"Encryption on its own gives you which goal?","o":["Confidentiality only","Confidentiality and integrity","All five goals","Non-repudiation"],"a":0,"why":"A perfectly secret message can still be modified, replayed or sent by an impostor. Real systems combine several tools."},{"q":"What can Mallory do that Eve can’t?","o":["Only listen","Listen, block, modify, replay and inject messages","Issue certificates","Nothing, they are the same"],"a":1,"why":"Eve is a passive eavesdropper. Mallory is an active attacker, and on the internet you should assume she is on the line."},{"q":"<code>SGVsbG8sIFdvcmxkIQ==</code> is…","o":["AES ciphertext","A SHA-256 hash","Base64 encoding that anyone can decode","A private key"],"a":2,"why":"It is just “Hello, World!” in Base64. Encoding changes the format and gives zero security."},{"q":"Kerckhoffs’s principle says a cryptosystem should stay secure even if…","o":["the key leaks","everything except the key is public","nobody knows the algorithm","attackers have unlimited time"],"a":1,"why":"The lock design is public; only the key is secret. Security through obscurity eventually fails."}],"fragment":"alice","secs":["s-1-1","s-1-2","s-1-3","s-1-4","s-1-5","s-1-6","s-1-7","s-1-8"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-a.js?v=86fb719f26"></script>
+</body>
+</html>

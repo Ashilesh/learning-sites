@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appendix: Where to Learn More · CryptoSketch</title>
+<meta name="description" content="Where to Learn More">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-grape">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">📚 In this chapter</p><ol><li><a href="#s-books" data-sec="s-books"><span class="st-num">•</span><span class="st-t">Books</span></a></li><li><a href="#s-courses-and-videos" data-sec="s-courses-and-videos"><span class="st-num">•</span><span class="st-t">Courses and videos</span></a></li><li><a href="#s-hands-on-practice" data-sec="s-hands-on-practice"><span class="st-num">•</span><span class="st-t">Hands-on practice</span></a></li><li><a href="#s-trusted-references" data-sec="s-trusted-references"><span class="st-num">•</span><span class="st-t">Trusted references</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="appendix">
+<header class="ch-hero world-grape">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-6">📚 World 6 · Reference</a>
+    <p class="ch-num">Appendix</p>
+    <h1 class="ch-title">Where to Learn More</h1>
+    
+    <ul class="ch-stats"><li>⏱️ ~2 min</li><li>📚 4 sections</li><li>⭐ 20 XP</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="appendix" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"></div>
+<section class="sec" id="s-books" data-sec="s-books">
+<h2 class="sec-title"><span class="sec-text">Books</span><a class="sec-anchor" href="#s-books" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Book</th>
+<th>Level</th>
+<th>Why read it</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><em>The Code Book</em>, Simon Singh</td>
+<td>Beginner</td>
+<td>A gripping history of codes and code-breaking, from Caesar to RSA</td>
+</tr>
+<tr>
+<td><em>Real-World Cryptography</em>, David Wong</td>
+<td>Beginner → intermediate</td>
+<td>Modern protocols explained for practitioners</td>
+</tr>
+<tr>
+<td><em>Serious Cryptography</em> (2nd edition), Jean-Philippe Aumasson</td>
+<td>Intermediate</td>
+<td>A clear, practical introduction to how modern algorithms work</td>
+</tr>
+<tr>
+<td><em>Crypto 101</em>, Laurens Van Houtven</td>
+<td>Intermediate</td>
+<td>Free online book focused on how things break</td>
+</tr>
+<tr>
+<td><em>Bulletproof TLS and PKI</em>, Ivan Ristić</td>
+<td>Intermediate</td>
+<td>Everything about TLS and certificates in practice</td>
+</tr>
+<tr>
+<td><em>Cryptography Engineering</em>, Ferguson, Schneier and Kohno</td>
+<td>Intermediate</td>
+<td>How to build systems that use crypto correctly</td>
+</tr>
+<tr>
+<td><em>Security Engineering</em> (3rd edition), Ross Anderson</td>
+<td>Intermediate</td>
+<td>Crypto inside real systems: payment cards, hardware, Kerberos and the policy fights of Chapter <a class="xref" href="chapter-20.html">20</a></td>
+</tr>
+</tbody></table></div>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec" id="s-courses-and-videos" data-sec="s-courses-and-videos">
+<h2 class="sec-title"><span class="sec-text">Courses and videos</span><a class="sec-anchor" href="#s-courses-and-videos" aria-label="Link to this section">#</a></h2>
+<div class="prose"><ul>
+<li><strong>Cryptography I</strong> by Dan Boneh (Stanford, on Coursera): the classic university-level course, free to audit.</li>
+<li><strong>Introduction to Cryptography</strong> lectures by Christof Paar (free on YouTube): clear explanations with a little more math.</li>
+<li><strong>Computerphile</strong> (YouTube): short, friendly videos on many topics in this guide.</li>
+</ul>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec" id="s-hands-on-practice" data-sec="s-hands-on-practice">
+<h2 class="sec-title"><span class="sec-text">Hands-on practice</span><a class="sec-anchor" href="#s-hands-on-practice" aria-label="Link to this section">#</a></h2>
+<div class="prose"><ul>
+<li><strong><a href="https://cryptohack.org" target="_blank" rel="noopener">CryptoHack</a></strong>: a free, game-like platform for learning by breaking things.</li>
+<li><strong><a href="https://cryptopals.com" target="_blank" rel="noopener">Cryptopals</a></strong>: famous programming challenges that walk you through real attacks (ECB detection, padding oracles, and more).</li>
+<li><strong><a href="https://badssl.com" target="_blank" rel="noopener">badssl.com</a></strong>: test how browsers handle broken certificates.</li>
+<li><strong><a href="https://tls13.xargs.org" target="_blank" rel="noopener">The Illustrated TLS 1.3 Connection</a></strong>: a byte-by-byte walkthrough of a real handshake.</li>
+<li><strong><a href="https://crt.sh" target="_blank" rel="noopener">crt.sh</a></strong>: search Certificate Transparency logs.</li>
+<li><strong><a href="https://www.oauth.com/playground/" target="_blank" rel="noopener">OAuth 2.0 Playground</a></strong>: step through OAuth and OpenID Connect flows, including PKCE.</li>
+<li><strong><a href="https://www.torproject.org" target="_blank" rel="noopener">Tor Browser</a></strong>: see onion routing for yourself.</li>
+<li><strong><a href="https://www.ssllabs.com/ssltest/" target="_blank" rel="noopener">SSL Labs</a></strong>: grade any website&#39;s TLS setup.</li>
+<li><strong><a href="https://www.wireshark.org" target="_blank" rel="noopener">Wireshark</a></strong>: watch real packets on your own network.</li>
+</ul>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec" id="s-trusted-references" data-sec="s-trusted-references">
+<h2 class="sec-title"><span class="sec-text">Trusted references</span><a class="sec-anchor" href="#s-trusted-references" aria-label="Link to this section">#</a></h2>
+<div class="prose"><ul>
+<li><strong>NIST Computer Security Resource Center</strong> (<a href="https://csrc.nist.gov" target="_blank" rel="noopener">csrc.nist.gov</a>): official standards (AES, SHA, ML-KEM and more).</li>
+<li><strong>OWASP Cheat Sheet Series</strong> (<a href="https://cheatsheetseries.owasp.org" target="_blank" rel="noopener">cheatsheetseries.owasp.org</a>): especially &quot;Password Storage&quot; and &quot;Cryptographic Storage.&quot;</li>
+<li><strong>Mozilla&#39;s Server-Side TLS guidelines</strong> and the <strong><a href="https://ssl-config.mozilla.org" target="_blank" rel="noopener">SSL Configuration Generator</a></strong>.</li>
+<li><strong>Let&#39;s Encrypt documentation</strong> (<a href="https://letsencrypt.org/docs" target="_blank" rel="noopener">letsencrypt.org/docs</a>): how certificates and ACME work.</li>
+</ul>
+<hr>
+<p><em>Cryptography can look like magic, but it&#39;s built from a handful of simple ideas: randomness, one-way functions, shared secrets, key pairs and trust. Every padlock in your browser, every encrypted message and every app update combines the same small toolbox you&#39;ve now seen from the inside.</em></p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+
+<nav class="next-card world-grape"><p class="next-kicker">🏁 The end</p><h3>You made it through the whole guide!</h3><div class="next-actions"><a class="btn big" href="index.html#vault">Open the Vault 🔓</a></div></nav>
+<p class="prevnext"><a href="chapter-22.html">← Glossary</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":"appendix","title":"Where to Learn More","quiz":null,"fragment":null,"secs":["s-books","s-courses-and-videos","s-hands-on-practice","s-trusted-references"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+
+</body>
+</html>

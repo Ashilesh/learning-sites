@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 18: How Cryptography Breaks: Attacks and Pitfalls · CryptoSketch</title>
+<meta name="description" content="The math almost never breaks. A missing length check, one duplicated line of code, a signature made of zeros… those do.">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-mint">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">💥 In this chapter</p><ol><li><a href="#s-18-1" data-sec="s-18-1"><span class="st-num">18.1</span><span class="st-t">The math is rarely the weak point</span></a></li><li><a href="#s-18-2" data-sec="s-18-2"><span class="st-num">18.2</span><span class="st-t">A catalog of attacks</span></a></li><li><a href="#s-18-3" data-sec="s-18-3"><span class="st-num">18.3</span><span class="st-t">Side-channel attacks: secrets leak through the walls</span></a></li><li><a href="#s-18-4" data-sec="s-18-4"><span class="st-num">18.4</span><span class="st-t">Replay attacks</span></a></li><li><a href="#s-18-5" data-sec="s-18-5"><span class="st-num">18.5</span><span class="st-t">Downgrade attacks</span></a></li><li><a href="#s-18-6" data-sec="s-18-6"><span class="st-num">18.6</span><span class="st-t">Padding oracle attacks</span></a></li><li><a href="#s-18-7" data-sec="s-18-7"><span class="st-num">18.7</span><span class="st-t">Hall of fame (or shame): famous crypto failures</span></a></li><li><a href="#s-18-8" data-sec="s-18-8"><span class="st-num">18.8</span><span class="st-t">Don't roll your own crypto</span></a></li><li><a href="#s-18-9" data-sec="s-18-9"><span class="st-num">18.9</span><span class="st-t">Developer mistakes checklist</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="18">
+<header class="ch-hero world-mint">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-4">🏙️ World 4 · Cryptography in the Real World</a>
+    <p class="ch-num">Chapter 18</p>
+    <h1 class="ch-title">How Cryptography Breaks: Attacks and Pitfalls</h1>
+    <p class="ch-hook"><span>🤔</span> The math almost never breaks. A missing length check, one duplicated line of code, a signature made of zeros… those do.</p>
+    <ul class="ch-stats"><li>⏱️ ~9 min</li><li>📚 9 sections</li><li>🎮 2 interactive</li><li>⭐ 205 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="18" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"></div>
+<section class="sec sec-18-1" id="s-18-1" data-sec="s-18-1">
+<h2 class="sec-title"><span class="sec-num">18.1</span><span class="sec-text">The math is rarely the weak point</span><a class="sec-anchor" href="#s-18-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Breaking AES-256 or a properly used Ed25519 key by brute force is impossible in practice. So attackers don&#39;t try. As cryptographer Adi Shamir put it: &quot;Cryptography is typically bypassed, not penetrated.&quot;</p>
+<p>Real attacks go <strong>around</strong> the math: bad randomness, implementation bugs, misconfigurations, stolen keys, tricked users. There&#39;s even a joke term, <strong>rubber-hose cryptanalysis</strong>: threatening a person until they reveal the key is cheaper than any computation.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-18-2" id="s-18-2" data-sec="s-18-2">
+<h2 class="sec-title"><span class="sec-num">18.2</span><span class="sec-text">A catalog of attacks</span><a class="sec-anchor" href="#s-18-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Attack</th>
+<th>Plain description</th>
+<th>Defense</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Brute force</strong></td>
+<td>Try every possible key</td>
+<td>Large keys (128+ bits)</td>
+</tr>
+<tr>
+<td><strong>Dictionary / credential stuffing</strong></td>
+<td>Try common passwords, or passwords leaked from other sites</td>
+<td>Slow password hashing, MFA, passkeys, rate limits</td>
+</tr>
+<tr>
+<td><strong>Cryptanalysis</strong></td>
+<td>Find mathematical shortcuts in an algorithm</td>
+<td>Use well-studied standard algorithms</td>
+</tr>
+<tr>
+<td><strong>Known- / chosen-plaintext</strong></td>
+<td>Attacker knows or chooses some plaintexts and studies the ciphertexts</td>
+<td>Modern ciphers are designed to resist this</td>
+</tr>
+<tr>
+<td><strong>Chosen-ciphertext</strong></td>
+<td>Attacker sends crafted ciphertexts and watches how the system reacts</td>
+<td>AEAD; uniform error handling</td>
+</tr>
+<tr>
+<td><strong>Man-in-the-middle</strong></td>
+<td>Intercept and relay, impersonating both sides</td>
+<td>Authentication: certificates, signatures, fingerprints</td>
+</tr>
+<tr>
+<td><strong>Replay</strong></td>
+<td>Record a valid message and send it again later</td>
+<td>Nonces, timestamps, sequence numbers</td>
+</tr>
+<tr>
+<td><strong>Downgrade</strong></td>
+<td>Trick both sides into using weaker crypto</td>
+<td>Remove old options; authenticate the negotiation</td>
+</tr>
+<tr>
+<td><strong>Side-channel</strong></td>
+<td>Learn secrets from timing, power use, electromagnetic radiation, sound or CPU caches</td>
+<td>Constant-time code, hardware protections</td>
+</tr>
+<tr>
+<td><strong>Fault injection</strong></td>
+<td>Glitch a chip (voltage, laser, clock) so it makes a revealing mistake</td>
+<td>Tamper-resistant hardware, result checking</td>
+</tr>
+<tr>
+<td><strong>Padding oracle</strong></td>
+<td>Use &quot;bad padding&quot; error messages to decrypt data byte by byte</td>
+<td>AEAD; never reveal why decryption failed</td>
+</tr>
+<tr>
+<td><strong>Nonce / key reuse</strong></td>
+<td>Reusing a &quot;use-once&quot; value collapses security</td>
+<td>Counters, random 192-bit nonces, misuse-resistant modes</td>
+</tr>
+<tr>
+<td><strong>Weak randomness</strong></td>
+<td>Predictable keys</td>
+<td>OS CSPRNG only</td>
+</tr>
+<tr>
+<td><strong>Implementation bugs</strong></td>
+<td>Memory errors, skipped checks</td>
+<td>Well-tested libraries, memory-safe languages, audits, fuzzing</td>
+</tr>
+<tr>
+<td><strong>Key theft</strong></td>
+<td>Malware, leaked backups, keys committed to Git</td>
+<td>Hardware key storage, secret scanning, least privilege</td>
+</tr>
+<tr>
+<td><strong>Social engineering</strong></td>
+<td>Trick a human into giving access</td>
+<td>Training, phishing-resistant MFA</td>
+</tr>
+<tr>
+<td><strong>Supply chain</strong></td>
+<td>Compromise a dependency or build system</td>
+<td>Signed builds, reproducible builds, review</td>
+</tr>
+<tr>
+<td><strong>Quantum (future)</strong></td>
+<td>Shor&#39;s algorithm breaks today&#39;s public-key crypto</td>
+<td>Post-quantum cryptography</td>
+</tr>
+</tbody></table></div>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-18-3" id="s-18-3" data-sec="s-18-3">
+<h2 class="sec-title"><span class="sec-num">18.3</span><span class="sec-text">Side-channel attacks: secrets leak through the walls</span><a class="sec-anchor" href="#s-18-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Even a mathematically perfect algorithm runs on a physical machine, and machines leak.</p>
+<p><strong>Timing.</strong> Imagine a login check that compares a password one character at a time and stops at the first mismatch:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>Real password:  s e c r e t
+Guess &quot;a.....&quot; → fails at character 1 → takes 1 microsecond
+Guess &quot;s.....&quot; → fails at character 2 → takes 2 microseconds   ← &quot;s&quot; must be right!
+Guess &quot;sa....&quot; → fails at character 2
+Guess &quot;se....&quot; → fails at character 3                          ← &quot;e&quot; must be right!</pre></div></figure><p>By measuring tiny time differences, an attacker learns the secret one character at a time: about 26 × 6 = 156 guesses instead of 26⁶ ≈ 300 million. That&#39;s why crypto code must run in <strong>constant time</strong>, taking exactly as long no matter what the secret is (like <code>hmac.compare_digest</code> in Chapter <a class="xref" href="chapter-07.html">7</a>).</p>
+<p><strong>Other side channels:</strong></p>
+<ul>
+<li><strong>Power analysis:</strong> a smart card&#39;s power use varies with the bits it processes. Recording power traces can reveal its key (demonstrated by Paul Kocher in the late 1990s).</li>
+<li><strong>Electromagnetic and acoustic:</strong> researchers have extracted RSA keys from the faint high-pitched noise a laptop&#39;s electronics make (2013).</li>
+<li><strong>CPU caches and speculative execution:</strong> <strong>Spectre</strong> and <strong>Meltdown</strong> (2018) showed that one program could read another&#39;s secrets through the way modern processors guess ahead.</li>
+</ul>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-18-4" id="s-18-4" data-sec="s-18-4">
+<h2 class="sec-title"><span class="sec-num">18.4</span><span class="sec-text">Replay attacks</span><a class="sec-anchor" href="#s-18-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A replayed message is perfectly genuine. It&#39;s just <strong>old</strong>. If Mallory records &quot;Unlock the car&quot; or &quot;Transfer $100 to Mallory,&quot; she can send it again later.</p>
+<p>Defenses: include something that changes every time and is checked by the receiver.</p>
+<ul>
+<li><strong>Nonces/challenges:</strong> the receiver sends a random challenge, and the sender must include it (passkeys work this way).</li>
+<li><strong>Timestamps:</strong> reject messages older than a few seconds or minutes (TOTP, AWS request signing).</li>
+<li><strong>Sequence numbers:</strong> reject repeated or out-of-order numbers (TLS records).</li>
+<li><strong>Rolling codes:</strong> car key fobs send a different code each press.</li>
+</ul>
+</div><div class="widget" data-w="replay"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-18-5" id="s-18-5" data-sec="s-18-5">
+<h2 class="sec-title"><span class="sec-num">18.5</span><span class="sec-text">Downgrade attacks</span><a class="sec-anchor" href="#s-18-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>If two sides negotiate which algorithms to use, an attacker in the middle may try to make them agree on the weakest option.</p>
+<div class="callout story"><p>📜 <strong>FREAK and Logjam (2015).</strong> In the 1990s, US export rules required software sold abroad to use deliberately weak &quot;export-grade&quot; crypto, such as 512-bit RSA and Diffie-Hellman keys. Twenty years later, many servers still supported those options. Attackers could trick browsers and servers into using them, then break the weak keys.</p></div>
+<div class="callout story"><p>📜 <strong>POODLE (2014).</strong> Browsers that failed to connect with TLS would &quot;helpfully&quot; retry with SSL 3.0. Attackers could force that failure, then exploit SSL 3.0&#39;s padding weakness.</p></div>
+<p>Defenses: remove old options entirely, and <strong>authenticate the negotiation</strong>. In TLS 1.3, the Finished messages cover the whole handshake transcript, and the server&#39;s random value contains a special marker if it was forced to use an older version.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-18-6" id="s-18-6" data-sec="s-18-6">
+<h2 class="sec-title"><span class="sec-num">18.6</span><span class="sec-text">Padding oracle attacks</span><a class="sec-anchor" href="#s-18-6" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>With CBC mode (Chapter <a class="xref" href="chapter-05.html">5</a>), the decrypted data must end with valid padding. If a server responds differently to &quot;bad padding&quot; versus &quot;bad data,&quot; an attacker can modify a ciphertext, send it, and watch the reaction. With about 256 tries per byte, they can decrypt the entire message <strong>without the key</strong>. Serge Vaudenay described this in 2002, and it has broken real systems many times since (including web frameworks and TLS implementations).</p>
+<p>Defense: use AEAD, which checks integrity <strong>before</strong> decrypting, and fails the same way for every kind of tampering.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-18-7" id="s-18-7" data-sec="s-18-7">
+<h2 class="sec-title"><span class="sec-num">18.7</span><span class="sec-text">Hall of fame (or shame): famous crypto failures</span><a class="sec-anchor" href="#s-18-7" aria-label="Link to this section">#</a></h2>
+<div class="prose"><ol class="timeline"><li class="tl-item c0"><span class="tl-year">2008</span><div class="tl-body"><h5><strong>Debian OpenSSL</strong></h5><p><b>What went wrong:</b> A code cleanup removed the randomness source; only 32,768 possible keys</p><p><b>Lesson:</b> Randomness is everything</p></div></li><li class="tl-item c1"><span class="tl-year">2010</span><div class="tl-body"><h5><strong>PlayStation 3</strong></h5><p><b>What went wrong:</b> Same ECDSA nonce for every signature; private key recovered</p><p><b>Lesson:</b> Never reuse nonces; prefer Ed25519</p></div></li><li class="tl-item c2"><span class="tl-year">2011</span><div class="tl-body"><h5><strong>BEAST</strong></h5><p><b>What went wrong:</b> Predictable CBC IVs in TLS 1.0</p><p><b>Lesson:</b> Upgrade protocols</p></div></li><li class="tl-item c3"><span class="tl-year">2012–13</span><div class="tl-body"><h5><strong>CRIME / BREACH</strong></h5><p><b>What went wrong:</b> Compressing data before encryption leaked secrets through the compressed length</p><p><b>Lesson:</b> Encryption doesn&#39;t hide length</p></div></li><li class="tl-item c4"><span class="tl-year">2013</span><div class="tl-body"><h5><strong>Lucky Thirteen</strong></h5><p><b>What went wrong:</b> Timing differences in TLS&#39;s MAC-then-encrypt CBC mode</p><p><b>Lesson:</b> Use AEAD</p></div></li><li class="tl-item c5"><span class="tl-year">2014</span><div class="tl-body"><h5><strong>Heartbleed</strong></h5><p><b>What went wrong:</b> A missing length check in OpenSSL let anyone read server memory, including private keys. Roughly half a million secure web servers were vulnerable.</p><p><b>Lesson:</b> Implementation bugs bypass all the math</p></div></li><li class="tl-item c0"><span class="tl-year">2014</span><div class="tl-body"><h5><strong>Apple &quot;goto fail&quot;</strong></h5><p><b>What went wrong:</b> One duplicated line of code skipped the certificate signature check</p><p><b>Lesson:</b> Test the failure paths</p></div></li><li class="tl-item c1"><span class="tl-year">2014</span><div class="tl-body"><h5><strong>POODLE</strong></h5><p><b>What went wrong:</b> Downgrade to SSL 3.0 + padding oracle</p><p><b>Lesson:</b> Remove old protocols</p></div></li><li class="tl-item c2"><span class="tl-year">2015</span><div class="tl-body"><h5><strong>FREAK / Logjam</strong></h5><p><b>What went wrong:</b> Leftover 1990s export-grade crypto</p><p><b>Lesson:</b> Remove weak options completely</p></div></li><li class="tl-item c3"><span class="tl-year">2016</span><div class="tl-body"><h5><strong>DROWN</strong></h5><p><b>What went wrong:</b> Servers still supporting SSLv2 exposed TLS sessions that shared the same key</p><p><b>Lesson:</b> Old protocols endanger new ones</p></div></li><li class="tl-item c4"><span class="tl-year">2016</span><div class="tl-body"><h5><strong>Sweet32</strong></h5><p><b>What went wrong:</b> 64-bit block ciphers (3DES, Blowfish) leak data in long sessions</p><p><b>Lesson:</b> Block size matters</p></div></li><li class="tl-item c5"><span class="tl-year">2017</span><div class="tl-body"><h5><strong>ROCA</strong></h5><p><b>What went wrong:</b> A flawed key generator in Infineon security chips produced factorable RSA keys, affecting hundreds of thousands of Estonian national ID cards</p><p><b>Lesson:</b> Key generation needs scrutiny too</p></div></li><li class="tl-item c0"><span class="tl-year">2017</span><div class="tl-body"><h5><strong>KRACK</strong></h5><p><b>What went wrong:</b> WPA2 handshake replays caused nonce reuse</p><p><b>Lesson:</b> Protocol state machines are tricky</p></div></li><li class="tl-item c1"><span class="tl-year">2017</span><div class="tl-body"><h5><strong>ROBOT</strong></h5><p><b>What went wrong:</b> Bleichenbacher&#39;s 1998 RSA padding attack still worked on major sites</p><p><b>Lesson:</b> Old attacks return; drop RSA key transport</p></div></li><li class="tl-item c2"><span class="tl-year">2020</span><div class="tl-body"><h5><strong>CurveBall</strong></h5><p><b>What went wrong:</b> Windows didn&#39;t fully check elliptic-curve parameters in certificates, allowing spoofed certificates (reported by the NSA)</p><p><b>Lesson:</b> Validate every field</p></div></li><li class="tl-item c3"><span class="tl-year">2022</span><div class="tl-body"><h5><strong>&quot;Psychic signatures&quot;</strong></h5><p><b>What went wrong:</b> Java accepted an ECDSA signature made of all zeros as valid for anything</p><p><b>Lesson:</b> Check the obvious edge cases</p></div></li><li class="tl-item c4"><span class="tl-year">2023</span><div class="tl-body"><h5><strong>Terrapin</strong></h5><p><b>What went wrong:</b> An attacker could silently drop messages at the start of some SSH connections</p><p><b>Lesson:</b> Authenticate the whole handshake</p></div></li><li class="tl-item c5"><span class="tl-year">2024</span><div class="tl-body"><h5><strong>xz backdoor</strong></h5><p><b>What went wrong:</b> A malicious contributor hid a backdoor targeting SSH inside a compression library</p><p><b>Lesson:</b> Supply chain and trust in people</p></div></li></ol>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-18-8" id="s-18-8" data-sec="s-18-8">
+<h2 class="sec-title"><span class="sec-num">18.8</span><span class="sec-text">Don&#39;t roll your own crypto</span><a class="sec-anchor" href="#s-18-8" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>The first rule of practical cryptography: <strong>don&#39;t invent your own algorithms or protocols, and don&#39;t implement standard ones yourself for real use.</strong></p>
+<p>The idea is often called <strong>Schneier&#39;s Law</strong> (after security expert Bruce Schneier): anyone can design a cipher that they personally can&#39;t break. That proves nothing. Only years of attack by many experts build confidence. Even world-class experts produce designs that are later broken, which is why standards go through long public competitions.</p>
+<p>Instead, use well-reviewed libraries, preferably their <strong>high-level</strong> interfaces that make safe choices for you:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Need</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>General-purpose crypto with safe defaults</td>
+<td><strong>libsodium</strong> (C; bindings like PyNaCl for Python), <strong>Google Tink</strong> (Java, C++, Go, Python)</td>
+</tr>
+<tr>
+<td>Python</td>
+<td><code>cryptography</code> (prefer its high-level recipes like <strong>Fernet</strong>; the &quot;hazmat&quot; layer is for experts)</td>
+</tr>
+<tr>
+<td>Go</td>
+<td>The standard library&#39;s <code>crypto/...</code> packages</td>
+</tr>
+<tr>
+<td>Browsers / JavaScript</td>
+<td>The <strong>Web Crypto API</strong> (<code>crypto.subtle</code>)</td>
+</tr>
+<tr>
+<td>TLS</td>
+<td>Your platform&#39;s TLS (OpenSSL, BoringSSL, AWS-LC, rustls, Go&#39;s <code>crypto/tls</code>, the OS&#39;s built-in TLS)</td>
+</tr>
+<tr>
+<td>Encrypting files</td>
+<td><strong>age</strong>, GnuPG</td>
+</tr>
+<tr>
+<td>Password hashing</td>
+<td>Argon2id via a maintained library (e.g. <code>argon2-cffi</code>), or your web framework&#39;s built-in password hasher</td>
+</tr>
+</tbody></table></div>
+<p>For example, Fernet in Python does authenticated symmetric encryption (AES plus HMAC, with a timestamp) with no decisions to get wrong:</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">from</span> cryptography.fernet <span class="hljs-keyword">import</span> Fernet
+
+key = Fernet.generate_key()       <span class="hljs-comment"># store this safely (see Chapter 19)</span>
+f = Fernet(key)
+token = f.encrypt(<span class="hljs-string">b&quot;my secret note&quot;</span>)
+<span class="hljs-built_in">print</span>(f.decrypt(token))           <span class="hljs-comment"># b&#x27;my secret note&#x27;</span></code></pre></div></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Rolling your own crypto</h4></div><div class="pc-grid">
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>Home-made crypto</h5><p class="pc-tag">“I invented a cipher!”</p></header>
+<ul class="pros"><li>A great way to learn (in a sandbox)</li></ul>
+<ul class="cons"><li>Unreviewed; side channels; misuse</li><li>Experts get it wrong too</li></ul>
+<footer><b>Best for:</b> Learning projects only</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Vetted libraries</h5><p class="pc-tag">libsodium, Tink, platform crypto</p></header>
+<ul class="pros"><li>Reviewed, tested, constant time</li><li>Safe high-level APIs</li></ul>
+<ul class="cons"><li>Must still be used correctly and kept updated</li></ul>
+<footer><b>Best for:</b> Every production system</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-18-9" id="s-18-9" data-sec="s-18-9">
+<h2 class="sec-title"><span class="sec-num">18.9</span><span class="sec-text">Developer mistakes checklist</span><a class="sec-anchor" href="#s-18-9" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>❌ Mistake</th>
+<th>✅ Do this instead</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Using ECB mode</td>
+<td>AES-GCM or ChaCha20-Poly1305</td>
+</tr>
+<tr>
+<td>Encryption without integrity (plain CBC or CTR)</td>
+<td>AEAD</td>
+</tr>
+<tr>
+<td>Reusing nonces or IVs</td>
+<td>Counters, or random nonces with XChaCha20; or a library that handles it</td>
+</tr>
+<tr>
+<td>Hard-coding keys or committing them to Git</td>
+<td>A secrets manager or KMS; secret scanning (Chapter <a class="xref" href="chapter-19.html">19</a>)</td>
+</tr>
+<tr>
+<td>MD5, SHA-1 or plain SHA-256 for passwords</td>
+<td>Argon2id, scrypt or bcrypt</td>
+</tr>
+<tr>
+<td><code>random</code>, <code>Math.random()</code> for tokens or keys</td>
+<td><code>secrets</code>, <code>crypto.getRandomValues()</code>, OS CSPRNG</td>
+</tr>
+<tr>
+<td>Turning off certificate verification</td>
+<td>Fix the certificate or trust store properly</td>
+</tr>
+<tr>
+<td>Comparing MACs/tokens with <code>==</code></td>
+<td>Constant-time comparison</td>
+</tr>
+<tr>
+<td>Using a raw Diffie-Hellman output as a key</td>
+<td>Run it through HKDF</td>
+</tr>
+<tr>
+<td>Textbook RSA or PKCS#1 v1.5 encryption</td>
+<td>RSA-OAEP, or better, HPKE / X25519-based encryption</td>
+</tr>
+<tr>
+<td>Trusting the JWT <code>alg</code> header</td>
+<td>Enforce the expected algorithm server-side</td>
+</tr>
+<tr>
+<td>Logging secrets, tokens or full card numbers</td>
+<td>Redact sensitive fields in logs</td>
+</tr>
+<tr>
+<td>Supporting TLS 1.0/1.1, SSLv3, RC4, 3DES</td>
+<td>TLS 1.2+ with AEAD; TLS 1.3 preferred</td>
+</tr>
+<tr>
+<td>Treating Base64 or hex as &quot;encryption&quot;</td>
+<td>Actual encryption</td>
+</tr>
+<tr>
+<td>Never rotating keys; no plan for compromise</td>
+<td>Rotation schedules and a tested revocation procedure</td>
+</tr>
+<tr>
+<td>Designing your own protocol</td>
+<td>TLS, Noise, Signal Protocol, HPKE, age</td>
+</tr>
+</tbody></table></div>
+</div><div class="widget" data-w="checklist"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 18</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 18 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-mint" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 19</p>
+<h3>Key Management: Guarding the Keys</h3>
+<p class="next-hook">Strong crypto turns a data-protection problem into a key-protection problem. So where do you hide the one key that protects everything?</p>
+<div class="next-actions"><a class="btn big" href="chapter-19.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-17.html">← Advanced and Emerging Cryptography</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":18,"title":"How Cryptography Breaks: Attacks and Pitfalls","quiz":[{"q":"Heartbleed (2014) was…","o":["a weak RSA key","a missing length check that leaked server memory","an MD5 collision","a quantum attack"],"a":1,"why":"Implementation bugs bypass all the math. Private keys leaked from memory."},{"q":"The defense against replay attacks is…","o":["bigger keys","nonces, timestamps or sequence numbers","Base64","a faster hash"],"a":1,"why":"Make every valid message usable only once."},{"q":"How do you defeat padding-oracle attacks?","o":["Use AEAD and never reveal why decryption failed","Use ECB","Use longer passwords","Compress first"],"a":0,"why":"Uniform errors plus authenticated encryption leave the attacker nothing to measure."},{"q":"Apple’s “goto fail” bug teaches…","o":["use RSA","test the failure paths","avoid Wi-Fi","use MD5"],"a":1,"why":"One duplicated line skipped the certificate signature check entirely."}],"fragment":"oracle","secs":["s-18-1","s-18-2","s-18-3","s-18-4","s-18-5","s-18-6","s-18-7","s-18-8","s-18-9"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-d.js?v=86fb719f26"></script>
+</body>
+</html>

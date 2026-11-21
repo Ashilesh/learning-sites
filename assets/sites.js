@@ -118,5 +118,35 @@ window.SITES = [
     featured: true,
   },
 
+  {
+    id: "pqc-quantum-safe-sketchbook",
+    title: "Quantum-Safe Sketchbook",
+    path: "PQC-v2/index.html",
+    category: "security",
+    topic: "PQC",
+    format: "Illustrated guide",
+    description:
+      "The complete, plain-language guide to post-quantum cryptography: what quantum computers break, " +
+      "harvest-now-decrypt-later, hybrid key exchange, certificate sizes and a step-by-step migration roadmap. 18 diagrams.",
+    tags: ["pqc", "post-quantum", "cryptography", "ml-kem", "ml-dsa", "hybrid", "x25519mlkem768", "migration", "certificates", "quantum"],
+    added: "2026-11-21",
+    minutes: 60,
+  },
+  {
+    id: "crypto-sketch",
+    title: "Cryptography, Explained",
+    path: "Cryptography/dist/index.html",
+    category: "security",
+    topic: "Cryptography",
+    format: "Interactive guide · 22 chapters",
+    description:
+      "The whole of applied cryptography as a game: ciphers, hashes, MACs, RSA, Diffie-Hellman, TLS, PKI, passwords and more, " +
+      "with 80 live demos running real crypto in your browser, boss quizzes and a vault to unlock.",
+    tags: ["cryptography", "aes", "rsa", "sha-256", "hmac", "diffie-hellman", "tls", "pki", "signatures", "jwt", "totp", "encryption"],
+    added: "2026-11-21",
+    minutes: 240,
+    featured: true,
+  },
+
   // ↓↓↓ ADD NEW SITES HERE ↓↓↓
 ];

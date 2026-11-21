@@ -1,0 +1,842 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 13: Certificates and PKI: The Internet's ID Cards · CryptoSketch</title>
+<meta name="description" content="Anyone can generate a key and claim to be your bank. So who vouches that this key really belongs to bank.com?">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-ocean">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">🪪 In this chapter</p><ol><li><a href="#s-13-1" data-sec="s-13-1"><span class="st-num">13.1</span><span class="st-t">The problem certificates solve</span></a></li><li><a href="#s-13-2" data-sec="s-13-2"><span class="st-num">13.2</span><span class="st-t">The passport analogy</span></a></li><li><a href="#s-13-3" data-sec="s-13-3"><span class="st-num">13.3</span><span class="st-t">What's inside a certificate</span></a></li><li><a href="#s-13-4" data-sec="s-13-4"><span class="st-num">13.4</span><span class="st-t">Certificate authorities and the chain of trust</span></a></li><li><a href="#s-13-5" data-sec="s-13-5"><span class="st-num">13.5</span><span class="st-t">How your browser checks a certificate</span></a></li><li><a href="#s-13-6" data-sec="s-13-6"><span class="st-num">13.6</span><span class="st-t">How a certificate is created</span></a></li><li><a href="#s-13-7" data-sec="s-13-7"><span class="st-num">13.7</span><span class="st-t">Validation levels: DV, OV and EV</span></a></li><li><a href="#s-13-8" data-sec="s-13-8"><span class="st-num">13.8</span><span class="st-t">Let's Encrypt and ACME: certificates for everyone</span></a></li><li><a href="#s-13-9" data-sec="s-13-9"><span class="st-num">13.9</span><span class="st-t">Why certificates expire, and why they're getting shorter</span></a></li><li><a href="#s-13-10" data-sec="s-13-10"><span class="st-num">13.10</span><span class="st-t">Revocation: cancelling a certificate early</span></a></li><li><a href="#s-13-11" data-sec="s-13-11"><span class="st-num">13.11</span><span class="st-t">Certificate Transparency: watching the watchers</span></a></li><li><a href="#s-13-12" data-sec="s-13-12"><span class="st-num">13.12</span><span class="st-t">Special kinds of certificates</span></a></li><li><a href="#s-13-13" data-sec="s-13-13"><span class="st-num">13.13</span><span class="st-t">Certificate and key file formats</span></a></li><li><a href="#s-13-14" data-sec="s-13-14"><span class="st-num">13.14</span><span class="st-t">When PKI goes wrong</span></a></li><li><a href="#s-13-15" data-sec="s-13-15"><span class="st-num">13.15</span><span class="st-t">Other ways to trust keys</span></a></li><li><a href="#s-13-16" data-sec="s-13-16"><span class="st-num">13.16</span><span class="st-t">🧪 Hands-on lab: build your own PKI</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="13">
+<header class="ch-hero world-ocean">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-3">🌐 World 3 · Trust on the Internet</a>
+    <p class="ch-num">Chapter 13</p>
+    <h1 class="ch-title">Certificates and PKI: The Internet's ID Cards</h1>
+    <p class="ch-hook"><span>🤔</span> Anyone can generate a key and claim to be your bank. So who vouches that this key really belongs to bank.com?</p>
+    <ul class="ch-stats"><li>⏱️ ~14 min</li><li>📚 16 sections</li><li>🎮 3 interactive</li><li>⭐ 255 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="13" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"></div>
+<section class="sec sec-13-1" id="s-13-1" data-sec="s-13-1">
+<h2 class="sec-title"><span class="sec-num">13.1</span><span class="sec-text">The problem certificates solve</span><a class="sec-anchor" href="#s-13-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Chapter <a class="xref" href="chapter-10.html">10</a> ended with a warning: key exchange alone can&#39;t stop <strong>Mallory in the middle</strong>. When your browser receives a public key that claims to belong to <code>bank.example</code>, how does it know the key isn&#39;t Mallory&#39;s?</p>
+<p>You can&#39;t meet every website&#39;s owner to swap keys in person. You need someone you <strong>already trust</strong> to vouch for the key.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-13-2" id="s-13-2" data-sec="s-13-2">
+<h2 class="sec-title"><span class="sec-num">13.2</span><span class="sec-text">The passport analogy</span><a class="sec-anchor" href="#s-13-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Think of how passports work:</p>
+<ol>
+<li>You prove your identity to a <strong>passport office</strong> (a trusted authority).</li>
+<li>The office issues a document binding <strong>your name</strong> to <strong>your photo</strong>, protected by anti-forgery features.</li>
+<li>A border officer in another country has never met you, but <strong>trusts the passport office</strong>, checks the document is genuine and unexpired, and checks that the photo matches your face.</li>
+</ol>
+<p>A <strong>digital certificate</strong> does exactly this for public keys:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Passport</th>
+<th>Certificate</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Your name</td>
+<td>The website&#39;s domain name (<code>bank.example</code>)</td>
+</tr>
+<tr>
+<td>Your photo</td>
+<td>The website&#39;s <strong>public key</strong></td>
+</tr>
+<tr>
+<td>Passport office</td>
+<td><strong>Certificate Authority (CA)</strong></td>
+</tr>
+<tr>
+<td>Holograms and special paper</td>
+<td>The CA&#39;s <strong>digital signature</strong></td>
+</tr>
+<tr>
+<td>Expiry date</td>
+<td>Validity dates</td>
+</tr>
+<tr>
+<td>Border officer</td>
+<td>Your browser</td>
+</tr>
+<tr>
+<td>&quot;Does the photo match your face?&quot;</td>
+<td>&quot;Does the server <strong>prove it holds the private key</strong> matching the certificate&#39;s public key?&quot;</td>
+</tr>
+</tbody></table></div>
+<p>That last row is important. <strong>Certificates are public.</strong> Anyone can download Google&#39;s certificate. Mallory can copy it, but it&#39;s useless to her without Google&#39;s private key. During the TLS handshake, the server must sign something with that private key to prove the certificate is really its own (Chapter <a class="xref" href="chapter-14.html">14</a>).</p>
+<p>A <strong>Public Key Infrastructure (PKI)</strong> is the whole system around certificates: the authorities, the rules, the software and the processes for issuing, checking and revoking them.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-13-3" id="s-13-3" data-sec="s-13-3">
+<h2 class="sec-title"><span class="sec-num">13.3</span><span class="sec-text">What&#39;s inside a certificate</span><a class="sec-anchor" href="#s-13-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>The standard format is called <strong>X.509</strong> (version 3). Here&#39;s a real certificate, created in the lab at the end of this chapter, printed by OpenSSL with notes added:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>Certificate:
+    Data:
+        Version: 3 (0x2)                                         ← X.509 version 3
+        Serial Number:
+            4a:ac:bc:0b:c2:99:58:f1:1e:30:2e:17:a3:ae:43:0a:...  ← unique ID from the CA
+        Signature Algorithm: ecdsa-with-SHA256                   ← how the CA signed it
+        Issuer: C=US, O=My Learning Lab, CN=My Learning Intermediate CA   ← who vouches
+        Validity
+            Not Before: Nov 21 06:16:42 2026 GMT                 ← valid from
+            Not After : Feb 19 06:16:42 2027 GMT                 ← valid until (90 days)
+        Subject: CN=myapp.local                                  ← who this is for
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey                 ← the PUBLIC KEY itself
+                Public-Key: (256 bit)
+                pub:
+                    04:05:67:14:83:1c:2e:23:e4:44:b8:9d:7c:08:bf:...
+                NIST CURVE: P-256
+        X509v3 extensions:
+            X509v3 Basic Constraints: critical
+                CA:FALSE                                         ← can't issue other certs
+            X509v3 Key Usage: critical
+                Digital Signature                                ← allowed use of the key
+            X509v3 Extended Key Usage:
+                TLS Web Server Authentication                    ← for HTTPS servers
+            X509v3 Subject Alternative Name:
+                DNS:myapp.local, DNS:localhost, IP Address:127.0.0.1   ← names it's valid for
+            X509v3 Subject Key Identifier:
+                1A:27:98:F4:3F:77:9B:0C:...                      ← ID of this key
+            X509v3 Authority Key Identifier:
+                2D:D7:19:C7:C0:36:46:2B:...                      ← ID of the issuer's key
+    Signature Algorithm: ecdsa-with-SHA256
+    Signature Value:                                             ← the CA's SIGNATURE
+        30:44:02:20:7e:11:4f:b4:65:9f:07:2d:73:8f:45:31:...         over everything above</pre></div></figure><p>The most important fields:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Field</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Subject</strong></td>
+<td>Who the certificate identifies. <code>CN</code> = Common Name, <code>O</code> = Organization, <code>C</code> = Country.</td>
+</tr>
+<tr>
+<td><strong>Subject Alternative Name (SAN)</strong></td>
+<td>The domain names (and/or IP addresses) the certificate is valid for. <strong>Browsers only check this field</strong>, not the Common Name.</td>
+</tr>
+<tr>
+<td><strong>Issuer</strong></td>
+<td>The CA that signed it</td>
+</tr>
+<tr>
+<td><strong>Validity</strong></td>
+<td>Not Before / Not After dates</td>
+</tr>
+<tr>
+<td><strong>Public key</strong></td>
+<td>The key being vouched for</td>
+</tr>
+<tr>
+<td><strong>Serial number</strong></td>
+<td>Unique per CA; used for revocation</td>
+</tr>
+<tr>
+<td><strong>Basic Constraints</strong></td>
+<td><code>CA:TRUE</code> means it can sign other certificates; <code>CA:FALSE</code> means it&#39;s an end certificate</td>
+</tr>
+<tr>
+<td><strong>Key Usage / Extended Key Usage</strong></td>
+<td>What the key may be used for: server authentication, client authentication, code signing, email, signing certificates</td>
+</tr>
+<tr>
+<td><strong>CRL Distribution Points / Authority Information Access</strong></td>
+<td>Where to check revocation and download the issuer&#39;s certificate</td>
+</tr>
+<tr>
+<td><strong>Signed Certificate Timestamps (SCTs)</strong></td>
+<td>Proof the certificate was published in Certificate Transparency logs (<a class="xref" href="chapter-13.html#s-13-11">section 13.11</a>)</td>
+</tr>
+<tr>
+<td><strong>Signature</strong></td>
+<td>The CA&#39;s signature over all of the above</td>
+</tr>
+</tbody></table></div>
+</div><div class="widget" data-w="certfields"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-13-4" id="s-13-4" data-sec="s-13-4">
+<h2 class="sec-title"><span class="sec-num">13.4</span><span class="sec-text">Certificate authorities and the chain of trust</span><a class="sec-anchor" href="#s-13-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A <strong>Certificate Authority (CA)</strong> is an organization trusted to verify identities and sign certificates. Examples include Let&#39;s Encrypt, DigiCert, Sectigo, GlobalSign and Google Trust Services.</p>
+<p>CAs are organized in a hierarchy:</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>                ┌─────────────────────────────────────┐
+                │  ROOT CA certificate                 │  ← Self-signed. Pre-installed in your
+                │  &quot;SSL.com TLS ECC Root CA 2022&quot;      │    operating system / browser &quot;trust store&quot;.
+                │  Private key kept OFFLINE in a vault │    Valid ~15–25 years.
+                └──────────────────┬──────────────────┘
+                                   │ signs
+                ┌──────────────────▼──────────────────┐
+                │  INTERMEDIATE CA certificate(s)      │  ← Does the day-to-day signing.
+                │  &quot;Cloudflare TLS Issuing ECC CA 3&quot;   │    Can be replaced if compromised,
+                │                                      │    without touching the root.
+                └──────────────────┬──────────────────┘
+                                   │ signs
+                ┌──────────────────▼──────────────────┐
+                │  LEAF (end-entity) certificate       │  ← The website's own certificate.
+                │  &quot;example.com&quot;                       │    Valid weeks to months.
+                └─────────────────────────────────────┘</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>(The names above are the actual chain <code>example.com</code> served when this guide was written; it included one more intermediate between the two shown.)</p>
+<ul>
+<li><strong>Root CA:</strong> the anchor of trust. Its certificate is <strong>self-signed</strong> (it vouches for itself) and comes pre-installed in your device&#39;s <strong>trust store</strong>. Root private keys are kept offline in hardware security modules inside guarded facilities, and used only in formal, recorded &quot;key ceremonies&quot; with multiple witnesses.</li>
+<li><strong>Intermediate CA:</strong> signed by the root and used for daily issuing. This keeps the root key offline and safe. If an intermediate is compromised, only it has to be replaced.</li>
+<li><strong>Leaf certificate:</strong> the server&#39;s own certificate.</li>
+</ul>
+<p><strong>Trust stores.</strong> Your device trusts a list of roots (roughly 100–150) maintained by the operating system or browser vendor: Apple, Microsoft, Google (the Chrome Root Store), and Mozilla (also used by many Linux systems). To be included, CAs must follow strict rules (the <strong>CA/Browser Forum Baseline Requirements</strong>) and pass regular independent audits. CAs that break the rules get removed (<a class="xref" href="chapter-13.html#s-13-14">section 13.14</a>).</p>
+<p>The server sends its leaf certificate <strong>plus the intermediates</strong>. The browser already has the root. If a server forgets to send an intermediate, some clients will fail with &quot;unable to get local issuer certificate.&quot; It&#39;s one of the most common setup mistakes.</p>
+</div><div class="widget" data-w="chain"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-13-5" id="s-13-5" data-sec="s-13-5">
+<h2 class="sec-title"><span class="sec-num">13.5</span><span class="sec-text">How your browser checks a certificate</span><a class="sec-anchor" href="#s-13-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>When you connect to <code>https://bank.example</code>, your browser, in a few milliseconds:</p>
+<ol>
+<li><strong>Builds the chain:</strong> leaf → intermediate(s) → a root in its trust store.</li>
+<li><strong>Verifies every signature</strong> in the chain: the root signed the intermediate, the intermediate signed the leaf.</li>
+<li><strong>Checks the dates</strong> on every certificate. (This is why a computer with a wrong clock shows certificate errors everywhere.)</li>
+<li><strong>Checks the name:</strong> <code>bank.example</code> must appear in the leaf&#39;s <strong>Subject Alternative Name</strong>.</li>
+<li><strong>Checks the rules:</strong> intermediates must have <code>CA:TRUE</code>; the leaf must be allowed for &quot;TLS Web Server Authentication.&quot;</li>
+<li><strong>Checks revocation</strong> (has this certificate been cancelled?), using whatever method the browser supports.</li>
+<li><strong>Checks Certificate Transparency:</strong> major browsers require proof the certificate was publicly logged.</li>
+<li><strong>Checks possession:</strong> during the TLS handshake, the server signs the handshake data with the private key that matches the certificate. Without the private key, a copied certificate is worthless.</li>
+</ol>
+<p>If any step fails, you get a warning page.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-13-6" id="s-13-6" data-sec="s-13-6">
+<h2 class="sec-title"><span class="sec-num">13.6</span><span class="sec-text">How a certificate is created</span><a class="sec-anchor" href="#s-13-6" aria-label="Link to this section">#</a></h2>
+<div class="prose"><figure class="sketch diagram"><div class="sketch-scroll"><pre>  WEBSITE OWNER                                          CERTIFICATE AUTHORITY
+  ─────────────                                          ─────────────────────
+  1. Generate a key pair 🔑
+     (the private key never leaves the server)
+
+  2. Create a CSR (Certificate Signing Request):
+     &quot;Please certify this public key
+      for bank.example, www.bank.example&quot;
+     — signed with the private key to prove
+       the requester holds it
+                       ────────── CSR ─────────────────►
+                                                         3. Validate: does the requester
+                                                            really control bank.example?
+                       ◄──── &quot;prove it: put this ────────
+                              token on your site / in DNS&quot;
+  4. Place the token
+                       ───────── &quot;done&quot; ───────────────►
+                                                         5. Check the token ✔
+                                                         6. Log the certificate publicly
+                                                            (Certificate Transparency)
+                                                         7. Sign the certificate with the
+                                                            intermediate CA's private key
+                       ◄──────── certificate + chain ────
+  8. Install certificate + intermediates on the server
+  9. Renew before expiry (ideally automatically)
+ 10. Revoke if the private key is ever compromised</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p><strong>How does a CA check that you control a domain?</strong> The automated methods (defined by a protocol called <strong>ACME</strong>, used by Let&#39;s Encrypt and others) are:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Method</th>
+<th>What you do</th>
+<th>Good for</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>HTTP-01</strong></td>
+<td>Serve a specific token at <code>http://yourdomain/.well-known/acme-challenge/&lt;token&gt;</code></td>
+<td>Ordinary web servers</td>
+</tr>
+<tr>
+<td><strong>DNS-01</strong></td>
+<td>Create a DNS TXT record <code>_acme-challenge.yourdomain</code> containing a token</td>
+<td>Wildcard certificates; servers not reachable from the internet</td>
+</tr>
+<tr>
+<td><strong>TLS-ALPN-01</strong></td>
+<td>Answer a special TLS handshake on port 443</td>
+<td>Setups where only port 443 is open</td>
+</tr>
+</tbody></table></div>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-13-7" id="s-13-7" data-sec="s-13-7">
+<h2 class="sec-title"><span class="sec-num">13.7</span><span class="sec-text">Validation levels: DV, OV and EV</span><a class="sec-anchor" href="#s-13-7" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Level</th>
+<th>What the CA verifies</th>
+<th>Cost and speed</th>
+<th>What you see in the browser</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>DV</strong> (Domain Validation)</td>
+<td>Only that the requester controls the domain</td>
+<td>Free to cheap; automatic, in seconds</td>
+<td>Padlock</td>
+</tr>
+<tr>
+<td><strong>OV</strong> (Organization Validation)</td>
+<td>Domain + that the organization legally exists</td>
+<td>Paid; days</td>
+<td>Padlock (organization visible in certificate details)</td>
+</tr>
+<tr>
+<td><strong>EV</strong> (Extended Validation)</td>
+<td>Domain + organization with stricter checks</td>
+<td>Expensive; days to weeks</td>
+<td>Padlock. (Browsers removed the green &quot;company name&quot; bar around 2019, after research showed users didn&#39;t notice it and it could be gamed.)</td>
+</tr>
+</tbody></table></div>
+<p>The vast majority of the web uses DV certificates.</p>
+<aside class="callout warn"><p>⚠️ <strong>Watch out: the padlock does NOT mean a site is trustworthy.</strong> It means your connection is encrypted and that you&#39;re connected to the domain shown in the address bar. Phishing sites get free DV certificates too. <code>paypa1-secure-login.example</code> can have a perfectly valid padlock. Always check the <strong>domain name</strong>.</p>
+</aside>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Certificate validation levels</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>DV</h5><p class="pc-tag">Domain Validation</p></header>
+<ul class="pros"><li>Free and automatic (seconds)</li><li>Enables HTTPS everywhere</li></ul>
+<ul class="cons"><li>Proves domain control only, not identity</li><li>Phishers get them too</li></ul>
+<footer><b>Best for:</b> Almost every website</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>OV</h5><p class="pc-tag">Organization Validation</p></header>
+<ul class="pros"><li>Organization named in the certificate</li></ul>
+<ul class="cons"><li>Paid; days to issue</li><li>Users never look</li></ul>
+<footer><b>Best for:</b> Corporate policy requirements</footer></article>
+<article class="pc-card v-legacy"><header><span class="pc-verdict">⚠️ Legacy</span><h5>EV</h5><p class="pc-tag">Extended Validation</p></header>
+<ul class="pros"><li>Strictest identity checks</li></ul>
+<ul class="cons"><li>Expensive; browsers removed the green bar (~2019)</li><li>Research showed users didn’t notice</li></ul>
+<footer><b>Best for:</b> Rarely worth it now</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-13-8" id="s-13-8" data-sec="s-13-8">
+<h2 class="sec-title"><span class="sec-num">13.8</span><span class="sec-text">Let&#39;s Encrypt and ACME: certificates for everyone</span><a class="sec-anchor" href="#s-13-8" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Before 2015, certificates usually cost money and required manual paperwork, so many sites didn&#39;t bother with HTTPS. <strong>Let&#39;s Encrypt</strong>, a non-profit CA launched in 2015, changed that by offering <strong>free, fully automated</strong> DV certificates through the ACME protocol. Today it secures hundreds of millions of websites, and HTTPS is the default for the web.</p>
+<p>With <strong>Certbot</strong> (a popular ACME client), getting and installing a certificate on a typical web server is one command:</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># Get a certificate and configure nginx automatically</span>
+<span class="hljs-built_in">sudo</span> certbot --nginx -d example.com -d www.example.com
+
+<span class="hljs-comment"># Test that automatic renewal works</span>
+<span class="hljs-built_in">sudo</span> certbot renew --dry-run</code></pre></div><p>Other ACME tools: <code>acme.sh</code>, the <strong>Caddy</strong> web server (which gets certificates automatically with zero configuration), Traefik, and <code>cert-manager</code> for Kubernetes.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-13-9" id="s-13-9" data-sec="s-13-9">
+<h2 class="sec-title"><span class="sec-num">13.9</span><span class="sec-text">Why certificates expire, and why they&#39;re getting shorter</span><a class="sec-anchor" href="#s-13-9" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Certificate lifetimes keep shrinking:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Period</th>
+<th>Maximum lifetime for public TLS certificates</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Early 2010s</td>
+<td>Up to 5 years</td>
+</tr>
+<tr>
+<td>2015</td>
+<td>39 months (~3 years)</td>
+</tr>
+<tr>
+<td>2018</td>
+<td>825 days (~2 years)</td>
+</tr>
+<tr>
+<td>September 2020</td>
+<td>398 days (~13 months)</td>
+</tr>
+<tr>
+<td>March 2026</td>
+<td>200 days</td>
+</tr>
+<tr>
+<td>March 2027 (planned)</td>
+<td>100 days</td>
+</tr>
+<tr>
+<td>March 2029 (planned)</td>
+<td>47 days</td>
+</tr>
+</tbody></table></div>
+<p>(The last three steps come from a rule the CA/Browser Forum approved in 2025.) Let&#39;s Encrypt already issues 90-day certificates by default and has begun offering certificates that last only about six days.</p>
+<p>Why shorter?</p>
+<ul>
+<li><strong>Limits the damage</strong> if a private key is stolen or a certificate was issued by mistake: it stops working soon anyway.</li>
+<li><strong>Revocation is unreliable</strong> (next section), so short lifetimes are a more dependable safety net.</li>
+<li><strong>Forces automation,</strong> which eliminates the classic outage: &quot;our certificate expired and nobody noticed.&quot;</li>
+</ul>
+</div><div class="widget" data-w="lifetimes"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-13-10" id="s-13-10" data-sec="s-13-10">
+<h2 class="sec-title"><span class="sec-num">13.10</span><span class="sec-text">Revocation: cancelling a certificate early</span><a class="sec-anchor" href="#s-13-10" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>If a server&#39;s private key is stolen, the certificate must be <strong>revoked</strong> before it expires. Several mechanisms exist, none perfect:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Method</th>
+<th>How it works</th>
+<th>Problems</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>CRL</strong> (Certificate Revocation List)</td>
+<td>The CA publishes a signed list of revoked serial numbers</td>
+<td>Lists can get large; clients must download them</td>
+</tr>
+<tr>
+<td><strong>OCSP</strong> (Online Certificate Status Protocol)</td>
+<td>The browser asks the CA: &quot;Is serial #4aacbc… still good?&quot;</td>
+<td>Slow; tells the CA which sites you visit; if the CA doesn&#39;t answer, browsers usually carry on anyway (&quot;soft-fail&quot;), which an attacker can exploit by blocking the request</td>
+</tr>
+<tr>
+<td><strong>OCSP stapling</strong></td>
+<td>The <em>server</em> fetches a fresh signed OCSP answer and attaches it to the handshake</td>
+<td>Better, but not universally deployed</td>
+</tr>
+<tr>
+<td><strong>Browser-pushed lists</strong></td>
+<td>The browser vendor collects revocations and pushes them to browsers (Chrome&#39;s CRLSets, Firefox&#39;s CRLite)</td>
+<td>Works well; this is where things are heading</td>
+</tr>
+</tbody></table></div>
+<p>The industry is moving away from OCSP (Let&#39;s Encrypt shut down its OCSP service in 2025) toward CRLs, browser-pushed lists and very short certificate lifetimes.</p>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Revocation methods</h4></div><div class="pc-grid">
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>CRL</h5><p class="pc-tag">Signed list of revoked serials</p></header>
+<ul class="pros"><li>Simple, offline-friendly</li><li>Making a comeback</li></ul>
+<ul class="cons"><li>Lists can get big</li><li>Clients must download them</li></ul>
+<footer><b>Best for:</b> Browser-pushed lists &amp; enterprise</footer></article>
+<article class="pc-card v-legacy"><header><span class="pc-verdict">⚠️ Legacy</span><h5>OCSP</h5><p class="pc-tag">Ask the CA live</p></header>
+<ul class="pros"><li>Fresh per-certificate status</li></ul>
+<ul class="cons"><li>Slow; leaks your browsing to the CA</li><li>Soft-fail lets attackers block it</li></ul>
+<footer><b>Best for:</b> Being phased out (Let’s Encrypt ended it in 2025)</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>OCSP stapling</h5><p class="pc-tag">Server attaches the answer</p></header>
+<ul class="pros"><li>No privacy leak; no extra round trip</li></ul>
+<ul class="cons"><li>Not universally deployed</li></ul>
+<footer><b>Best for:</b> Servers that still use OCSP</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Short-lived certs</h5><p class="pc-tag">Expire before revocation matters</p></header>
+<ul class="pros"><li>Damage window shrinks automatically</li><li>Forces automation</li></ul>
+<ul class="cons"><li>Requires reliable ACME automation</li></ul>
+<footer><b>Best for:</b> The direction the industry is heading</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-13-11" id="s-13-11" data-sec="s-13-11">
+<h2 class="sec-title"><span class="sec-num">13.11</span><span class="sec-text">Certificate Transparency: watching the watchers</span><a class="sec-anchor" href="#s-13-11" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Any trusted CA can technically issue a certificate for <strong>any</strong> domain. What if a CA is hacked or makes a mistake and issues a certificate for <code>google.com</code> to an attacker?</p>
+<p><strong>Certificate Transparency (CT)</strong> makes every publicly trusted certificate <strong>public</strong>. CAs must submit certificates to several independent, append-only public logs (built as Merkle trees, Chapter <a class="xref" href="chapter-06.html">6</a>). The log returns a signed receipt called an <strong>SCT</strong> (Signed Certificate Timestamp), which goes into the certificate. Chrome, Safari and Firefox reject publicly trusted certificates without valid SCTs.</p>
+<p>Domain owners can monitor the logs and get alerted if anyone ever issues a certificate for their domain.</p>
+<p class="lab-label">🧪 <strong>Try it yourself:</strong> search the logs for any domain at <strong><a href="https://crt.sh" target="_blank" rel="noopener">crt.sh</a></strong>, for example <code>https://crt.sh/?q=example.com</code>. You&#39;ll see every certificate ever issued for it.</p>
+<p>You can also tell CAs who is <em>allowed</em> to issue for your domain with a <strong>CAA</strong> DNS record:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>example.com.  CAA  0 issue &quot;letsencrypt.org&quot;</pre></div></figure></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-13-12" id="s-13-12" data-sec="s-13-12">
+<h2 class="sec-title"><span class="sec-num">13.12</span><span class="sec-text">Special kinds of certificates</span><a class="sec-anchor" href="#s-13-12" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Type</th>
+<th>What it&#39;s for</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Wildcard</strong> (<code>*.example.com</code>)</td>
+<td>Covers any single-level subdomain: <code>www.example.com</code>, <code>api.example.com</code> (but not <code>a.b.example.com</code>, and not <code>example.com</code> itself)</td>
+</tr>
+<tr>
+<td><strong>Multi-domain (SAN)</strong></td>
+<td>Lists several names in one certificate</td>
+</tr>
+<tr>
+<td><strong>Self-signed</strong></td>
+<td>Signs itself, with no CA. Fine for testing; browsers show a warning because nobody vouches for it.</td>
+</tr>
+<tr>
+<td><strong>Private / internal CA</strong></td>
+<td>A company runs its own CA for internal servers, devices and employees. Its root is installed only on company devices.</td>
+</tr>
+<tr>
+<td><strong>Client certificate</strong></td>
+<td>Identifies a user or device to a server (used in mutual TLS, Chapter <a class="xref" href="chapter-14.html">14</a>)</td>
+</tr>
+<tr>
+<td><strong>Code-signing certificate</strong></td>
+<td>Signs software so operating systems can verify the publisher</td>
+</tr>
+<tr>
+<td><strong>S/MIME certificate</strong></td>
+<td>Signs and encrypts email (Chapter <a class="xref" href="chapter-16.html">16</a>)</td>
+</tr>
+<tr>
+<td><strong>Document-signing certificate</strong></td>
+<td>Signs PDFs and legal documents</td>
+</tr>
+</tbody></table></div>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-13-13" id="s-13-13" data-sec="s-13-13">
+<h2 class="sec-title"><span class="sec-num">13.13</span><span class="sec-text">Certificate and key file formats</span><a class="sec-anchor" href="#s-13-13" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Certificate files come in confusingly many formats. Here&#39;s the decoder:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Extension(s)</th>
+<th>Format</th>
+<th>Contains</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><code>.pem</code>, <code>.crt</code>, <code>.cer</code></td>
+<td><strong>PEM</strong>: Base64 text with <code>-----BEGIN ...-----</code> lines</td>
+<td>Certificates, keys, or both; can hold a chain</td>
+<td>Linux, nginx, Apache, most tools</td>
+</tr>
+<tr>
+<td><code>.der</code>, <code>.cer</code></td>
+<td><strong>DER</strong>: raw binary</td>
+<td>One certificate or key</td>
+<td>Windows, Java, some devices</td>
+</tr>
+<tr>
+<td><code>.key</code></td>
+<td>Usually PEM</td>
+<td>A private key</td>
+<td>Server configuration</td>
+</tr>
+<tr>
+<td><code>.csr</code></td>
+<td>PEM</td>
+<td>A certificate signing request</td>
+<td>Sent to a CA</td>
+</tr>
+<tr>
+<td><code>.p12</code>, <code>.pfx</code></td>
+<td><strong>PKCS#12</strong>: password-protected binary bundle</td>
+<td>Certificate + private key + chain</td>
+<td>Importing into Windows, macOS Keychain, browsers, Java</td>
+</tr>
+<tr>
+<td><code>.p7b</code>, <code>.p7c</code></td>
+<td>PKCS#7</td>
+<td>Certificates only (no key)</td>
+<td>Windows chain bundles</td>
+</tr>
+<tr>
+<td><code>.jks</code></td>
+<td>Java KeyStore</td>
+<td>Keys and certificates</td>
+<td>Older Java applications</td>
+</tr>
+</tbody></table></div>
+<p>Handy conversions:</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># PEM → DER, and back</span>
+openssl x509 -<span class="hljs-keyword">in</span> cert.pem -outform DER -out cert.der
+openssl x509 -<span class="hljs-keyword">in</span> cert.der -inform DER -out cert.pem
+
+<span class="hljs-comment"># Bundle certificate + key + chain into a password-protected .p12/.pfx</span>
+openssl pkcs12 -<span class="hljs-built_in">export</span> -<span class="hljs-keyword">in</span> server.crt -inkey server.key \
+  -certfile intermediate-ca.crt -out server.p12
+
+<span class="hljs-comment"># Extract certificate and key from a .p12</span>
+openssl pkcs12 -<span class="hljs-keyword">in</span> server.p12 -nokeys -out cert.pem
+openssl pkcs12 -<span class="hljs-keyword">in</span> server.p12 -nocerts -nodes -out key.pem    <span class="hljs-comment"># -nodes = leave key unencrypted</span>
+
+<span class="hljs-comment"># Check that a certificate and private key belong together (the two outputs must match)</span>
+openssl x509 -<span class="hljs-keyword">in</span> server.crt -noout -pubkey | openssl sha256
+openssl pkey -<span class="hljs-keyword">in</span> server.key -pubout | openssl sha256</code></pre></div></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Key and certificate file formats</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>PEM</h5><p class="pc-tag">Base64 between BEGIN/END lines</p></header>
+<ul class="pros"><li>Human-readable, copy-pasteable</li><li>Can hold a whole chain</li></ul>
+<ul class="cons"><li>Easy to confuse what’s inside</li></ul>
+<footer><b>Best for:</b> Linux servers, nginx, OpenSSL</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>DER</h5><p class="pc-tag">Raw binary ASN.1</p></header>
+<ul class="pros"><li>Compact; what’s actually signed</li></ul>
+<ul class="cons"><li>Not readable or pasteable</li></ul>
+<footer><b>Best for:</b> Java, Windows, embedded</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>PKCS#12 (.p12/.pfx)</h5><p class="pc-tag">Password-protected bundle</p></header>
+<ul class="pros"><li>Key + cert + chain in one file</li><li>Imports into Windows/macOS/Java</li></ul>
+<ul class="cons"><li>Old files use weak encryption</li><li>Password handling</li></ul>
+<footer><b>Best for:</b> Moving identities between systems</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-13-14" id="s-13-14" data-sec="s-13-14">
+<h2 class="sec-title"><span class="sec-num">13.14</span><span class="sec-text">When PKI goes wrong</span><a class="sec-anchor" href="#s-13-14" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="callout story"><p>📜 <strong>DigiNotar (2011).</strong> Hackers broke into DigiNotar, a Dutch CA, and issued over 500 fraudulent certificates, including one for <code>*.google.com</code>. It was used to intercept the Gmail traffic of an estimated 300,000 people in Iran. It was discovered because Chrome had Google&#39;s keys &quot;pinned&quot; (it knew what Google&#39;s certificates should look like). All browsers removed DigiNotar from their trust stores, and the company went bankrupt within weeks.</p></div>
+<div class="callout story"><p>📜 <strong>Symantec (2017–2018).</strong> After years of mis-issued certificates and poor oversight, Google and Mozilla gradually distrusted Symantec&#39;s CA business, one of the largest in the world at the time. Millions of websites had to replace their certificates.</p></div>
+<div class="callout story"><p>📜 <strong>Entrust (2024).</strong> After a long series of compliance failures, Chrome announced it would stop trusting new Entrust TLS certificates issued after late 2024. Other browsers followed.</p></div>
+<p>The lesson: the PKI system has a weakness, because <strong>any</strong> trusted CA can issue for <strong>any</strong> domain, and so it also has strong oversight. Certificate Transparency, CAA records, audits and browser root programs exist to catch and punish misbehavior.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-13-15" id="s-13-15" data-sec="s-13-15">
+<h2 class="sec-title"><span class="sec-num">13.15</span><span class="sec-text">Other ways to trust keys</span><a class="sec-anchor" href="#s-13-15" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Certificate authorities aren&#39;t the only approach:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Model</th>
+<th>How it works</th>
+<th>Where it&#39;s used</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Hierarchical PKI</strong> (CAs)</td>
+<td>Trusted authorities vouch for keys</td>
+<td>The web, enterprise networks</td>
+</tr>
+<tr>
+<td><strong>Trust on first use (TOFU)</strong></td>
+<td>Trust the key the first time you see it; warn loudly if it ever changes</td>
+<td>SSH (Chapter <a class="xref" href="chapter-15.html">15</a>)</td>
+</tr>
+<tr>
+<td><strong>Web of trust</strong></td>
+<td>Individuals sign each other&#39;s keys; you trust keys signed by people you trust</td>
+<td>PGP/GnuPG email</td>
+</tr>
+<tr>
+<td><strong>Manual verification</strong></td>
+<td>Compare fingerprints in person or over another channel</td>
+<td>Signal safety numbers</td>
+</tr>
+<tr>
+<td><strong>DANE</strong></td>
+<td>Publish the expected certificate in DNS, protected by DNSSEC</td>
+<td>Some email servers</td>
+</tr>
+<tr>
+<td><strong>Pinning</strong></td>
+<td>An app hard-codes the keys it expects for its own servers</td>
+<td>Mobile banking apps. (Pinning in browsers, &quot;HPKP,&quot; was abandoned around 2018 because mistakes could lock a website out of its own users.)</td>
+</tr>
+</tbody></table></div>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Ways to trust a key</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Hierarchical PKI</h5><p class="pc-tag">Certificate authorities</p></header>
+<ul class="pros"><li>Scales to billions of users</li><li>Automatic for users</li></ul>
+<ul class="cons"><li>Any CA can issue for any domain (CT helps)</li><li>Central points of failure</li></ul>
+<footer><b>Best for:</b> The web</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>TOFU</h5><p class="pc-tag">Trust on first use</p></header>
+<ul class="pros"><li>Zero setup</li><li>Detects key changes later</li></ul>
+<ul class="cons"><li>The very first connection is unprotected</li></ul>
+<footer><b>Best for:</b> SSH</footer></article>
+<article class="pc-card v-legacy"><header><span class="pc-verdict">⚠️ Legacy</span><h5>Web of trust</h5><p class="pc-tag">People sign each other’s keys</p></header>
+<ul class="pros"><li>No central authority</li></ul>
+<ul class="cons"><li>Hard to use; doesn’t scale</li><li>Leaks social graphs</li></ul>
+<footer><b>Best for:</b> PGP enthusiasts</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Manual fingerprints</h5><p class="pc-tag">Compare out of band</p></header>
+<ul class="pros"><li>Strongest assurance</li></ul>
+<ul class="cons"><li>Few people actually do it</li></ul>
+<footer><b>Best for:</b> Signal safety numbers</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>DANE</h5><p class="pc-tag">Certificates in DNSSEC</p></header>
+<ul class="pros"><li>Domain owner controls trust</li></ul>
+<ul class="cons"><li>Depends on DNSSEC deployment</li></ul>
+<footer><b>Best for:</b> Mail servers</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>Pinning</h5><p class="pc-tag">App hard-codes expected keys</p></header>
+<ul class="pros"><li>Blocks rogue CAs and interception</li></ul>
+<ul class="cons"><li>Mistakes lock users out (HPKP was abandoned)</li></ul>
+<footer><b>Best for:</b> Mobile banking apps</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-13-16" id="s-13-16" data-sec="s-13-16">
+<h2 class="sec-title"><span class="sec-num">13.16</span><span class="sec-text">🧪 Hands-on lab: build your own PKI</span><a class="sec-anchor" href="#s-13-16" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>In this lab you&#39;ll act as a certificate authority. You&#39;ll create a root CA, an intermediate CA and a server certificate, then run an HTTPS server that trusts only your root. Every command was tested with OpenSSL 3.6. The lab uses elliptic-curve P-256 keys, a common choice for modern certificates.</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-built_in">mkdir</span> my-pki &amp;&amp; <span class="hljs-built_in">cd</span> my-pki</code></pre></div><h4 id="step-1-create-the-root-ca" class="h4">Step 1: Create the root CA</h4>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># The root&#x27;s private key: the most precious file in your PKI</span>
+openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 -out root-ca.key
+
+<span class="hljs-comment"># A self-signed root certificate, valid for 10 years</span>
+openssl req -x509 -new -key root-ca.key -sha256 -days 3650 \
+  -subj <span class="hljs-string">&quot;/C=US/O=My Learning Lab/CN=My Learning Root CA&quot;</span> \
+  -addext <span class="hljs-string">&quot;basicConstraints=critical,CA:TRUE&quot;</span> \
+  -addext <span class="hljs-string">&quot;keyUsage=critical,keyCertSign,cRLSign&quot;</span> \
+  -out root-ca.crt
+
+<span class="hljs-comment"># Look at it: note that Issuer and Subject are the same (self-signed)</span>
+openssl x509 -<span class="hljs-keyword">in</span> root-ca.crt -noout -subject -issuer -dates</code></pre></div><h4 id="step-2-create-the-intermediate-ca" class="h4">Step 2: Create the intermediate CA</h4>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># Intermediate key and CSR</span>
+openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 -out intermediate-ca.key
+openssl req -new -key intermediate-ca.key \
+  -subj <span class="hljs-string">&quot;/C=US/O=My Learning Lab/CN=My Learning Intermediate CA&quot;</span> \
+  -out intermediate-ca.csr
+
+<span class="hljs-comment"># Rules for the intermediate: it IS a CA, but may not create further CAs (pathlen:0)</span>
+<span class="hljs-built_in">cat</span> &gt; intermediate-ext.cnf &lt;&lt;<span class="hljs-string">&#x27;EOF&#x27;</span>
+basicConstraints       = critical, CA:TRUE, pathlen:0
+keyUsage               = critical, keyCertSign, cRLSign
+subjectKeyIdentifier   = <span class="hljs-built_in">hash</span>
+authorityKeyIdentifier = keyid:always
+EOF
+
+<span class="hljs-comment"># The ROOT signs the intermediate&#x27;s CSR (valid 5 years)</span>
+openssl x509 -req -<span class="hljs-keyword">in</span> intermediate-ca.csr \
+  -CA root-ca.crt -CAkey root-ca.key -CAcreateserial \
+  -days 1825 -sha256 -extfile intermediate-ext.cnf \
+  -out intermediate-ca.crt</code></pre></div><p>In a real CA, you would now lock <code>root-ca.key</code> away offline and use only the intermediate from here on.</p>
+<h4 id="step-3-create-a-server-key-and-csr-what-a-website-owner-does" class="h4">Step 3: Create a server key and CSR (what a website owner does)</h4>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs">openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 -out server.key
+openssl req -new -key server.key -subj <span class="hljs-string">&quot;/CN=myapp.local&quot;</span> -out server.csr
+
+<span class="hljs-comment"># Inspect the CSR, and check its self-signature (proof the requester holds the private key)</span>
+openssl req -<span class="hljs-keyword">in</span> server.csr -noout -text
+openssl req -<span class="hljs-keyword">in</span> server.csr -noout -verify
+<span class="hljs-comment"># Certificate request self-signature verify OK</span></code></pre></div><h4 id="step-4-the-intermediate-ca-issues-the-server-certificate" class="h4">Step 4: The intermediate CA issues the server certificate</h4>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># Rules for the server certificate: NOT a CA, used for TLS servers, valid for these names</span>
+<span class="hljs-built_in">cat</span> &gt; server-ext.cnf &lt;&lt;<span class="hljs-string">&#x27;EOF&#x27;</span>
+basicConstraints       = critical, CA:FALSE
+keyUsage               = critical, digitalSignature
+extendedKeyUsage       = serverAuth
+subjectAltName         = DNS:myapp.local, DNS:localhost, IP:127.0.0.1
+subjectKeyIdentifier   = <span class="hljs-built_in">hash</span>
+authorityKeyIdentifier = keyid
+EOF
+
+openssl x509 -req -<span class="hljs-keyword">in</span> server.csr \
+  -CA intermediate-ca.crt -CAkey intermediate-ca.key -CAcreateserial \
+  -days 90 -sha256 -extfile server-ext.cnf \
+  -out server.crt
+
+<span class="hljs-comment"># The &quot;full chain&quot; file servers usually send: leaf first, then intermediate(s)</span>
+<span class="hljs-built_in">cat</span> server.crt intermediate-ca.crt &gt; server-fullchain.crt</code></pre></div><h4 id="step-5-verify-the-chain-of-trust" class="h4">Step 5: Verify the chain of trust</h4>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># Trust only our root; supply the intermediate as an &quot;untrusted&quot; helper</span>
+openssl verify -CAfile root-ca.crt -untrusted intermediate-ca.crt server.crt
+<span class="hljs-comment"># server.crt: OK</span>
+
+<span class="hljs-comment"># What happens if the intermediate is missing? (The classic server misconfiguration)</span>
+openssl verify -CAfile root-ca.crt server.crt
+<span class="hljs-comment"># error 20 at 0 depth lookup: unable to get local issuer certificate</span></code></pre></div><h4 id="step-6-inspect-your-certificate" class="h4">Step 6: Inspect your certificate</h4>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs">openssl x509 -<span class="hljs-keyword">in</span> server.crt -noout -text          <span class="hljs-comment"># everything (compare with section 13.3)</span>
+openssl x509 -<span class="hljs-keyword">in</span> server.crt -noout -subject -issuer -dates -ext subjectAltName
+openssl x509 -<span class="hljs-keyword">in</span> server.crt -noout -fingerprint -sha256</code></pre></div><h4 id="step-7-run-a-real-https-server-with-your-certificate" class="h4">Step 7: Run a real HTTPS server with your certificate</h4>
+<p>In one terminal, start a test server:</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs">openssl s_server -accept 8443 -cert server.crt -key server.key \
+  -cert_chain intermediate-ca.crt -www</code></pre></div><p>In a second terminal (in the same folder), connect to it:</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># curl, trusting only YOUR root CA</span>
+curl --cacert root-ca.crt https://localhost:8443/
+
+<span class="hljs-comment"># Or with OpenSSL&#x27;s client, for a summary of the handshake</span>
+openssl s_client -connect localhost:8443 -servername localhost \
+  -CAfile root-ca.crt -verify_return_error -brief &lt;/dev/null</code></pre></div><p>Output from <code>s_client</code>:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>CONNECTION ESTABLISHED
+Protocol version: TLSv1.3
+Ciphersuite: TLS_AES_256_GCM_SHA384
+Peer certificate: CN=myapp.local
+Hash used: SHA256
+Signature type: ecdsa_secp256r1_sha256
+Verification: OK
+Negotiated TLS1.3 group: X25519MLKEM768</pre></div></figure><p>You&#39;ve just run a TLS 1.3 server with your own certificate chain, a post-quantum hybrid key exchange and AES-256-GCM encryption. Try <code>curl https://localhost:8443/</code> <strong>without</strong> <code>--cacert</code> and you&#39;ll get a certificate error, because your system doesn&#39;t trust your root. That&#39;s exactly how a browser reacts to an unknown CA. Press <code>Ctrl+C</code> in the first terminal to stop the server.</p>
+<h4 id="step-8-optional-client-certificates-for-mutual-tls" class="h4">Step 8 (optional): Client certificates for mutual TLS</h4>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-built_in">cat</span> &gt; client-ext.cnf &lt;&lt;<span class="hljs-string">&#x27;EOF&#x27;</span>
+basicConstraints       = critical, CA:FALSE
+keyUsage               = critical, digitalSignature
+extendedKeyUsage       = clientAuth
+EOF
+
+openssl genpkey -algorithm EC -pkeyopt ec_paramgen_curve:P-256 -out client.key
+openssl req -new -key client.key -subj <span class="hljs-string">&quot;/CN=alice&quot;</span> -out client.csr
+openssl x509 -req -<span class="hljs-keyword">in</span> client.csr -CA intermediate-ca.crt -CAkey intermediate-ca.key \
+  -CAcreateserial -days 30 -sha256 -extfile client-ext.cnf -out client.crt
+<span class="hljs-built_in">cat</span> client.crt intermediate-ca.crt &gt; client-chain.crt
+
+<span class="hljs-comment"># Server that REQUIRES a client certificate from our PKI</span>
+openssl s_server -accept 8444 -cert server.crt -key server.key \
+  -cert_chain intermediate-ca.crt -CAfile root-ca.crt -chainCAfile intermediate-ca.crt \
+  -Verify 1 -verify_return_error -www</code></pre></div><p>In the second terminal:</p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs">curl --cacert root-ca.crt https://localhost:8444/                    <span class="hljs-comment"># rejected: no client cert</span>
+curl --cacert root-ca.crt --cert client-chain.crt --key client.key \
+  https://localhost:8444/                                            <span class="hljs-comment"># accepted</span></code></pre></div><h4 id="step-9-optional-package-for-other-systems" class="h4">Step 9 (optional): Package for other systems</h4>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># A .p12 bundle for importing into Windows, macOS Keychain or Java</span>
+openssl pkcs12 -<span class="hljs-built_in">export</span> -<span class="hljs-keyword">in</span> server.crt -inkey server.key \
+  -certfile intermediate-ca.crt -out server.p12</code></pre></div><h4 id="step-10-optional-be-careful-make-your-computer-trust-your-root" class="h4">Step 10 (optional, be careful): Make your computer trust your root</h4>
+<aside class="callout warn"><p>⚠️ <strong>Watch out:</strong> whoever holds a trusted root&#39;s private key can impersonate <strong>any website</strong> to your computer. Only do this on a test machine, keep <code>root-ca.key</code> safe, and remove the root when you&#39;re done. For local development, the tool <strong><a href="https://github.com/FiloSottile/mkcert" target="_blank" rel="noopener">mkcert</a></strong> automates all of this safely.</p>
+</aside>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># macOS</span>
+<span class="hljs-built_in">sudo</span> security add-trusted-cert -d -r trustRoot \
+  -k /Library/Keychains/System.keychain root-ca.crt
+
+<span class="hljs-comment"># Debian / Ubuntu</span>
+<span class="hljs-built_in">sudo</span> <span class="hljs-built_in">cp</span> root-ca.crt /usr/local/share/ca-certificates/my-learning-root.crt
+<span class="hljs-built_in">sudo</span> update-ca-certificates</code></pre></div><p>On Windows, double-click <code>root-ca.crt</code> → <strong>Install Certificate</strong> → <strong>Local Machine</strong> → <strong>Trusted Root Certification Authorities</strong>.</p>
+<h4 id="bonus-inspect-a-real-websites-certificates" class="h4">Bonus: inspect a real website&#39;s certificates</h4>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-comment"># Show the certificate chain a site sends</span>
+openssl s_client -connect example.com:443 -servername example.com -showcerts &lt;/dev/null
+
+<span class="hljs-comment"># Just the essentials: who it&#x27;s for, who issued it, when it expires</span>
+<span class="hljs-built_in">echo</span> | openssl s_client -connect example.com:443 -servername example.com 2&gt;/dev/null \
+  | openssl x509 -noout -subject -issuer -dates
+<span class="hljs-comment"># subject=CN=example.com</span>
+<span class="hljs-comment"># issuer=C=US, O=SSL Corporation, CN=Cloudflare TLS Issuing ECC CA 3</span>
+<span class="hljs-comment"># notBefore=Sep 26 22:49:11 2026 GMT</span>
+<span class="hljs-comment"># notAfter=Dec 25 22:56:35 2026 GMT</span></code></pre></div><p>In a browser, click the padlock (or the site-settings icon) next to the address → <strong>Connection is secure</strong> → <strong>Certificate is valid</strong> to see the same information.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 13</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 13 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-ocean" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 14</p>
+<h3>TLS and HTTPS: Putting It All Together</h3>
+<p class="next-hook">In about 100 milliseconds, your browser and a server on another continent run almost everything from Chapters 4 to 13. Let’s watch it happen in slow motion.</p>
+<div class="next-actions"><a class="btn big" href="chapter-14.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-12.html">← Networking Essentials for Cryptography</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":13,"title":"Certificates and PKI: The Internet's ID Cards","quiz":[{"q":"A browser trusts a certificate when its chain leads up to…","o":["any intermediate CA","a root CA in its trust store","the website itself","a DNS server"],"a":1,"why":"Leaf → intermediate → root. The root is pre-installed in your OS or browser."},{"q":"The padlock icon means…","o":["the site is trustworthy","the connection is encrypted to the domain shown","it is an EV certificate","no phishing is possible"],"a":1,"why":"Phishing sites get free DV certificates too. Always check the domain name."},{"q":"From March 2026, the maximum lifetime of a public TLS certificate is…","o":["5 years","398 days","200 days","47 days"],"a":2,"why":"200 days now, 100 days in 2027 and 47 days in 2029 (planned)."},{"q":"Certificate Transparency logs are built as…","o":["Merkle trees","blockchains","spreadsheets","encrypted databases"],"a":0,"why":"Append-only hash trees, so anyone can check that a certificate was logged."}],"fragment":"chain","secs":["s-13-1","s-13-2","s-13-3","s-13-4","s-13-5","s-13-6","s-13-7","s-13-8","s-13-9","s-13-10","s-13-11","s-13-12","s-13-13","s-13-14","s-13-15","s-13-16"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-d.js?v=86fb719f26"></script>
+</body>
+</html>

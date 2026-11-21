@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 7: Message Authentication Codes: Tamper-Proof Seals · CryptoSketch</title>
+<meta name="description" content="Mallory can change a message AND recompute its hash. So how does your server know a webhook really came from GitHub?">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-coral">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">🧷 In this chapter</p><ol><li><a href="#s-7-1" data-sec="s-7-1"><span class="st-num">7.1</span><span class="st-t">Why a plain hash isn't enough</span></a></li><li><a href="#s-7-2" data-sec="s-7-2"><span class="st-num">7.2</span><span class="st-t">MACs: a hash with a secret key</span></a></li><li><a href="#s-7-3" data-sec="s-7-3"><span class="st-num">7.3</span><span class="st-t">HMAC: the most popular MAC</span></a></li><li><a href="#s-7-4" data-sec="s-7-4"><span class="st-num">7.4</span><span class="st-t">Combining encryption with a MAC</span></a></li><li><a href="#s-7-5" data-sec="s-7-5"><span class="st-num">7.5</span><span class="st-t">Comparing tags safely: timing attacks</span></a></li><li><a href="#s-7-6" data-sec="s-7-6"><span class="st-num">7.6</span><span class="st-t">Where MACs are used in real life</span></a></li><li><a href="#s-7-7" data-sec="s-7-7"><span class="st-num">7.7</span><span class="st-t">MAC vs. digital signature</span></a></li><li><a href="#s-7-8" data-sec="s-7-8"><span class="st-num">7.8</span><span class="st-t">Hands-on with HMAC</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="7">
+<header class="ch-hero world-coral">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-2">🧱 World 2 · The Building Blocks</a>
+    <p class="ch-num">Chapter 7</p>
+    <h1 class="ch-title">Message Authentication Codes: Tamper-Proof Seals</h1>
+    <p class="ch-hook"><span>🤔</span> Mallory can change a message AND recompute its hash. So how does your server know a webhook really came from GitHub?</p>
+    <ul class="ch-stats"><li>⏱️ ~4 min</li><li>📚 8 sections</li><li>🎮 2 interactive</li><li>⭐ 200 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="7" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"></div>
+<section class="sec sec-7-1" id="s-7-1" data-sec="s-7-1">
+<h2 class="sec-title"><span class="sec-num">7.1</span><span class="sec-text">Why a plain hash isn&#39;t enough</span><a class="sec-anchor" href="#s-7-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>Suppose Alice sends Bob a message plus its SHA-256 hash, so Bob can check nothing changed. Mallory intercepts it, changes the message <strong>and recomputes the hash</strong>. Bob checks: the hash matches. Fooled.</p>
+<p>A hash proves integrity only if the hash itself can&#39;t be replaced. To fix that, we need a <strong>secret</strong>.</p>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-7-2" id="s-7-2" data-sec="s-7-2">
+<h2 class="sec-title"><span class="sec-num">7.2</span><span class="sec-text">MACs: a hash with a secret key</span><a class="sec-anchor" href="#s-7-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A <strong>MAC</strong> (Message Authentication Code) is like a hash that also uses a <strong>secret key</strong> shared by Alice and Bob:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>tag = MAC(secret_key, message)</pre></div></figure><p>Analogy: a wax seal made with a signet ring. Only Alice and Bob own copies of the ring. Mallory can change the letter, but she can&#39;t make a matching seal.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre> Alice                                                  Bob
+   message ──────────────────── message ───────────────► recompute MAC(key, message)
+   MAC(key, message) = tag ──── tag ───────────────────► do the tags match?
+                                                           ✅ yes → genuine and unchanged
+                                                           ❌ no  → reject it!</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p>A MAC proves two things at once:</p>
+<ul>
+<li><strong>Integrity:</strong> the message wasn&#39;t changed.</li>
+<li><strong>Authenticity:</strong> it came from someone who knows the key.</li>
+</ul>
+</div><div class="widget" data-w="hmac"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-7-3" id="s-7-3" data-sec="s-7-3">
+<h2 class="sec-title"><span class="sec-num">7.3</span><span class="sec-text">HMAC: the most popular MAC</span><a class="sec-anchor" href="#s-7-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p><strong>HMAC</strong> turns any hash function into a MAC. HMAC-SHA256 is by far the most common.</p>
+<div class="callout math"><p>🧮 <strong>Math corner:</strong> HMAC hashes twice, mixing in the key two different ways:</p></div>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>HMAC(K, m) = H( (K ⊕ opad) ‖ H( (K ⊕ ipad) ‖ m ) )</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p><code>ipad</code> and <code>opad</code> are fixed constants, and <code>‖</code> means &quot;joined together.&quot; The double hashing defeats the length-extension attack from Chapter <a class="xref" href="chapter-06.html">6</a>. You don&#39;t need to remember the formula; just remember to <strong>use HMAC, never <code>hash(key + message)</code></strong>.</p>
+<p>Other MACs you&#39;ll meet:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>MAC</th>
+<th>Built from</th>
+<th>Where it&#39;s used</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>HMAC-SHA256</strong></td>
+<td>SHA-256</td>
+<td>APIs, webhooks, JWTs, TLS 1.2, key derivation</td>
+</tr>
+<tr>
+<td><strong>Poly1305</strong></td>
+<td>Fast math with a one-time key</td>
+<td>Paired with ChaCha20 (ChaCha20-Poly1305)</td>
+</tr>
+<tr>
+<td><strong>GMAC / GHASH</strong></td>
+<td>Galois field math</td>
+<td>Inside AES-GCM</td>
+</tr>
+<tr>
+<td><strong>CMAC</strong></td>
+<td>AES</td>
+<td>Banking and smart-card systems</td>
+</tr>
+<tr>
+<td><strong>KMAC</strong></td>
+<td>SHA-3</td>
+<td>Newer standards</td>
+</tr>
+</tbody></table></div>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>MAC algorithms</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>HMAC-SHA256</h5><p class="pc-tag">Hash twice with the key</p></header>
+<ul class="pros"><li>Works with any hash; immune to length extension</li><li>Supported everywhere</li></ul>
+<ul class="cons"><li>Slower than Poly1305/GMAC</li><li>Needs constant-time tag checks</li></ul>
+<footer><b>Best for:</b> APIs, webhooks, JWT HS256, TOTP, HKDF</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Poly1305</h5><p class="pc-tag">Fast one-time MAC</p></header>
+<ul class="pros"><li>Very fast, provable security</li></ul>
+<ul class="cons"><li>Key must be used once only (ChaCha20 handles this)</li></ul>
+<footer><b>Best for:</b> Inside ChaCha20-Poly1305</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>GMAC / GHASH</h5><p class="pc-tag">Galois field MAC</p></header>
+<ul class="pros"><li>Hardware fast (PCLMUL)</li></ul>
+<ul class="cons"><li>Nonce reuse breaks it badly</li><li>Rarely used standalone</li></ul>
+<footer><b>Best for:</b> Inside AES-GCM</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>CMAC</h5><p class="pc-tag">MAC built from AES</p></header>
+<ul class="pros"><li>Only needs an AES engine</li><li>Standardized (NIST SP 800-38B)</li></ul>
+<ul class="cons"><li>Slower than HMAC in software</li></ul>
+<footer><b>Best for:</b> Smart cards, banking hardware</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>KMAC</h5><p class="pc-tag">MAC built from SHA-3</p></header>
+<ul class="pros"><li>Simple: SHA-3 needs no HMAC wrapper</li><li>Variable output length</li></ul>
+<ul class="cons"><li>Less library support</li></ul>
+<footer><b>Best for:</b> Newer standards</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-7-4" id="s-7-4" data-sec="s-7-4">
+<h2 class="sec-title"><span class="sec-num">7.4</span><span class="sec-text">Combining encryption with a MAC</span><a class="sec-anchor" href="#s-7-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>If you&#39;re using AEAD (AES-GCM or ChaCha20-Poly1305), the MAC is already built in. But it&#39;s worth knowing how people combined them in the past, because getting the order wrong caused real attacks:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Approach</th>
+<th>What it does</th>
+<th>Verdict</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Encrypt-then-MAC</strong></td>
+<td>Encrypt, then MAC the ciphertext</td>
+<td class="st-ok">✅ Correct: reject tampered data before even decrypting</td>
+</tr>
+<tr>
+<td>MAC-then-Encrypt</td>
+<td>MAC the plaintext, then encrypt both</td>
+<td class="st-warn">⚠️ Caused padding-oracle attacks in old TLS (Lucky Thirteen, POODLE)</td>
+</tr>
+<tr>
+<td>Encrypt-and-MAC</td>
+<td>Encrypt, and separately MAC the plaintext</td>
+<td class="st-warn">⚠️ The MAC can leak information about the plaintext</td>
+</tr>
+<tr>
+<td><strong>AEAD</strong></td>
+<td>All in one, designed by experts</td>
+<td class="st-ok">✅ <strong>Best: use this</strong></td>
+</tr>
+</tbody></table></div>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Combining encryption and a MAC</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Encrypt-then-MAC</h5><p class="pc-tag">MAC the ciphertext</p></header>
+<ul class="pros"><li>Rejects tampering before decrypting</li><li>Provably secure composition</li></ul>
+<ul class="cons"><li>Two keys and two passes to manage</li></ul>
+<footer><b>Best for:</b> When you can’t use an AEAD</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>MAC-then-Encrypt</h5><p class="pc-tag">MAC the plaintext, encrypt both</p></header>
+<ul class="pros"><li>Hides the tag</li></ul>
+<ul class="cons"><li>Must decrypt before verifying</li><li>Caused Lucky Thirteen and POODLE</li></ul>
+<footer><b>Best for:</b> Old TLS (don’t copy it)</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>Encrypt-and-MAC</h5><p class="pc-tag">Separate MAC of the plaintext</p></header>
+<ul class="pros"><li>Parallel</li></ul>
+<ul class="cons"><li>The MAC can leak plaintext info</li><li>Decrypt-before-verify</li></ul>
+<footer><b>Best for:</b> Old SSH (don’t copy it)</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>AEAD</h5><p class="pc-tag">All-in-one, designed by experts</p></header>
+<ul class="pros"><li>One key, one call, one tag</li><li>Hard to get wrong</li></ul>
+<ul class="cons"><li>Still requires unique nonces</li></ul>
+<footer><b>Best for:</b> Always, when available</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-7-5" id="s-7-5" data-sec="s-7-5">
+<h2 class="sec-title"><span class="sec-num">7.5</span><span class="sec-text">Comparing tags safely: timing attacks</span><a class="sec-anchor" href="#s-7-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>When checking a tag, a normal comparison stops at the first different byte. That means a wrong tag that differs at byte 1 is rejected slightly faster than one that differs at byte 20.</p>
+<p>An attacker can measure those tiny time differences over many attempts to guess the correct tag <strong>one byte at a time</strong>, turning an impossible 2²⁵⁶ search into a few thousand tries.</p>
+<p>The fix is a <strong>constant-time comparison</strong>, which always checks every byte:</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">import</span> hmac
+hmac.compare_digest(received_tag, expected_tag)   <span class="hljs-comment"># ✅ constant time</span>
+received_tag == expected_tag                      <span class="hljs-comment"># ❌ leaks timing</span></code></pre></div></div><div class="widget" data-w="timing"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-7-6" id="s-7-6" data-sec="s-7-6">
+<h2 class="sec-title"><span class="sec-num">7.6</span><span class="sec-text">Where MACs are used in real life</span><a class="sec-anchor" href="#s-7-6" aria-label="Link to this section">#</a></h2>
+<div class="prose"><ul>
+<li><strong>Webhooks:</strong> when GitHub or Stripe calls your server, it includes a header containing an HMAC-SHA256 of the request body made with a secret you share. Your server recomputes it to make sure the request is genuine.</li>
+<li><strong>API request signing:</strong> Amazon Web Services&#39; &quot;Signature Version 4&quot; signs every API request with HMAC.</li>
+<li><strong>Session cookies:</strong> web frameworks sign cookies so users can&#39;t edit them (for example, to change <code>user=bob</code> to <code>user=admin</code>).</li>
+<li><strong>JWTs with <code>HS256</code>:</strong> a JSON Web Token signed with HMAC-SHA256 (Chapter <a class="xref" href="chapter-16.html">16</a>).</li>
+<li><strong>One-time login codes (TOTP):</strong> the 6-digit codes in authenticator apps are HMACs of the current time (Chapter <a class="xref" href="chapter-16.html">16</a>).</li>
+<li><strong>Every TLS, SSH and VPN packet:</strong> protected by a MAC or AEAD tag.</li>
+</ul>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-7-7" id="s-7-7" data-sec="s-7-7">
+<h2 class="sec-title"><span class="sec-num">7.7</span><span class="sec-text">MAC vs. digital signature</span><a class="sec-anchor" href="#s-7-7" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A MAC has one limitation: <strong>both sides hold the same key.</strong> If Bob receives a tagged message, he knows it came from Alice (since he didn&#39;t send it himself). But he can&#39;t prove that to a judge: Bob could have created the tag himself.</p>
+<p>For <strong>public proof</strong> of who sent something (non-repudiation), you need a <strong>digital signature</strong>, which uses a private key only the sender has (Chapter <a class="xref" href="chapter-11.html">11</a>).</p>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>MAC vs. signature</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>MAC</h5><p class="pc-tag">One shared secret</p></header>
+<ul class="pros"><li>Very fast and tiny</li><li>Simple key handling between two parties</li></ul>
+<ul class="cons"><li>Both sides can make tags: no non-repudiation</li><li>Key must be shared securely first</li></ul>
+<footer><b>Best for:</b> Two parties who already share a key</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Digital signature</h5><p class="pc-tag">Private signs, public verifies</p></header>
+<ul class="pros"><li>Anyone can verify</li><li>Non-repudiation</li></ul>
+<ul class="cons"><li>Slower; bigger output</li><li>Needs a way to trust the public key (PKI)</li></ul>
+<footer><b>Best for:</b> Software, documents, certificates</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-7-8" id="s-7-8" data-sec="s-7-8">
+<h2 class="sec-title"><span class="sec-num">7.8</span><span class="sec-text">Hands-on with HMAC</span><a class="sec-anchor" href="#s-7-8" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p class="lab-label">🧪 <strong>Try it yourself:</strong></p>
+<div class="code-card lang-bash"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Terminal</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-built_in">printf</span> <span class="hljs-string">&#x27;hello&#x27;</span> | openssl dgst -sha256 -hmac <span class="hljs-string">&quot;secret&quot;</span>
+<span class="hljs-comment"># SHA2-256(stdin)= 88aab3ede8d3adf94d26ab90d3bafd4a2083070c3bcce9c014ee04a443847c0b</span></code></pre></div><div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">import</span> hmac, hashlib
+
+secret_key = <span class="hljs-string">b&quot;shared-secret-between-alice-and-bob&quot;</span>
+message = <span class="hljs-string">b&quot;Transfer $100 to Bob&quot;</span>
+
+<span class="hljs-comment"># Alice computes the tag and sends message + tag</span>
+tag = hmac.new(secret_key, message, hashlib.sha256).hexdigest()
+
+<span class="hljs-comment"># Bob recomputes and compares in constant time</span>
+expected = hmac.new(secret_key, message, hashlib.sha256).hexdigest()
+<span class="hljs-built_in">print</span>(hmac.compare_digest(tag, expected))           <span class="hljs-comment"># True</span>
+
+<span class="hljs-comment"># Mallory changes the message but can&#x27;t compute a valid tag without the key</span>
+fake = hmac.new(secret_key, <span class="hljs-string">b&quot;Transfer $9999 to Mallory&quot;</span>, hashlib.sha256).hexdigest()
+<span class="hljs-built_in">print</span>(hmac.compare_digest(tag, fake))               <span class="hljs-comment"># False</span></code></pre></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 7</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 7 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-coral" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 8</p>
+<h3>Passwords and Key Derivation</h3>
+<p class="next-hook">Hackers just stole your website’s password database. Whether that’s a shrug or a catastrophe depends on one choice you made years ago.</p>
+<div class="next-actions"><a class="btn big" href="chapter-08.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-06.html">← Hash Functions: Digital Fingerprints</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":7,"title":"Message Authentication Codes: Tamper-Proof Seals","quiz":[{"q":"Why is hash(key + message) a bad MAC?","o":["It is too slow","Length-extension attacks","It needs a public key","It is not deterministic"],"a":1,"why":"With Merkle–Damgård hashes, an attacker can append data and compute a valid hash without the key. Use HMAC."},{"q":"Comparing tags with a normal == is risky because…","o":["it is slow","it leaks timing, byte by byte","it ignores case","it uses floating point"],"a":1,"why":"An early mismatch returns faster. Use constant-time comparison like hmac.compare_digest."},{"q":"The correct way to combine a cipher and a MAC is…","o":["MAC-then-Encrypt","Encrypt-and-MAC","Encrypt-then-MAC","Hash-then-Encode"],"a":2,"why":"Encrypt-then-MAC rejects tampered data before decrypting. Better still: use an AEAD."},{"q":"What can a MAC NOT give you?","o":["Integrity","Authenticity","Non-repudiation","Tamper detection"],"a":2,"why":"Both sides hold the same key, so Bob could have made the tag himself. For public proof you need a signature."}],"fragment":"seal","secs":["s-7-1","s-7-2","s-7-3","s-7-4","s-7-5","s-7-6","s-7-7","s-7-8"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-b.js?v=86fb719f26"></script>
+</body>
+</html>

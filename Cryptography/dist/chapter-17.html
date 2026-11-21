@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ch 17: Advanced and Emerging Cryptography · CryptoSketch</title>
+<meta name="description" content="A machine that doesn’t fully exist yet already threatens secrets you send today. Plus: how to prove you know a secret without revealing a single bit of it.">
+<meta name="theme-color" content="#fdf8ee">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/css/style.css?v=86fb719f26">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+</head>
+<body class="page-chapter world-mint">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs><filter id="wobble"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.2"/></filter></defs></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="pill home-link" href="../../index.html" title="Back to all explainers">←<span class="sp-text"> All explainers</span></a>
+  <button class="icon-btn" id="menuBtn" aria-label="Open the chapter map" aria-expanded="false">☰</button>
+  <a class="brand" href="index.html" aria-label="CryptoSketch home"><span class="brand-lock">🔐</span><span class="brand-text">Crypto<b>Sketch</b></span></a>
+  <a href="shorts.html" class="pill shorts-pill" title="Bite-sized cards">▶<span class="sp-text"> Shorts</span></a>
+  <span class="grow"></span>
+  <button class="xp-wrap" id="xpWrap" type="button" title="Your level and achievements"><span class="lvl" id="lvlName">Lv 1</span><span class="xp-bar"><i id="xpFill"></i></span><span class="xp-num" id="xpNum">0 XP</span></button>
+  <span class="streak" id="streak" title="Daily reading streak">🔥 1</span>
+  <button class="icon-btn" id="searchBtn" aria-label="Search the guide">🔎</button>
+  <button class="icon-btn" id="themeBtn" aria-label="Switch sketchbook / chalkboard theme">🌙</button>
+</header>
+<div class="read-progress" aria-hidden="true"><i id="readProg"></i></div>
+<div class="drawer-scrim" id="scrim" hidden></div>
+<nav class="drawer" id="drawer" aria-label="All chapters" hidden>
+  <div class="drawer-head"><b>🗺️ The Map</b><button class="icon-btn" id="closeDrawer" aria-label="Close">✕</button></div>
+  <a class="drawer-link start" href="start.html">🧭 Start here: how to read this guide</a>
+  <div class="drawer-world world-sun"><p>🏝️ World 1: Foundations</p><a class="drawer-link" data-ch="1" href="chapter-01.html"><span class="dl-num">1</span><span class="dl-title">What Is Cryptography?</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="2" href="chapter-02.html"><span class="dl-num">2</span><span class="dl-title">A Quick Trip Through History</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="3" href="chapter-03.html"><span class="dl-num">3</span><span class="dl-title">The Math Toolbox, Gently</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="4" href="chapter-04.html"><span class="dl-num">4</span><span class="dl-title">Randomness: The Secret Ingredient</span><span class="dl-state"></span></a></div><div class="drawer-world world-coral"><p>🧱 World 2: The Building Blocks</p><a class="drawer-link" data-ch="5" href="chapter-05.html"><span class="dl-num">5</span><span class="dl-title">Symmetric Encryption: One Shared Key</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="6" href="chapter-06.html"><span class="dl-num">6</span><span class="dl-title">Hash Functions: Digital Fingerprints</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="7" href="chapter-07.html"><span class="dl-num">7</span><span class="dl-title">Message Authentication Codes: Tamper-Proof Seals</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="8" href="chapter-08.html"><span class="dl-num">8</span><span class="dl-title">Passwords and Key Derivation</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="9" href="chapter-09.html"><span class="dl-num">9</span><span class="dl-title">Public-Key Cryptography: The Two-Key Revolution</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="10" href="chapter-10.html"><span class="dl-num">10</span><span class="dl-title">Key Exchange: Agreeing on a Secret in Public</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="11" href="chapter-11.html"><span class="dl-num">11</span><span class="dl-title">Digital Signatures: Unforgeable Digital Ink</span><span class="dl-state"></span></a></div><div class="drawer-world world-ocean"><p>🌐 World 3: Trust on the Internet</p><a class="drawer-link" data-ch="12" href="chapter-12.html"><span class="dl-num">12</span><span class="dl-title">Networking Essentials for Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="13" href="chapter-13.html"><span class="dl-num">13</span><span class="dl-title">Certificates and PKI: The Internet's ID Cards</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="14" href="chapter-14.html"><span class="dl-num">14</span><span class="dl-title">TLS and HTTPS: Putting It All Together</span><span class="dl-state"></span></a></div><div class="drawer-world world-mint"><p>🏙️ World 4: Crypto in the Real World</p><a class="drawer-link" data-ch="15" href="chapter-15.html"><span class="dl-num">15</span><span class="dl-title">Secure Connections: SSH, VPNs, Wi-Fi and DNS</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="16" href="chapter-16.html"><span class="dl-num">16</span><span class="dl-title">Everyday Security: Email, Messaging, Disks, Logins and Money</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="17" href="chapter-17.html"><span class="dl-num">17</span><span class="dl-title">Advanced and Emerging Cryptography</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="18" href="chapter-18.html"><span class="dl-num">18</span><span class="dl-title">How Cryptography Breaks: Attacks and Pitfalls</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="19" href="chapter-19.html"><span class="dl-num">19</span><span class="dl-title">Key Management: Guarding the Keys</span><span class="dl-state"></span></a></div><div class="drawer-world world-orange"><p>🔭 World 5: Going Deeper</p><a class="drawer-link" data-ch="20" href="chapter-20.html"><span class="dl-num">20</span><span class="dl-title">Going Deeper: Proofs, Cipher Design and Crypto in Hidden Places</span><span class="dl-state"></span></a></div><div class="drawer-world world-grape"><p>📚 World 6: Reference</p><a class="drawer-link" data-ch="21" href="chapter-21.html"><span class="dl-num">21</span><span class="dl-title">Cheat Sheet: What to Use Today</span><span class="dl-state"></span></a><a class="drawer-link" data-ch="22" href="chapter-22.html"><span class="dl-num">22</span><span class="dl-title">Glossary</span><span class="dl-state"></span></a></div>
+  <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
+  <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
+</nav>
+<div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>
+<main id="main">
+<div class="chapter-layout">
+<aside class="side-toc" id="sideToc" aria-label="Sections in this chapter"><div class="side-inner"><p class="side-title">⚛️ In this chapter</p><ol><li><a href="#s-17-1" data-sec="s-17-1"><span class="st-num">17.1</span><span class="st-t">Post-quantum cryptography</span></a></li><li><a href="#s-17-2" data-sec="s-17-2"><span class="st-num">17.2</span><span class="st-t">Zero-knowledge proofs: proving without revealing</span></a></li><li><a href="#s-17-3" data-sec="s-17-3"><span class="st-num">17.3</span><span class="st-t">Homomorphic encryption: computing on locked data</span></a></li><li><a href="#s-17-4" data-sec="s-17-4"><span class="st-num">17.4</span><span class="st-t">Secret sharing: splitting a key among people</span></a></li><li><a href="#s-17-5" data-sec="s-17-5"><span class="st-num">17.5</span><span class="st-t">Multi-party computation and threshold signatures</span></a></li><li><a href="#s-17-6" data-sec="s-17-6"><span class="st-num">17.6</span><span class="st-t">PAKE: secure key exchange from a password</span></a></li><li><a href="#s-17-7" data-sec="s-17-7"><span class="st-num">17.7</span><span class="st-t">Other ideas worth knowing</span></a></li><li><a href="#boss" data-sec="boss"><span class="st-num">👾</span><span class="st-t">Boss battle</span></a></li></ol></div></aside>
+<article class="chapter" data-ch="17">
+<header class="ch-hero world-mint">
+  <div class="ch-hero-text">
+    <a class="world-chip" href="index.html#world-4">🏙️ World 4 · Cryptography in the Real World</a>
+    <p class="ch-num">Chapter 17</p>
+    <h1 class="ch-title">Advanced and Emerging Cryptography</h1>
+    <p class="ch-hook"><span>🤔</span> A machine that doesn’t fully exist yet already threatens secrets you send today. Plus: how to prove you know a secret without revealing a single bit of it.</p>
+    <ul class="ch-stats"><li>⏱️ ~10 min</li><li>📚 7 sections</li><li>🎮 5 interactive</li><li>⭐ 240 XP</li><li>🔑 1 fragment</li></ul>
+  </div>
+  <div class="ch-doodle" data-doodle="17" aria-hidden="true"></div>
+</header>
+
+<div class="prose ch-intro"><p>This chapter covers ideas that sound like magic: protecting against computers that don&#39;t exist yet, proving things without revealing them, and computing on data you can&#39;t see.</p>
+</div>
+<section class="sec sec-17-1" id="s-17-1" data-sec="s-17-1">
+<h2 class="sec-title"><span class="sec-num">17.1</span><span class="sec-text">Post-quantum cryptography</span><a class="sec-anchor" href="#s-17-1" aria-label="Link to this section">#</a></h2>
+<div class="prose"><h4 id="what-quantum-computers-change" class="h4">What quantum computers change</h4>
+<p>Ordinary computers use bits (0 or 1). <strong>Quantum computers</strong> use <strong>qubits</strong>, which can be in a blend of 0 and 1 at the same time (superposition), and can be linked together (entanglement). Quantum algorithms use these effects to make wrong answers cancel out and right answers reinforce each other.</p>
+<p>Quantum computers are <strong>not</strong> faster at everything. But for a few specific problems, they&#39;re dramatically faster, and two of those problems matter enormously for cryptography:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Quantum algorithm</th>
+<th>What it does</th>
+<th>Impact</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Shor&#39;s algorithm</strong> (1994)</td>
+<td>Factors numbers and solves discrete logarithms efficiently</td>
+<td><strong>Breaks RSA, Diffie-Hellman and all elliptic-curve crypto</strong> (ECDH, ECDSA, Ed25519, X25519)</td>
+</tr>
+<tr>
+<td><strong>Grover&#39;s algorithm</strong> (1996)</td>
+<td>Speeds up brute-force search (roughly square-root of the work)</td>
+<td>Weakens symmetric keys and hashes: AES-128 drops to roughly 64-bit strength in theory. AES-256 stays very strong.</td>
+</tr>
+</tbody></table></div>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>Against a large quantum computer</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>RSA, DH, ECDH, ECDSA, Ed25519, X25519</td>
+<td class="st-bad">❌ Broken</td>
+</tr>
+<tr>
+<td>AES-128</td>
+<td class="st-warn">⚠️ Weakened (still likely fine in practice, since Grover&#39;s algorithm is very slow to run)</td>
+</tr>
+<tr>
+<td>AES-256, ChaCha20</td>
+<td class="st-ok">✅ Fine</td>
+</tr>
+<tr>
+<td>SHA-256, SHA-384, SHA-3</td>
+<td class="st-ok">✅ Fine</td>
+</tr>
+</tbody></table></div>
+<p><strong>When?</strong> Nobody knows. Today&#39;s quantum computers have at most a few thousand noisy, error-prone qubits, far from enough. Breaking RSA-2048 needs a large machine with error correction. Estimates have been falling: a 2025 study estimated that it could be done with under a million noisy qubits running for about a week. Many experts consider a cryptographically relevant quantum computer possible within the next 10 to 20 years.</p>
+<h4 id="harvest-now-decrypt-later" class="h4">Harvest now, decrypt later</h4>
+<p>Here&#39;s why this matters <strong>today</strong>: an adversary can record encrypted traffic now and store it until a quantum computer exists. Secrets that need to stay secret for 10+ years (medical records, state secrets, trade secrets, personal messages) are already at risk.</p>
+<p>A simple rule of thumb, known as <strong>Mosca&#39;s inequality</strong>:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>  If   (how long your data must stay secret)  +  (how long it takes you to migrate)
+       &gt;  (time until a quantum computer exists)
+  then you are already late.</pre></div></figure><h4 id="the-new-standards" class="h4">The new standards</h4>
+<p>In 2016, NIST started a public competition, much like the one that produced AES. Teams around the world submitted 82 algorithms; cryptographers attacked them for years (several were broken along the way). In <strong>August 2024</strong>, NIST published the first standards:</p>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Standard</th>
+<th>Old name</th>
+<th>Type</th>
+<th>Based on</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>FIPS 203: ML-KEM</strong></td>
+<td>CRYSTALS-Kyber</td>
+<td>Key encapsulation (KEM)</td>
+<td>Lattices</td>
+<td>Key exchange (replaces ECDH)</td>
+</tr>
+<tr>
+<td><strong>FIPS 204: ML-DSA</strong></td>
+<td>CRYSTALS-Dilithium</td>
+<td>Signature</td>
+<td>Lattices</td>
+<td>General-purpose signatures</td>
+</tr>
+<tr>
+<td><strong>FIPS 205: SLH-DSA</strong></td>
+<td>SPHINCS+</td>
+<td>Signature</td>
+<td>Hash functions only</td>
+<td>Conservative backup signatures</td>
+</tr>
+<tr>
+<td>FN-DSA (coming)</td>
+<td>Falcon</td>
+<td>Signature</td>
+<td>Lattices</td>
+<td>Compact signatures</td>
+</tr>
+<tr>
+<td>HQC (selected 2025)</td>
+<td>—</td>
+<td>KEM</td>
+<td>Error-correcting codes</td>
+<td>Backup KEM with different math</td>
+</tr>
+</tbody></table></div>
+<h4 id="the-intuition-behind-lattice-cryptography" class="h4">The intuition behind lattice cryptography</h4>
+<p>Most post-quantum algorithms rely on a problem called <strong>Learning With Errors (LWE)</strong>. In school algebra, you solve systems of equations easily:</p>
+<figure class="sketch plain"><div class="sketch-scroll"><pre>WITHOUT NOISE                       WITH A LITTLE NOISE
+2a + 5b = 11                        2a + 5b = 12    (really 11, plus 1 of noise)
+4a + 1b = 13                        4a + 1b = 12    (really 13, minus 1)
+→ easy: a = 3, b = 1                → no values fit exactly anymore</pre></div></figure><p>Add a tiny bit of random noise to each answer, use &quot;clock math&quot; (mod q), and use <strong>hundreds</strong> of unknowns instead of two, and finding the secret values becomes a needle in a haystack with hundreds of dimensions. The secret is like a point hidden inside a gigantic, fuzzy multi-dimensional grid (a <strong>lattice</strong>). No known algorithm, classical or quantum, can find it efficiently.</p>
+<p><strong>Hash-based signatures</strong> (SLH-DSA) are even more conservative: their security depends only on hash functions like SHA-256 being secure, which is about the most trusted assumption in cryptography. The price is large signatures.</p>
+<h4 id="the-trade-off-bigger-keys-and-signatures" class="h4">The trade-off: bigger keys and signatures</h4>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Algorithm</th>
+<th>Public key</th>
+<th>Ciphertext or signature</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>X25519 (classical key exchange)</td>
+<td>32 bytes</td>
+<td>32 bytes</td>
+</tr>
+<tr>
+<td><strong>ML-KEM-768</strong></td>
+<td>1,184 bytes</td>
+<td>1,088 bytes</td>
+</tr>
+<tr>
+<td>Ed25519 (classical signature)</td>
+<td>32 bytes</td>
+<td>64 bytes</td>
+</tr>
+<tr>
+<td><strong>ML-DSA-65</strong></td>
+<td>1,952 bytes</td>
+<td>3,309 bytes</td>
+</tr>
+<tr>
+<td>SLH-DSA-128s</td>
+<td>32 bytes</td>
+<td>7,856 bytes</td>
+</tr>
+</tbody></table></div>
+<p>These sizes are manageable for key exchange, which is why it&#39;s been deployed first. Signatures, especially the several signatures in every certificate chain, are harder, and work on post-quantum certificates for the web is ongoing.</p>
+<h4 id="where-the-migration-stands" class="h4">Where the migration stands</h4>
+<div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Area</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>HTTPS key exchange</td>
+<td class="st-ok">✅ Hybrid <strong>X25519MLKEM768</strong> is the default in major browsers, Cloudflare and OpenSSL 3.5+</td>
+</tr>
+<tr>
+<td>SSH</td>
+<td class="st-ok">✅ OpenSSH 10 uses <strong>mlkem768x25519-sha256</strong> by default</td>
+</tr>
+<tr>
+<td>Messaging</td>
+<td class="st-ok">✅ Signal (PQXDH and a post-quantum ratchet), iMessage (PQ3)</td>
+</tr>
+<tr>
+<td>Certificates and signatures</td>
+<td>🔄 In progress</td>
+</tr>
+<tr>
+<td>Government timelines</td>
+<td>NIST has proposed deprecating today&#39;s quantum-vulnerable public-key algorithms around 2030 and disallowing them by 2035. The US NSA&#39;s &quot;CNSA 2.0&quot; sets similar deadlines for national-security systems.</td>
+</tr>
+</tbody></table></div>
+<aside class="callout key"><p>💡 <strong>Key idea: crypto agility.</strong> The PQ migration shows why systems should be designed so algorithms can be swapped without rebuilding everything. The next migration will come too.</p>
+</aside>
+<h4 id="quantum-key-distribution-qkd-a-different-idea" class="h4">Quantum key distribution (QKD): a different idea</h4>
+<p>Don&#39;t confuse post-quantum cryptography (new math that runs on normal computers) with <strong>quantum key distribution</strong>, which uses physics. QKD sends single particles of light (photons) over special fiber links. Measuring a photon disturbs it, so an eavesdropper creates detectable errors (the BB84 protocol, 1984). It needs dedicated hardware, works only over limited distances, and still needs classical authentication. Most security agencies recommend post-quantum cryptography rather than QKD for general use.</p>
+</div><div class="widget" data-w="pqsizes"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Post-quantum algorithms</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>ML-KEM (Kyber)</h5><p class="pc-tag">FIPS 203, lattices</p></header>
+<ul class="pros"><li>Fast (often faster than X25519)</li><li>Already deployed in hybrids</li></ul>
+<ul class="cons"><li>~1 KB keys and ciphertexts</li></ul>
+<footer><b>Best for:</b> Key exchange</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>ML-DSA (Dilithium)</h5><p class="pc-tag">FIPS 204, lattices</p></header>
+<ul class="pros"><li>Fast; general purpose</li></ul>
+<ul class="cons"><li>2.4–4.6 KB signatures strain certificates</li></ul>
+<footer><b>Best for:</b> General signatures</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>SLH-DSA (SPHINCS+)</h5><p class="pc-tag">FIPS 205, hashes only</p></header>
+<ul class="pros"><li>Most conservative assumptions</li></ul>
+<ul class="cons"><li>Big, slow signatures</li></ul>
+<footer><b>Best for:</b> Firmware, roots of trust</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>FN-DSA (Falcon)</h5><p class="pc-tag">Compact lattice signatures</p></header>
+<ul class="pros"><li>Small signatures</li></ul>
+<ul class="cons"><li>Tricky floating-point implementation</li></ul>
+<footer><b>Best for:</b> Where size matters</footer></article>
+<article class="pc-card v-ok"><header><span class="pc-verdict">👍 Situational</span><h5>HQC</h5><p class="pc-tag">Code-based KEM, selected 2025</p></header>
+<ul class="pros"><li>Different math: a backup if lattices fall</li></ul>
+<ul class="cons"><li>Larger keys; not yet standardized</li></ul>
+<footer><b>Best for:</b> Diversity</footer></article>
+<article class="pc-card v-legacy"><header><span class="pc-verdict">⚠️ Legacy</span><h5>QKD</h5><p class="pc-tag">Quantum key distribution</p></header>
+<ul class="pros"><li>Security from physics</li></ul>
+<ul class="cons"><li>Special hardware and fiber; short range</li><li>Still needs authentication</li><li>Not recommended by most agencies</li></ul>
+<footer><b>Best for:</b> Niche experiments</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-17-2" id="s-17-2" data-sec="s-17-2">
+<h2 class="sec-title"><span class="sec-num">17.2</span><span class="sec-text">Zero-knowledge proofs: proving without revealing</span><a class="sec-anchor" href="#s-17-2" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A <strong>zero-knowledge proof (ZKP)</strong> lets you prove a statement is true <strong>without revealing anything else</strong>. For example: proving you know a password without revealing it, or proving you&#39;re over 18 without revealing your birthday.</p>
+<p><strong>The cave story.</strong> A cave has a ring-shaped tunnel with a magic door in the middle that opens only with a secret word.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>                 entrance
+                    │
+              ┌─────┴─────┐
+              │           │
+         Path A       Path B
+              │           │
+              └──── 🚪 ───┘
+               magic door
+              (needs the word)</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><ol>
+<li>Peggy (the prover) goes into the cave and picks path A or B at random, while Victor (the verifier) waits outside.</li>
+<li>Victor walks to the entrance and shouts: &quot;Come out of path A!&quot; (or B, at random).</li>
+<li>If Peggy knows the word, she can always come out of the requested path, opening the door if needed.</li>
+<li>If she doesn&#39;t, she has a 50% chance of having picked the right path by luck.</li>
+</ol>
+<p>Repeat 20 times. A faker would have to be lucky every time: a 1 in 1,048,576 chance. Victor becomes convinced Peggy knows the word, yet he learns <strong>nothing</strong> about the word itself. He also can&#39;t convince anyone else, since a video of the exchange could have been staged.</p>
+<p><strong>Another analogy:</strong> to prove you&#39;ve found Waldo in a &quot;Where&#39;s Waldo?&quot; picture without revealing where he is, cover the page with a huge sheet of cardboard that has a small hole, and position it so only Waldo shows through.</p>
+<p>Real uses:</p>
+<ul>
+<li><strong>Privacy cryptocurrencies</strong> (Zcash) prove a transaction is valid without revealing amounts or parties.</li>
+<li><strong>Blockchain scaling</strong> (&quot;zk-rollups&quot;) prove that thousands of transactions were processed correctly with one small proof.</li>
+<li><strong>Digital identity:</strong> prove &quot;I&#39;m over 18&quot; or &quot;I live in this country&quot; from a digital ID without revealing your name or birth date. Digital ID wallets in the EU and elsewhere are adopting this.</li>
+<li>You&#39;ll see acronyms like <strong>zk-SNARK</strong> and <strong>zk-STARK</strong>, which are families of efficient zero-knowledge proof systems.</li>
+</ul>
+</div><div class="widget" data-w="zkcave"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Zero-knowledge proofs</h4></div><div class="pc-grid">
+<article class="pc-card v-idea"><header><span class="pc-verdict">💡 Concept</span><h5>zk-SNARKs</h5><p class="pc-tag">Succinct proofs</p></header>
+<ul class="pros"><li>Tiny proofs, fast verification</li></ul>
+<ul class="cons"><li>Often need a trusted setup</li><li>Heavy to generate</li></ul>
+<footer><b>Best for:</b> Blockchain privacy and scaling</footer></article>
+<article class="pc-card v-idea"><header><span class="pc-verdict">💡 Concept</span><h5>zk-STARKs</h5><p class="pc-tag">Transparent proofs</p></header>
+<ul class="pros"><li>No trusted setup; hash-based (post-quantum)</li></ul>
+<ul class="cons"><li>Bigger proofs</li></ul>
+<footer><b>Best for:</b> Rollups</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-17-3" id="s-17-3" data-sec="s-17-3">
+<h2 class="sec-title"><span class="sec-num">17.3</span><span class="sec-text">Homomorphic encryption: computing on locked data</span><a class="sec-anchor" href="#s-17-3" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p><strong>Homomorphic encryption</strong> lets someone perform calculations on encrypted data <strong>without decrypting it</strong>. The result, once decrypted by the owner, is the answer to the calculation.</p>
+<p><strong>Analogy: the jeweler&#39;s glovebox.</strong> A jewelry-shop owner wants workers to assemble necklaces from gold without letting them pocket any. She puts the gold in a locked, transparent box with gloves built into the sides. Workers can assemble the necklace inside, but can&#39;t take anything out. Only the owner, with the key, opens the box.</p>
+<p>You&#39;ve already seen a tiny homomorphic property. Remember that textbook RSA is &quot;malleable&quot;? Multiplying two RSA ciphertexts multiplies the hidden messages:</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs">n, e, d = <span class="hljs-number">3233</span>, <span class="hljs-number">17</span>, <span class="hljs-number">2753</span>                 <span class="hljs-comment"># toy RSA keys from Chapter 9</span>
+enc = <span class="hljs-keyword">lambda</span> m: <span class="hljs-built_in">pow</span>(m, e, n)
+dec = <span class="hljs-keyword">lambda</span> c: <span class="hljs-built_in">pow</span>(c, d, n)
+
+c2, c3 = enc(<span class="hljs-number">2</span>), enc(<span class="hljs-number">3</span>)                  <span class="hljs-comment"># 1752 and 1211: meaningless to an observer</span>
+product = (c2 * c3) % n                  <span class="hljs-comment"># someone multiplies the CIPHERTEXTS</span>
+<span class="hljs-built_in">print</span>(dec(product))                      <span class="hljs-comment"># 6  = 2 × 3, computed without seeing 2 or 3</span></code></pre></div><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Type</th>
+<th>What you can compute</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Partially homomorphic</td>
+<td>One operation only (multiply, or add)</td>
+<td>RSA (multiply), Paillier (add, used in some e-voting systems)</td>
+</tr>
+<tr>
+<td><strong>Fully homomorphic (FHE)</strong></td>
+<td>Any computation</td>
+<td>First built by Craig Gentry in 2009</td>
+</tr>
+</tbody></table></div>
+<p>FHE is still much slower than normal computation (often thousands of times or more), but it&#39;s improving fast and is starting to appear in real products: for example, services that look something up on your behalf (a caller ID, a landmark in a photo) without learning what you asked about. Apple has used homomorphic encryption for features like this.</p>
+</div><div class="widget" data-w="homo"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Homomorphic encryption</h4></div><div class="pc-grid">
+<article class="pc-card v-idea"><header><span class="pc-verdict">💡 Concept</span><h5>Partially homomorphic</h5><p class="pc-tag">One operation (RSA ×, Paillier +)</p></header>
+<ul class="pros"><li>Fast and practical today</li></ul>
+<ul class="cons"><li>Only one kind of math</li></ul>
+<footer><b>Best for:</b> E-voting tallies, simple sums</footer></article>
+<article class="pc-card v-idea"><header><span class="pc-verdict">💡 Concept</span><h5>Fully homomorphic (FHE)</h5><p class="pc-tag">Any computation on ciphertext</p></header>
+<ul class="pros"><li>Cloud can compute without seeing data</li></ul>
+<ul class="cons"><li>Thousands to millions of times slower</li><li>Huge ciphertexts</li></ul>
+<footer><b>Best for:</b> Specialized private analytics</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-17-4" id="s-17-4" data-sec="s-17-4">
+<h2 class="sec-title"><span class="sec-num">17.4</span><span class="sec-text">Secret sharing: splitting a key among people</span><a class="sec-anchor" href="#s-17-4" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>What if a key is so important that <strong>no single person</strong> should be able to use it, but losing one person shouldn&#39;t lose the key either? <strong>Shamir&#39;s Secret Sharing</strong> (Adi Shamir, 1979) splits a secret into <code>n</code> shares so that <strong>any <code>k</code> of them</strong> can rebuild it, and <strong>fewer than <code>k</code> reveal nothing at all</strong>.</p>
+<p><strong>The intuition:</strong> two points define a line.</p>
+<figure class="sketch diagram"><div class="sketch-scroll"><pre>   y                                   Hide the secret where the line crosses the y-axis.
+   │       ● share 3                   Give each person ONE point on the line.
+   │     ╱
+   │   ● share 2                       • Any 2 people → draw the line → read the secret.
+   │ ╱                                 • 1 person alone → infinitely many lines pass
+   ● ← SECRET (y-intercept)              through one point → no information at all.
+ ╱ │ ● share 1 ... (any point on the line)
+───┼──────────────────── x            For &quot;any 3 of 5,&quot; use a curve (parabola) instead:
+   │                                   3 points define it.</pre></div><figcaption>✏️ napkin sketch · scroll sideways on small screens</figcaption></figure><p class="lab-label">🧪 <strong>Try it yourself</strong> (Python, &quot;any 3 of 5&quot;):</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">import</span> secrets
+PRIME = <span class="hljs-number">2</span>**<span class="hljs-number">127</span> - <span class="hljs-number">1</span>          <span class="hljs-comment"># all arithmetic is &quot;clock math&quot; modulo a large prime</span>
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">make_shares</span>(<span class="hljs-params">secret, threshold, count</span>):
+    <span class="hljs-comment"># random polynomial: f(x) = secret + a1*x + a2*x^2 + ... ; f(0) = secret</span>
+    coeffs = [secret] + [secrets.randbelow(PRIME) <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(threshold - <span class="hljs-number">1</span>)]
+    f = <span class="hljs-keyword">lambda</span> x: <span class="hljs-built_in">sum</span>(c * <span class="hljs-built_in">pow</span>(x, i, PRIME) <span class="hljs-keyword">for</span> i, c <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(coeffs)) % PRIME
+    <span class="hljs-keyword">return</span> [(x, f(x)) <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">1</span>, count + <span class="hljs-number">1</span>)]
+
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">recover</span>(<span class="hljs-params">shares</span>):
+    <span class="hljs-comment"># Lagrange interpolation: rebuild the curve and read off f(0)</span>
+    total = <span class="hljs-number">0</span>
+    <span class="hljs-keyword">for</span> i, (xi, yi) <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(shares):
+        num, den = <span class="hljs-number">1</span>, <span class="hljs-number">1</span>
+        <span class="hljs-keyword">for</span> j, (xj, _) <span class="hljs-keyword">in</span> <span class="hljs-built_in">enumerate</span>(shares):
+            <span class="hljs-keyword">if</span> i != j:
+                num = num * (-xj) % PRIME
+                den = den * (xi - xj) % PRIME
+        total = (total + yi * num * <span class="hljs-built_in">pow</span>(den, -<span class="hljs-number">1</span>, PRIME)) % PRIME
+    <span class="hljs-keyword">return</span> total
+
+shares = make_shares(<span class="hljs-number">123456789</span>, threshold=<span class="hljs-number">3</span>, count=<span class="hljs-number">5</span>)
+<span class="hljs-built_in">print</span>(recover(shares[:<span class="hljs-number">3</span>]))                          <span class="hljs-comment"># 123456789</span>
+<span class="hljs-built_in">print</span>(recover([shares[<span class="hljs-number">0</span>], shares[<span class="hljs-number">2</span>], shares[<span class="hljs-number">4</span>]]))   <span class="hljs-comment"># 123456789 (any 3 work)</span>
+<span class="hljs-built_in">print</span>(recover(shares[:<span class="hljs-number">2</span>]))                          <span class="hljs-comment"># garbage: 2 shares aren&#x27;t enough</span></code></pre></div><p>Real uses:</p>
+<ul>
+<li><strong>Certificate authority and DNSSEC root keys:</strong> the DNS root key&#39;s backup is split among trusted people around the world, a certain number of whom must come together to restore it. (This is the true story behind headlines about &quot;seven people who hold the keys to the internet.&quot;)</li>
+<li><strong>Unsealing secret managers:</strong> HashiCorp Vault, by default, needs several key holders to unlock it after a restart.</li>
+<li><strong>Cryptocurrency wallet backups</strong> and company &quot;break-glass&quot; master passwords.</li>
+</ul>
+</div><div class="widget" data-w="shamir"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Splitting secrets</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Shamir secret sharing</h5><p class="pc-tag">Any k of n shares</p></header>
+<ul class="pros"><li>Fewer than k shares reveal nothing</li><li>Survives losing up to n − k shares</li></ul>
+<ul class="cons"><li>Secret is rebuilt in one place (a moment of exposure)</li><li>Shares need secure storage</li></ul>
+<footer><b>Best for:</b> Root-key backups, Vault unsealing</footer></article>
+<article class="pc-card v-avoid"><header><span class="pc-verdict">❌ Avoid</span><h5>Single key holder</h5><p class="pc-tag">One person, one key</p></header>
+<ul class="pros"><li>Simple</li></ul>
+<ul class="cons"><li>Single point of failure and of corruption</li></ul>
+<footer><b>Best for:</b> Low-value secrets only</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-17-5" id="s-17-5" data-sec="s-17-5">
+<h2 class="sec-title"><span class="sec-num">17.5</span><span class="sec-text">Multi-party computation and threshold signatures</span><a class="sec-anchor" href="#s-17-5" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p><strong>Secure multi-party computation (MPC)</strong> lets several people jointly compute a result from their private inputs while learning <strong>only the result</strong>.</p>
+<p>The classic example is <strong>Yao&#39;s Millionaires&#39; Problem</strong> (1982): two millionaires want to know who is richer without either revealing their wealth.</p>
+<p>A simpler example you can run: three colleagues want their <strong>average salary</strong> without anyone revealing their own. Each splits their salary into three random-looking pieces that add up to it, keeps one, and hands one to each colleague. Each person adds up the pieces they hold and announces only that sum. The three sums add up to the total, but no individual salary is ever revealed:</p>
+<div class="code-card lang-python"><div class="code-head"><span class="dots"><i></i><i></i><i></i></span><span class="lang">Python</span><button class="copy" type="button" aria-label="Copy code">Copy</button></div><pre><code class="hljs"><span class="hljs-keyword">import</span> secrets
+M = <span class="hljs-number">2</span>**<span class="hljs-number">64</span>                                    <span class="hljs-comment"># clock math so pieces look random</span>
+salaries = {<span class="hljs-string">&quot;Ana&quot;</span>: <span class="hljs-number">72000</span>, <span class="hljs-string">&quot;Ben&quot;</span>: <span class="hljs-number">58000</span>, <span class="hljs-string">&quot;Chen&quot;</span>: <span class="hljs-number">91000</span>}
+
+pieces = {}
+<span class="hljs-keyword">for</span> person, salary <span class="hljs-keyword">in</span> salaries.items():
+    r1, r2 = secrets.randbelow(M), secrets.randbelow(M)
+    pieces[person] = [r1, r2, (salary - r1 - r2) % M]   <span class="hljs-comment"># three random pieces summing to salary</span>
+
+<span class="hljs-comment"># Person i receives piece i from everyone and announces only the sum</span>
+announced = [<span class="hljs-built_in">sum</span>(pieces[p][i] <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> salaries) % M <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-built_in">range</span>(<span class="hljs-number">3</span>)]
+total = <span class="hljs-built_in">sum</span>(announced) % M
+<span class="hljs-built_in">print</span>(total, total / <span class="hljs-number">3</span>)                      <span class="hljs-comment"># 221000  73666.67  (nobody&#x27;s salary revealed)</span></code></pre></div><p>Real uses:</p>
+<ul>
+<li><strong>Threshold signatures:</strong> a signing key is split among several servers or devices, and a signature requires several of them to cooperate. The full private key never exists in one place. Used by cryptocurrency custody providers (&quot;MPC wallets&quot;) and some certificate and key-management systems.</li>
+<li><strong>Private set intersection:</strong> two parties find what they have in common (for example, which of your contacts use an app) without revealing the rest of their lists.</li>
+<li><strong>Privacy-preserving statistics and advertising measurement.</strong></li>
+</ul>
+</div><div class="widget" data-w="mpc"><div class="widget-loading">✏️ sketching an interactive demo…</div><noscript>Turn on JavaScript to play with this demo.</noscript></div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>Distributed key use</h4></div><div class="pc-grid">
+<article class="pc-card v-idea"><header><span class="pc-verdict">💡 Concept</span><h5>MPC</h5><p class="pc-tag">Compute jointly, reveal only the result</p></header>
+<ul class="pros"><li>No party sees others’ inputs</li></ul>
+<ul class="cons"><li>Network-heavy; complex</li></ul>
+<footer><b>Best for:</b> Private auctions, statistics</footer></article>
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>Threshold signatures</h5><p class="pc-tag">The key is never in one place</p></header>
+<ul class="pros"><li>No single device can sign alone</li><li>Looks like one normal signature</li></ul>
+<ul class="cons"><li>Complex protocols; fewer audited libraries</li></ul>
+<footer><b>Best for:</b> Custody wallets, CAs</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-17-6" id="s-17-6" data-sec="s-17-6">
+<h2 class="sec-title"><span class="sec-num">17.6</span><span class="sec-text">PAKE: secure key exchange from a password</span><a class="sec-anchor" href="#s-17-6" aria-label="Link to this section">#</a></h2>
+<div class="prose"><p>A <strong>PAKE</strong> (Password-Authenticated Key Exchange) lets two parties who share only a password (possibly a weak one) create a strong shared key, in a way that:</p>
+<ul>
+<li>an eavesdropper learns nothing, and</li>
+<li>even a man-in-the-middle gets only <strong>one guess per attempt</strong>, with no way to test passwords offline.</li>
+</ul>
+<p>You&#39;ve already met one: <strong>SAE</strong> in WPA3 Wi-Fi (Chapter <a class="xref" href="chapter-15.html">15</a>). Others include <strong>SRP</strong> (used in Apple&#39;s iCloud Keychain recovery) and <strong>OPAQUE</strong>, a modern design in which the server never sees the password at all, even during registration.</p>
+</div><div class="pc-block"><div class="pc-head"><span class="pc-badge">⚖️ Pros &amp; Cons</span><h4>PAKE</h4></div><div class="pc-grid">
+<article class="pc-card v-use"><header><span class="pc-verdict">✅ Use it</span><h5>PAKE (OPAQUE, SRP, SAE)</h5><p class="pc-tag">Key exchange from a password</p></header>
+<ul class="pros"><li>No offline guessing from traffic</li><li>Server never sees the password (OPAQUE)</li></ul>
+<ul class="cons"><li>Harder to deploy than password-over-TLS</li></ul>
+<footer><b>Best for:</b> Wi-Fi (WPA3), password managers</footer></article></div></div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="sec sec-17-7" id="s-17-7" data-sec="s-17-7">
+<h2 class="sec-title"><span class="sec-num">17.7</span><span class="sec-text">Other ideas worth knowing</span><a class="sec-anchor" href="#s-17-7" aria-label="Link to this section">#</a></h2>
+<div class="prose"><div class="table-wrap"><table class="sk-table">
+<thead>
+<tr>
+<th>Idea</th>
+<th>Plain description</th>
+<th>Where it&#39;s used</th>
+</tr>
+</thead>
+<tbody><tr>
+<td><strong>Commitment scheme</strong></td>
+<td>Like a sealed envelope: commit to a value now, reveal it later, and you can&#39;t change it in between</td>
+<td>Fair coin flips online, sealed-bid auctions, inside ZK proofs</td>
+</tr>
+<tr>
+<td><strong>Blind signature</strong></td>
+<td>Get something signed without the signer seeing what it is</td>
+<td>David Chaum&#39;s digital cash (1982); &quot;Privacy Pass&quot; tokens that let you skip CAPTCHAs without being tracked</td>
+</tr>
+<tr>
+<td><strong>Ring / group signature</strong></td>
+<td>Prove &quot;someone in this group signed&quot; without revealing who</td>
+<td>Monero; anonymous credentials</td>
+</tr>
+<tr>
+<td><strong>Format-preserving encryption</strong></td>
+<td>Encrypt a 16-digit card number into another 16-digit number</td>
+<td>Payment systems, legacy databases</td>
+</tr>
+<tr>
+<td><strong>Searchable encryption</strong></td>
+<td>Search encrypted data without decrypting it</td>
+<td>Encrypted databases</td>
+</tr>
+<tr>
+<td><strong>Key transparency</strong></td>
+<td>A public, auditable log of users&#39; public keys so a messaging service can&#39;t secretly swap them</td>
+<td>WhatsApp, iMessage Contact Key Verification</td>
+</tr>
+<tr>
+<td><strong>Confidential computing</strong></td>
+<td>Hardware-isolated &quot;enclaves&quot; that keep data encrypted in memory, even from the cloud provider</td>
+<td>Intel TDX, AMD SEV, Apple Private Cloud Compute</td>
+</tr>
+</tbody></table></div>
+</div>
+<div class="sec-done" aria-hidden="true"><span>✔ section read</span></div>
+</section>
+<section class="boss" id="boss" aria-labelledby="boss-title">
+<div class="boss-head"><span class="boss-emoji">👾</span><div><p class="boss-kicker">Boss battle · Chapter 17</p><h2 id="boss-title">Beat the quiz, win a 🔑 key fragment</h2><p>Answer all 4 questions. Each correct answer is worth 20 XP. The fragment opens <a href="index.html#vault">the Vault</a>.</p></div></div>
+<div class="quiz" id="quiz"></div>
+<div class="fragment" id="fragment" hidden><div class="frag-card"><p>🔑 Key fragment 17 of 22</p><b class="frag-word" id="fragWord">?????</b><small>Saved automatically. Collect all 22 to open the Vault.</small></div></div>
+</section>
+<nav class="next-card world-mint" aria-label="Next chapter">
+<p class="next-kicker">⏭️ Up next · Chapter 18</p>
+<h3>How Cryptography Breaks: Attacks and Pitfalls</h3>
+<p class="next-hook">The math almost never breaks. A missing length check, one duplicated line of code, a signature made of zeros… those do.</p>
+<div class="next-actions"><a class="btn big" href="chapter-18.html">Keep going →</a><a class="btn ghost" href="shorts.html">or swipe a few Shorts ▶</a></div>
+</nav>
+<p class="prevnext"><a href="chapter-16.html">← Everyday Security: Email, Messaging, Disks, Logins and Money</a></p>
+</article>
+</div>
+</main>
+<footer class="site-foot"><p>✏️ <b>CryptoSketch</b> · every word comes from <i>Cryptography, Explained</i> · built with doodles, real crypto (Web Crypto API) and too much coffee ☕</p><p><a href="index.html">Home</a> · <a href="start.html">Start</a> · <a href="shorts.html">Shorts</a> · <a href="chapter-20.html">Cheat sheet</a> · <a href="chapter-21.html">Glossary</a></p></footer>
+<script>window.PAGE={"ch":17,"title":"Advanced and Emerging Cryptography","quiz":[{"q":"Shor’s algorithm on a big quantum computer would break…","o":["AES-256","SHA-256","RSA and elliptic-curve crypto","one-time pads"],"a":2,"why":"Factoring and discrete logs fall. Symmetric crypto only needs bigger keys (Grover)."},{"q":"ML-KEM (Kyber) is based on…","o":["factoring","lattice problems","hash functions only","elliptic curves"],"a":1,"why":"Finding a hidden point in a huge, noisy multi-dimensional grid. FIPS 203, August 2024."},{"q":"In a 3-of-5 Shamir scheme, what do 2 shares reveal about the secret?","o":["Two-thirds of it","Its first digits","Nothing at all","Everything"],"a":2,"why":"Infinitely many curves pass through 2 points. Fewer than k shares reveal nothing."},{"q":"“Harvest now, decrypt later” means…","o":["recording encrypted traffic today to decrypt with a future quantum computer","collecting passwords","mining bitcoin","caching TLS sessions"],"a":0,"why":"That is why long-lived secrets need post-quantum key exchange now."}],"fragment":"lattice","secs":["s-17-1","s-17-2","s-17-3","s-17-4","s-17-5","s-17-6","s-17-7"]};</script>
+<script src="assets/vendor/rough.js?v=86fb719f26"></script>
+<script src="assets/js/site-data.js?v=86fb719f26"></script>
+<script src="assets/js/core.js?v=86fb719f26"></script>
+<script src="assets/js/doodles.js?v=86fb719f26"></script>
+<script src="assets/js/widgets-d.js?v=86fb719f26"></script>
+</body>
+</html>
