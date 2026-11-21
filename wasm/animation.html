@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Wasm in Two Minutes · Wasm Sketchbook</title>
+<meta name="description" content="A two-minute hand-drawn animation: what WebAssembly is, compiling once, the stack machine, loading, riding the JS engine, the sandbox, the GPU trip, limits and what comes next.">
+<script>try{var t=localStorage.getItem('wasm-sketchbook-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Courier+Prime:wght@400;700&family=Patrick+Hand&display=swap">
+<style>
+:root{
+  --paper:#fbf7ec;--paper-2:#f3edde;--grid:rgba(70,110,170,.10);
+  --ink:#2a2723;--ink-soft:#5c574f;--pencil:#8d877c;
+  --blue:#2e6db0;--red:#cf4457;--green:#2f8f57;--orange:#d9741a;--purple:#7656a8;--teal:#1f8a8a;
+  --highlight:rgba(255,214,64,.65);
+  --fill-yellow:#fff1a8;--fill-blue:#d9e9fb;--fill-green:#d9f1df;--fill-pink:#fde0e3;--fill-purple:#e9e1f6;--fill-orange:#ffe2c4;--fill-paper:#fffdf6;--fill-gray:#ece8de;
+  --shadow:rgba(60,45,20,.18);
+  --wobbly:255px 15px 225px 15px / 15px 225px 15px 255px;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --paper:#1f2428;--paper-2:#272d32;--grid:rgba(255,255,255,.045);
+  --ink:#efeae0;--ink-soft:#c3bdb1;--pencil:#8f8a80;
+  --blue:#8cc4ff;--red:#ff8f9c;--green:#7fdc9c;--orange:#ffb46b;--purple:#c7a8ff;--teal:#6fd6d6;
+  --highlight:rgba(255,214,64,.35);
+  --fill-yellow:rgba(255,220,80,.16);--fill-blue:rgba(120,180,255,.16);--fill-green:rgba(110,220,150,.15);--fill-pink:rgba(255,130,150,.16);
+  --fill-purple:rgba(190,150,255,.17);--fill-orange:rgba(255,170,90,.16);--fill-paper:rgba(255,255,255,.04);--fill-gray:rgba(255,255,255,.08);
+  --shadow:rgba(0,0,0,.45);
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#1f2428;--paper-2:#272d32;--grid:rgba(255,255,255,.045);
+    --ink:#efeae0;--ink-soft:#c3bdb1;--pencil:#8f8a80;
+    --blue:#8cc4ff;--red:#ff8f9c;--green:#7fdc9c;--orange:#ffb46b;--purple:#c7a8ff;--teal:#6fd6d6;
+    --highlight:rgba(255,214,64,.35);
+    --fill-yellow:rgba(255,220,80,.16);--fill-blue:rgba(120,180,255,.16);--fill-green:rgba(110,220,150,.15);--fill-pink:rgba(255,130,150,.16);
+    --fill-purple:rgba(190,150,255,.17);--fill-orange:rgba(255,170,90,.16);--fill-paper:rgba(255,255,255,.04);--fill-gray:rgba(255,255,255,.08);
+    --shadow:rgba(0,0,0,.45);
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:1.15rem/1.5 "Patrick Hand","Comic Sans MS",cursive;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:26px 26px}
+a{color:inherit}
+.wrap{max-width:1040px;margin:0 auto;padding:14px 16px 40px}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.top .sp{flex:1}
+.brand{font:700 1.7rem Caveat,cursive;text-decoration:none}
+.brand span{color:var(--purple)}
+.home-link,.pill{display:inline-flex;align-items:center;gap:6px;font:1.05rem "Patrick Hand",cursive;color:var(--ink);text-decoration:none;
+  padding:2px 12px;border:2px solid var(--ink);border-radius:var(--wobbly);background:var(--fill-paper);cursor:pointer}
+.home-link:hover,.pill:hover{background:var(--fill-gray)}
+h1{font:700 clamp(2.6rem,6vw,3.8rem)/1.05 Caveat,cursive;margin:12px 0 4px}
+h1 span{color:var(--purple)}
+.lede{margin:0 0 16px;color:var(--ink-soft);font-size:1.25rem;max-width:62ch}
+.stage{position:relative;border:2.5px solid var(--ink);border-radius:12px;box-shadow:5px 6px 0 var(--shadow);overflow:hidden;background:var(--paper)}
+canvas{display:block;width:100%;aspect-ratio:16/9}
+.chip{position:absolute;top:10px;left:12px;font:700 13px "Courier Prime",monospace;background:var(--paper);border:2px solid var(--ink);border-radius:999px;padding:1px 10px;opacity:.92}
+.controls{display:flex;align-items:center;gap:10px;margin:16px 0 8px;flex-wrap:wrap}
+.btn{font:1.2rem/1 "Patrick Hand",cursive;padding:8px 16px;cursor:pointer;border:2.5px solid var(--ink);border-radius:var(--wobbly);
+  background:var(--fill-paper);color:var(--ink);box-shadow:3px 3px 0 var(--shadow);transition:transform .1s}
+.btn:hover{transform:rotate(-1deg);color:var(--red)}
+.btn:active{transform:translate(1px,2px)}
+.btn.primary{background:var(--fill-yellow);min-width:96px}
+.bar{flex:1;min-width:140px;height:16px;border:2.5px solid var(--ink);border-radius:999px;background:var(--fill-paper);cursor:pointer;position:relative;overflow:hidden;touch-action:none}
+.bar i{position:absolute;inset:0 auto 0 0;background:var(--purple);width:0}
+.time{font:700 14px "Courier Prime",monospace;color:var(--ink-soft);min-width:96px;text-align:right}
+.dots{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.dots button{font:1rem "Patrick Hand",cursive;padding:1px 10px;border-radius:999px;border:2px solid var(--pencil);background:var(--fill-paper);color:var(--ink-soft);cursor:pointer}
+.dots button[aria-current="true"]{background:var(--highlight);border-color:var(--ink);color:var(--ink)}
+.caption{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.caption > div{background:var(--fill-paper);border:2.5px solid var(--ink);border-radius:var(--wobbly);padding:12px 18px;min-height:124px}
+.tag{display:block;font:700 1.55rem Caveat,cursive;color:var(--purple);margin-bottom:2px}
+.caption .real .tag{color:var(--blue)}
+.caption p{margin:0}
+.caption b{font-weight:400;background:linear-gradient(transparent 55%,var(--highlight) 55%,var(--highlight) 92%,transparent 92%);padding:0 2px}
+.caption code{font:.95em "Courier Prime",monospace}
+.note{color:var(--ink-soft);font-size:1rem;margin-top:14px}
+.end-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.end-cta a{text-decoration:none}
+:focus-visible{outline:3px dashed var(--red);outline-offset:3px}
+@media (max-width:700px){.caption{grid-template-columns:1fr}.hide-sm,.chip{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="home-link" href="../index.html" title="All explainers">&larr; all</a>
+    <a class="brand" href="index.html">Wasm <span>Sketchbook</span></a>
+    <span class="sp"></span>
+    <button class="pill" type="button" id="theme" aria-label="Switch light or dark theme"><span aria-hidden="true">🌙</span></button>
+  </div>
+  <h1>WebAssembly in <span>two minutes</span></h1>
+  <p class="lede">What Wasm is, how one file runs in every browser, the little stack machine inside, how it rides the JavaScript engine, its sandbox, the trip to the GPU, and what it still can't do. Sketched start to finish.</p>
+
+  <div class="stage">
+    <canvas id="cv" role="img" aria-label="Hand-drawn animation explaining WebAssembly. The captions below describe each scene."></canvas>
+    <span class="chip" id="chip">Scene 1</span>
+  </div>
+
+  <div class="controls">
+    <button type="button" class="btn" id="prev" aria-label="Previous scene">◀<span class="hide-sm"> Prev</span></button>
+    <button type="button" class="btn primary" id="play">Pause</button>
+    <button type="button" class="btn" id="next" aria-label="Next scene"><span class="hide-sm">Next </span>▶</button>
+    <div class="bar" id="bar" role="slider" aria-label="Timeline" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="fill"></i></div>
+    <span class="time" id="time">0:00</span>
+  </div>
+  <div class="dots" id="dots" aria-label="Scenes"></div>
+
+  <div class="caption" aria-live="polite">
+    <div class="kid"><span class="tag">The story</span><p id="kid"></p></div>
+    <div class="real"><span class="tag">What's really happening</span><p id="real"></p></div>
+  </div>
+  <div class="end-cta">
+    <a class="btn primary" href="01-plain-words.html">Start chapter 1 &rarr;</a>
+    <a class="btn" href="03-key-terms.html">Play with the stack machine</a>
+  </div>
+  <p class="note">Keyboard: space to play or pause, arrow keys to change scene.</p>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const W=960,H=540,PI=Math.PI;
+const cv=$('cv'),ctx=cv.getContext('2d');
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const seg=(p,a,b)=>clamp((p-a)/(b-a),0,1);
+const A=(p,a,b)=>ease(seg(p,a,b));
+function mb(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+/* ---------- colours (read from CSS tokens so both themes work) ---------- */
+const col={};
+function readColors(){const s=getComputedStyle(document.documentElement);
+  ['paper','paper-2','grid','ink','ink-soft','pencil','blue','red','green','orange','purple','teal','highlight',
+   'fill-yellow','fill-blue','fill-green','fill-pink','fill-purple','fill-orange','fill-paper','fill-gray']
+    .forEach(k=>col[k.replace(/-/g,'')]=s.getPropertyValue('--'+k).trim());
+  col.dark=s.getPropertyValue('color-scheme').trim()==='dark';}
+
+/* ---------- sketchy drawing kit ---------- */
+let boil=0,calls=0;const JIT=1.3;
+const R=()=>mb(boil*7919+(++calls)*104729);
+const jj=(r,k=1)=>(r()-.5)*2*JIT*k;
+function fade(a,fn){if(a<=.001)return;ctx.save();ctx.globalAlpha*=Math.min(1,a);fn();ctx.restore();}
+function line(x1,y1,x2,y2,o={}){const r=R();ctx.save();ctx.strokeStyle=o.c||col.ink;ctx.lineCap='round';if(o.dash)ctx.setLineDash(o.dash);
+  const w=o.w||3,k=Math.min(1,Math.hypot(x2-x1,y2-y1)/60)+.3;
+  for(let pass=0;pass<(o.dash?1:2);pass++){ctx.lineWidth=pass?w*.45:w;ctx.beginPath();ctx.moveTo(x1+jj(r),y1+jj(r));
+    ctx.quadraticCurveTo((x1+x2)/2+jj(r,1.6*k),(y1+y2)/2+jj(r,1.6*k),x2+jj(r),y2+jj(r));ctx.stroke();}
+  ctx.restore();}
+function circle(cx,cy,rad,o={}){const r=R();ctx.save();
+  if(o.fill){ctx.fillStyle=o.fill;ctx.beginPath();ctx.arc(cx,cy,rad,0,7);ctx.fill();}
+  if(o.stroke!==false){ctx.strokeStyle=o.c||col.ink;ctx.lineWidth=o.w||3;ctx.lineCap='round';
+    const n=Math.max(14,Math.round(rad/2.5)),a0=r()*6.28,f1=r()*6,amp=rad>25?1.4:.5;ctx.beginPath();
+    for(let i=0;i<=n;i++){const a=a0+i/n*(2*PI+.3);const rr=rad+Math.sin(a*2+f1)*amp*JIT;
+      const x=cx+Math.cos(a)*rr,y=cy+Math.sin(a)*rr;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+    ctx.stroke();}
+  ctx.restore();}
+function rect(x,y,w,h,o={}){if(o.fill){ctx.save();ctx.fillStyle=o.fill;ctx.beginPath();ctx.roundRect(x,y,w,h,o.rad??8);ctx.fill();ctx.restore();}
+  if(o.stroke!==false){const q={c:o.c,w:o.w||3,dash:o.dash};line(x,y,x+w,y,q);line(x+w,y,x+w,y+h,q);line(x+w,y+h,x,y+h,q);line(x,y+h,x,y,q);}}
+function arrow(x1,y1,x2,y2,o={}){line(x1,y1,x2,y2,o);const a=Math.atan2(y2-y1,x2-x1),h=o.head||14,q={c:o.c,w:o.w};
+  line(x2,y2,x2-h*Math.cos(a-.45),y2-h*Math.sin(a-.45),q);line(x2,y2,x2-h*Math.cos(a+.45),y2-h*Math.sin(a+.45),q);}
+const FONTS={hand:s=>`700 ${s}px Caveat, cursive`,body:s=>`${s}px "Patrick Hand", cursive`,
+  mono:s=>`700 ${s}px "Courier Prime", monospace`,emoji:s=>`${s}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`};
+function txt(s,x,y,o={}){ctx.save();ctx.font=FONTS[o.f||'hand'](o.s||32);ctx.fillStyle=o.c||col.ink;ctx.textAlign=o.a||'center';ctx.textBaseline='middle';ctx.fillText(s,x,y);ctx.restore();}
+function head(s,a=1){fade(a,()=>{ctx.save();ctx.font=FONTS.hand(46);const w=ctx.measureText(s).width;ctx.fillStyle=col.highlight;
+  ctx.beginPath();ctx.roundRect(480-w/2-12,62,w+24,16,7);ctx.fill();ctx.restore();txt(s,480,52,{s:46});});}
+function box(x,y,w,h,fill,title,sub,o={}){rect(x,y,w,h,{fill,w:o.w||2.5,rad:o.rad??8,dash:o.dash,c:o.c});
+  if(title)txt(title,x+w/2,y+(sub?h/2-11:h/2+1),{s:o.ts||28,c:o.tc||col.ink});if(sub)txt(sub,x+w/2,y+h/2+16,{f:'body',s:o.ss||16,c:col.inksoft});}
+function card(x,y,w,h,fill){rect(x,y,w,h,{fill,rad:12,w:3});}
+function logo(x,y,s){rect(x-s/2,y-s/2,s,s,{fill:col.purple,w:3,rad:s*.08});ctx.save();ctx.fillStyle=col.paper;ctx.beginPath();ctx.arc(x,y-s/2,s*.16,0,PI);ctx.fill();ctx.restore();
+  txt('WA',x,y+s*.2,{f:'mono',s:s*.38,c:col.paper});}
+function fileIcon(x,y,label){const w=84,h=104;ctx.save();ctx.fillStyle=col.fillpurple;ctx.beginPath();ctx.moveTo(x-w/2,y-h/2);ctx.lineTo(x+w/2-22,y-h/2);ctx.lineTo(x+w/2,y-h/2+22);ctx.lineTo(x+w/2,y+h/2);ctx.lineTo(x-w/2,y+h/2);ctx.closePath();ctx.fill();ctx.restore();
+  line(x-w/2,y-h/2,x+w/2-22,y-h/2,{w:2.5});line(x+w/2-22,y-h/2,x+w/2,y-h/2+22,{w:2.5});line(x+w/2,y-h/2+22,x+w/2,y+h/2,{w:2.5});line(x+w/2,y+h/2,x-w/2,y+h/2,{w:2.5});line(x-w/2,y+h/2,x-w/2,y-h/2,{w:2.5});
+  line(x+w/2-22,y-h/2,x+w/2-22,y-h/2+22,{w:2});line(x+w/2-22,y-h/2+22,x+w/2,y-h/2+22,{w:2});
+  for(let i=0;i<4;i++)txt(['00 61','73 6d','01 00','00 00'][i],x-2,y-18+i*16,{f:'mono',s:13,c:col.inksoft});
+  txt(label,x,y+h/2+20,{f:'mono',s:17,c:col.purple});}
+function keys(p,k){if(p<=k[0][0])return k[0][1];for(let i=1;i<k.length;i++){if(p<=k[i][0]){const[p0,v0]=k[i-1],[p1,v1]=k[i];return v0+(v1-v0)*ease((p-p0)/(p1-p0));}}return k[k.length-1][1];}
+
+/* ---------- scenes ---------- */
+const SCENES=[
+{t:'Hello',d:6,
+ kid:"WebAssembly lets programs written in almost any language run in your browser, fast and safely, right next to JavaScript.",
+ real:"<b>WebAssembly (Wasm)</b> is a compact binary instruction format that every modern browser can run. It became an official W3C standard in December 2019.",
+ draw(p,lt,c){
+  fade(A(p,0,.15),()=>txt('WebAssembly',480,130,{s:92,c:col.purple}));
+  fade(A(p,.1,.3),()=>txt('in about two minutes',480,200,{s:40,c:col.inksoft}));
+  fade(A(p,.2,.4),()=>logo(480,375,120));
+  ['C++','Rust','Go','C#','Kotlin','Zig','Swift','Dart'].forEach((l,i)=>fade(A(p,.3+i*.04,.4+i*.04),()=>{const a=c*.35+i/8*2*PI;
+    txt(l,480+Math.cos(a)*300,375+Math.sin(a)*105,{f:'mono',s:22,c:[col.blue,col.red,col.green,col.orange,col.teal][i%5]});}));
+ }},
+{t:'Kitchen',d:11,
+ kid:"Think of the browser as a kitchen. JavaScript is a recipe in everyday words: the chef reads it, guesses, and learns shortcuts. Wasm is a precise prep card: exact amounts, nothing to interpret.",
+ real:"JavaScript is flexible, so the engine must parse it and <b>guess types</b> while it runs. Wasm arrives already compiled to low-level instructions with every type written down, so there's little left to interpret.",
+ draw(p,lt,c){
+  head('Same kitchen, two kinds of recipe',A(p,0,.06));
+  fade(A(p,.04,.14),()=>{card(60,110,400,300,col.fillyellow);txt('JavaScript',260,145,{s:38,c:col.orange});txt('a recipe in everyday words',260,178,{f:'body',s:18,c:col.inksoft});
+    ['"add a pinch of salt…"','"cook until golden?"','"some cheese, to taste"'].forEach((l,i)=>txt(l,90,222+i*36,{f:'body',s:21,a:'left'}));
+    txt('🧑‍🍳',140,355,{f:'emoji',s:46});
+    ['?','?','??'].forEach((q,i)=>txt(q,200+i*30,335+Math.sin(c*4+i)*6,{s:34,c:col.red}));
+    txt('read · guess · learn shortcuts',330,370,{f:'body',s:17,c:col.inksoft});});
+  fade(A(p,.34,.44),()=>{card(500,110,400,300,col.fillblue);txt('WebAssembly',700,145,{s:38,c:col.purple});txt('a precise prep card',700,178,{f:'body',s:18,c:col.inksoft});
+    ['salt     2.0 g','heat     180 °C','time     12 min'].forEach((l,i)=>txt(l,540,222+i*36,{f:'mono',s:21,a:'left'}));
+    txt('🧑‍🍳',580,355,{f:'emoji',s:46});txt('✓',640,345,{s:40,c:col.green});txt('just follow it',780,370,{f:'body',s:17,c:col.inksoft});});
+  fade(A(p,.74,.84),()=>txt('Less reading and guessing → fast and predictable',480,480,{s:34,c:col.purple}));
+ }},
+{t:'Compile once',d:11,
+ kid:"You write your program in a language you like, translate it once into a small .wasm file, and every modern browser can run that same file.",
+ real:"Toolchains such as <b>Emscripten</b> (C/C++), <b>rustc</b> and Go compile source to a <code>.wasm</code> module. Chrome, Firefox, Safari and Edge all run it, and runtimes like Wasmtime run it outside the browser too (WASI).",
+ draw(p){
+  head('Write in many languages, compile once',A(p,0,.06));
+  const langs=[['C / C++',col.blue],['Rust',col.red],['Go',col.teal],['Kotlin',col.purple],['C# / .NET',col.green]];
+  langs.forEach(([l,cc],i)=>fade(A(p,.05+i*.04,.11+i*.04),()=>{const y=130+i*62;box(60,y,170,46,col.fillpaper,'',null);txt(l,145,y+23,{f:'mono',s:19,c:cc});arrow(236,y+23,322,250,{w:2,c:col.pencil});}));
+  fade(A(p,.3,.38),()=>box(330,200,170,100,col.fillgray,'compiler','Emscripten · rustc · …',{ts:32}));
+  fade(A(p,.4,.48),()=>{arrow(508,250,566,250,{w:3});fileIcon(625,245,'app.wasm');});
+  ['Chrome','Firefox','Safari','Edge'].forEach((b,i)=>fade(A(p,.52+i*.05,.58+i*.05),()=>{const y=150+i*62;arrow(675,250,752,y+20,{w:2,c:col.pencil});box(760,y,150,40,col.fillgreen,b,null,{ts:26});}));
+  fade(A(p,.72,.78),()=>txt('+ servers, edge, plugins (WASI)',835,410,{f:'body',s:17,c:col.inksoft}));
+  fade(A(p,.8,.88),()=>txt('One small binary. Runs in every modern browser.',480,490,{s:34,c:col.purple}));
+ }},
+{t:'Inside the file',d:10,
+ kid:"A .wasm file is tidy: it starts with a magic word, then neat labelled sections saying what it needs, what it does and what it offers.",
+ real:"A module begins with the bytes <code>00 61 73 6d</code> (<code>\\0asm</code>) and a version, followed by typed <b>sections</b>: types, imports, functions, memory (in 64 KiB pages), data and exports.",
+ draw(p){
+  head('Inside a .wasm file: neat, typed sections',A(p,0,.06));
+  fade(A(p,.04,.12),()=>{rect(200,100,560,44,{fill:col.fillgray,w:2.5,rad:6});txt('00 61 73 6d  01 00 00 00',350,122,{f:'mono',s:20});txt('= "\\0asm" + version 1',625,122,{s:24,c:col.purple});});
+  const S=[['Type','function signatures',col.fillblue],['Import','what it needs from JavaScript',col.fillorange],['Function','the code bodies',col.fillyellow],
+    ['Memory','how big, in 64 KiB pages',col.fillgreen],['Data','strings, lookup tables',col.fillpink],['Export','what JavaScript may call',col.fillpurple]];
+  S.forEach(([n,s,f],i)=>fade(A(p,.14+i*.07,.2+i*.07),()=>{const y=158+i*50;rect(250,y,460,42,{fill:f,w:2.5,rad:6});txt(n,270,y+21,{s:28,a:'left'});txt(s,400,y+22,{f:'body',s:18,a:'left',c:col.inksoft});}));
+  fade(A(p,.62,.7),()=>{arrow(840,260,724,330,{w:2.5,c:col.green});txt('every type',840,215,{s:28,c:col.green});txt('written down',840,245,{s:28,c:col.green});});
+  fade(A(p,.8,.88),()=>txt('Small to download, quick to check',480,500,{s:34,c:col.purple}));
+ }},
+{t:'Stack machine',d:12,
+ kid:"Inside, Wasm code is like a stack of plates. Each instruction puts numbers on top or takes the top two off, combines them and puts the answer back.",
+ real:"Wasm is a <b>stack machine</b>: <code>i32.const</code> pushes a 32-bit integer, <code>i32.add</code> and <code>i32.mul</code> pop two values and push the result. The engine turns this into real machine code.",
+ draw(p){
+  head('Wasm code is a tiny stack machine',A(p,0,.06));
+  const ins=['i32.const 2','i32.const 3','i32.add','i32.const 4','i32.mul'];
+  const st=[[],[2],[2,3],[5],[5,4],[20]],tt=[.1,.22,.34,.46,.58];
+  let k=0;tt.forEach(t=>{if(p>=t)k++;});
+  fade(A(p,.03,.08),()=>{txt('code',230,118,{s:30,c:col.inksoft});txt('stack',640,118,{s:30,c:col.inksoft});
+    line(560,420,720,420,{w:3});line(560,420,560,150,{w:2,c:col.pencil,dash:[6,6]});line(720,420,720,150,{w:2,c:col.pencil,dash:[6,6]});});
+  ins.forEach((s,i)=>fade(A(p,.04,.08),()=>{const y=165+i*48,cur=i===k-1;
+    if(cur)rect(100,y-20,290,40,{fill:col.highlight,stroke:false,rad:6});txt(s,130,y,{f:'mono',s:24,a:'left',c:i<k?col.ink:col.pencil});
+    if(cur)txt('▶',105,y,{s:24,c:col.red});}));
+  const cur=st[k],prev=k?st[k-1]:[],drop=k?A(p,tt[k-1],tt[k-1]+.06):1;
+  cur.forEach((v,i)=>{const isNew=i>=prev.length||prev[i]!==v;const y=420-(i+1)*56+(isNew?-(1-drop)*60:0);
+    fade(isNew?drop:1,()=>{rect(572,y+4,136,48,{fill:isNew&&k>2&&(k===3||k===5)?col.fillgreen:col.fillblue,w:2.5,rad:6});txt(String(v),640,y+29,{f:'mono',s:30});});});
+  fade(A(p,.66,.74),()=>txt('(2 + 3) × 4 = 20',230,430,{s:36,c:col.green}));
+  fade(A(p,.8,.88),()=>txt('Simple, compact and easy to check before it runs',480,495,{s:32,c:col.purple}));
+ }},
+{t:'Load & run',d:12,
+ kid:"Loading Wasm is a short assembly line: download, translate to machine code while it's still downloading, check it, set it up, then call it.",
+ real:"<code>WebAssembly.instantiateStreaming()</code> fetches, compiles (streaming), <b>validates</b> and instantiates in one call. Validation is a single quick pass because every type is declared; JS instead parses, interprets and warms up its JIT.",
+ draw(p){
+  head('Loading: fetch, compile, check, start, call',A(p,0,.06));
+  const st=[['📥','fetch','download app.wasm'],['⚙️','compile','while it streams'],['✅','validate','types match, no escape'],['🏗️','instantiate','memory, tables, start'],['📞','call','JS calls an export']];
+  st.forEach(([e,t,s],i)=>{const x=40+i*180,a=.06+i*.1;fade(A(p,a,a+.06),()=>{const on=p>=a+.06;
+    rect(x,120,160,120,{fill:on?col.fillgreen:col.fillpaper,w:2.5,rad:10});txt(e,x+80,150,{f:'emoji',s:30});txt(t,x+80,190,{s:30});txt(s,x+80,220,{f:'body',s:15,c:col.inksoft});
+    if(i<4)arrow(x+162,180,x+178,180,{w:2.5,head:9});});});
+  fade(A(p,.56,.62),()=>{rect(110,268,740,90,{fill:col.fillgray,w:2,rad:8});
+    txt("await WebAssembly.instantiateStreaming(fetch('app.wasm'))",130,296,{f:'mono',s:19,a:'left'});
+    txt('instance.exports.add(2, 3)   // → 5',130,330,{f:'mono',s:19,a:'left',c:col.green});});
+  fade(A(p,.68,.74),()=>{txt('JavaScript:',140,395,{s:28,a:'left',c:col.orange});txt('parse → interpret → watch → optimise (warm-up)',290,396,{f:'body',s:20,a:'left',c:col.inksoft});});
+  fade(A(p,.74,.8),()=>{txt('Wasm:',140,432,{s:28,a:'left',c:col.purple});txt('decode + validate in one pass → compile',290,433,{f:'body',s:20,a:'left',c:col.inksoft});});
+  fade(A(p,.85,.92),()=>txt('Ready to run fast almost immediately',480,500,{s:32,c:col.purple}));
+ }},
+{t:'Rides the engine',d:12,
+ kid:"Wasm doesn't bring its own engine. It walks in through a side door of the JavaScript engine, skips the reading-and-guessing rooms, and shares everything else.",
+ real:"V8, SpiderMonkey and JavaScriptCore each added a Wasm front door to their existing <b>JS engine</b>. Wasm skips the parser, interpreter and type guessing, then shares the machine-code generator, garbage collector (WasmGC), sandbox and threads.",
+ draw(p){
+  head('Wasm rides inside the JavaScript engine',A(p,0,.06));
+  fade(A(p,.03,.1),()=>{rect(40,100,880,330,{w:2.5,dash:[10,8],c:col.pencil,rad:16,fill:col.fillpaper});txt('one JS engine (V8 · SpiderMonkey · JavaScriptCore)',60,122,{f:'body',s:18,a:'left',c:col.inksoft});});
+  fade(A(p,.1,.2),()=>{txt('app.js',110,185,{f:'mono',s:22,c:col.orange});arrow(150,185,178,185,{w:2.5,head:9});
+    box(184,160,140,50,col.fillorange,'parser',null,{ts:26});arrow(326,185,354,185,{w:2.5,head:9});
+    box(360,160,160,50,col.fillorange,'interpreter',null,{ts:26});arrow(522,185,550,185,{w:2.5,head:9});
+    box(556,160,190,50,col.fillorange,'JIT tiers',null,{ts:26});txt('(warm-up)',651,225,{f:'body',s:15,c:col.inksoft});
+    arrow(780,185,800,318,{w:2.5,c:col.orange});line(746,185,780,185,{w:2.5,c:col.orange});});
+  fade(A(p,.32,.42),()=>{txt('app.wasm',110,280,{f:'mono',s:22,c:col.purple});arrow(160,280,178,280,{w:2.5,head:9});
+    box(184,255,200,50,col.fillpurple,'decode + validate',null,{ts:26});
+    line(386,280,700,280,{w:2.5,dash:[8,7],c:col.purple});arrow(700,280,760,318,{w:2.5,c:col.purple});
+    txt('skips the guessing: types already known',545,262,{f:'body',s:16,c:col.purple});});
+  fade(A(p,.52,.62),()=>{rect(184,322,720,90,{fill:col.fillgreen,w:3,rad:10});txt('shared',210,346,{s:26,a:'left',c:col.green});
+    txt('machine-code generator · garbage collector · sandbox · threads',544,382,{f:'body',s:20});});
+  fade(A(p,.82,.9),()=>txt('A second front door, not a second engine',480,485,{s:34,c:col.purple}));
+ }},
+{t:'Sandbox',d:13,
+ kid:"Wasm lives in a sealed room with one long shelf of boxes: its memory. It can only touch that shelf. To pass in a word, JavaScript puts the letters on the shelf and says where they start and how many there are.",
+ real:"Each instance gets <b>linear memory</b>: one flat array of bytes that grows in 64 KiB pages. Wasm can't reach outside it. Strings cross the border as bytes in that memory plus two numbers: a <b>pointer</b> and a <b>length</b>.",
+ draw(p){
+  head('A sandbox with one block of memory',A(p,0,.06));
+  fade(A(p,.04,.12),()=>{rect(60,100,580,240,{w:3,dash:[12,9],c:col.green,rad:18});txt('🔒 sandbox',80,122,{s:28,a:'left',c:col.green});});
+  const wrote=p>=.6,hi=['68','69','21'];
+  fade(A(p,.08,.16),()=>{txt('linear memory (grows in 64 KiB pages)',360,150,{f:'body',s:18,c:col.inksoft});
+    for(let i=0;i<16;i++){const x=120+i*30,on=wrote&&i>=8&&i<11;rect(x,170,28,40,{fill:on?col.fillorange:col.fillpaper,w:1.8,rad:3});
+      txt(on?hi[i-8]:'00',x+14,190,{f:'mono',s:12,c:on?col.ink:col.pencil});}
+    txt('0',134,224,{f:'mono',s:13,c:col.inksoft});txt('8',374,224,{f:'mono',s:13,c:col.red});});
+  fade(A(p,.16,.24),()=>{box(110,260,180,60,col.fillpurple,'Wasm code',null,{ts:28});arrow(200,258,250,214,{w:2.5,c:col.purple});txt('only touches this',318,240,{f:'body',s:16,a:'left',c:col.purple});});
+  [['your files',200],['other tabs',480],['the page itself',760]].forEach(([l,x],i)=>fade(A(p,.26+i*.04,.3+i*.04),()=>txt(`✗ ${l}`,x,370,{s:28,c:col.red})));
+  fade(A(p,.48,.54),()=>{box(690,255,200,60,col.fillorange,'JavaScript',null,{ts:28});txt('"hi!"',790,232,{f:'mono',s:22,c:col.orange});txt('outside the sandbox',790,335,{f:'body',s:16,c:col.inksoft});});
+  if(p>=.54&&p<.62){const t=A(p,.54,.6);txt('h i !',lerp(790,404,t),lerp(232,195,t),{f:'mono',s:20,c:col.orange});}
+  fade(A(p,.64,.7),()=>{arrow(690,300,296,300,{w:2.5,c:col.orange});txt('add(ptr = 8, len = 3)',470,286,{f:'mono',s:17,c:col.orange});});
+  fade(A(p,.4,.46)*(1-A(p,.62,.66)),()=>txt('Wasm can\'t reach anything outside its room',480,420,{s:30,c:col.red}));
+  fade(A(p,.8,.88),()=>txt('Text crosses as bytes + two numbers: where, and how long',480,440,{s:30,c:col.purple}));
+ }},
+{t:'Borrowed powers',d:11,
+ kid:"Wasm is great at number crunching on its own. For anything outside its room, like changing the page, the network or drawing, it asks JavaScript to do it.",
+ real:"Built in: numbers, linear memory, <b>WasmGC</b> structs and arrays, and exception handling (both in Wasm 3.0), plus atomics. Borrowed through JS: the DOM, <code>fetch</code>, Canvas, WebGL and WebGPU, storage and timers. Threads are Web Workers sharing memory.",
+ draw(p){
+  head('Built in, or borrowed from the browser?',A(p,0,.06));
+  fade(A(p,.04,.12),()=>{card(60,105,400,330,col.fillgreen);txt('built into Wasm',260,138,{s:36,c:col.green});});
+  [['🔢','fast maths on numbers'],['🧱','linear memory'],['♻️','GC objects (Wasm 3.0)'],['⚠️','exceptions (Wasm 3.0)'],['⚛️','atomics (threads half-built-in)']].forEach(([e,l],i)=>
+    fade(A(p,.1+i*.05,.16+i*.05),()=>{txt(e,95,190+i*48,{f:'emoji',s:24});txt(l,125,191+i*48,{f:'body',s:21,a:'left'});}));
+  fade(A(p,.38,.46),()=>{card(500,105,400,330,col.fillorange);txt('borrowed through JavaScript',700,138,{s:36,c:col.orange});});
+  [['📄','the page (DOM)'],['🌐','the network (fetch)'],['🎨','graphics: Canvas, WebGL, WebGPU'],['💾','storage, audio, timers…'],['🧵','threads = Web Workers']].forEach(([e,l],i)=>
+    fade(A(p,.44+i*.05,.5+i*.05),()=>{txt(e,535,190+i*48,{f:'emoji',s:24});txt(l,565,191+i*48,{f:'body',s:21,a:'left'});}));
+  fade(A(p,.82,.9),()=>txt('Outside its room, Wasm asks JavaScript for help',480,485,{s:34,c:col.purple}));
+ }},
+{t:'GPU trip',d:10,
+ kid:"To draw a triangle, Wasm prepares the corner points, JavaScript glue passes them to the graphics system, which hands them to a locked-down graphics helper, and finally the GPU paints.",
+ real:"Wasm reaches the GPU exactly the way JavaScript does: through <b>WebGL or WebGPU</b>. Every call crosses into a separate, sandboxed GPU process. Wasm does the CPU side (logic, physics, vertex data); batching keeps the crossing cheap.",
+ draw(p){
+  head('Reaching the GPU: a relay race',A(p,0,.06));
+  const st=[['Wasm memory','triangle corners',col.fillpurple],['JS glue','turns it into a call',col.fillorange],['WebGPU/WebGL','the graphics API',col.fillblue],['GPU process','separate & locked down',col.fillgray],['the GPU 🎮','draws pixels',col.fillgreen]];
+  st.forEach(([t,s,f],i)=>fade(A(p,.05+i*.05,.1+i*.05),()=>{const x=30+i*186;box(x,190,166,100,f,t,s,{ts:24,ss:15});if(i<4)arrow(x+168,240,x+184,240,{w:2.5,head:9});}));
+  if(p>=.32&&p<.8){const t=seg(p,.32,.78),x=lerp(113,857,t),y=160+Math.sin(t*PI*4)*6;
+    ctx.save();ctx.fillStyle=col.red;ctx.beginPath();ctx.moveTo(x,y-14);ctx.lineTo(x+14,y+10);ctx.lineTo(x-14,y+10);ctx.closePath();ctx.fill();ctx.restore();}
+  fade(A(p,.78,.84),()=>{ctx.save();ctx.fillStyle=col.red;ctx.beginPath();ctx.moveTo(863,330);ctx.lineTo(903,395);ctx.lineTo(823,395);ctx.closePath();ctx.fill();ctx.restore();txt('✨',915,330,{f:'emoji',s:26});});
+  fade(A(p,.55,.62),()=>txt('tip: send data in big batches, not many tiny calls',420,360,{f:'body',s:21,c:col.inksoft}));
+  fade(A(p,.84,.92),()=>txt('Same road as JavaScript: no secret shortcut to the GPU',480,480,{s:32,c:col.purple}));
+ }},
+{t:'Limits',d:11,
+ kid:"Wasm isn't magic. It can't touch the page directly, every trip across the border costs a little, threads need extra setup, and its memory can grow but never shrink.",
+ real:"No direct DOM access (no active proposal today). Each JS↔Wasm call converts values, and strings get copied. Shared-memory threads need <b>COOP/COEP</b> headers. Linear memory can't give pages back without breaking addresses.",
+ draw(p){
+  head('The catch: what Wasm can\'t do (yet)',A(p,0,.06));
+  const cards=[['🚪','No direct DOM','changes the page through JS','~ use a framework or glue',col.orange],['🔁','Crossings cost','strings get copied','~ batch your calls',col.orange],
+    ['🧵','Threads need setup','COOP / COEP headers','~ workers + message passing',col.orange],['📈','Memory only grows','pages can\'t be given back','✗ plan your memory',col.red]];
+  cards.forEach(([e,t,s,v,c],i)=>fade(A(p,.08+i*.13,.18+i*.13),()=>{const x=70+(i%2)*420,y=105+Math.floor(i/2)*180;
+    card(x,y,400,150,col.fillpaper);txt(e,x+52,y+75,{f:'emoji',s:48});txt(t,x+100,y+48,{s:34,a:'left'});
+    txt(s,x+100,y+88,{f:'body',s:19,a:'left',c:col.inksoft});txt(v,x+100,y+122,{s:26,a:'left',c});}));
+  fade(A(p,.72,.84),()=>txt('A power tool next to JavaScript, not a replacement',480,505,{s:32,c:col.purple}));
+ }},
+{t:'What\'s next',d:9,
+ kid:"New Wasm features are like students moving through five school years. Each one has to pass every year before it becomes part of the standard.",
+ real:"Proposals move through five <b>standardisation phases</b>. In the pipeline: the <b>Component Model</b> (modules from different languages plug together via WIT interfaces), WASI for running outside the browser, stack switching for coroutines, and shared-everything threads.",
+ draw(p){
+  head('What comes next',A(p,0,.06));
+  fade(A(p,.04,.14),()=>{line(150,135,810,135,{w:3,c:col.pencil});for(let i=0;i<5;i++){const x=150+i*165;circle(x,135,14,{fill:i===4?col.green:col.fillpaper,w:2.5});
+    txt(i===4?'5 · standard!':'phase '+(i+1),x,170,{f:'body',s:17,c:i===4?col.green:col.inksoft});}
+    const t=(seg(p,.1,.6)),x=lerp(150,810,t);txt('📜',x,103,{f:'emoji',s:26});});
+  const pr=[['🧩','Component Model','modules from any language snap together (WIT)',col.fillpurple],['🖥️','WASI','run Wasm safely outside the browser',col.fillblue],
+    ['🔀','Stack switching','coroutines and better async',col.fillyellow],['🧵','Shared-everything threads','share GC objects between threads',col.fillgreen]];
+  pr.forEach(([e,t,s,f],i)=>fade(A(p,.18+i*.1,.26+i*.1),()=>{const x=70+(i%2)*420,y=215+Math.floor(i/2)*110;card(x,y,400,90,f);
+    txt(e,x+40,y+45,{f:'emoji',s:34});txt(t,x+80,y+30,{s:30,a:'left'});txt(s,x+80,y+64,{f:'body',s:17,a:'left',c:col.inksoft});}));
+  fade(A(p,.75,.85),()=>txt('Each step is argued over in public before it ships',480,500,{s:30,c:col.purple}));
+ }},
+{t:'Recap',d:8,
+ kid:"Fast, safe, portable, and a teammate for JavaScript. That's WebAssembly.",
+ real:"Compiled once, validated in one pass, run in a sandbox with its own linear memory, sharing the JS engine's compiler and GC, and borrowing browser powers through JavaScript. The Wasm Sketchbook covers each idea in 12 hand-drawn chapters.",
+ draw(p){
+  fade(A(p,0,.15),()=>{logo(250,130,90);txt('WebAssembly',540,130,{s:78,c:col.purple});});
+  [['⚡','fast: precompiled and typed',col.orange],['🔒','safe: a sandbox and its own memory',col.green],['🌍','portable: many languages, every browser',col.blue],['🤝','a teammate for JavaScript',col.purple]]
+    .forEach(([e,t,c],i)=>fade(A(p,.12+i*.1,.22+i*.1),()=>{const y=230+i*52;txt(e,200,y,{f:'emoji',s:32});txt(t,236,y,{s:34,a:'left',c});}));
+  fade(A(p,.62,.8),()=>txt('Keep going: 12 hand-drawn chapters and a quiz in the Wasm Sketchbook →',480,470,{s:28,c:col.inksoft}));
+ }},
+];
+const starts=[];let TOTAL=0;SCENES.forEach(s=>{starts.push(TOTAL);TOTAL+=s.d;});
+
+/* ---------- canvas sizing ---------- */
+function resize(){const w=cv.clientWidth||W,dpr=Math.min(2,devicePixelRatio||1);cv.width=Math.round(w*dpr);cv.height=Math.round(w*9/16*dpr);}
+addEventListener('resize',resize);
+function backdrop(){ctx.fillStyle=col.paper;ctx.fillRect(0,0,W,H);ctx.strokeStyle=col.grid;ctx.lineWidth=1;ctx.beginPath();
+  for(let x=0;x<=W;x+=30){ctx.moveTo(x+.5,0);ctx.lineTo(x+.5,H);}for(let y=0;y<=H;y+=30){ctx.moveTo(0,y+.5);ctx.lineTo(W,y+.5);}ctx.stroke();}
+function render(i,p,clock){const s=cv.width/W;ctx.setTransform(s,0,0,s,0,0);calls=0;boil=reduce?0:Math.floor(clock*6);
+  backdrop();SCENES[i].draw(p,p*SCENES[i].d,reduce?0:clock);}
+
+/* ---------- player ---------- */
+let time=0,playing=!reduce,last=performance.now(),lastScene=-1,clock=0;
+const fmt=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
+const dotsEl=$('dots');
+SCENES.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.textContent=(i+1)+' · '+s.t;b.addEventListener('click',()=>{time=starts[i]+.01;});dotsEl.appendChild(b);});
+function sceneAt(t){let i=0;while(i<SCENES.length-1&&t>=starts[i+1])i++;return i;}
+function ui(i){if(i===lastScene)return;lastScene=i;const s=SCENES[i];
+  $('chip').textContent=`Scene ${i+1} of ${SCENES.length} · ${s.t}`;$('kid').textContent=s.kid;$('real').innerHTML=s.real;
+  [...dotsEl.children].forEach((b,j)=>b.setAttribute('aria-current',j===i));}
+function setPlay(v){playing=v;$('play').textContent=v?'Pause':(time>=TOTAL-.05?'Replay':'Play');}
+$('play').addEventListener('click',()=>{if(!playing&&time>=TOTAL-.05)time=0;setPlay(!playing);});
+$('prev').addEventListener('click',()=>{const i=sceneAt(time);time=starts[Math.max(0,(time-starts[i]<1.5?i-1:i))]+.01;});
+$('next').addEventListener('click',()=>{const i=sceneAt(time);time=i<SCENES.length-1?starts[i+1]+.01:TOTAL-.01;});
+const bar=$('bar');
+function seek(e){const r=bar.getBoundingClientRect();time=clamp((e.clientX-r.left)/r.width,0,1)*TOTAL;}
+bar.addEventListener('pointerdown',e=>{seek(e);try{bar.setPointerCapture(e.pointerId);}catch(_){}bar.onpointermove=seek;});
+bar.addEventListener('pointerup',()=>{bar.onpointermove=null;});
+bar.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();e.stopPropagation();time=clamp(time+(e.key==='ArrowRight'?5:-5),0,TOTAL-.01);}});
+addEventListener('keydown',e=>{if(e.target.closest('button,a')&&(e.code==='Space'||e.key==='Enter'))return;
+  if(e.code==='Space'){e.preventDefault();$('play').click();}else if(e.key==='ArrowRight')$('next').click();else if(e.key==='ArrowLeft')$('prev').click();});
+
+/* theme toggle, shared with the Wasm Sketchbook (same localStorage key) */
+const root=document.documentElement;
+function isDark(){const t=root.getAttribute('data-theme');return t?t==='dark':matchMedia('(prefers-color-scheme: dark)').matches;}
+function themeIcon(){$('theme').firstElementChild.textContent=isDark()?'☀️':'🌙';}
+$('theme').addEventListener('click',()=>{const t=isDark()?'light':'dark';root.setAttribute('data-theme',t);try{localStorage.setItem('wasm-sketchbook-theme',t);}catch(e){}readColors();themeIcon();});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{readColors();themeIcon();});
+
+function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000,.05);last=now;clock+=dt;
+  if(playing){time+=dt;if(time>=TOTAL){time=TOTAL-.001;setPlay(false);}}
+  const i=sceneAt(time),p=clamp((time-starts[i])/SCENES[i].d,0,1);
+  ui(i);render(i,p,clock);
+  $('fill').style.width=(time/TOTAL*100)+'%';bar.setAttribute('aria-valuenow',Math.round(time/TOTAL*100));
+  $('time').textContent=fmt(time)+' / '+fmt(TOTAL);}
+readColors();themeIcon();resize();setPlay(playing);
+if(reduce)time=starts[0]+SCENES[0].d*.99;
+window.__anim={seek:t=>{time=clamp(t,0,TOTAL-.01);},total:TOTAL,starts};
+(document.fonts?document.fonts.ready:Promise.resolve()).then(()=>{last=performance.now();requestAnimationFrame(loop);});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,387 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Quantum in Two Minutes · Qubit Sketchbook</title>
+<meta name="description" content="A two-minute hand-drawn animation: bits, qubits, measurement, entanglement, interference, a quantum search, noise and what quantum computers are good for.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%237C5CFF' stroke='%2326243A' stroke-width='4'/%3E%3Ctext x='32' y='43' font-size='32' text-anchor='middle' fill='white' font-family='Georgia'%3EQ%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=JetBrains+Mono:wght@400;600&family=Nunito:wght@400;700;800&family=Permanent+Marker&display=swap" rel="stylesheet">
+<script>(function(){try{var t=localStorage.getItem('qsk-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+<style>
+:root{
+  --paper:#FFF8EC;--card:#FFFDF8;--grid:rgba(60,100,190,.13);
+  --ink:#26243A;--ink-2:#4A4763;--ink-3:#8A86A3;
+  --violet:#7C5CFF;--coral:#FF6B57;--teal:#14B8A6;--sky:#3B9EF5;--sun:#FFC83D;
+  --pink:#FF5FA8;--lime:#7BC74D;--amber:#FF9F1C;
+  --shadow:4px 4px 0 var(--ink);--shadow-sm:2px 2px 0 var(--ink);
+  --wobble:255px 15px 225px 15px / 15px 225px 15px 255px;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --paper:#1C2927;--card:#233431;--grid:rgba(255,255,255,.06);
+  --ink:#F1EEE3;--ink-2:#CCD5CF;--ink-3:#93A39C;
+  --violet:#B3A2FF;--coral:#FF9A88;--teal:#5FD9C7;--sky:#8CC6FF;--sun:#FFD970;
+  --pink:#FF9FCB;--lime:#B1E07D;--amber:#FFBE6A;
+  --shadow:4px 4px 0 rgba(0,0,0,.55);--shadow-sm:2px 2px 0 rgba(0,0,0,.55);
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#1C2927;--card:#233431;--grid:rgba(255,255,255,.06);
+    --ink:#F1EEE3;--ink-2:#CCD5CF;--ink-3:#93A39C;
+    --violet:#B3A2FF;--coral:#FF9A88;--teal:#5FD9C7;--sky:#8CC6FF;--sun:#FFD970;
+    --pink:#FF9FCB;--lime:#B1E07D;--amber:#FFBE6A;
+    --shadow:4px 4px 0 rgba(0,0,0,.55);--shadow-sm:2px 2px 0 rgba(0,0,0,.55);
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.55 Nunito,system-ui,sans-serif;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px}
+a{color:inherit}
+.wrap{max-width:1040px;margin:0 auto;padding:16px 16px 40px}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.top .sp{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:2px solid var(--ink);border-radius:var(--wobble);
+  background:var(--card);box-shadow:var(--shadow-sm);font:700 15px Nunito,sans-serif;color:var(--ink);text-decoration:none;cursor:pointer;
+  transition:transform .12s,box-shadow .12s}
+.pill:hover{transform:translate(-1px,-1px) rotate(-1deg);box-shadow:3px 3px 0 var(--ink)}
+.pill.primary{background:var(--violet);color:#fff}
+:root[data-theme="dark"] .pill.primary{color:#17221F}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pill.primary{color:#17221F}}
+h1{font:400 clamp(30px,5vw,46px)/1.1 "Permanent Marker",cursive;margin:8px 0 4px}
+h1 span{color:var(--violet)}
+.lede{margin:0 0 16px;color:var(--ink-2);font-size:18px}
+.stage{position:relative;border:3px solid var(--ink);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;background:var(--paper)}
+canvas{display:block;width:100%;aspect-ratio:16/9}
+.chip{position:absolute;top:10px;left:12px;font:600 12px "JetBrains Mono",monospace;background:var(--card);border:2px solid var(--ink);
+  border-radius:999px;padding:2px 10px;opacity:.9}
+.controls{display:flex;align-items:center;gap:10px;margin:14px 0 8px;flex-wrap:wrap}
+.bar{flex:1;min-width:140px;height:14px;border:2px solid var(--ink);border-radius:999px;background:var(--card);cursor:pointer;position:relative;overflow:hidden;touch-action:none}
+.bar i{position:absolute;inset:0 auto 0 0;background:var(--violet);width:0}
+.time{font:600 13px "JetBrains Mono",monospace;color:var(--ink-2);min-width:92px;text-align:right}
+.dots{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.dots button{font:600 12px Nunito,sans-serif;padding:3px 10px;border-radius:999px;border:1.5px solid var(--ink-3);background:var(--card);color:var(--ink-2);cursor:pointer}
+.dots button[aria-current="true"]{background:var(--violet);border-color:var(--ink);color:#fff}
+:root[data-theme="dark"] .dots button[aria-current="true"]{color:#17221F}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .dots button[aria-current="true"]{color:#17221F}}
+.caption{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.caption > div{background:var(--card);border:2px solid var(--ink);border-radius:var(--wobble);padding:12px 16px;box-shadow:var(--shadow-sm);min-height:120px}
+.tag{display:inline-block;font:700 22px Caveat,cursive;color:var(--violet);margin-bottom:2px}
+.caption .real .tag{color:var(--coral)}
+.caption p{margin:0}
+.note{color:var(--ink-3);font-size:14px;margin-top:14px}
+.end-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+button:focus-visible,a:focus-visible,.bar:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+@media (max-width:700px){.caption{grid-template-columns:1fr}.hide-sm,.chip{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="pill home-link" href="../index.html" title="All explainers"><span aria-hidden="true">←</span><span class="hide-sm"> All explainers</span></a>
+    <a class="pill" href="index.html"><span aria-hidden="true">📚</span><span class="hide-sm"> Qubit Sketchbook</span></a>
+    <a class="pill" href="bites.html"><span aria-hidden="true">📱</span><span class="hide-sm"> Quick Bites</span></a>
+    <span class="sp"></span>
+    <button class="pill" type="button" id="theme" aria-label="Switch between paper and chalkboard"><span aria-hidden="true">🌙</span></button>
+  </div>
+  <h1>Quantum in <span>two minutes</span></h1>
+  <p class="lede">Bits, qubits, measurement, entanglement, interference, a real quantum search, and what it all is (and isn't) good for. Sketched, start to finish.</p>
+
+  <div class="stage">
+    <canvas id="cv" role="img" aria-label="Hand-drawn animation explaining quantum computing. The captions below describe each scene."></canvas>
+    <span class="chip" id="chip">Scene 1 of 11</span>
+  </div>
+
+  <div class="controls">
+    <button type="button" class="pill" id="prev" aria-label="Previous scene">◀<span class="hide-sm"> Prev</span></button>
+    <button type="button" class="pill primary" id="play">Pause</button>
+    <button type="button" class="pill" id="next" aria-label="Next scene"><span class="hide-sm">Next </span>▶</button>
+    <div class="bar" id="bar" role="slider" aria-label="Timeline" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="fill"></i></div>
+    <span class="time" id="time">0:00 / 2:03</span>
+  </div>
+  <div class="dots" id="dots" aria-label="Scenes"></div>
+
+  <div class="caption" aria-live="polite">
+    <div class="kid"><span class="tag">The story</span><p id="kid"></p></div>
+    <div class="real"><span class="tag">What's really happening</span><p id="real"></p></div>
+  </div>
+  <div class="end-cta">
+    <a class="pill primary" href="chapters/01-why-quantum-computing.html">▶ Start Episode 1</a>
+    <a class="pill" href="bites.html">📱 Swipe Quick Bites</a>
+  </div>
+  <p class="note">Keyboard: space to play or pause, arrow keys to change scene. The circle is a 2-D slice of the Bloch sphere; the full guide explains the 3-D picture and phase.</p>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const W=960,H=540,PI=Math.PI;
+const cv=$('cv'),ctx=cv.getContext('2d');
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const seg=(p,a,b)=>clamp((p-a)/(b-a),0,1);
+const A=(p,a,b)=>ease(seg(p,a,b));
+function keys(p,k){if(p<=k[0][0])return k[0][1];for(let i=1;i<k.length;i++){if(p<=k[i][0]){const[p0,v0]=k[i-1],[p1,v1]=k[i];return v0+(v1-v0)*ease((p-p0)/(p1-p0));}}return k[k.length-1][1];}
+function mb(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+/* ---------- colours (read from CSS tokens so both themes work) ---------- */
+const col={};const DK='#26243A';
+function readColors(){const s=getComputedStyle(document.documentElement);
+  ['paper','card','grid','ink','ink-2','ink-3','violet','coral','teal','sky','sun','pink','lime','amber'].forEach(k=>col[k.replace('-','')]=s.getPropertyValue('--'+k).trim());
+  col.dark=s.getPropertyValue('color-scheme').trim()==='dark';}
+
+/* ---------- sketchy drawing kit ---------- */
+let boil=0,calls=0;const JIT=1.3;
+const R=()=>mb(boil*7919+(++calls)*104729);
+const jj=(r,k=1)=>(r()-.5)*2*JIT*k;
+function fade(a,fn){if(a<=.001)return;ctx.save();ctx.globalAlpha*=Math.min(1,a);fn();ctx.restore();}
+function line(x1,y1,x2,y2,o={}){const r=R();ctx.save();ctx.strokeStyle=o.c||col.ink;ctx.lineCap='round';if(o.dash)ctx.setLineDash(o.dash);
+  const w=o.w||3,k=Math.min(1,Math.hypot(x2-x1,y2-y1)/60)+.3;
+  for(let pass=0;pass<(o.dash?1:2);pass++){ctx.lineWidth=pass?w*.45:w;ctx.beginPath();ctx.moveTo(x1+jj(r),y1+jj(r));
+    ctx.quadraticCurveTo((x1+x2)/2+jj(r,1.6*k),(y1+y2)/2+jj(r,1.6*k),x2+jj(r),y2+jj(r));ctx.stroke();}
+  ctx.restore();}
+function circle(cx,cy,rad,o={}){const r=R();ctx.save();
+  if(o.fill){ctx.fillStyle=o.fill;ctx.beginPath();ctx.arc(cx,cy,rad,0,7);ctx.fill();}
+  if(o.stroke!==false){ctx.strokeStyle=o.c||col.ink;ctx.lineWidth=o.w||3;ctx.lineCap='round';
+    const n=Math.max(14,Math.round(rad/2.5)),a0=r()*6.28,f1=r()*6,f2=r()*6,amp=rad>25?1.4:.5;ctx.beginPath();
+    for(let i=0;i<=n;i++){const a=a0+i/n*(2*PI+.3);const rr=rad+Math.sin(a*2+f1)*amp*JIT+Math.sin(a*3+f2)*amp*.7*JIT;
+      const x=cx+Math.cos(a)*rr,y=cy+Math.sin(a)*rr;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+    ctx.stroke();}
+  ctx.restore();}
+function rect(x,y,w,h,o={}){if(o.fill){ctx.save();ctx.fillStyle=o.fill;ctx.beginPath();ctx.roundRect(x,y,w,h,o.rad??8);ctx.fill();ctx.restore();}
+  if(o.stroke!==false){const q={c:o.c,w:o.w||3,dash:o.dash};line(x,y,x+w,y,q);line(x+w,y,x+w,y+h,q);line(x+w,y+h,x,y+h,q);line(x,y+h,x,y,q);}}
+function arrow(x1,y1,x2,y2,o={}){line(x1,y1,x2,y2,o);const a=Math.atan2(y2-y1,x2-x1),h=o.head||14,q={c:o.c,w:o.w};
+  line(x2,y2,x2-h*Math.cos(a-.45),y2-h*Math.sin(a-.45),q);line(x2,y2,x2-h*Math.cos(a+.45),y2-h*Math.sin(a+.45),q);}
+const FONTS={hand:s=>`700 ${s}px Caveat, cursive`,marker:s=>`${s}px "Permanent Marker", cursive`,body:s=>`700 ${s}px Nunito, sans-serif`,
+  mono:s=>`600 ${s}px "JetBrains Mono", monospace`,emoji:s=>`${s}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`};
+function txt(s,x,y,o={}){ctx.save();ctx.font=FONTS[o.f||'hand'](o.s||32);ctx.fillStyle=o.c||col.ink;ctx.textAlign=o.a||'center';ctx.textBaseline='middle';ctx.fillText(s,x,y);ctx.restore();}
+function head(s,a=1){fade(a,()=>{ctx.save();ctx.font=FONTS.hand(44);const w=ctx.measureText(s).width;ctx.fillStyle=col.sun;ctx.globalAlpha*=col.dark?.25:.5;
+  ctx.beginPath();ctx.roundRect(480-w/2-12,60,w+24,16,7);ctx.fill();ctx.restore();txt(s,480,52,{s:44});});}
+function dial(cx,cy,rad,th,o={}){const len=o.len??1;
+  circle(cx,cy,rad,{fill:o.fill||col.card,w:rad>40?3:2});
+  ctx.save();ctx.strokeStyle=col.ink3;ctx.lineWidth=1.5;ctx.setLineDash([5,6]);ctx.beginPath();ctx.ellipse(cx,cy,rad,rad*.28,0,0,7);
+  ctx.moveTo(cx,cy-rad);ctx.lineTo(cx,cy+rad);ctx.stroke();ctx.restore();
+  if(o.labels!==false){const s=Math.max(18,rad*.2);txt('|0⟩',cx,cy-rad-s*.9,{f:'mono',s});txt('|1⟩',cx,cy+rad+s*.9,{f:'mono',s});}
+  const ac=o.ac||col.violet,x=cx+Math.sin(th)*rad*.9*len,y=cy-Math.cos(th)*rad*.9*len;
+  fade(o.aa??1,()=>{arrow(cx,cy,x,y,{c:ac,w:Math.max(3,rad*.05),head:Math.max(8,rad*.14)});circle(x,y,Math.max(4,rad*.06),{fill:ac,stroke:false});});
+  circle(cx,cy,Math.max(2,rad*.03),{fill:col.ink,stroke:false});}
+function coin(x,y,r,v){const f=v===null?col.card:(v?col.coral:col.sky);circle(x,y,r,{fill:f,w:3});
+  txt(v===null?'?':String(v),x,y+3,{f:'mono',s:r*.85,c:v===null?col.ink:DK});}
+function wavePath(x0,x1,f){ctx.beginPath();for(let x=x0;x<=x1;x+=4){const y=f(x);x===x0?ctx.moveTo(x,y):ctx.lineTo(x,y);}}
+
+/* ---------- precomputed data ---------- */
+const OUT=(()=>{const r=mb(42);return Array.from({length:40},()=>r()<.5?0:1);})();
+const AMPS=(()=>{const r=mb(7),out={};for(let n=1;n<=10;n++)out[n]=Array.from({length:1<<n},()=>.25+r()*.75);return out;})();
+const G=[[.354,.354],[.354,-.354],[.177,.884],[.177,-.884],[-.088,.972]]; // [others, marked] for Grover on 8 items
+const MARK=5;
+
+/* ---------- scenes ---------- */
+const SCENES=[
+{t:'Hello',d:6,
+ kid:"Your laptop thinks in 0s and 1s. Nature doesn't. Let's see what happens when a computer plays by nature's rules.",
+ real:"A <b>quantum computer</b> stores and processes information using quantum physics: the rules that govern atoms, electrons and light.",
+ draw(p,lt,c){
+  fade(A(p,0,.15),()=>txt('Quantum computing',480,170,{f:'marker',s:66}));
+  fade(A(p,.1,.3),()=>txt('in about two minutes',480,228,{s:42,c:col.ink2}));
+  fade(A(p,.2,.4),()=>dial(480,385,95,c*.9));
+ }},
+{t:'Bits',d:10,
+ kid:"A bit is a light switch: off (0) or on (1). Eight switches can show 256 different patterns, but only one at a time.",
+ real:"Classical computers work with definite bits. A row of <i>n</i> bits holds exactly one of 2ⁿ values at any moment, and the processor changes it step by step.",
+ draw(p,lt){
+  head('A normal bit: a switch that is 0 or 1',A(p,0,.08));
+  const v=(Math.floor(lt*2.2)*37+77)%256,bits=v.toString(2).padStart(8,'0');
+  for(let i=0;i<8;i++)fade(A(p,.04+i*.02,.12+i*.02),()=>{const x=480-4*96+i*96+8,y=140,on=bits[i]==='1';
+    rect(x,y,80,100,{fill:on?col.sun:col.card});txt(bits[i],x+40,y+52,{f:'mono',s:52,c:on?DK:col.ink});txt(on?'on':'off',x+40,y+128,{s:26,c:col.ink2});});
+  fade(A(p,.28,.4),()=>{txt('8 bits = one of 256 patterns, one at a time',480,330,{s:38});
+    txt(`right now: ${bits} = ${v}`,480,385,{f:'mono',s:26,c:col.violet});});
+  fade(A(p,.6,.72),()=>txt('A laptop flips billions per second, but always holds ONE pattern',480,460,{s:32,c:col.ink2}));
+ }},
+{t:'Qubit',d:12,
+ kid:"A qubit is more like an arrow that can point anywhere between 0 and 1. Where it points sets the odds of each answer.",
+ real:"A qubit's state is α|0⟩ + β|1⟩. The chance of reading 0 is |α|², of 1 is |β|². This is <b>superposition</b>. (The full picture is a sphere, not a circle: the arrow also has a <i>phase</i>.)",
+ draw(p){
+  head('A qubit: a blend of 0 and 1',A(p,0,.08));
+  const th=keys(p,[[0,0],[.12,0],[.32,PI/2],[.48,PI/2],[.65,PI*.8],[.78,PI*.8],[.92,PI/3]]);
+  fade(A(p,.03,.12),()=>dial(290,290,140,th));
+  const p0=Math.cos(th/2)**2,p1=1-p0,base=420,mh=230;
+  fade(A(p,.08,.18),()=>[[p0,'0',col.sky],[p1,'1',col.coral]].forEach(([v,l,c],i)=>{const x=600+i*160;
+    rect(x,base-Math.max(3,mh*v),90,Math.max(3,mh*v),{fill:c,rad:4,w:2.5});txt(`${Math.round(v*100)}%`,x+45,base-mh*v-24,{f:'mono',s:24});
+    txt('chance of '+l,x+45,base+32,{s:30});}));
+  fade(A(p,.32,.44),()=>txt('Superposition: a bit of both, with odds',480,500,{s:34,c:col.violet}));
+ }},
+{t:'Measure',d:12,
+ kid:"But the moment you look, the arrow snaps to 0 or 1 at random. Look at many fresh qubits and you see the odds.",
+ real:"<b>Measurement</b> returns one ordinary bit and destroys the superposition. You can never read α and β directly; you can only sample them, many times.",
+ draw(p){
+  head('Looking forces the qubit to choose',A(p,0,.08));
+  const nS=30,sp=nS*Math.pow(seg(p,.08,.88),1.6),k=Math.min(nS,Math.floor(sp)),fr=sp-Math.floor(sp);
+  let shown=null;if(k>=1&&(fr<.6||k>=nS))shown=OUT[k-1];
+  const th=shown===null?PI/2:(shown?PI:0);
+  dial(260,290,130,th,{ac:shown===null?col.violet:(shown?col.coral:col.sky)});
+  if(shown!==null){txt('👀',410,170,{f:'emoji',s:40});txt(`got ${shown}!`,440,215,{s:34,c:shown?col.coral:col.sky,a:'left'});}
+  else if(k<nS)txt('fresh qubit, 50/50',420,190,{s:28,c:col.ink2,a:'left'});
+  let c0=0,c1=0;for(let i=0;i<k;i++)OUT[i]?c1++:c0++;
+  [[c0,'0',col.sky],[c1,'1',col.coral]].forEach(([n,l,c],i)=>{const x=620+i*150,base=440;line(x-20,base,x+120,base,{w:2});
+    if(n)rect(x,base-n*11,100,n*11,{fill:c,rad:3,w:2});txt(String(n),x+50,base-n*11-22,{f:'mono',s:24});txt('got '+l,x+50,base+30,{s:30});});
+  txt(`looks: ${k}`,770,110,{f:'mono',s:22,c:col.ink2});
+  fade(A(p,.6,.72),()=>txt('One look → one random answer. The blend is gone.',480,512,{s:32,c:col.violet}));
+ }},
+{t:'Many qubits',d:12,
+ kid:"Each extra qubit doubles the size of the blend. Ten qubits juggle 1,024 possibilities at once.",
+ real:"<i>n</i> qubits are described by 2ⁿ amplitudes. Storing 50 qubits' state exactly takes about 16 petabytes; 300 qubits would need more numbers than there are atoms in the observable universe.",
+ draw(p){
+  head('Add qubits: the blend doubles every time',A(p,0,.08));
+  const n=clamp(1+Math.floor(seg(p,.06,.7)*10),1,10),cnt=1<<n;
+  for(let i=0;i<n;i++){const x=480+(i-(n-1)/2)*58;dial(x,140,20,PI/2,{labels:false});}
+  const x0=80,wd=800,base=390,hh=150,bw=wd/cnt;
+  if(cnt<=16)AMPS[n].forEach((v,i)=>rect(x0+i*bw+bw*.15,base-v*hh,bw*.7,v*hh,{fill:col.violet,rad:3,w:2}));
+  else{ctx.save();ctx.fillStyle=col.violet;AMPS[n].forEach((v,i)=>ctx.fillRect(x0+i*bw,base-v*hh,Math.max(.6,bw*.75),v*hh));ctx.restore();}
+  line(x0-10,base,x0+wd+10,base,{w:2});
+  txt(`${n} qubit${n>1?'s':''} → 2^${n} = ${cnt.toLocaleString('en-US')} numbers`,480,440,{f:'marker',s:32});
+  fade(A(p,.76,.88),()=>txt('300 qubits → 10⁹⁰ numbers. More than atoms in the universe.',480,500,{s:32,c:col.coral}));
+ }},
+{t:'Entanglement',d:13,
+ kid:"Two entangled qubits are like a pair of magic coins: flip them on different planets and they always land the same way.",
+ real:"In the Bell state (|00⟩ + |11⟩)/√2 each result is random, yet the two always agree. It can't send a message faster than light: it's a shared correlation you only see when you compare notes.",
+ draw(p,lt,c){
+  head('Entanglement: two qubits, one shared fate',A(p,0,.08));
+  const sep=A(p,.06,.3),ax=480-sep*290,bx=480+sep*290,y=260;
+  if(bx-ax>140){ctx.save();ctx.strokeStyle=col.pink;ctx.lineWidth=3;wavePath(ax+64,bx-64,x=>y+Math.sin(x/18-c*5)*7);ctx.stroke();ctx.restore();}
+  let q=seg(p,.33,.95)*4,ri=Math.floor(q),f=q-ri;if(ri>=4){ri=3;f=1;}
+  const res=[0,1,1,0][ri],started=p>=.33;
+  coin(ax,y,62,started&&f>=.3?res:null);coin(bx,y,62,started&&f>=.6?res:null);
+  fade(sep,()=>{txt('here',ax,y+100,{s:32,c:col.ink2});txt('on Mars 🪐',bx,y+100,{s:32,c:col.ink2});});
+  if(started&&f>=.3&&f<.6)txt('👀',ax,y-100,{f:'emoji',s:38});
+  if(started&&f>=.6){txt('👀',bx,y-100,{f:'emoji',s:38});txt('match ✓',480,y,{s:38,c:col.lime});}
+  const m=started?ri+(f>=.6?1:0):0;if(started)txt(`matches: ${m} / ${m}`,480,395,{f:'mono',s:24});
+  fade(A(p,.8,.92),()=>txt('Random every time, yet always matching. (No message travels.)',480,490,{s:31,c:col.violet}));
+ }},
+{t:'Interference',d:12,
+ kid:"Quantum possibilities behave like waves. Line two waves up and they grow; put them out of step and they cancel to nothing.",
+ real:"Amplitudes can be negative (or complex), so different paths to the same answer can add up or cancel. This <b>interference</b> is the real engine behind quantum speedups.",
+ draw(p,lt,c){
+  head('Interference: waves add up… or cancel',A(p,0,.08));
+  const ph=keys(p,[[0,0],[.3,0],[.55,PI],[1,PI]]),k=1/38,s=c*2.2;
+  const W1=(x,yc)=>yc-34*Math.sin(x*k-s),W2=(x,yc)=>yc-34*Math.sin(x*k-s+ph);
+  const draw=(f,c2,w)=>{ctx.save();ctx.strokeStyle=c2;ctx.lineWidth=w;ctx.lineJoin='round';wavePath(250,900,f);ctx.stroke();ctx.restore();};
+  draw(x=>W1(x,150),col.sky,4);draw(x=>W2(x,250),col.coral,4);
+  line(250,318,900,318,{w:2,dash:[8,8],c:col.ink3});
+  draw(x=>410-34*Math.sin(x*k-s)-34*Math.sin(x*k-s+ph),col.violet,6);
+  txt('wave A',130,150,{s:34,c:col.sky});txt('wave B',130,250,{s:34,c:col.coral});txt('A + B',130,410,{f:'marker',s:30,c:col.violet});
+  if(p<.72){const msg=ph<.2?['in step → they ADD UP',col.lime]:ph>PI-.2?['out of step → they CANCEL',col.coral]:['sliding out of step…',col.ink2];txt(msg[0],575,508,{s:34,c:msg[1]});}
+  else fade(A(p,.72,.8),()=>txt('Quantum algorithms make WRONG answers cancel',575,508,{s:34,c:col.violet}));
+ }},
+{t:'Quantum search',d:16,
+ kid:"To find the prize behind one of 8 doors, the computer doesn't secretly open them all. It nudges the odds, twice, until the right door is almost certain.",
+ real:"This is <b>Grover's search</b>. An oracle flips the sign of the right answer, then a 'reflect about the average' step amplifies it. With 8 items, 2 rounds give about 95%. For N items it takes about √N rounds instead of about N/2 guesses.",
+ draw(p){
+  head('A quantum search, step by step',A(p,0,.06));
+  const st=[[0,0],[.1,0],[.2,1],[.27,1],[.38,2],[.45,2],[.53,3],[.6,3],[.7,4]];
+  const base=300,sc=140;line(100,base,860,base,{w:2});
+  for(let i=0;i<8;i++){const g=i===MARK?1:0;const a=keys(p,st.map(([t,s])=>[t,G[s][g]]));
+    const x=480+(i-3.5)*100,h=a*sc,c=a<0?col.coral:(i===MARK&&p>.7?col.lime:col.violet);
+    rect(x-28,Math.min(base,base-h),56,Math.max(3,Math.abs(h)),{fill:c,rad:3,w:2.5});
+    txt(i.toString(2).padStart(3,'0'),x,452,{f:'mono',s:22,c:i===MARK?col.coral:col.ink2});
+    if(i===MARK)txt('★',x+34,452,{s:28,c:col.sun});
+    if(i===MARK&&p>.72)fade(A(p,.72,.8),()=>{txt(`${(a*a*100).toFixed(1)}%`,x,base-h-28,{f:'mono',s:24});circle(x,base-h/2,95,{c:col.lime,w:3});});}
+  const mean=p>=.2&&p<.38?.265:(p>=.53&&p<.7?.044:null);
+  if(mean!==null)fade(Math.min(A(p,.2,.24),1)*(p<.38?1:A(p,.53,.57)),()=>{line(100,base-mean*sc,860,base-mean*sc,{w:2.5,dash:[10,7],c:col.amber});txt('average',900,base-mean*sc,{s:26,c:col.amber});});
+  const msgs=[[0,'8 doors, one prize (★). Start: every door equally likely'],[.1,'Step 1: the oracle flips the prize upside down'],[.27,'Step 2: flip every bar around the average'],[.45,'Repeat: flip… and reflect again'],[.7,'Now look: 101 wins ~95% of the time, after just 2 rounds']];
+  let m=msgs[0][1];msgs.forEach(([t,s])=>{if(p>=t)m=s;});txt(m,480,500,{s:34,c:p>=.7?col.lime:col.ink});
+ }},
+{t:'Noise',d:12,
+ kid:"Qubits are shy. A little heat, a wobble or a stray bit of light smudges the blend. So engineers bundle many fragile qubits to protect one good one.",
+ real:"<b>Decoherence</b> and gate errors (very roughly 1 in 100 to 1 in 1,000 operations on today's best machines) limit how long a calculation can run. <b>Quantum error correction</b> spreads one logical qubit across many physical ones.",
+ draw(p,lt,c){
+  head('The catch: qubits are fragile',A(p,0,.08));
+  const a1=1-A(p,.45,.52),a2=A(p,.5,.58);
+  fade(a1,()=>{const J9=seg(p,.06,.42),th=PI/2+(Math.sin(c*11)*.5+Math.sin(c*7.3)*.3)*J9;
+    dial(300,290,120,th,{len:1-.65*J9,aa:1-.5*J9});
+    [['heat 🔥',160],['vibration 〰️',290],['stray light ✨',420]].forEach(([l,y],i)=>fade(A(p,.05+i*.07,.15+i*.07),()=>{
+      arrow(640,y,450,y+(290-y)*.35,{c:col.amber,w:3,dash:[10,8]});txt(l,660,y,{s:32,a:'left',c:col.ink2});}));
+    fade(A(p,.25,.35),()=>txt('Tiny bumps smudge the blend → errors',480,505,{s:34,c:col.coral}));});
+  fade(a2,()=>{for(let i=0;i<49;i++){const r=Math.floor(i/7),cc=i%7;fade(A(p,.52+i*.003,.56+i*.003),()=>circle(300+(cc-3)*30,280+(r-3)*30,9,{fill:col.violet,w:1.5}));}
+    fade(A(p,.7,.76),()=>{rect(178,158,244,244,{c:col.lime,w:3.5,rad:12});txt('1 logical qubit',300,430,{s:32,c:col.lime});
+      arrow(445,280,560,280,{w:3});dial(690,280,85,PI/3);txt('steady ✓',690,430,{s:32,c:col.lime});});
+    fade(A(p,.78,.86),()=>txt('Error correction: many fragile qubits guard one reliable one',480,505,{s:32,c:col.violet}));});
+ }},
+{t:'Good for?',d:11,
+ kid:"Quantum computers are brilliant at a few special jobs and useless for most everyday ones.",
+ real:"Expected big wins: simulating molecules and materials, and factoring with <b>Shor's algorithm</b> (which is why the internet is moving to post-quantum cryptography). Search gets a modest √N speedup. Email, games and video get nothing.",
+ draw(p){
+  head('So what is it good for?',A(p,0,.08));
+  const cards=[['🧪','Molecules & materials','simulating nature','✓ huge',col.lime],['🔐','Breaking RSA','why we’re switching to PQC','✓ huge (one day)',col.lime],
+    ['🔍','Searching','√N instead of N','~ modest',col.amber],['🎮','Email, games, video','no speedup at all','✗ none',col.coral]];
+  cards.forEach(([e,t,s,v,c],i)=>fade(A(p,.08+i*.13,.18+i*.13),()=>{const x=70+(i%2)*420,y=105+Math.floor(i/2)*180;
+    rect(x,y,400,150,{fill:col.card,rad:12});txt(e,x+52,y+75,{f:'emoji',s:50});txt(t,x+100,y+52,{s:36,a:'left'});
+    txt(s,x+100,y+92,{f:'body',s:19,a:'left',c:col.ink2});txt(v,x+100,y+126,{s:28,a:'left',c});}));
+  fade(A(p,.72,.84),()=>txt('A specialist co-processor, not a faster laptop',480,505,{s:36,c:col.violet}));
+ }},
+{t:'The idea',d:7,
+ kid:"Not a faster laptop. Think of a laser next to a light bulb: a different tool for different jobs.",
+ real:"Superposition + entanglement + interference, read out by measurement: that's the whole trick. The full guide builds each piece up in short episodes with things to play with.",
+ draw(p,lt,c){
+  fade(A(p,0,.2),()=>dial(480,210,100,c*.9));
+  fade(A(p,.15,.35),()=>txt('Not a faster computer.',480,395,{f:'marker',s:40}));
+  fade(A(p,.3,.5),()=>txt('A different kind of computer.',480,450,{f:'marker',s:40,c:col.violet}));
+  fade(A(p,.55,.75),()=>txt('Keep going: 36 short episodes in the Qubit Sketchbook →',480,508,{s:30,c:col.ink2}));
+ }},
+];
+const starts=[];let TOTAL=0;SCENES.forEach(s=>{starts.push(TOTAL);TOTAL+=s.d;});
+
+/* ---------- canvas sizing ---------- */
+function resize(){const w=cv.clientWidth||W,dpr=Math.min(2,devicePixelRatio||1);cv.width=Math.round(w*dpr);cv.height=Math.round(w*9/16*dpr);}
+addEventListener('resize',resize);
+function backdrop(){ctx.fillStyle=col.paper;ctx.fillRect(0,0,W,H);ctx.strokeStyle=col.grid;ctx.lineWidth=1;ctx.beginPath();
+  for(let x=0;x<=W;x+=30){ctx.moveTo(x+.5,0);ctx.lineTo(x+.5,H);}for(let y=0;y<=H;y+=30){ctx.moveTo(0,y+.5);ctx.lineTo(W,y+.5);}ctx.stroke();}
+function render(i,p,clock){const s=cv.width/W;ctx.setTransform(s,0,0,s,0,0);calls=0;boil=reduce?0:Math.floor(clock*6);
+  backdrop();SCENES[i].draw(p,p*SCENES[i].d,reduce?0:clock);}
+
+/* ---------- player ---------- */
+let time=0,playing=!reduce,last=performance.now(),lastScene=-1,clock=0;
+const fmt=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
+const dotsEl=$('dots');
+SCENES.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.textContent=(i+1)+' · '+s.t;b.addEventListener('click',()=>{time=starts[i]+.01;});dotsEl.appendChild(b);});
+function sceneAt(t){let i=0;while(i<SCENES.length-1&&t>=starts[i+1])i++;return i;}
+function ui(i){if(i===lastScene)return;lastScene=i;const s=SCENES[i];
+  $('chip').textContent=`Scene ${i+1} of ${SCENES.length} · ${s.t}`;$('kid').textContent=s.kid;$('real').innerHTML=s.real;
+  [...dotsEl.children].forEach((b,j)=>b.setAttribute('aria-current',j===i));}
+function setPlay(v){playing=v;$('play').textContent=v?'Pause':(time>=TOTAL-.05?'Replay':'Play');}
+$('play').addEventListener('click',()=>{if(!playing&&time>=TOTAL-.05)time=0;setPlay(!playing);});
+$('prev').addEventListener('click',()=>{const i=sceneAt(time);time=starts[Math.max(0,(time-starts[i]<1.5?i-1:i))]+.01;});
+$('next').addEventListener('click',()=>{const i=sceneAt(time);time=i<SCENES.length-1?starts[i+1]+.01:TOTAL-.01;});
+const bar=$('bar');
+function seek(e){const r=bar.getBoundingClientRect();time=clamp((e.clientX-r.left)/r.width,0,1)*TOTAL;}
+bar.addEventListener('pointerdown',e=>{seek(e);bar.setPointerCapture(e.pointerId);bar.onpointermove=seek;});
+bar.addEventListener('pointerup',()=>{bar.onpointermove=null;});
+bar.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();e.stopPropagation();time=clamp(time+(e.key==='ArrowRight'?5:-5),0,TOTAL-.01);}});
+addEventListener('keydown',e=>{if(e.target.closest('button,a')&&(e.code==='Space'||e.key==='Enter'))return;
+  if(e.code==='Space'){e.preventDefault();$('play').click();}else if(e.key==='ArrowRight')$('next').click();else if(e.key==='ArrowLeft')$('prev').click();});
+
+/* theme toggle, shared with the guide (same localStorage key) */
+const root=document.documentElement;
+function isDark(){const t=root.getAttribute('data-theme');return t?t==='dark':matchMedia('(prefers-color-scheme: dark)').matches;}
+function themeIcon(){$('theme').firstElementChild.textContent=isDark()?'☀️':'🌙';}
+$('theme').addEventListener('click',()=>{const t=isDark()?'light':'dark';root.setAttribute('data-theme',t);try{localStorage.setItem('qsk-theme',t);}catch(e){}readColors();themeIcon();});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{readColors();themeIcon();});
+
+function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000,.05);last=now;clock+=dt;
+  if(playing){time+=dt;if(time>=TOTAL){time=TOTAL-.001;setPlay(false);}}
+  const i=sceneAt(time),p=clamp((time-starts[i])/SCENES[i].d,0,1);
+  ui(i);render(i,p,clock);
+  $('fill').style.width=(time/TOTAL*100)+'%';bar.setAttribute('aria-valuenow',Math.round(time/TOTAL*100));
+  $('time').textContent=fmt(time)+' / '+fmt(TOTAL);}
+readColors();themeIcon();resize();setPlay(playing);
+if(reduce)time=starts[0]+SCENES[0].d*.99; // reduced motion: start on a complete still
+(document.fonts?document.fonts.ready:Promise.resolve()).then(()=>{last=performance.now();requestAnimationFrame(loop);});
+})();
+</script>
+</body>
+</html>

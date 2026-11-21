@@ -197,6 +197,7 @@ function drawer() {
   ${Object.entries(groups).map(([w, list]) => `<div class="drawer-world world-${WORLDS[w].color}"><p>${WORLDS[w].emoji} World ${WORLDS[w].n}: ${WORLDS[w].name}</p>${list.map((c) => `<a class="drawer-link" data-ch="${c.n}" href="${c.file}"><span class="dl-num">${c.n}</span><span class="dl-title">${esc(c.title)}</span><span class="dl-state"></span></a>`).join('')}</div>`).join('')}
   <a class="drawer-link" href="appendix.html">📚 Appendix: Where to Learn More</a>
   <a class="drawer-link" href="shorts.html">▶ Crypto Shorts</a>
+  <a class="drawer-link" href="animation.html">🎬 Crypto in Two Minutes</a>
   <a class="drawer-link" href="index.html#vault">🔒 The Vault</a>
 </nav>
 <div class="search-pop" id="searchPop" hidden><div class="search-box"><input id="searchInput" type="search" placeholder="Search: nonce, Argon2, TLS handshake…" autocomplete="off"><button class="icon-btn" id="closeSearch" aria-label="Close search">✕</button></div><ol id="searchResults"></ol></div>`;
@@ -265,6 +266,8 @@ function build() {
   fs.cpSync(path.join(ROOT, 'assets'), path.join(DIST, 'assets'), { recursive: true });
   fs.mkdirSync(path.join(DIST, 'assets', 'vendor'), { recursive: true });
   fs.copyFileSync(path.join(ROOT, 'node_modules/roughjs/bundled/rough.js'), path.join(DIST, 'assets/vendor/rough.js'));
+  // Hand-written page (not generated from the guide): copied as-is.
+  fs.copyFileSync(path.join(ROOT, 'animation.html'), path.join(DIST, 'animation.html'));
 
   const siteChapters = [];
 
@@ -391,7 +394,7 @@ ${nextCard}
     <h1 class="hero-title">${esc(title)}</h1>
     <p class="hero-sub">${esc(subtitle)}</p>
     <p class="decrypt-line" aria-live="polite"><span id="decrypt">Every secret on the internet is guarded by math. Let’s learn how.</span></p>
-    <div class="hero-actions"><a class="btn big" id="ctaStart" href="start.html">▶ Start the journey</a><a class="btn ghost" href="shorts.html">⚡ 60-second Shorts</a></div>
+    <div class="hero-actions"><a class="btn big" id="ctaStart" href="start.html">▶ Start the journey</a><a class="btn ghost" href="shorts.html">⚡ 60-second Shorts</a><a class="btn ghost" href="animation.html">🎬 2-minute animation</a></div>
     <p class="hero-meta">${MAXCH} chapters · 80 interactive demos (many running real crypto) · 150+ pros &amp; cons cards · 1 locked vault</p>
   </div>
   <div class="hero-doodle" data-doodle="hero" aria-hidden="true"></div>

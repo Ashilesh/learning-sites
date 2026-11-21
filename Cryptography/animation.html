@@ -1,0 +1,461 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cryptography in Two Minutes · CryptoSketch</title>
+<meta name="description" content="A two-minute hand-drawn animation: Alice, Bob and Eve, Caesar's cipher, AES, Diffie-Hellman paint mixing, padlocks, hashes, MACs, signatures, password storage and HTTPS.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🔐</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Nunito:wght@400;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script>try{var t=localStorage.getItem('cs-theme');if(t)document.documentElement.dataset.theme=t}catch(e){}</script>
+<!-- Source of truth for this page is Cryptography/animation.html; build.mjs copies it into dist/. -->
+<style>
+:root{
+  --paper:#fdf8ee;--paper-2:#fffdf7;--paper-3:#f4ead6;
+  --ink:#2b2d42;--ink-soft:#5b5e78;--ink-faint:#8d8fa6;--grid:rgba(17,138,178,.10);
+  --sun:#ffd166;--sun-soft:#fff1c9;--coral:#ef476f;--coral-soft:#ffe0e7;--mint:#06d6a0;--mint-ink:#047857;--mint-soft:#d4f8ec;
+  --ocean:#118ab2;--ocean-soft:#d7f0fa;--grape:#8338ec;--grape-soft:#ece1ff;--orange:#fb8500;--orange-soft:#ffe8cc;
+  --shadow:4px 5px 0 var(--ink);--shadow-sm:2px 3px 0 var(--ink);
+  --wobbly:255px 18px 225px 18px / 18px 225px 18px 255px;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --paper:#1d2827;--paper-2:#24322f;--paper-3:#2c3c39;
+  --ink:#f3f1e7;--ink-soft:#c3cdc8;--ink-faint:#8fa19b;--grid:rgba(120,200,255,.08);
+  --sun:#ffd97a;--sun-soft:#3d3522;--coral:#ff7a95;--coral-soft:#42262e;--mint:#4ff0bd;--mint-ink:#9ff7d8;--mint-soft:#1d3d34;
+  --ocean:#5cc8ef;--ocean-soft:#1c3542;--grape:#b18cff;--grape-soft:#2f2747;--orange:#ffa94d;--orange-soft:#40301f;
+  --shadow:4px 5px 0 rgba(0,0,0,.55);--shadow-sm:2px 3px 0 rgba(0,0,0,.55);
+  color-scheme:dark;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --paper:#1d2827;--paper-2:#24322f;--paper-3:#2c3c39;
+    --ink:#f3f1e7;--ink-soft:#c3cdc8;--ink-faint:#8fa19b;--grid:rgba(120,200,255,.08);
+    --sun:#ffd97a;--sun-soft:#3d3522;--coral:#ff7a95;--coral-soft:#42262e;--mint:#4ff0bd;--mint-ink:#9ff7d8;--mint-soft:#1d3d34;
+    --ocean:#5cc8ef;--ocean-soft:#1c3542;--grape:#b18cff;--grape-soft:#2f2747;--orange:#ffa94d;--orange-soft:#40301f;
+    --shadow:4px 5px 0 rgba(0,0,0,.55);--shadow-sm:2px 3px 0 rgba(0,0,0,.55);
+    color-scheme:dark;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 17px/1.55 Nunito,system-ui,sans-serif;
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:28px 28px}
+a{color:inherit}
+.wrap{max-width:1040px;margin:0 auto;padding:16px 16px 40px}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+.top .sp{flex:1}
+.pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border:2px solid var(--ink);border-radius:var(--wobbly);
+  background:var(--paper-2);box-shadow:var(--shadow-sm);font:700 15px Nunito,sans-serif;color:var(--ink);text-decoration:none;cursor:pointer;
+  transition:transform .12s,box-shadow .12s}
+.pill:hover{transform:translate(-1px,-1px) rotate(-1deg);box-shadow:3px 3px 0 var(--ink)}
+.pill.primary{background:var(--coral);color:#fff}
+:root[data-theme="dark"] .pill.primary{color:#1d2827}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pill.primary{color:#1d2827}}
+h1{font:700 clamp(36px,6vw,58px)/1.05 Caveat,cursive;margin:8px 0 4px}
+h1 span{color:var(--coral)}
+.lede{margin:0 0 16px;color:var(--ink-soft);font-size:18px;max-width:64ch}
+.stage{position:relative;border:3px solid var(--ink);border-radius:16px;box-shadow:var(--shadow);overflow:hidden;background:var(--paper-2)}
+canvas{display:block;width:100%;aspect-ratio:16/9}
+.chip{position:absolute;top:10px;left:12px;font:600 12px "JetBrains Mono",monospace;background:var(--paper-2);border:2px solid var(--ink);
+  border-radius:999px;padding:2px 10px;opacity:.92}
+.controls{display:flex;align-items:center;gap:10px;margin:14px 0 8px;flex-wrap:wrap}
+.bar{flex:1;min-width:140px;height:14px;border:2px solid var(--ink);border-radius:999px;background:var(--paper-2);cursor:pointer;position:relative;overflow:hidden;touch-action:none}
+.bar i{position:absolute;inset:0 auto 0 0;background:var(--coral);width:0}
+.time{font:600 13px "JetBrains Mono",monospace;color:var(--ink-soft);min-width:92px;text-align:right}
+.dots{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.dots button{font:600 12px Nunito,sans-serif;padding:3px 10px;border-radius:999px;border:1.5px solid var(--ink-faint);background:var(--paper-2);color:var(--ink-soft);cursor:pointer}
+.dots button[aria-current="true"]{background:var(--sun);border-color:var(--ink);color:#2b2d42}
+.caption{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.caption > div{background:var(--paper-2);border:2px solid var(--ink);border-radius:var(--wobbly);padding:12px 16px;box-shadow:var(--shadow-sm);min-height:124px}
+.tag{display:inline-block;font:700 23px Caveat,cursive;color:var(--coral);margin-bottom:2px}
+.caption .real .tag{color:var(--ocean)}
+.caption p{margin:0}
+.note{color:var(--ink-faint);font-size:14px;margin-top:14px}
+.end-cta{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+button:focus-visible,a:focus-visible,.bar:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+@media (max-width:700px){.caption{grid-template-columns:1fr}.hide-sm,.chip{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="pill home-link" href="../../index.html" title="All explainers"><span aria-hidden="true">←</span><span class="hide-sm"> All explainers</span></a>
+    <a class="pill" href="index.html"><span aria-hidden="true">🔐</span><span class="hide-sm"> CryptoSketch</span></a>
+    <a class="pill" href="shorts.html"><span aria-hidden="true">⚡</span><span class="hide-sm"> Shorts</span></a>
+    <span class="sp"></span>
+    <button class="pill" type="button" id="theme" aria-label="Switch sketchbook / chalkboard theme"><span aria-hidden="true">🌙</span></button>
+  </div>
+  <h1>Cryptography in <span>two minutes</span></h1>
+  <p class="lede">Alice wants to talk to Bob. Eve is listening and Mallory wants to meddle. Ciphers, keys, paint mixing, padlocks, fingerprints and signatures: how every secret on the internet is kept. Sketched start to finish.</p>
+
+  <div class="stage">
+    <canvas id="cv" role="img" aria-label="Hand-drawn animation explaining cryptography. The captions below describe each scene."></canvas>
+    <span class="chip" id="chip">Scene 1</span>
+  </div>
+
+  <div class="controls">
+    <button type="button" class="pill" id="prev" aria-label="Previous scene">◀<span class="hide-sm"> Prev</span></button>
+    <button type="button" class="pill primary" id="play">Pause</button>
+    <button type="button" class="pill" id="next" aria-label="Next scene"><span class="hide-sm">Next </span>▶</button>
+    <div class="bar" id="bar" role="slider" aria-label="Timeline" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="fill"></i></div>
+    <span class="time" id="time">0:00</span>
+  </div>
+  <div class="dots" id="dots" aria-label="Scenes"></div>
+
+  <div class="caption" aria-live="polite">
+    <div class="kid"><span class="tag">The story</span><p id="kid"></p></div>
+    <div class="real"><span class="tag">What's really happening</span><p id="real"></p></div>
+  </div>
+  <div class="end-cta">
+    <a class="pill primary" href="start.html">▶ Start the journey</a>
+    <a class="pill" href="shorts.html">⚡ 60-second Shorts</a>
+  </div>
+  <p class="note">Keyboard: space to play or pause, arrow keys to change scene. The hashes shown are real SHA-256 values; the other keys and tags are illustrative.</p>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const W=960,H=540,PI=Math.PI;
+const cv=$('cv'),ctx=cv.getContext('2d');
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const seg=(p,a,b)=>clamp((p-a)/(b-a),0,1);
+const A=(p,a,b)=>ease(seg(p,a,b));
+function mb(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+/* ---------- colours (read from CSS tokens so both themes work) ---------- */
+const col={};const DK='#2b2d42';
+function readColors(){const s=getComputedStyle(document.documentElement);
+  ['paper','paper-2','paper-3','grid','ink','ink-soft','ink-faint','sun','sun-soft','coral','coral-soft','mint','mint-ink','mint-soft','ocean','ocean-soft','grape','grape-soft','orange','orange-soft']
+    .forEach(k=>col[k.replace(/-/g,'')]=s.getPropertyValue('--'+k).trim());
+  col.dark=s.getPropertyValue('color-scheme').trim()==='dark';}
+
+/* ---------- sketchy drawing kit ---------- */
+let boil=0,calls=0;const JIT=1.3;
+const R=()=>mb(boil*7919+(++calls)*104729);
+const jj=(r,k=1)=>(r()-.5)*2*JIT*k;
+function fade(a,fn){if(a<=.001)return;ctx.save();ctx.globalAlpha*=Math.min(1,a);fn();ctx.restore();}
+function line(x1,y1,x2,y2,o={}){const r=R();ctx.save();ctx.strokeStyle=o.c||col.ink;ctx.lineCap='round';if(o.dash)ctx.setLineDash(o.dash);
+  const w=o.w||3,k=Math.min(1,Math.hypot(x2-x1,y2-y1)/60)+.3;
+  for(let pass=0;pass<(o.dash?1:2);pass++){ctx.lineWidth=pass?w*.45:w;ctx.beginPath();ctx.moveTo(x1+jj(r),y1+jj(r));
+    ctx.quadraticCurveTo((x1+x2)/2+jj(r,1.6*k),(y1+y2)/2+jj(r,1.6*k),x2+jj(r),y2+jj(r));ctx.stroke();}
+  ctx.restore();}
+function circle(cx,cy,rad,o={}){const r=R();ctx.save();
+  if(o.fill){ctx.fillStyle=o.fill;ctx.beginPath();ctx.arc(cx,cy,rad,0,7);ctx.fill();}
+  if(o.stroke!==false){ctx.strokeStyle=o.c||col.ink;ctx.lineWidth=o.w||3;ctx.lineCap='round';
+    const n=Math.max(14,Math.round(rad/2.5)),a0=r()*6.28,f1=r()*6,amp=rad>25?1.4:.5;ctx.beginPath();
+    for(let i=0;i<=n;i++){const a=a0+i/n*(2*PI+.3);const rr=rad+Math.sin(a*2+f1)*amp*JIT;
+      const x=cx+Math.cos(a)*rr,y=cy+Math.sin(a)*rr;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+    ctx.stroke();}
+  ctx.restore();}
+function rect(x,y,w,h,o={}){if(o.fill){ctx.save();ctx.fillStyle=o.fill;ctx.beginPath();ctx.roundRect(x,y,w,h,o.rad??8);ctx.fill();ctx.restore();}
+  if(o.stroke!==false){const q={c:o.c,w:o.w||3,dash:o.dash};line(x,y,x+w,y,q);line(x+w,y,x+w,y+h,q);line(x+w,y+h,x,y+h,q);line(x,y+h,x,y,q);}}
+function arrow(x1,y1,x2,y2,o={}){line(x1,y1,x2,y2,o);const a=Math.atan2(y2-y1,x2-x1),h=o.head||14,q={c:o.c,w:o.w};
+  line(x2,y2,x2-h*Math.cos(a-.45),y2-h*Math.sin(a-.45),q);line(x2,y2,x2-h*Math.cos(a+.45),y2-h*Math.sin(a+.45),q);}
+const FONTS={hand:s=>`700 ${s}px Caveat, cursive`,body:s=>`700 ${s}px Nunito, sans-serif`,
+  mono:s=>`600 ${s}px "JetBrains Mono", monospace`,emoji:s=>`${s}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`};
+function txt(s,x,y,o={}){ctx.save();ctx.font=FONTS[o.f||'hand'](o.s||32);ctx.fillStyle=o.c||col.ink;ctx.textAlign=o.a||'center';ctx.textBaseline='middle';ctx.fillText(s,x,y);ctx.restore();}
+function head(s,a=1){fade(a,()=>{ctx.save();ctx.font=FONTS.hand(46);const w=ctx.measureText(s).width;ctx.fillStyle=col.sun;ctx.globalAlpha*=col.dark?.25:.55;
+  ctx.beginPath();ctx.roundRect(480-w/2-12,62,w+24,16,7);ctx.fill();ctx.restore();txt(s,480,52,{s:46});});}
+function keys(p,k){if(p<=k[0][0])return k[0][1];for(let i=1;i<k.length;i++){if(p<=k[i][0]){const[p0,v0]=k[i-1],[p1,v1]=k[i];return v0+(v1-v0)*ease((p-p0)/(p1-p0));}}return k[k.length-1][1];}
+function hexMix(a,b,t){const pa=[1,3,5].map(i=>parseInt(a.slice(i,i+2),16)),pb=[1,3,5].map(i=>parseInt(b.slice(i,i+2),16));
+  return'#'+pa.map((v,i)=>Math.round(lerp(v,pb[i],t)).toString(16).padStart(2,'0')).join('');}
+
+/* ---------- cast & props ---------- */
+function person(x,y,name,fill,o={}){const r=o.r||34,look=o.look||0;
+  ctx.save();ctx.fillStyle=fill;ctx.beginPath();ctx.ellipse(x,y+r+r*1.1,r*1.15,r*.95,0,PI,0);ctx.fill();ctx.restore();
+  ctx.save();ctx.strokeStyle=col.ink;ctx.lineWidth=2.5;ctx.beginPath();ctx.ellipse(x,y+r+r*1.1,r*1.15,r*.95,0,PI,0);ctx.stroke();ctx.restore();
+  circle(x,y,r,{fill,w:3});
+  const ex=look*r*.15;circle(x-r*.32+ex,y-r*.12,Math.max(2,r*.09),{fill:col.ink,stroke:false});circle(x+r*.32+ex,y-r*.12,Math.max(2,r*.09),{fill:col.ink,stroke:false});
+  ctx.save();ctx.strokeStyle=col.ink;ctx.lineWidth=2.5;ctx.lineCap='round';ctx.beginPath();
+  if(o.mood==='sad')ctx.arc(x,y+r*.55,r*.3,PI*1.2,PI*1.8);else if(o.mood==='sly')ctx.arc(x+r*.1,y+r*.15,r*.35,.15,PI*.55);else ctx.arc(x,y+r*.12,r*.38,.2*PI,.8*PI);
+  ctx.stroke();ctx.restore();
+  if(name){if(o.lab==='right')txt(name,x+r*1.35,y,{s:30,a:'left',c:o.nc||col.ink});else txt(name,x,y+r*2.3+14,{s:30,c:o.nc||col.ink});}}
+function padlock(x,y,s,open,fill){const r=s*.3,up=open?s*.32:0;
+  ctx.save();ctx.strokeStyle=col.ink;ctx.lineWidth=Math.max(2.5,s*.1);ctx.lineCap='round';ctx.beginPath();
+  ctx.moveTo(x-r,y-s*.05);ctx.lineTo(x-r,y-s*.25-up);ctx.arc(x,y-s*.25-up,r,PI,0);ctx.lineTo(x+r,y-s*.05-(open?up:0));ctx.stroke();ctx.restore();
+  rect(x-s*.45,y-s*.1,s*.9,s*.7,{fill:fill||col.sun,w:2.5,rad:5});circle(x,y+s*.2,s*.07,{fill:DK,stroke:false});}
+function envelope(x,y,o={}){const w=o.w||64,h=o.h||44;rect(x-w/2,y-h/2,w,h,{fill:o.fill||col.paper3,w:2.5,rad:4});
+  line(x-w/2,y-h/2,x,y+h*.08,{w:2});line(x+w/2,y-h/2,x,y+h*.08,{w:2});if(o.lock)padlock(x,y+4,h*.5,false,col.coral);}
+function card(x,y,w,h,fill){rect(x,y,w,h,{fill,rad:12,w:3});}
+
+/* ---------- precomputed data ---------- */
+const AB='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+const shift=(s,k)=>s.split('').map(ch=>AB[(AB.indexOf(ch)+k+26)%26]).join('');
+const HEXR=mb(99);const rhex=n=>Array.from({length:n},()=>Math.floor(HEXR()*256).toString(16).padStart(2,'0'));
+const CIPHER=rhex(12);
+function noise(n,seed){const r=mb(seed);return Array.from({length:n},()=>'0123456789abcdef'[Math.floor(r()*16)]).join('');}
+const H_hello='2cf24dba5fb0a30e26e83b2ac5b9e29e1b161e5c1fa7425e73043362938b9824';
+const H_Hello='185f8db32271fe25f561a6fc938b2e264306ec304eda518007d1764826381969';
+const PAINT={yellow:'#ffd166',red:'#ef476f',blue:'#118ab2'};
+PAINT.aMix=hexMix(PAINT.yellow,PAINT.red,.5);PAINT.bMix=hexMix(PAINT.yellow,PAINT.blue,.5);
+PAINT.final=hexMix(hexMix(PAINT.aMix,PAINT.blue,1/3),PAINT.red,.25);
+
+/* ---------- scenes ---------- */
+const SCENES=[
+{t:'Hello',d:6,
+ kid:"Alice wants to send Bob a secret. Eve is listening in. Cryptography is the art of keeping that secret safe anyway.",
+ real:"<b>Cryptography</b> protects messages that travel over channels anyone can watch: keeping them <i>secret</i>, spotting <i>tampering</i> and proving <i>who sent them</i>.",
+ draw(p,lt,c){
+  fade(A(p,0,.15),()=>txt('Cryptography',480,140,{s:96,c:col.coral}));
+  fade(A(p,.1,.3),()=>txt('in about two minutes',480,215,{s:40,c:col.inksoft}));
+  fade(A(p,.2,.4),()=>{person(170,330,'Alice',col.coralsoft);person(790,330,'Bob',col.oceansoft);
+    const t=(c*.3)%1;envelope(lerp(250,710,t),350-Math.sin(t*PI)*70,{lock:true});});
+  fade(A(p,.45,.6),()=>person(480,430,'Eve 👀',col.grapesoft,{r:26,lab:'right',look:-1,mood:'sly'}));
+ }},
+{t:'The problem',d:9,
+ kid:"Sending a message online is like mailing a postcard. It passes through many hands on the way, and anyone along the route can read it.",
+ real:"Internet traffic hops through Wi-Fi access points, internet providers and routers you don't control. Without cryptography, every one of them can <b>read, copy or change</b> what you send.",
+ draw(p){
+  head('The problem: the internet is a crowd',A(p,0,.06));
+  person(110,250,'Alice',col.coralsoft,{r:30});person(850,250,'Bob',col.oceansoft,{r:30});
+  [['café Wi-Fi',320],['provider',480],['router',640]].forEach(([l,x],i)=>fade(A(p,.04+i*.03,.1+i*.03),()=>{circle(x,320,14,{fill:col.paper3,w:2.5});txt(l,x,352,{f:'body',s:16,c:col.inksoft});}));
+  const t=A(p,.08,.6),x=lerp(200,720,t);
+  fade(A(p,.05,.1),()=>{rect(x-75,200,150,84,{fill:col.sunsoft,w:2.5,rad:4});txt('meet at 6pm',x,232,{f:'body',s:20});txt('🍕 xo, Alice',x,262,{f:'body',s:16,c:col.inksoft});});
+  person(480,430,'Eve',col.grapesoft,{r:24,lab:'right',look:t<.5?-1:1,mood:'sly'});
+  fade(A(p,.36,.44),()=>txt('"Pizza at 6? Noted." 😈',560,470,{s:28,c:col.grape,a:'left'}));
+  fade(A(p,.7,.8),()=>txt('Anyone in between can read, copy or change it',480,512,{s:32,c:col.coral}));
+ }},
+{t:'Caesar',d:12,
+ kid:"The oldest trick: slide every letter along the alphabet by 3. HELLO becomes KHOOR. It looks like gibberish… until Eve simply tries every slide.",
+ real:"Julius Caesar's cipher has only 25 possible keys, so a <b>brute-force</b> attack tries them all in seconds. A real cipher needs so many keys that trying them all is impossible.",
+ draw(p){
+  head('The oldest trick: shift every letter',A(p,0,.06));
+  const sh=Math.round(keys(p,[[0,0],[.08,0],[.25,3]]));
+  for(let i=0;i<26;i++){const x=480+(i-12.5)*33;
+    fade(A(p,.02,.08),()=>txt(AB[i],x,120,{f:'mono',s:20,c:col.inksoft}));
+    fade(A(p,.05,.1),()=>{rect(x-14,140,28,30,{fill:col.sunsoft,w:1.6,rad:3});txt(AB[(i+sh)%26],x,156,{f:'mono',s:20,c:col.coral});});}
+  fade(A(p,.12,.2),()=>txt(`shift = ${sh}`,480,200,{s:30,c:col.coral}));
+  const W5='HELLO',E5=shift(W5,3);
+  fade(A(p,.28,.34),()=>{let n=0;for(let j=0;j<5;j++){const flip=p>=.34+j*.035;if(flip)n++;const x=480+(j-2)*64;
+      rect(x-26,250,52,58,{fill:flip?col.coralsoft:col.paper2,w:2.5,rad:6});txt(flip?E5[j]:W5[j],x,281,{f:'mono',s:34,c:flip?col.coral:col.ink});}
+    txt(n<5?'Alice writes:':'sent:',250,281,{s:30,a:'right',c:col.inksoft});});
+  person(190,410,'',col.grapesoft,{r:24,look:1,mood:'sly'});
+  fade(A(p,.52,.56),()=>txt('Eve tries:',240,410,{s:28,a:'left',c:col.grape}));
+  [1,2,3].forEach((k,i)=>fade(A(p,.56+i*.08,.6+i*.08),()=>{const ok=k===3;
+    txt(`back ${k} → ${shift(E5,-k)} ${ok?'✓':'✗'}`,360+i*0,380+i*34,{f:'mono',s:22,a:'left',c:ok?col.mintink:col.inksoft});}));
+  fade(A(p,.84,.9),()=>txt('Only 25 keys to try → cracked in seconds',480,512,{s:32,c:col.coral}));
+ }},
+{t:'Shared key',d:11,
+ kid:"Modern ciphers like AES also use one secret key to lock and unlock. But the key is a 128-bit number, so there are far too many to try.",
+ real:"<b>Symmetric encryption</b> (AES, ChaCha20) uses the same key to encrypt and decrypt. A 128-bit key has 2¹²⁸ ≈ 3.4 × 10³⁸ possibilities. The catch: both sides must already share that key.",
+ draw(p,lt,c){
+  head('Modern ciphers: one shared secret key',A(p,0,.06));
+  const hexRow=(x,y,fixed,seed)=>{const h=fixed?CIPHER:rhexAt(seed);txt(h.slice(0,6).join(' '),x,y-12,{f:'mono',s:17,c:col.ink});txt(h.slice(6).join(' '),x,y+12,{f:'mono',s:17,c:col.ink});};
+  const rhexAt=seed=>{const r=mb(seed);return Array.from({length:12},()=>Math.floor(r()*256).toString(16).padStart(2,'0'));};
+  const tick=Math.floor(c*12);
+  fade(A(p,.04,.12),()=>{txt('Alice encrypts',90,118,{s:28,a:'left',c:col.coral});
+    rect(90,140,210,70,{fill:col.sunsoft,w:2.5,rad:6});txt('meet at 6pm',195,175,{f:'body',s:21});
+    arrow(310,175,400,175,{w:3});rect(410,140,140,70,{fill:col.paper3,w:3,rad:10});txt('AES',480,177,{s:36});txt('🔑',480,118,{f:'emoji',s:30});
+    arrow(560,175,640,175,{w:3});rect(650,140,220,70,{fill:col.grapesoft,w:2.5,rad:6});hexRow(760,175,p>=.3,tick);});
+  fade(A(p,.34,.44),()=>{txt('Bob decrypts',90,262,{s:28,a:'left',c:col.ocean});
+    rect(90,285,210,70,{fill:col.grapesoft,w:2.5,rad:6});hexRow(195,320,true);
+    arrow(310,320,400,320,{w:3});rect(410,285,140,70,{fill:col.paper3,w:3,rad:10});txt('AES',480,322,{s:36});
+    arrow(560,320,640,320,{w:3});rect(650,285,220,70,{fill:col.sunsoft,w:2.5,rad:6});txt('meet at 6pm',760,320,{f:'body',s:21});
+    txt('🔑',480,262,{f:'emoji',s:30});txt('← the same key',502,262,{s:24,a:'left',c:col.coral});});
+  fade(A(p,.55,.65),()=>{txt('128-bit key → 2¹²⁸ ≈ 3.4 × 10³⁸ possible keys',480,410,{s:32});txt('trying them all would take far longer than the age of the universe',480,445,{f:'body',s:18,c:col.inksoft});});
+  fade(A(p,.76,.84),()=>txt('But how do Alice and Bob agree on that key… in public?',480,505,{s:32,c:col.grape}));
+ }},
+{t:'Key exchange',d:14,
+ kid:"Think of paint. Alice and Bob each mix a secret colour into a shared public one, swap the mixes, then add their secret again. Both end up with the same colour, and Eve can't un-mix paint.",
+ real:"<b>Diffie-Hellman</b> key exchange (today usually <b>X25519</b>) lets two strangers agree on a secret key over a public channel. Eve sees the exchanged values, but undoing the 'mixing' is a mathematically hard problem.",
+ draw(p){
+  head('Agreeing on a secret in public',A(p,0,.06));
+  const pot=(x,y,c,l,lc)=>{circle(x,y,28,{fill:c,w:3});if(l)txt(l,x,y+46,{f:'body',s:16,c:lc||col.inksoft});};
+  fade(A(p,.02,.08),()=>{pot(480,135,PAINT.yellow,'public colour');txt('Alice',180,110,{s:34,c:col.coral});txt('Bob',780,110,{s:34,c:col.ocean});});
+  fade(A(p,.06,.12),()=>{pot(180,185,PAINT.red,'secret 🤫');pot(780,185,PAINT.blue,'secret 🤫');});
+  fade(A(p,.14,.24),()=>{arrow(445,150,225,268,{w:2,c:col.inkfaint,dash:[6,6]});arrow(515,150,735,268,{w:2,c:col.inkfaint,dash:[6,6]});
+    arrow(180,236,180,252,{w:2.5});arrow(780,236,780,252,{w:2.5});pot(180,285,PAINT.aMix,'mix');pot(780,285,PAINT.bMix,'mix');});
+  const sw=A(p,.3,.52);
+  if(p>=.3){const ax=lerp(180,780,sw),bx=lerp(780,180,sw),y=395-Math.sin(sw*PI)*18;
+    const ta=A(p,.58,.72);
+    circle(ax,y,26,{fill:hexMix(PAINT.aMix,PAINT.final,ta),w:3});circle(bx,y,26,{fill:hexMix(PAINT.bMix,PAINT.final,ta),w:3});
+    if(p>=.56){arrow(146,205,140,372,{w:2,c:col.coral,dash:[6,6]});arrow(814,205,820,372,{w:2,c:col.ocean,dash:[6,6]});}
+    fade(A(p,.72,.78),()=>{txt('same secret!',180,440,{s:26,c:col.mintink});txt('same secret!',780,440,{s:26,c:col.mintink});});}
+  person(480,440,'',col.grapesoft,{r:22,look:sw<.5?-1:1,mood:p>.58?'sad':'sly'});
+  fade(A(p,.5,.56)*(1-A(p,.82,.86)),()=>txt('Eve saw both mixes… but can\'t un-mix paint 😩',520,440,{s:26,a:'left',c:col.grape}));
+  fade(A(p,.86,.92),()=>txt('A shared key, agreed in public. Eve only saw the mixes.',480,512,{s:30,c:col.grape}));
+ }},
+{t:'Padlocks',d:12,
+ kid:"Bob hands out open padlocks to anyone who asks. Alice snaps one shut on her box. Now only Bob's key, which never leaves his pocket, can open it.",
+ real:"<b>Public-key cryptography</b> (RSA, elliptic curves) uses a key pair. The <b>public key</b> (the open padlock) can be shared with the world; only the matching <b>private key</b> can undo it.",
+ draw(p){
+  head('Public-key crypto: hand out open padlocks',A(p,0,.06));
+  person(140,260,'Alice',col.coralsoft,{r:30});person(820,260,'Bob',col.oceansoft,{r:30});
+  fade(A(p,.04,.1),()=>{txt('🗝️',880,200,{f:'emoji',s:34});txt('private key: never shared',820,372,{s:24,c:col.ocean});});
+  if(p<.4){const t=A(p,.1,.3);if(p>=.1){padlock(lerp(760,240,t),190-Math.sin(t*PI)*40,40,true);padlock(lerp(760,520,t),lerp(200,410,t),30,true);}}
+  fade(A(p,.12,.2),()=>txt('public key = an open padlock (copies for everyone)',480,122,{s:28,c:col.inksoft}));
+  person(480,440,'',col.grapesoft,{r:22,look:-1,mood:p>.62?'sad':'sly'});
+  if(p>=.3)padlock(540,422,30,true);
+  const closed=p>=.46,mv=A(p,.52,.76),bx=lerp(240,700,mv);
+  if(p>=.3){envelope(bx,270,{w:84,h:56});padlock(bx,252,40,!closed,col.sun);}
+  fade(A(p,.4,.46)*(1-A(p,.5,.54)),()=>txt('snap!',300,200,{s:32,c:col.coral}));
+  fade(A(p,.6,.66)*(1-A(p,.84,.88)),()=>txt('"My padlock copy can\'t open it 😩"',580,440,{s:26,a:'left',c:col.grape}));
+  if(p>=.78){const o=A(p,.78,.84);txt('🗝️',lerp(880,730,o),lerp(200,250,o),{f:'emoji',s:34});
+    fade(A(p,.84,.9),()=>txt('meet at 6pm',700,190,{f:'body',s:22,c:col.mintink}));}
+  fade(A(p,.88,.94),()=>txt('Anyone can lock it. Only Bob can unlock it.',480,512,{s:32,c:col.grape}));
+ }},
+{t:'Hashing',d:11,
+ kid:"A hash is a fingerprint for data. The same input always gives the same fingerprint, change one letter and it changes completely, and you can't turn a fingerprint back into the data.",
+ real:"<b>SHA-256</b> turns any input into a 256-bit digest. It's used to check downloads, store passwords (with extra care), build signatures and chain blocks together. These are the real SHA-256 values.",
+ draw(p,lt,c){
+  head('Hashing: a fingerprint for any data',A(p,0,.06));
+  const tick=Math.floor(c*14);
+  const row=(y,inp,hash,a0,hl)=>fade(A(p,a0,a0+.06),()=>{rect(60,y-34,170,68,{fill:col.sunsoft,w:2.5,rad:6});txt(`"${inp}"`,145,y,{f:'mono',s:26,c:hl?col.coral:col.ink});
+    arrow(240,y,330,y,{w:3});rect(340,y-40,170,80,{fill:col.paper3,w:3,rad:12});txt('SHA-256',425,y-8,{s:32});txt('🌀',425,y+22,{f:'emoji',s:18});
+    arrow(520,y,580,y,{w:3});const done=p>=a0+.14,h=done?hash:noise(64,tick+y);
+    txt(h.slice(0,32),595,y-14,{f:'mono',s:17,a:'left',c:done?(hl?col.coral:col.ink):col.inkfaint});txt(h.slice(32),595,y+14,{f:'mono',s:17,a:'left',c:done?(hl?col.coral:col.ink):col.inkfaint});});
+  row(170,'hello',H_hello,.05,false);
+  row(300,'Hello',H_Hello,.36,true);
+  fade(A(p,.55,.62),()=>txt('one capital letter → a totally different fingerprint',480,370,{s:28,c:col.coral}));
+  fade(A(p,.66,.74),()=>txt('same input → same hash  ·  tiny change → new hash  ·  no way back',480,425,{f:'body',s:19,c:col.inksoft}));
+  fade(A(p,.8,.88),()=>txt('Used to check files, store passwords and build signatures',480,505,{s:32,c:col.grape}));
+ }},
+{t:'Tampering',d:11,
+ kid:"Alice seals her message with a tag made from the message plus a key only she and Bob know. Mallory changes the amount, but can't make a matching tag, so Bob rejects it.",
+ real:"A <b>MAC</b> (message authentication code, e.g. HMAC-SHA256, or the tag in AES-GCM) proves a message wasn't altered and came from someone holding the shared key. Encryption alone doesn't guarantee that.",
+ draw(p){
+  head('Spotting tampering: a sealed tag',A(p,0,.06));
+  person(100,230,'Alice',col.coralsoft,{r:28});person(860,230,'Bob',col.oceansoft,{r:28});
+  fade(A(p,.03,.08),()=>{txt('🔑 shared key',100,140,{s:24,c:col.coral});txt('🔑 shared key',860,140,{s:24,c:col.coral});});
+  const t1=A(p,.08,.3),t2=A(p,.45,.62),x=p<.45?lerp(210,480,t1):lerp(480,700,t2),edited=p>=.37;
+  person(480,440,'Mallory',col.orangesoft,{r:22,lab:'right',look:-1,mood:'sly'});
+  fade(A(p,.06,.1),()=>{rect(x-115,195,230,84,{fill:edited?col.coralsoft:col.sunsoft,w:2.5,rad:6});
+    txt(edited?'pay Mallory $1000':'pay Carol $10',x,222,{f:'body',s:20,c:edited?col.coral:col.ink});
+    rect(x-70,242,140,26,{fill:col.paper2,w:2,rad:4});txt('🔏 tag 7d1e…',x,256,{f:'mono',s:15});});
+  fade(A(p,.32,.37)*(1-A(p,.6,.64)),()=>txt('"…make that $1000" ✂️',480,345,{s:28,c:col.orange}));
+  fade(A(p,.66,.72),()=>{txt('Bob re-computes the tag: a90c…',940,370,{s:26,a:'right'});});
+  fade(A(p,.74,.8),()=>txt('a90c… ≠ 7d1e… ✗ REJECTED',940,405,{s:30,a:'right',c:col.coral}));
+  fade(A(p,.84,.9),()=>txt('No key → Mallory can\'t forge a matching tag',480,512,{s:32,c:col.grape}));
+ }},
+{t:'Signatures',d:11,
+ kid:"Alice stamps a document with her private key. Anyone holding her public key can check the stamp, but nobody else can make it. A certificate is a trusted party vouching whose key is whose.",
+ real:"A <b>digital signature</b> (Ed25519, ECDSA, RSA-PSS) is made with a private key and verified with the public key. It proves who signed and that nothing changed. <b>Certificates</b> are public keys signed by a certificate authority.",
+ draw(p){
+  head('Digital signatures: proof of who sent it',A(p,0,.06));
+  person(100,220,'Alice',col.coralsoft,{r:28});
+  fade(A(p,.03,.1),()=>{rect(190,120,190,220,{fill:col.paper2,w:2.5,rad:6});txt('Contract',285,150,{s:30});
+    for(let i=0;i<5;i++)line(210,185+i*22,210+(i%2?130:150),185+i*22,{w:2,c:col.inkfaint});});
+  fade(A(p,.12,.2),()=>{const s=lerp(1.6,1,A(p,.12,.2));ctx.save();ctx.translate(320,300);ctx.rotate(-.18);ctx.scale(s,s);
+    circle(0,0,30,{c:col.coral,w:3});txt('Alice',0,-6,{s:20,c:col.coral});txt('✍️ sig',0,14,{f:'body',s:11,c:col.coral});ctx.restore();});
+  fade(A(p,.1,.16),()=>txt('signed with her PRIVATE key',285,370,{s:24,c:col.coral}));
+  [['Bob',col.oceansoft,150],['Carol',col.mintsoft,250],['Dave',col.sunsoft,350]].forEach(([n,f,y],i)=>{
+    fade(A(p,.24,.3),()=>person(720,y,n,f,{r:20,lab:'right'}));
+    const t=A(p,.3+i*.06,.42+i*.06);if(t>0&&t<1){rect(lerp(400,640,t)-20,lerp(230,y,t)-26,40,52,{fill:col.paper2,w:2,rad:3});}
+    if(t>=1)txt('✓',880,y,{s:44,c:col.mintink});});
+  fade(A(p,.4,.46),()=>txt('checked with her PUBLIC key',780,410,{s:24,c:col.ocean}));
+  fade(A(p,.62,.7),()=>txt('📜 Certificate = "this public key really belongs to Alice", signed by a trusted authority',480,455,{f:'body',s:18,c:col.inksoft}));
+  fade(A(p,.82,.9),()=>txt('Anyone can check it. Nobody else can forge it.',480,507,{s:32,c:col.grape}));
+ }},
+{t:'Passwords',d:11,
+ kid:"Websites shouldn't keep your password at all. They keep a slow, salted fingerprint of it. If the database leaks, thieves get a pile of fingerprints that are painfully slow to guess.",
+ real:"Store passwords with a <b>slow, salted hash</b> such as Argon2id, scrypt or bcrypt. The random <b>salt</b> makes identical passwords hash differently; the slowness makes each guess expensive.",
+ draw(p){
+  head('Storing passwords: never the real thing',A(p,0,.06));
+  const rows=[['alice','hunter2','$argon2id$…k9Qx'],['bob','123456','$argon2id$…Zp7w'],['carol','123456','$argon2id$…4mHe']];
+  fade(A(p,.04,.12),()=>{card(60,110,390,230,col.coralsoft);txt('✗ stored as-is',255,140,{s:32,c:col.coral});
+    rows.forEach(([u,pw],i)=>{txt(u,90,190+i*44,{f:'mono',s:20,a:'left',c:col.inksoft});txt(pw,230,190+i*44,{f:'mono',s:20,a:'left'});});});
+  fade(A(p,.14,.22),()=>{card(510,110,390,230,col.mintsoft);txt('✓ salted, slow hash',705,140,{s:32,c:col.mintink});
+    rows.forEach(([u,,h],i)=>{txt(u,540,190+i*44,{f:'mono',s:20,a:'left',c:col.inksoft});txt(h,640,190+i*44,{f:'mono',s:17,a:'left'});});});
+  fade(A(p,.3,.36),()=>{const s=lerp(1.5,1,A(p,.3,.36));ctx.save();ctx.translate(480,250);ctx.rotate(-.12);ctx.scale(s,s);
+    rect(-150,-26,300,52,{c:col.coral,w:4,rad:6,fill:col.dark?'rgba(29,40,39,.85)':'rgba(255,253,247,.85)'});txt('DATABASE LEAKED 🦹',0,2,{s:34,c:col.coral});ctx.restore();});
+  fade(A(p,.44,.52),()=>txt('thief reads every password',255,375,{s:26,c:col.coral}));
+  fade(A(p,.52,.6),()=>txt('each guess is slow on purpose',705,375,{s:26,c:col.mintink}));
+  fade(A(p,.64,.72),()=>txt('same password, different hash: that\'s the salt',705,412,{f:'body',s:16,c:col.grape}));
+  fade(A(p,.8,.88),()=>txt('Never store passwords. Store slow, salted hashes.',480,505,{s:32,c:col.grape}));
+ }},
+{t:'HTTPS',d:11,
+ kid:"Every padlock in your browser bar is all of these tricks at once: agree on a key, check the website's signed certificate, then encrypt and seal every byte.",
+ real:"<b>TLS 1.3</b> (the S in HTTPS) combines a key exchange (X25519, increasingly hybrid with post-quantum ML-KEM), certificate signatures to authenticate the server, and AEAD encryption (AES-GCM or ChaCha20-Poly1305).",
+ draw(p){
+  head('HTTPS: everything working together',A(p,0,.06));
+  fade(A(p,.03,.1),()=>{rect(200,95,560,40,{fill:col.paper2,w:2.5,rad:20});txt('🔒 https://bank.example',230,115,{f:'mono',s:19,a:'left'});
+    txt('💻',110,300,{f:'emoji',s:70});txt('you',110,355,{f:'body',s:18,c:col.inksoft});txt('🏦',850,300,{f:'emoji',s:70});txt('bank',850,355,{f:'body',s:18,c:col.inksoft});});
+  const steps=[['🤝 Key exchange','X25519 (+ ML-KEM) → a fresh shared key',col.grapesoft,.12],['📜 Certificate + signature','proves it really is bank.example',col.sunsoft,.36],['🔐 AES-GCM encryption','every byte locked and tamper-checked',col.mintsoft,.6]];
+  steps.forEach(([t,s,f,a],i)=>fade(A(p,a,a+.08),()=>{const y=170+i*95;
+    line(160,300,250,y+38,{w:2,dash:[6,6],c:col.inkfaint});line(710,y+38,800,300,{w:2,dash:[6,6],c:col.inkfaint});
+    card(250,y,460,76,f);txt(t,275,y+26,{s:30,a:'left'});txt(s,275,y+56,{f:'body',s:17,a:'left',c:col.inksoft});
+    txt(String(i+1),690,y+38,{s:34,c:col.inkfaint});}));
+  fade(A(p,.84,.92),()=>txt('Every 🔒 in your browser = all of these, in milliseconds',480,512,{s:30,c:col.grape}));
+ }},
+{t:'Golden rules',d:10,
+ kid:"The maths is the strong part. Most real break-ins happen around it: home-made ciphers, leaked keys, reused random numbers. And quantum computers are coming for some of today's locks.",
+ real:"Use vetted libraries, never your own cipher. Protect and rotate keys. Never reuse a nonce. Plan the move to <b>post-quantum cryptography</b> (ML-KEM, ML-DSA), because a large quantum computer would break RSA and elliptic curves.",
+ draw(p){
+  head('Golden rules',A(p,0,.06));
+  const cards=[['🚫','Don\'t roll your own','use vetted libraries',col.coral],['🔑','Keys are the secret','guard them, rotate them',col.ocean],
+    ['🎲','Real randomness','never reuse a nonce',col.orange],['⚛️','Quantum is coming','move to post-quantum',col.grape]];
+  cards.forEach(([e,t,s,c],i)=>fade(A(p,.08+i*.13,.18+i*.13),()=>{const x=70+(i%2)*420,y=105+Math.floor(i/2)*180;
+    card(x,y,400,150,col.paper2);txt(e,x+52,y+75,{f:'emoji',s:48});txt(t,x+100,y+58,{s:36,a:'left',c});
+    txt(s,x+100,y+100,{f:'body',s:20,a:'left',c:col.inksoft});}));
+  fade(A(p,.72,.84),()=>txt('Strong maths, careful engineering',480,505,{s:34,c:col.grape}));
+ }},
+{t:'Recap',d:8,
+ kid:"Secrets, seals, signatures and a shared key out of thin air. That's cryptography.",
+ real:"Confidentiality (encryption), integrity (hashes and MACs), authenticity (signatures and certificates) and key exchange: four building blocks behind every secure app. CryptoSketch covers all of them in 22 chapters with 80 live demos.",
+ draw(p){
+  fade(A(p,0,.15),()=>txt('Cryptography',480,125,{s:84,c:col.coral}));
+  [['🔒','secrets: encryption',col.coral],['🧾','no tampering: hashes & MACs',col.orange],['✍️','who sent it: signatures',col.ocean],['🤝','shared keys: key exchange',col.grape]]
+    .forEach(([e,t,c],i)=>fade(A(p,.12+i*.1,.22+i*.1),()=>{const x=80+(i%2)*430,y=240+Math.floor(i/2)*90;
+      txt(e,x,y,{f:'emoji',s:36});txt(t,x+36,y,{s:33,a:'left',c});}));
+  fade(A(p,.62,.8),()=>txt('Keep going: 22 chapters and 80 live demos in CryptoSketch →',480,470,{s:30,c:col.inksoft}));
+ }},
+];
+const starts=[];let TOTAL=0;SCENES.forEach(s=>{starts.push(TOTAL);TOTAL+=s.d;});
+
+/* ---------- canvas sizing ---------- */
+function resize(){const w=cv.clientWidth||W,dpr=Math.min(2,devicePixelRatio||1);cv.width=Math.round(w*dpr);cv.height=Math.round(w*9/16*dpr);}
+addEventListener('resize',resize);
+function backdrop(){ctx.fillStyle=col.paper2;ctx.fillRect(0,0,W,H);ctx.strokeStyle=col.grid;ctx.lineWidth=1;ctx.beginPath();
+  for(let x=0;x<=W;x+=30){ctx.moveTo(x+.5,0);ctx.lineTo(x+.5,H);}for(let y=0;y<=H;y+=30){ctx.moveTo(0,y+.5);ctx.lineTo(W,y+.5);}ctx.stroke();}
+function render(i,p,clock){const s=cv.width/W;ctx.setTransform(s,0,0,s,0,0);calls=0;boil=reduce?0:Math.floor(clock*6);
+  backdrop();SCENES[i].draw(p,p*SCENES[i].d,reduce?0:clock);}
+
+/* ---------- player ---------- */
+let time=0,playing=!reduce,last=performance.now(),lastScene=-1,clock=0;
+const fmt=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
+const dotsEl=$('dots');
+SCENES.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.textContent=(i+1)+' · '+s.t;b.addEventListener('click',()=>{time=starts[i]+.01;});dotsEl.appendChild(b);});
+function sceneAt(t){let i=0;while(i<SCENES.length-1&&t>=starts[i+1])i++;return i;}
+function ui(i){if(i===lastScene)return;lastScene=i;const s=SCENES[i];
+  $('chip').textContent=`Scene ${i+1} of ${SCENES.length} · ${s.t}`;$('kid').textContent=s.kid;$('real').innerHTML=s.real;
+  [...dotsEl.children].forEach((b,j)=>b.setAttribute('aria-current',j===i));}
+function setPlay(v){playing=v;$('play').textContent=v?'Pause':(time>=TOTAL-.05?'Replay':'Play');}
+$('play').addEventListener('click',()=>{if(!playing&&time>=TOTAL-.05)time=0;setPlay(!playing);});
+$('prev').addEventListener('click',()=>{const i=sceneAt(time);time=starts[Math.max(0,(time-starts[i]<1.5?i-1:i))]+.01;});
+$('next').addEventListener('click',()=>{const i=sceneAt(time);time=i<SCENES.length-1?starts[i+1]+.01:TOTAL-.01;});
+const bar=$('bar');
+function seek(e){const r=bar.getBoundingClientRect();time=clamp((e.clientX-r.left)/r.width,0,1)*TOTAL;}
+bar.addEventListener('pointerdown',e=>{seek(e);try{bar.setPointerCapture(e.pointerId);}catch(_){}bar.onpointermove=seek;});
+bar.addEventListener('pointerup',()=>{bar.onpointermove=null;});
+bar.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();e.stopPropagation();time=clamp(time+(e.key==='ArrowRight'?5:-5),0,TOTAL-.01);}});
+addEventListener('keydown',e=>{if(e.target.closest('button,a')&&(e.code==='Space'||e.key==='Enter'))return;
+  if(e.code==='Space'){e.preventDefault();$('play').click();}else if(e.key==='ArrowRight')$('next').click();else if(e.key==='ArrowLeft')$('prev').click();});
+
+/* theme toggle, shared with CryptoSketch (same localStorage key) */
+const root=document.documentElement;
+function isDark(){const t=root.dataset.theme;return t?t==='dark':matchMedia('(prefers-color-scheme: dark)').matches;}
+function themeIcon(){$('theme').firstElementChild.textContent=isDark()?'☀️':'🌙';}
+$('theme').addEventListener('click',()=>{const t=isDark()?'light':'dark';root.dataset.theme=t;try{localStorage.setItem('cs-theme',t);}catch(e){}readColors();themeIcon();});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{readColors();themeIcon();});
+
+function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000,.05);last=now;clock+=dt;
+  if(playing){time+=dt;if(time>=TOTAL){time=TOTAL-.001;setPlay(false);}}
+  const i=sceneAt(time),p=clamp((time-starts[i])/SCENES[i].d,0,1);
+  ui(i);render(i,p,clock);
+  $('fill').style.width=(time/TOTAL*100)+'%';bar.setAttribute('aria-valuenow',Math.round(time/TOTAL*100));
+  $('time').textContent=fmt(time)+' / '+fmt(TOTAL);}
+readColors();themeIcon();resize();setPlay(playing);
+if(reduce)time=starts[0]+SCENES[0].d*.99;
+window.__anim={seek:t=>{time=clamp(t,0,TOTAL-.01);},total:TOTAL,starts};
+(document.fonts?document.fonts.ready:Promise.resolve()).then(()=>{last=performance.now();requestAnimationFrame(loop);});
+})();
+</script>
+</body>
+</html>

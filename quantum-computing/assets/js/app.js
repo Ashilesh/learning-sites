@@ -128,7 +128,7 @@
     }).join('');
     p.innerHTML = `<div class="panel-head"><h2>📚 All episodes</h2><button class="close-x" type="button" aria-label="Close">✕</button></div>
       <input class="search-box" type="search" placeholder="Search ${D.search.length} sections & glossary terms..." aria-label="Search the guide"><div class="search-results"></div>
-      <p style="margin:0;font-weight:700">${doneCount()} of ${D.chapters.length} done · <a href="${ROOT}index.html">journey map</a> · <a href="${ROOT}bites.html">quick bites</a></p>${parts}`;
+      <p style="margin:0;font-weight:700">${doneCount()} of ${D.chapters.length} done · <a href="${ROOT}index.html">journey map</a> · <a href="${ROOT}bites.html">quick bites</a> · <a href="${ROOT}animation.html">2-min animation</a></p>${parts}`;
     const box = p.querySelector('.search-box'), res = p.querySelector('.search-results');
     box.addEventListener('input', () => {
       const q = box.value.trim().toLowerCase();

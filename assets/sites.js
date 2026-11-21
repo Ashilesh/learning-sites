@@ -164,5 +164,65 @@ window.SITES = [
     minutes: 300,
   },
 
+  {
+    id: "quantum-in-two-minutes",
+    title: "Quantum in Two Minutes",
+    path: "quantum-computing/animation.html",
+    category: "quantum",
+    topic: "Quantum",
+    format: "Animation",
+    description:
+      "A hand-drawn, two-minute animated tour: bits vs qubits, measurement, entanglement, interference, " +
+      "a real quantum search step by step, why qubits are fragile, and what quantum computers are actually good for.",
+    tags: ["quantum", "quantum computing", "animation", "qubit", "superposition", "entanglement", "interference", "grover", "decoherence"],
+    added: "2026-11-21",
+    minutes: 2,
+  },
+
+  {
+    id: "quic-in-two-minutes",
+    title: "QUIC in Two Minutes",
+    path: "QUIC/animation.html",
+    category: "networking",
+    topic: "QUIC",
+    format: "Animation",
+    description:
+      "A hand-drawn, two-minute animated tour of QUIC: parcels and couriers, the TCP vs QUIC handshake race, 0-RTT, " +
+      "streams vs head-of-line blocking, switching from Wi-Fi to 5G mid-download, and the always-locked box.",
+    tags: ["quic", "http/3", "animation", "udp", "tcp", "handshake", "0-rtt", "streams", "head-of-line blocking", "connection migration", "tls"],
+    added: "2026-11-21",
+    minutes: 2,
+  },
+
+  {
+    id: "crypto-in-two-minutes",
+    title: "Cryptography in Two Minutes",
+    path: "Cryptography/dist/animation.html",
+    category: "security",
+    topic: "Cryptography",
+    format: "Animation",
+    description:
+      "A hand-drawn, two-minute animated tour with Alice, Bob, Eve and Mallory: Caesar's cipher, AES, Diffie-Hellman paint mixing, " +
+      "public-key padlocks, hashes, tamper-proof tags, signatures, password storage and how HTTPS ties it all together.",
+    tags: ["cryptography", "animation", "encryption", "aes", "diffie-hellman", "rsa", "public key", "sha-256", "hash", "hmac", "signatures", "passwords", "tls", "https"],
+    added: "2026-11-21",
+    minutes: 2,
+  },
+
+  {
+    id: "wasm-in-two-minutes",
+    title: "Wasm in Two Minutes",
+    path: "wasm/animation.html",
+    category: "web",
+    topic: "Wasm",
+    format: "Animation",
+    description:
+      "A hand-drawn, two-minute animated tour of WebAssembly: the kitchen analogy, compiling once, the stack machine, " +
+      "loading and validation, riding the JS engine, the sandbox and linear memory, the trip to the GPU, limits and what comes next.",
+    tags: ["wasm", "webassembly", "animation", "javascript", "v8", "browser", "stack machine", "linear memory", "sandbox", "webgpu", "wasi"],
+    added: "2026-11-21",
+    minutes: 2,
+  },
+
   // ↓↓↓ ADD NEW SITES HERE ↓↓↓
 ];

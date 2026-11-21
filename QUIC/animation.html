@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>QUIC in Two Minutes · QUIC Sketchbook</title>
+<meta name="description" content="A two-minute hand-drawn animation: packets and couriers, TCP vs QUIC handshakes, 0-RTT, streams vs head-of-line blocking, connection migration, built-in encryption and QUIC's limits.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&family=Courier+Prime:wght@400;700&display=swap">
+<style>
+:root{
+  --paper:#f6f7f2; --grid:rgba(47,91,211,.09); --sheet:#ffffff; --sheet-edge:rgba(35,38,58,.10);
+  --ink:#23263a; --ink-soft:#585d76;
+  --blue:#2f5bd3; --red:#e2483d; --yellow:#f5b800; --green:#23925a; --purple:#7a4fd0; --pink:#dd3f7f; --orange:#ea7a12;
+  --hl:rgba(255,212,59,.6);
+  --note-y:#fff2a6; --note-p:#ffd5e4; --note-b:#d3e4ff; --note-g:#d3f3dc; --note-o:#ffe1c4; --note-v:#e7dcff; --note-ink:#23263a;
+  --f-display:"Caveat", "Segoe Print", "Bradley Hand", cursive;
+  --f-body:"Patrick Hand", "Comic Sans MS", "Chalkboard SE", system-ui, sans-serif;
+  --f-mono:"Courier Prime", "Courier New", ui-monospace, monospace;
+  --wobbly:255px 15px 225px 15px / 15px 225px 15px 255px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#1a1d26; --grid:rgba(140,165,255,.07); --sheet:#242836; --sheet-edge:rgba(0,0,0,.35);
+    --ink:#eeece4; --ink-soft:#b0b4c8;
+    --blue:#83a6ff; --red:#ff7d70; --yellow:#ffd25a; --green:#62d69d; --purple:#b597ff; --pink:#ff88b6; --orange:#ffab5e;
+    --hl:rgba(255,210,90,.30);
+    --note-y:#efdf8c; --note-p:#f0bfd2; --note-b:#bcd2f5; --note-g:#bfe6cb; --note-o:#f3cfab; --note-v:#d4c6f5; --note-ink:#1d2030;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#1a1d26; --grid:rgba(140,165,255,.07); --sheet:#242836; --sheet-edge:rgba(0,0,0,.35);
+  --ink:#eeece4; --ink-soft:#b0b4c8;
+  --blue:#83a6ff; --red:#ff7d70; --yellow:#ffd25a; --green:#62d69d; --purple:#b597ff; --pink:#ff88b6; --orange:#ffab5e;
+  --hl:rgba(255,210,90,.30);
+  --note-y:#efdf8c; --note-p:#f0bfd2; --note-b:#bcd2f5; --note-g:#bfe6cb; --note-o:#f3cfab; --note-v:#d4c6f5; --note-ink:#1d2030;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0; color:var(--ink); font:1.15rem/1.5 var(--f-body); background-color:var(--paper);
+  background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:26px 26px;
+  -webkit-font-smoothing:antialiased}
+a{color:inherit}
+.wrap{max-width:1040px;margin:0 auto;padding:16px 16px 40px}
+.top{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.home-tab,.pill{display:inline-flex;align-items:center;gap:6px;font:700 1.25rem var(--f-display);color:var(--ink);text-decoration:none;
+  padding:2px 12px;border:2px dashed var(--ink);border-radius:var(--wobbly);background:transparent;cursor:pointer}
+.pill{border-style:solid}
+.home-tab:hover,.pill:hover{background:var(--hl)}
+h1{font:700 clamp(2.6rem,6vw,4rem)/1 var(--f-display);margin:12px 0 4px}
+h1 .q{color:var(--blue)} h1 .u{color:var(--pink)} h1 .i{color:var(--green)} h1 .c{color:var(--orange)}
+.lede{margin:0 0 16px;color:var(--ink-soft);font-size:1.25rem;max-width:62ch}
+.stage{position:relative;border:2.5px solid var(--ink);border-radius:10px;box-shadow:6px 8px 0 var(--sheet-edge);overflow:hidden;background:var(--sheet)}
+canvas{display:block;width:100%;aspect-ratio:16/9}
+.chip{position:absolute;top:10px;left:12px;font:700 13px var(--f-mono);background:var(--sheet);border:2px solid var(--ink);border-radius:999px;padding:1px 10px;opacity:.92}
+.controls{display:flex;align-items:center;gap:10px;margin:16px 0 8px;flex-wrap:wrap}
+.btn{font:700 1.3rem/1 var(--f-display);padding:8px 16px 10px;cursor:pointer;border:2.5px solid var(--ink);border-radius:var(--wobbly);
+  background:var(--note-b);color:var(--note-ink);box-shadow:3px 3px 0 var(--ink);transition:transform .1s,box-shadow .1s}
+.btn:hover{transform:translate(-1px,-1px);box-shadow:4px 4px 0 var(--ink)}
+.btn:active{transform:translate(2px,2px);box-shadow:1px 1px 0 var(--ink)}
+.btn.primary{background:var(--yellow);min-width:96px}
+.bar{flex:1;min-width:140px;height:16px;border:2.5px solid var(--ink);border-radius:999px;background:var(--sheet);cursor:pointer;position:relative;overflow:hidden;touch-action:none}
+.bar i{position:absolute;inset:0 auto 0 0;background:var(--orange);width:0}
+.time{font:700 14px var(--f-mono);color:var(--ink-soft);min-width:96px;text-align:right}
+.dots{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.dots button{font:1rem var(--f-body);padding:1px 10px;border-radius:999px;border:2px solid var(--ink-soft);background:var(--sheet);color:var(--ink-soft);cursor:pointer}
+.dots button[aria-current="true"]{background:var(--note-y);border-color:var(--ink);color:var(--note-ink)}
+.caption{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.caption > div{background:var(--sheet);border:2.5px solid var(--ink);border-radius:var(--wobbly);padding:12px 18px;min-height:124px}
+.tag{display:block;font:700 1.5rem var(--f-display);color:var(--pink);margin-bottom:2px}
+.caption .real .tag{color:var(--blue)}
+.caption p{margin:0}
+.caption b{font-weight:400;background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,transparent 92%);padding:0 2px}
+.note{color:var(--ink-soft);font-size:1rem;margin-top:14px}
+.end-cta{display:flex;gap:12px;flex-wrap:wrap;margin-top:18px}
+.end-cta a{text-decoration:none}
+:focus-visible{outline:3px dashed var(--pink);outline-offset:3px}
+@media (max-width:700px){.caption{grid-template-columns:1fr}.hide-sm,.chip{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <a class="home-tab home-link" href="../index.html" title="All explainers">&larr; all</a>
+    <a class="pill" href="index.html">📒<span class="hide-sm"> QUIC Sketchbook</span></a>
+  </div>
+  <h1><span class="q">Q</span><span class="u">U</span><span class="i">I</span><span class="c">C</span> in two minutes</h1>
+  <p class="lede">Parcels and couriers, the handshake race, lanes that don't block each other, a phone that switches networks mid-download, and the locked box. Sketched start to finish.</p>
+
+  <div class="stage">
+    <canvas id="cv" role="img" aria-label="Hand-drawn animation explaining the QUIC protocol. The captions below describe each scene."></canvas>
+    <span class="chip" id="chip">Scene 1</span>
+  </div>
+
+  <div class="controls">
+    <button type="button" class="btn" id="prev" aria-label="Previous scene">◀<span class="hide-sm"> Prev</span></button>
+    <button type="button" class="btn primary" id="play">Pause</button>
+    <button type="button" class="btn" id="next" aria-label="Next scene"><span class="hide-sm">Next </span>▶</button>
+    <div class="bar" id="bar" role="slider" aria-label="Timeline" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><i id="fill"></i></div>
+    <span class="time" id="time">0:00</span>
+  </div>
+  <div class="dots" id="dots" aria-label="Scenes"></div>
+
+  <div class="caption" aria-live="polite">
+    <div class="kid"><span class="tag">The story</span><p id="kid"></p></div>
+    <div class="real"><span class="tag">What's really happening</span><p id="real"></p></div>
+  </div>
+  <div class="end-cta">
+    <a class="btn primary" href="index.html">📒 Read the full QUIC Sketchbook</a>
+    <a class="btn" href="index.html#race">🚆 Try the train race</a>
+  </div>
+  <p class="note">Keyboard: space to play or pause, arrow keys to change scene. Timings assume 50 ms each way (a 100 ms round trip); real networks vary.</p>
+</div>
+
+<script>
+(function(){
+"use strict";
+const $=id=>document.getElementById(id);
+const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const W=960,H=540,PI=Math.PI;
+const cv=$('cv'),ctx=cv.getContext('2d');
+const clamp=(v,a,b)=>Math.min(b,Math.max(a,v));
+const lerp=(a,b,t)=>a+(b-a)*t;
+const ease=t=>t<.5?2*t*t:1-Math.pow(-2*t+2,2)/2;
+const seg=(p,a,b)=>clamp((p-a)/(b-a),0,1);
+const A=(p,a,b)=>ease(seg(p,a,b));
+function mb(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};}
+
+/* ---------- colours (read from CSS tokens so both themes work) ---------- */
+const col={};
+function readColors(){const s=getComputedStyle(document.documentElement);
+  ['paper','sheet','grid','ink','ink-soft','blue','red','yellow','green','purple','pink','orange','note-y','note-p','note-b','note-g','note-o','note-v','note-ink']
+    .forEach(k=>col[k.replace('-','')]=s.getPropertyValue('--'+k).trim());
+  col.dark=s.getPropertyValue('color-scheme').trim()==='dark';}
+
+/* ---------- sketchy drawing kit ---------- */
+let boil=0,calls=0;const JIT=1.3;
+const R=()=>mb(boil*7919+(++calls)*104729);
+const jj=(r,k=1)=>(r()-.5)*2*JIT*k;
+function fade(a,fn){if(a<=.001)return;ctx.save();ctx.globalAlpha*=Math.min(1,a);fn();ctx.restore();}
+function line(x1,y1,x2,y2,o={}){const r=R();ctx.save();ctx.strokeStyle=o.c||col.ink;ctx.lineCap='round';if(o.dash)ctx.setLineDash(o.dash);
+  const w=o.w||3,k=Math.min(1,Math.hypot(x2-x1,y2-y1)/60)+.3;
+  for(let pass=0;pass<(o.dash?1:2);pass++){ctx.lineWidth=pass?w*.45:w;ctx.beginPath();ctx.moveTo(x1+jj(r),y1+jj(r));
+    ctx.quadraticCurveTo((x1+x2)/2+jj(r,1.6*k),(y1+y2)/2+jj(r,1.6*k),x2+jj(r),y2+jj(r));ctx.stroke();}
+  ctx.restore();}
+function circle(cx,cy,rad,o={}){const r=R();ctx.save();
+  if(o.fill){ctx.fillStyle=o.fill;ctx.beginPath();ctx.arc(cx,cy,rad,0,7);ctx.fill();}
+  if(o.stroke!==false){ctx.strokeStyle=o.c||col.ink;ctx.lineWidth=o.w||3;ctx.lineCap='round';
+    const n=Math.max(14,Math.round(rad/2.5)),a0=r()*6.28,f1=r()*6,amp=rad>25?1.4:.5;ctx.beginPath();
+    for(let i=0;i<=n;i++){const a=a0+i/n*(2*PI+.3);const rr=rad+Math.sin(a*2+f1)*amp*JIT;
+      const x=cx+Math.cos(a)*rr,y=cy+Math.sin(a)*rr;i?ctx.lineTo(x,y):ctx.moveTo(x,y);}
+    ctx.stroke();}
+  ctx.restore();}
+function rect(x,y,w,h,o={}){if(o.fill){ctx.save();ctx.fillStyle=o.fill;ctx.beginPath();ctx.roundRect(x,y,w,h,o.rad??6);ctx.fill();ctx.restore();}
+  if(o.stroke!==false){const q={c:o.c,w:o.w||3,dash:o.dash};line(x,y,x+w,y,q);line(x+w,y,x+w,y+h,q);line(x+w,y+h,x,y+h,q);line(x,y+h,x,y,q);}}
+function arrow(x1,y1,x2,y2,o={}){line(x1,y1,x2,y2,o);const a=Math.atan2(y2-y1,x2-x1),h=o.head||14,q={c:o.c,w:o.w};
+  line(x2,y2,x2-h*Math.cos(a-.45),y2-h*Math.sin(a-.45),q);line(x2,y2,x2-h*Math.cos(a+.45),y2-h*Math.sin(a+.45),q);}
+const FONTS={hand:s=>`700 ${s}px Caveat, cursive`,body:s=>`${s}px "Patrick Hand", sans-serif`,
+  mono:s=>`700 ${s}px "Courier Prime", monospace`,emoji:s=>`${s}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`};
+function txt(s,x,y,o={}){ctx.save();ctx.font=FONTS[o.f||'hand'](o.s||32);ctx.fillStyle=o.c||col.ink;ctx.textAlign=o.a||'center';ctx.textBaseline='middle';ctx.fillText(s,x,y);ctx.restore();}
+function head(s,a=1){fade(a,()=>{ctx.save();ctx.font=FONTS.hand(46);const w=ctx.measureText(s).width;ctx.fillStyle=col.yellow;ctx.globalAlpha*=col.dark?.25:.45;
+  ctx.beginPath();ctx.roundRect(480-w/2-12,62,w+24,16,7);ctx.fill();ctx.restore();txt(s,480,52,{s:46});});}
+
+/* ---------- props ---------- */
+function lock(x,y,s,c){c=c||col.ink;ctx.save();ctx.strokeStyle=c;ctx.lineWidth=Math.max(2,s*.14);ctx.beginPath();ctx.arc(x,y-s*.15,s*.3,PI,0);ctx.stroke();ctx.restore();
+  rect(x-s*.45,y-s*.15,s*.9,s*.65,{fill:c,stroke:false,rad:3});}
+function parcel(x,y,w,h,fill,o={}){rect(x-w/2,y-h/2,w,h,{fill,w:2.5,rad:4,dash:o.dash,c:o.c});
+  if(o.lock)lock(x,y+2,Math.min(w,h)*.55,col.noteink);
+  else if(o.label!==undefined)txt(o.label,x,y+1,{f:'mono',s:o.ls||Math.min(20,h*.55),c:col.noteink});
+  else{line(x-w/2,y,x+w/2,y,{w:1.6,c:col.noteink});line(x,y-h/2,x,y+h/2,{w:1.6,c:col.noteink});}}
+function phone(x,y,o={}){rect(x-28,y-48,56,96,{fill:col.sheet,rad:10,w:3});rect(x-20,y-38,40,66,{fill:o.screen||col.noteb,stroke:false,rad:3});
+  circle(x,y+38,4,{w:2});}
+function server(x,y){rect(x-40,y-65,80,130,{fill:col.sheet,rad:6,w:3});
+  for(let i=0;i<3;i++){const yy=y-40+i*40;if(i)line(x-40,yy-20,x+40,yy-20,{w:2});circle(x-24,yy,4,{fill:col.green,stroke:false});line(x-10,yy,x+28,yy,{w:2,c:col.inksoft});}}
+function card(x,y,w,h,fill){rect(x,y,w,h,{fill,rad:12,w:3});}
+
+/* ---------- sequence diagram (handshake scenes) ---------- */
+const CX=200,SX=660,Y0=150,STEP=46;
+function seq(p,msgs,o){
+  fade(A(p,0,.06),()=>{txt('💻 your browser',CX,Y0-28,{s:30});txt('🖥️ server',SX,Y0-28,{s:30});
+    line(CX,Y0-8,CX,Y0+STEP*msgs.length+12,{w:3});line(SX,Y0-8,SX,Y0+STEP*msgs.length+12,{w:3});});
+  let ms=0;
+  msgs.forEach(([dir,label,c],i)=>{const a=o.t0+i*o.dt,f=ease(seg(p,a,a+o.dt*.9));if(f<=0)return;ms=i*50+f*50;
+    const x1=dir>0?CX:SX,x2=dir>0?SX:CX,y1=Y0+i*STEP,y2=y1+STEP;
+    arrow(x1,y1,lerp(x1,x2,f),lerp(y1,y2,f),{c:col[c],w:3.5,head:13});
+    fade(seg(p,a+o.dt*.2,a+o.dt*.5),()=>txt(label,(x1+x2)/2,(y1+y2)/2-15,{s:25,c:col[c]}));});
+  (o.rtts||[]).forEach(([s,e,l1,l2,c])=>{const done=o.t0+(e+1)*o.dt*.98;fade(A(p,done-.02,done+.04),()=>{
+    const ya=Y0+s*STEP+4,yb=Y0+(e+1)*STEP-4,x=SX+22;line(x,ya,x+10,ya,{w:2.5,c:col[c]});line(x+10,ya,x+10,yb,{w:2.5,c:col[c]});line(x,yb,x+10,yb,{w:2.5,c:col[c]});
+    txt(l1,x+24,(ya+yb)/2-12,{s:26,a:'left',c:col[c]});txt(l2,x+24,(ya+yb)/2+14,{f:'body',s:19,a:'left',c:col.inksoft});});});
+  txt(`⏱ ${Math.round(ms)} ms`,850,Y0-28,{f:'mono',s:24,c:col.inksoft});
+  return ms;
+}
+
+/* ---------- packets & lanes (head-of-line scenes) ---------- */
+const ROWS=[185,275,365],FILES=[['html','blue'],['css','green'],['image','orange']];
+function lanes(p,quic){
+  const L=130,Rx=730,TR=.2,lost=2,resDep=.58,resArr=.78;
+  const laneY=f=>quic?ROWS[f]:275;
+  // sender + road(s)
+  server(60,275);
+  if(quic)FILES.forEach(([n,c],f)=>{line(L-20,ROWS[f]+24,Rx+30,ROWS[f]+24,{w:2,dash:[10,9],c:col[c]});txt('stream '+(f+1),L-14,ROWS[f]-30,{f:'body',s:18,a:'left',c:col[c]});});
+  else{line(L-20,245,Rx+30,245,{w:2.5});line(L-20,305,Rx+30,305,{w:2.5});txt('one TCP connection = one road',L-14,225,{f:'body',s:18,a:'left',c:col.inksoft});}
+  // receiver
+  rect(770,130,170,290,{fill:col.sheet,w:3,rad:10});txt('🌐 browser',855,108,{s:28});
+  const pk=[];
+  for(let i=0;i<9;i++){const f=i%3,dep=.06+i*.05,arr=dep+TR;
+    const blocked=i>lost&&(!quic||f===FILES.length-1);
+    pk.push({i,f,dep,arr,deliv:i===lost?resArr:(blocked?Math.max(arr,resArr):arr)});}
+  const got=[0,0,0],held={};let anyHeld=false;
+  pk.forEach(k=>{const y=laneY(k.f),c=col[FILES[k.f][1]];
+    if(p>=k.deliv){got[k.f]++;return;}
+    if(k.i===lost){
+      if(p>=k.dep&&p<k.dep+.1)parcel(lerp(L,Rx,(p-k.dep)/TR),y,46,34,c,{label:'#'+(k.i+1)});
+      const lx=lerp(L,Rx,.1/TR);
+      if(p>=k.dep+.1&&p<k.dep+.22)fade(1-seg(p,k.dep+.16,k.dep+.22),()=>{txt('💥',lx,y,{f:'emoji',s:40});txt('lost!',lx,y-42,{s:30,c:col.red});});
+      return;}
+    if(p<k.dep)return;
+    if(p<k.arr){parcel(lerp(L,Rx,(p-k.dep)/TR),y,46,34,c,{label:'#'+(k.i+1)});return;}
+    const key=quic?k.f:0,n=held[key]||0;held[key]=n+1;anyHeld=true;
+    parcel(Rx-n*50,y,46,34,c,{label:'#'+(k.i+1)});});
+  // re-send of the lost packet
+  if(p>=resDep-.08&&p<resArr)fade(A(p,resDep-.08,resDep-.04),()=>txt('no receipt for #3… re-send!',300,quic?440:340,{s:26,c:col.red}));
+  if(p>=resDep&&p<resArr){const y=laneY(2);parcel(lerp(L,Rx,(p-resDep)/TR),y,46,34,col.orange,{label:'#3',dash:[6,5],c:col.red});}
+  // shelves inside the browser
+  FILES.forEach(([n,c],f)=>{txt(n,855,ROWS[f]-26,{f:'body',s:19,c:col.inksoft});
+    for(let s=0;s<3;s++)rect(800+s*38,ROWS[f]-10,30,26,{fill:s<got[f]?col[c]:null,w:2,rad:3});});
+  if(anyHeld)txt('⏳ held: waiting for #3',quic?560:540,quic?440:350,{s:26,c:col.inksoft});
+  return got;
+}
+
+/* ---------- scenes ---------- */
+const SCENES=[
+{t:'Hello',d:6,
+ kid:"Every time you open a website, your phone and a far-away computer swap thousands of tiny parcels. QUIC is a newer, faster courier for them.",
+ real:"<b>QUIC</b> is a transport protocol: the rules for getting data reliably between two machines. It carries <b>HTTP/3</b>, the newest version of the web.",
+ draw(p,lt,c){
+  fade(A(p,0,.15),()=>{const L='QUIC',cs=['blue','pink','green','orange'];L.split('').forEach((ch,i)=>txt(ch,390+i*60,150,{s:110,c:col[cs[i]]}));});
+  fade(A(p,.1,.3),()=>txt('in about two minutes',480,222,{s:40,c:col.inksoft}));
+  fade(A(p,.2,.4),()=>{phone(170,390);server(790,380);
+    const B=t=>[lerp(lerp(220,480,t),lerp(480,740,t),t),lerp(lerp(400,280,t),lerp(280,390,t),t)];
+    ctx.save();ctx.strokeStyle=col.blue;ctx.lineWidth=2.5;ctx.setLineDash([10,9]);ctx.beginPath();for(let t=0;t<=1;t+=.02){const[x,y]=B(t);t?ctx.lineTo(x,y):ctx.moveTo(x,y);}ctx.stroke();ctx.restore();
+    [col.notey,col.notep,col.noteg].forEach((f,k)=>{const[x,y]=B(((c*.22)+k/3)%1);parcel(x,y-6,34,28,f,{lock:true});});
+    txt('your phone',170,470,{f:'body',s:20,c:col.inksoft});txt('a website',790,470,{f:'body',s:20,c:col.inksoft});});
+ }},
+{t:'Parcels',d:11,
+ kid:"A web page is too big to send in one go, so it's chopped into small numbered parcels. Two couriers already exist: careful registered post (TCP) and quick postcards (UDP).",
+ real:"Data travels as <b>packets</b>, each with an IP address label. <b>TCP</b> numbers them, re-sends lost ones and delivers them in order. <b>UDP</b> just sends them, with no promises. QUIC runs on top of UDP.",
+ draw(p,lt,c){
+  head('A web page travels as many small parcels',A(p,0,.06));
+  fade(A(p,.03,.1),()=>{rect(70,110,150,150,{fill:col.sheet,rad:8});txt('📰',145,150,{f:'emoji',s:40});
+    for(let i=0;i<4;i++)line(92,190+i*16,92+(i%2?90:110),190+i*16,{w:2,c:col.inksoft});txt('a web page',145,282,{f:'body',s:20,c:col.inksoft});
+    arrow(235,185,295,185,{w:3});});
+  for(let i=0;i<6;i++)fade(A(p,.08+i*.03,.14+i*.03),()=>{const x=340+i*100,y=180+Math.sin(c*3+i)*3;parcel(x,y,72,56,col.notey,{label:'#'+(i+1),ls:22});
+    if(i===0)txt('to: news.site',x+40,y+48,{f:'body',s:17,c:col.inksoft,a:'left'});});
+  fade(A(p,.36,.46),()=>{card(70,310,400,140,col.noteb);txt('📮',115,355,{f:'emoji',s:40});txt('TCP = registered post',150,352,{s:34,a:'left',c:col.noteink});
+    txt('numbered · signed for · re-sent if lost',100,395,{f:'body',s:21,a:'left',c:col.noteink});txt('· always in order (a bit slow)',100,422,{f:'body',s:21,a:'left',c:col.noteink});});
+  fade(A(p,.48,.58),()=>{card(490,310,400,140,col.noteo);txt('✉️',535,355,{f:'emoji',s:40});txt('UDP = postcard',570,352,{s:34,a:'left',c:col.noteink});
+    txt('just sent · no receipts · fast',520,395,{f:'body',s:21,a:'left',c:col.noteink});txt('· may get lost, nobody checks',520,422,{f:'body',s:21,a:'left',c:col.noteink});});
+  fade(A(p,.72,.82),()=>txt('QUIC sends postcards (UDP)… and adds the care itself',480,500,{s:34,c:col.purple}));
+ }},
+{t:'TCP handshake',d:12,
+ kid:"With the old courier, your browser must first say hello, then agree on a lock, and only then ask for the page. That's lots of waiting before anything useful moves.",
+ real:"TCP's 3-way handshake (SYN, SYN-ACK, ACK) takes one round trip, then the <b>TLS 1.3</b> handshake takes another. Your request only leaves after 2 round trips, and the page arrives after the 3rd.",
+ draw(p){
+  head('The old way: TCP + TLS',A(p,0,.06));
+  seq(p,[[1,'SYN: hello?','blue'],[-1,'SYN-ACK: hello!','blue'],[1,'ACK + my key (ClientHello)','purple'],[-1,'key + certificate (ServerHello)','purple'],[1,'Finished + GET /news','green'],[-1,'📄 here is the page','orange']],
+    {t0:.06,dt:.12,rtts:[[0,1,'round trip 1','hello (TCP)','blue'],[2,3,'round trip 2','lock (TLS)','purple'],[4,5,'round trip 3','the page','orange']]});
+  fade(A(p,.82,.9),()=>txt('Two whole round trips before you even ask for the page',480,500,{s:32,c:col.red}));
+ }},
+{t:'QUIC handshake',d:11,
+ kid:"QUIC says hello and agrees on the lock in the same breath. Like ringing a restaurant once: \"Are you open? I'd like a pizza.\"",
+ real:"QUIC folds the TLS 1.3 key exchange into its own first packets, so connection setup and encryption finish in <b>1 round trip</b>. With a 100 ms round trip, the page shows up about 100 ms sooner.",
+ draw(p){
+  head('The QUIC way: hello and lock together',A(p,0,.06));
+  seq(p,[[1,'hello + my key (Initial)','pink'],[-1,'hello + key + certificate','pink'],[1,'Finished + GET /news','green'],[-1,'📄 here is the page','orange']],
+    {t0:.06,dt:.15,rtts:[[0,1,'round trip 1','hello AND lock','pink'],[2,3,'round trip 2','the page','orange']]});
+  fade(A(p,.7,.78),()=>{card(250,388,180,56,col.sheet);txt('TCP+TLS: 300 ms',340,416,{f:'mono',s:19,c:col.inksoft});
+    card(470,388,180,56,col.noteg);txt('QUIC: 200 ms',560,416,{f:'mono',s:19,c:col.noteink});});
+  fade(A(p,.82,.9),()=>txt('One round trip saved on every new connection',480,500,{s:32,c:col.green}));
+ }},
+{t:'0-RTT',d:10,
+ kid:"Been here before? Your browser keeps a ticket. Next time it sends the request with its very first packet, like a regular whose usual coffee is started before they say a word.",
+ real:"<b>0-RTT resumption</b>: using a ticket from the last visit, the request rides in the first flight. Catch: an attacker can replay that early data, so it's only used for harmless requests like loading a page.",
+ draw(p){
+  head('Coming back? Zero round trips',A(p,0,.06));
+  seq(p,[[1,'🎟 ticket + GET /news (0-RTT)','pink'],[-1,'📄 here is the page','orange']],{t0:.08,dt:.2,rtts:[[0,1,'round trip 1','already the page!','green']]});
+  fade(A(p,.5,.58),()=>{card(220,300,240,56,col.sheet);txt('first visit: 200 ms',340,328,{f:'mono',s:19,c:col.inksoft});
+    card(500,300,240,56,col.noteg);txt('return: 100 ms',620,328,{f:'mono',s:19,c:col.noteink});});
+  fade(A(p,.66,.76),()=>{card(170,380,620,64,col.notey);txt('⚠️ replayable: fine for "show the news", never for "send money"',480,412,{f:'body',s:22,c:col.noteink});});
+  fade(A(p,.84,.92),()=>txt('The fastest handshake is no handshake',480,500,{s:32,c:col.purple}));
+ }},
+{t:'One road',d:13,
+ kid:"On TCP's single road, if one parcel goes missing, every parcel behind it has to wait, even ones for a totally different file.",
+ real:"TCP must hand bytes over strictly in order. A single lost packet stalls everything after it until the re-send arrives. This is <b>head-of-line blocking</b>, and it gets worse on lossy Wi-Fi and mobile.",
+ draw(p){
+  head('TCP: one lost parcel holds up everything',A(p,0,.05));
+  lanes(p,false);
+  const m=p<.27?['Three files share one road, strictly in order',col.ink]:p<.78?['One parcel lost… and EVERYTHING behind it waits',col.red]:['Head-of-line blocking: one loss stalls every file',col.red];
+  txt(m[0],480,500,{s:32,c:m[1]});
+ }},
+{t:'Many lanes',d:13,
+ kid:"QUIC gives each file its own lane. A lost image parcel only slows the image. The text and styles keep arriving, like a supermarket with many tills.",
+ real:"One QUIC connection carries many independent <b>streams</b>. Ordering is only enforced inside a stream, so a loss on the image stream doesn't block the HTML or CSS streams.",
+ draw(p){
+  head('QUIC: each file gets its own lane',A(p,0,.05));
+  lanes(p,true);
+  const m=p<.27?['Same parcels, but each file has its own stream',col.ink]:p<.78?['Only the image waits. Text and styles keep coming',col.green]:['No head-of-line blocking between streams',col.green];
+  txt(m[0],480,500,{s:32,c:m[1]});
+ }},
+{t:'Switching networks',d:14,
+ kid:"Walk out of the house and your phone jumps from Wi-Fi to mobile data. Its address changes. TCP loses track of you; QUIC recognises your connection's ID badge and carries on.",
+ real:"TCP identifies a connection by IP address and port, so a new address means a dead connection. QUIC uses <b>connection IDs</b>, so the server can match the packets from your new address and the transfer continues (<b>connection migration</b>).",
+ draw(p){
+  const quic=p>=.5,q=quic?seg(p,.52,.97):seg(p,.02,.47),a=quic?A(p,.5,.54):1-A(p,.46,.5);
+  head(quic?'QUIC: the connection wears an ID badge':'TCP: a new address breaks the connection',quic?A(p,.5,.54):A(p,0,.04)*(1-A(p,.46,.5)));
+  fade(a,()=>{
+    const sx=800,sy=200,rx=180,tx=560,px=lerp(180,560,A(q,.25,.6)),sw=q>.425,bad=!quic&&sw&&q<.62;
+    server(sx,sy);txt('news.site',sx,sy+86,{f:'body',s:20,c:col.inksoft});
+    txt('📶',rx,250,{f:'emoji',s:46});txt('home Wi-Fi',rx,292,{f:'body',s:20,c:col.inksoft});
+    txt('📡',tx,250,{f:'emoji',s:46});txt('mobile 5G',tx,292,{f:'body',s:20,c:col.inksoft});
+    const hx=sw?tx:rx,lc=bad?col.red:col.blue;
+    line(px,352,hx,272,{w:2.5,dash:[9,8],c:lc});line(hx,228,sx-44,sy,{w:2.5,dash:[9,8],c:lc});
+    phone(px,400);
+    txt(sw?'IP 10.44.7.9':'IP 192.168.1.20',px,462,{f:'mono',s:18});
+    if(quic){rect(px-58,476,116,30,{fill:col.notep,rad:6,w:2});txt('🏷 ID 7c2f',px,492,{f:'mono',s:17,c:col.noteink});}
+    let prog;if(q<.425)prog=q/.425*.5;else if(quic)prog=Math.min(1,.5+(q-.425)/.35*.5);else prog=q<.62?.5:(q-.62)/.38*.55;
+    txt('download',70,130,{f:'body',s:20,a:'left',c:col.inksoft});rect(70,145,280,24,{fill:col.sheet,rad:12,w:2.5});
+    if(prog>0)rect(72,147,276*prog,20,{fill:bad?col.red:(quic?col.green:col.blue),stroke:false,rad:10});
+    txt(Math.round(prog*100)+'%',365,157,{f:'mono',s:20,a:'left'});
+    if(bad){txt('✗',(hx+sx)/2,(228+sy)/2-6,{s:56,c:col.red});txt('"10.44.7.9? I don\'t know you."',940,340,{s:27,a:'right',c:col.red});}
+    if(!quic&&q>=.62)txt('new connection… start again from 0%',940,340,{s:27,a:'right',c:col.inksoft});
+    if(quic&&sw)txt('"ID 7c2f? That\'s you. Carry on!" ✓',940,340,{s:27,a:'right',c:col.green});
+  });
+ }},
+{t:'Locked box',d:10,
+ kid:"With TCP, the courier can read your delivery notes even when the parcel is locked. QUIC locks the notes inside the box too. The courier sees only the address label.",
+ real:"QUIC always uses TLS 1.3: there is no unencrypted QUIC. Unlike TCP, its packet numbers and acks are encrypted as well; only a small part of the header, like the <b>connection ID</b>, stays readable.",
+ draw(p,lt,c){
+  head('Encryption is built in, not bolted on',A(p,0,.06));
+  fade(A(p,.04,.14),()=>{txt('TCP + TLS packet',255,118,{s:32});
+    [['port 443',col.noteb],['seq 1042',col.noteb],['ack 77',col.noteb],['flags',col.noteb]].forEach(([l,f],i)=>{rect(70+i*93,145,86,50,{fill:f,w:2.5,rad:4});txt(l,113+i*93,170,{f:'mono',s:16,c:col.noteink});});
+    rect(70,205,365,90,{fill:col.notep,w:2.5,rad:4});lock(170,250,30,col.noteink);txt('payload',280,250,{f:'body',s:24,c:col.noteink});});
+  fade(A(p,.14,.24),()=>{txt('QUIC packet',705,118,{s:32});
+    rect(525,145,120,50,{fill:col.noteb,w:2.5,rad:4});txt('conn ID',585,170,{f:'mono',s:16,c:col.noteink});
+    rect(525,205,365,90,{fill:col.notep,w:2.5,rad:4});rect(655,145,235,50,{fill:col.notep,w:2.5,rad:4});
+    lock(600,250,30,col.noteink);txt('packet no. · acks · payload',760,250,{f:'body',s:22,c:col.noteink});lock(772,170,22,col.noteink);});
+  const mx=p<.3?-100:keys(p,[[.3,120],[.5,380],[.56,560],[.76,860]]);
+  if(p>=.3&&p<.82)txt('🔍',mx,200,{f:'emoji',s:60});
+  fade(A(p,.36,.42)*(1-A(p,.8,.84)),()=>txt('"I can read the numbers and flags!"',255,340,{s:28,c:col.red}));
+  fade(A(p,.62,.68),()=>txt('"Just an ID label. Nothing else."',705,340,{s:28,c:col.green}));
+  fade(A(p,.84,.92),()=>txt('Snoops and meddling middleboxes see almost nothing',480,500,{s:32,c:col.purple}));
+ }},
+{t:'Where it lives',d:10,
+ kid:"TCP is built into the phone's operating system, so improving it means waiting for a system update. QUIC lives inside the app, so a browser update can make it better.",
+ real:"HTTP/3 runs on QUIC, which runs on UDP. QUIC is usually implemented in <b>user space</b> (in the browser or server), so new features and congestion-control tweaks ship as fast as an app update.",
+ draw(p){
+  head('Who carries what',A(p,0,.06));
+  fade(A(p,.04,.12),()=>{rect(60,330,840,140,{fill:col.dark?'rgba(255,255,255,.04)':'rgba(35,38,58,.05)',dash:[10,8],w:2,c:col.inksoft,rad:14});
+    txt('inside the operating system',890,452,{f:'body',s:19,a:'right',c:col.inksoft});});
+  const Lx=90,Rx=440,w=250,h=52;
+  const L=[['IP',col.notev,400],['TCP',col.noteb,342],['TLS',col.notep,284],['HTTP/2',col.notey,226]];
+  const Rr=[['IP',col.notev,400,h],['UDP',col.noteo,342,h],['QUIC + TLS 1.3',col.noteg,226,110],['HTTP/3',col.notey,168,h]];
+  L.forEach(([n,f,y],i)=>fade(A(p,.1+i*.07,.16+i*.07),()=>{rect(Lx,y,w,h,{fill:f,w:2.5,rad:6});txt(n,Lx+w/2,y+h/2,{s:30,c:col.noteink});}));
+  Rr.forEach(([n,f,y,hh],i)=>fade(A(p,.1+i*.07,.16+i*.07),()=>{rect(Rx,y,w,hh,{fill:f,w:2.5,rad:6});txt(n,Rx+w/2,y+hh/2,{s:30,c:col.noteink});}));
+  fade(A(p,.42,.5),()=>{txt('old web',Lx+w/2,140,{s:30,c:col.inksoft});txt('HTTP/3 web',Rx+w/2,130,{s:30,c:col.green});
+    arrow(Rx+w+60,281,Rx+w+12,281,{c:col.green,w:3});txt('in the app',Rx+w+70,266,{s:28,a:'left',c:col.green});txt('updates with the browser',Rx+w+70,298,{f:'body',s:18,a:'left',c:col.inksoft});});
+  fade(A(p,.8,.88),()=>txt('QUIC does TCP\'s job + TLS\'s job, riding on UDP',480,505,{s:32,c:col.purple}));
+ }},
+{t:'Limits',d:11,
+ kid:"QUIC isn't magic. Some networks still block postcards, it makes computers work a bit harder, and network guards can't peek inside to check things.",
+ real:"Some firewalls block UDP, so browsers quietly <b>fall back to TCP</b>. Encrypting everything in user space costs more CPU. Operators lose visibility they relied on. Still, all major browsers support HTTP/3 and a large share of websites use it.",
+ draw(p){
+  head('The catch: why not everywhere yet',A(p,0,.06));
+  const cards=[['🧱','UDP gets blocked','browsers fall back to TCP','~ works, just slower','orange'],['🖥️','More CPU work','encryption + packets in the app','~ getting cheaper','orange'],
+    ['🕵️','Harder to inspect','firewalls can\'t peek inside','✗ by design','red'],['🌍','Not everywhere yet','all big browsers, many sites','✓ growing fast','green']];
+  cards.forEach(([e,t,s,v,c],i)=>fade(A(p,.08+i*.13,.18+i*.13),()=>{const x=70+(i%2)*420,y=105+Math.floor(i/2)*180;
+    card(x,y,400,150,col.sheet);txt(e,x+52,y+75,{f:'emoji',s:48});txt(t,x+100,y+48,{s:34,a:'left'});
+    txt(s,x+100,y+88,{f:'body',s:20,a:'left',c:col.inksoft});txt(v,x+100,y+122,{s:28,a:'left',c:col[c]});}));
+  fade(A(p,.72,.84),()=>txt('Your browser tries QUIC, and quietly falls back if it must',480,505,{s:32,c:col.purple}));
+ }},
+{t:'Recap',d:8,
+ kid:"Faster hello, separate lanes, a badge that survives moving house, and a box that's always locked. That's QUIC.",
+ real:"QUIC = reliable, ordered streams + TLS 1.3, built on UDP, in the app. Standardised as RFC 9000 (2021); HTTP/3 is RFC 9114 (2022). The sketchbook goes deeper, with toys to play with.",
+ draw(p,lt,c){
+  const L='QUIC',cs=['blue','pink','green','orange'];
+  fade(A(p,0,.15),()=>L.split('').forEach((ch,i)=>txt(ch,390+i*60,130,{s:96,c:col[cs[i]]})));
+  [['⚡','1 round trip (or 0)','blue'],['🛣️','a lane per file','green'],['🏷','survives Wi-Fi → 5G','pink'],['🔒','always encrypted','purple']]
+    .forEach(([e,t,cc],i)=>fade(A(p,.12+i*.1,.22+i*.1),()=>{const x=110+(i%2)*430,y=230+Math.floor(i/2)*90;
+      txt(e,x,y,{f:'emoji',s:40});txt(t,x+40,y,{s:38,a:'left',c:col[cc]});}));
+  fade(A(p,.62,.8),()=>txt('Keep going: the full QUIC Sketchbook, with a train race to play →',480,480,{s:30,c:col.inksoft}));
+ }},
+];
+function keys(p,k){if(p<=k[0][0])return k[0][1];for(let i=1;i<k.length;i++){if(p<=k[i][0]){const[p0,v0]=k[i-1],[p1,v1]=k[i];return v0+(v1-v0)*ease((p-p0)/(p1-p0));}}return k[k.length-1][1];}
+const starts=[];let TOTAL=0;SCENES.forEach(s=>{starts.push(TOTAL);TOTAL+=s.d;});
+
+/* ---------- canvas sizing ---------- */
+function resize(){const w=cv.clientWidth||W,dpr=Math.min(2,devicePixelRatio||1);cv.width=Math.round(w*dpr);cv.height=Math.round(w*9/16*dpr);}
+addEventListener('resize',resize);
+function backdrop(){ctx.fillStyle=col.sheet;ctx.fillRect(0,0,W,H);ctx.strokeStyle=col.grid;ctx.lineWidth=1;ctx.beginPath();
+  for(let x=0;x<=W;x+=30){ctx.moveTo(x+.5,0);ctx.lineTo(x+.5,H);}for(let y=0;y<=H;y+=30){ctx.moveTo(0,y+.5);ctx.lineTo(W,y+.5);}ctx.stroke();}
+function render(i,p,clock){const s=cv.width/W;ctx.setTransform(s,0,0,s,0,0);calls=0;boil=reduce?0:Math.floor(clock*6);
+  backdrop();SCENES[i].draw(p,p*SCENES[i].d,reduce?0:clock);}
+
+/* ---------- player ---------- */
+let time=0,playing=!reduce,last=performance.now(),lastScene=-1,clock=0;
+const fmt=s=>Math.floor(s/60)+':'+String(Math.floor(s%60)).padStart(2,'0');
+const dotsEl=$('dots');
+SCENES.forEach((s,i)=>{const b=document.createElement('button');b.type='button';b.textContent=(i+1)+' · '+s.t;b.addEventListener('click',()=>{time=starts[i]+.01;});dotsEl.appendChild(b);});
+function sceneAt(t){let i=0;while(i<SCENES.length-1&&t>=starts[i+1])i++;return i;}
+function ui(i){if(i===lastScene)return;lastScene=i;const s=SCENES[i];
+  $('chip').textContent=`Scene ${i+1} of ${SCENES.length} · ${s.t}`;$('kid').textContent=s.kid;$('real').innerHTML=s.real;
+  [...dotsEl.children].forEach((b,j)=>b.setAttribute('aria-current',j===i));}
+function setPlay(v){playing=v;$('play').textContent=v?'Pause':(time>=TOTAL-.05?'Replay':'Play');}
+$('play').addEventListener('click',()=>{if(!playing&&time>=TOTAL-.05)time=0;setPlay(!playing);});
+$('prev').addEventListener('click',()=>{const i=sceneAt(time);time=starts[Math.max(0,(time-starts[i]<1.5?i-1:i))]+.01;});
+$('next').addEventListener('click',()=>{const i=sceneAt(time);time=i<SCENES.length-1?starts[i+1]+.01:TOTAL-.01;});
+const bar=$('bar');
+function seek(e){const r=bar.getBoundingClientRect();time=clamp((e.clientX-r.left)/r.width,0,1)*TOTAL;}
+bar.addEventListener('pointerdown',e=>{seek(e);bar.setPointerCapture(e.pointerId);bar.onpointermove=seek;});
+bar.addEventListener('pointerup',()=>{bar.onpointermove=null;});
+bar.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key==='ArrowLeft'){e.preventDefault();e.stopPropagation();time=clamp(time+(e.key==='ArrowRight'?5:-5),0,TOTAL-.01);}});
+addEventListener('keydown',e=>{if(e.target.closest('button,a')&&(e.code==='Space'||e.key==='Enter'))return;
+  if(e.code==='Space'){e.preventDefault();$('play').click();}else if(e.key==='ArrowRight')$('next').click();else if(e.key==='ArrowLeft')$('prev').click();});
+matchMedia('(prefers-color-scheme: dark)').addEventListener('change',readColors);
+
+function loop(now){requestAnimationFrame(loop);const dt=Math.min((now-last)/1000,.05);last=now;clock+=dt;
+  if(playing){time+=dt;if(time>=TOTAL){time=TOTAL-.001;setPlay(false);}}
+  const i=sceneAt(time),p=clamp((time-starts[i])/SCENES[i].d,0,1);
+  ui(i);render(i,p,clock);
+  $('fill').style.width=(time/TOTAL*100)+'%';bar.setAttribute('aria-valuenow',Math.round(time/TOTAL*100));
+  $('time').textContent=fmt(time)+' / '+fmt(TOTAL);}
+readColors();resize();setPlay(playing);
+if(reduce)time=starts[0]+SCENES[0].d*.99;
+(document.fonts?document.fonts.ready:Promise.resolve()).then(()=>{last=performance.now();requestAnimationFrame(loop);});
+})();
+</script>
+</body>
+</html>

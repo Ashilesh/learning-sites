@@ -111,7 +111,8 @@
   drawer.id = 'chapter-drawer';
   drawer.setAttribute('aria-label', 'Chapters');
   var items = '<li><a href="../index.html"><span aria-hidden="true" style="width:28px;text-align:center;font-size:1.4rem">&larr;</span><span>All explainers</span><span></span></a></li>' +
-    '<li><a href="index.html"' + (page === 'home' ? ' aria-current="page"' : '') + '>' + icon('home') + '<span>Start here</span><span></span></a></li>';
+    '<li><a href="index.html"' + (page === 'home' ? ' aria-current="page"' : '') + '>' + icon('home') + '<span>Start here</span><span></span></a></li>' +
+    '<li><a href="animation.html">' + icon('play') + '<span>Wasm in two minutes</span><span></span></a></li>';
   CHAPTERS.forEach(function (c, i) {
     items += '<li><a href="' + c.file + '"' + (c.id === page ? ' aria-current="page"' : '') + '>' +
       icon(c.icon) +
