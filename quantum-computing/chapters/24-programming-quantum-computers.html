@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chapter 24: Programming Quantum Computers: Tools and Code Examples · Qubit Sketchbook</title>
+<meta name="description" content="You don&#x27;t need a lab to program a quantum computer. You write Python with tools like Qiskit or Cirq, test on a simulator on your laptop, then send the">
+<meta name="theme-color" content="#FFF8EC">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%237C5CFF' stroke='%2326243A' stroke-width='4'/%3E%3Ctext x='32' y='43' font-size='32' text-anchor='middle' fill='white' font-family='Georgia'%3EQ%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=JetBrains+Mono:wght@400;600&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css?v=4cbd26e3">
+<script>(function(){try{var t=localStorage.getItem('qsk-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body data-part="5">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><filter id="rough" x="-4%" y="-4%" width="108%" height="108%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../index.html" aria-label="Qubit Sketchbook home"><span class="brand-mark" aria-hidden="true">Q</span><span class="brand-text">Qubit<br>Sketchbook</span></a>
+  <nav class="topnav" aria-label="Main">
+    <a class="pill home-link" href="../../index.html" title="All explainers"><span aria-hidden="true">←</span><span class="hide-sm"> All explainers</span></a>
+    <a class="pill" href="../bites.html"><span aria-hidden="true">📱</span><span class="hide-sm"> Quick Bites</span></a>
+    <button class="pill" type="button" data-open="drawer" aria-label="All episodes"><span aria-hidden="true">📚</span><span class="hide-sm"> Episodes</span></button>
+  </nav>
+  <div class="hud">
+    <button class="xp-chip" type="button" data-open="trophies" aria-label="Your progress and badges"><span aria-hidden="true">⚡</span> <b data-xp>0</b><span class="hide-sm"> XP · <span data-level>Classical Muggle</span></span></button>
+    <span class="streak" title="Daily reading streak"><span aria-hidden="true">🔥</span> <b data-streak>0</b></span>
+    <button class="theme-toggle" type="button" aria-label="Switch between paper and chalkboard"><span aria-hidden="true">🌙</span></button>
+  </div>
+</header>
+<div class="read-progress" aria-hidden="true"><div></div></div>
+<main id="main" class="chapter-page" data-ch="24"><section class="ch-hero">
+  <div class="ch-hero-text">
+    <div class="kicker"><span class="part-tag">💻 Part V · Programming Quantum Computers</span><span class="ep">Episode 24 / 36</span></div>
+    <h1><span class="ch-num">24</span><span class="ch-title">Programming Quantum Computers: Tools and Code Examples</span></h1>
+    <div class="meta"><span>⏱ 10 min</span><span>10 sections</span><span class="track t-student" title="Student / self-learner track">🟡 Student</span><span class="track t-dev" title="Developer track">🔵 Developer</span><span class="done-flag" hidden>✅ Completed</span></div>
+    <p class="hook"><span class="hook-label">The hook</span>About 70 lines of Python. That&#x27;s all it takes to build your own quantum computer simulator. Let&#x27;s do it.</p>
+  </div>
+  <div class="ch-cover"><svg viewBox="0 0 200 150" class="sk cover" role="img" aria-label="Programming Quantum Computers: Tools and Code Examples"><path d="M38 22 C70 2 140 4 172 26 C198 46 196 98 178 122 C156 148 66 152 34 130 C8 112 4 46 38 22 Z" class="blob"/><g class="rough"><rect x="40" y="24" width="120" height="80" rx="6" class="fscreen"/><path d="M24 120 L40 104 H160 L176 120 Z" class="fw"/><text x="50" y="46" class="tm xs scr-y">qc = Circuit(2)</text><text x="50" y="62" class="tm xs scr-t">qc.h(0)</text><text x="50" y="78" class="tm xs scr-p">qc.cx(0, 1)</text><text x="50" y="94" class="tm xs scr-w">print(qc.measure())</text><path d="M176 24V36M170 30H182M172.4 26.4L179.6 33.6M179.6 26.4L172.4 33.6" class="o thin"/></g><polygon points="14,135 15.3,138.2 18.8,138.5 16.1,140.7 16.9,144 14,142.2 11.1,144 11.9,140.7 9.2,138.5 12.7,138.2" class="fv"/><polygon points="190,6 191.1,8.5 193.8,8.8 191.7,10.6 192.4,13.2 190,11.8 187.6,13.2 188.3,10.6 186.2,8.8 188.9,8.5" class="fc"/></svg></div>
+</section><div class="ch-layout"><nav class="toc-side" aria-label="Sections in this episode"><div class="toc-title">In this episode</div><ol><li><a href="#s24-1"><span class=n>24.1</span>The software landscape</a></li><li><a href="#s24-2"><span class=n>24.2</span>Build your own quantum simulator in ~70 lines of Python</a></li><li><a href="#s24-3"><span class=n>24.3</span>Qiskit (IBM)</a></li><li><a href="#s24-4"><span class=n>24.4</span>Cirq (Google)</a></li><li><a href="#s24-5"><span class=n>24.5</span>PennyLane (Xanadu): a tiny variational algorithm</a></li><li><a href="#s24-6"><span class=n>24.6</span>Q# (Microsoft)</a></li><li><a href="#s24-7"><span class=n>24.7</span>CUDA-Q (NVIDIA)</a></li><li><a href="#s24-8"><span class=n>24.8</span>OpenQASM 3: the &quot;assembly language&quot; of quantum circuits</a></li><li><a href="#s24-9"><span class=n>24.9</span>Practical tips for quantum programmers</a></li><li><a href="#s24-10"><span class=n>24.10</span>Project ideas, from beginner to advanced</a></li></ol><div class="toc-progress"><div></div></div></nav><article class="prose"><aside class="eli5"><div class="eli5-tag">⚡ In 30 seconds <small>(no jargon, promise)</small></div><p>You don&#x27;t need a lab to program a quantum computer. You write Python with tools like Qiskit or Cirq, test on a simulator on your laptop, then send the job to real hardware in the cloud. Better still, you can build a tiny simulator yourself with NumPy (states are lists of numbers, gates are matrices) and watch every example in this guide come true.</p></aside><details class="toc-mobile"><summary>📍 In this episode (10 sections)</summary><ol><li><a href="#s24-1"><span class=n>24.1</span>The software landscape</a></li><li><a href="#s24-2"><span class=n>24.2</span>Build your own quantum simulator in ~70 lines of Python</a></li><li><a href="#s24-3"><span class=n>24.3</span>Qiskit (IBM)</a></li><li><a href="#s24-4"><span class=n>24.4</span>Cirq (Google)</a></li><li><a href="#s24-5"><span class=n>24.5</span>PennyLane (Xanadu): a tiny variational algorithm</a></li><li><a href="#s24-6"><span class=n>24.6</span>Q# (Microsoft)</a></li><li><a href="#s24-7"><span class=n>24.7</span>CUDA-Q (NVIDIA)</a></li><li><a href="#s24-8"><span class=n>24.8</span>OpenQASM 3: the &quot;assembly language&quot; of quantum circuits</a></li><li><a href="#s24-9"><span class=n>24.9</span>Practical tips for quantum programmers</a></li><li><a href="#s24-10"><span class=n>24.10</span>Project ideas, from beginner to advanced</a></li></ol></details><section class="sec" id="s24-1" data-sec="s24-1"><h2 class="sec-title"><span class="sec-num">24.1</span><span class="sec-text">The software landscape</span></h2><div class="table-wrap"><table class="tbl"><thead><tr><th>Tool</th><th>Made by</th><th>Language</th><th>Best for</th></tr></thead><tbody><tr><td><strong>Qiskit</strong></td><td>IBM</td><td>Python</td><td>The most widely used SDK; IBM hardware; huge learning ecosystem</td></tr><tr><td><strong>Cirq</strong></td><td>Google</td><td>Python</td><td>Google-style circuits, research, noise modelling</td></tr><tr><td><strong>PennyLane</strong></td><td>Xanadu</td><td>Python</td><td>Quantum machine learning and variational algorithms; automatic differentiation</td></tr><tr><td><strong>Q# / Azure Quantum Development Kit</strong></td><td>Microsoft</td><td>Q# and Python</td><td>Fault-tolerant algorithm design and resource estimation</td></tr><tr><td><strong>Amazon Braket SDK</strong></td><td>AWS</td><td>Python</td><td>One API for many vendors' hardware</td></tr><tr><td><strong>CUDA-Q</strong></td><td>NVIDIA</td><td>Python and C++</td><td>GPU-accelerated simulation; hybrid quantum–HPC workflows</td></tr><tr><td><strong>pytket</strong></td><td>Quantinuum</td><td>Python</td><td>Strong compiler and optimiser; works across hardware</td></tr><tr><td><strong>Guppy</strong></td><td>Quantinuum</td><td>Python-embedded</td><td>Newer language for dynamic, error-corrected programs</td></tr><tr><td><strong>pyQuil</strong></td><td>Rigetti</td><td>Python</td><td>Rigetti hardware</td></tr><tr><td><strong>Stim</strong></td><td>Craig Gidney (Google)</td><td>Python and C++</td><td>Ultra-fast simulation of error-correction circuits</td></tr><tr><td><strong>OpenQASM 3</strong></td><td>Open standard</td><td>Assembly-like</td><td>A common low-level circuit format understood by many tools</td></tr><tr><td><strong>QIR</strong></td><td>QIR Alliance</td><td>LLVM-based</td><td>A common intermediate representation for compilers</td></tr></tbody></table></div><aside class="callout warn"><div class="callout-tag"><span aria-hidden="true">⚠️</span> Heads up</div><div class="callout-body"><p><strong>Quantum SDKs change fast.</strong> Function names and import paths evolve between major versions. The examples below follow the current major versions as of 2026. If something errors, check the tool's official documentation.</p></div></aside></section><section class="sec" id="s24-2" data-sec="s24-2"><h2 class="sec-title"><span class="sec-num">24.2</span><span class="sec-text">Build your own quantum simulator in ~70 lines of Python</span></h2><p>The best way to <em>really</em> understand quantum computing is to simulate it yourself. This simulator uses only <strong>NumPy</strong> (<code>pip install numpy</code>) and applies exactly the math from <a class="xref" href="../chapters/05-the-math-toolkit-gentle-edition.html">Chapters 5</a> to <a class="xref" href="../chapters/07-many-qubits-and-entanglement.html">7</a>: states are vectors, gates are matrices, multi-qubit gates are built with tensor products, and probabilities come from the Born rule.</p><div class="codebox"><div class="codebox-bar"><span class="dots"><i></i><i></i><i></i></span><span class="codebox-lang">Python</span><button class="copy-btn" type="button">Copy</button></div><pre><code class="lang-python"><span class="c-kw">import</span> numpy <span class="c-kw">as</span> np
+
+<span class="c-com"># ---------- Basic single-qubit gates (2x2 unitary matrices) ----------</span>
+I = np.<span class="c-fn">eye</span>(<span class="c-num">2</span>, dtype=complex)
+X = np.<span class="c-fn">array</span>([[<span class="c-num">0</span>, <span class="c-num">1</span>], [<span class="c-num">1</span>, <span class="c-num">0</span>]], dtype=complex)
+Y = np.<span class="c-fn">array</span>([[<span class="c-num">0</span>, -<span class="c-num">1j</span>], [<span class="c-num">1j</span>, <span class="c-num">0</span>]], dtype=complex)
+Z = np.<span class="c-fn">array</span>([[<span class="c-num">1</span>, <span class="c-num">0</span>], [<span class="c-num">0</span>, -<span class="c-num">1</span>]], dtype=complex)
+H = np.<span class="c-fn">array</span>([[<span class="c-num">1</span>, <span class="c-num">1</span>], [<span class="c-num">1</span>, -<span class="c-num">1</span>]], dtype=complex) / np.<span class="c-fn">sqrt</span>(<span class="c-num">2</span>)
+S = np.<span class="c-fn">array</span>([[<span class="c-num">1</span>, <span class="c-num">0</span>], [<span class="c-num">0</span>, <span class="c-num">1j</span>]], dtype=complex)
+T = np.<span class="c-fn">array</span>([[<span class="c-num">1</span>, <span class="c-num">0</span>], [<span class="c-num">0</span>, np.<span class="c-fn">exp</span>(<span class="c-num">1j</span> * np.pi / <span class="c-num">4</span>)]], dtype=complex)
+
+<span class="c-kw">def</span> <span class="c-fn">RY</span>(theta):
+    c, s = np.<span class="c-fn">cos</span>(theta / <span class="c-num">2</span>), np.<span class="c-fn">sin</span>(theta / <span class="c-num">2</span>)
+    <span class="c-kw">return</span> np.<span class="c-fn">array</span>([[c, -s], [s, c]], dtype=complex)
+
+P0 = np.<span class="c-fn">array</span>([[<span class="c-num">1</span>, <span class="c-num">0</span>], [<span class="c-num">0</span>, <span class="c-num">0</span>]], dtype=complex)   <span class="c-com"># |0&gt;&lt;0|  projector</span>
+P1 = np.<span class="c-fn">array</span>([[<span class="c-num">0</span>, <span class="c-num">0</span>], [<span class="c-num">0</span>, <span class="c-num">1</span>]], dtype=complex)   <span class="c-com"># |1&gt;&lt;1|  projector</span>
+
+
+<span class="c-kw">def</span> <span class="c-fn">kron_all</span>(matrices):
+    <span class="c-str">&quot;&quot;&quot;Tensor product of a list of matrices: M0 ⊗ M1 ⊗ ... ⊗ Mn-1.&quot;&quot;&quot;</span>
+    result = matrices[<span class="c-num">0</span>]
+    <span class="c-kw">for</span> m <span class="c-kw">in</span> matrices[<span class="c-num">1</span>:]:
+        result = np.<span class="c-fn">kron</span>(result, m)
+    <span class="c-kw">return</span> result
+
+
+<span class="c-kw">class</span> Circuit:
+    <span class="c-str">&quot;&quot;&quot;A tiny state-vector simulator.
+    Convention: qubit 0 is the LEFTMOST character of a bit string like &#x27;01&#x27;.&quot;&quot;&quot;</span>
+
+    <span class="c-kw">def</span> <span class="c-fn">__init__</span>(self, n_qubits):
+        self.n = n_qubits
+        self.state = np.<span class="c-fn">zeros</span>(<span class="c-num">2</span> ** n_qubits, dtype=complex)
+        self.state[<span class="c-num">0</span>] = <span class="c-num">1.0</span>                      <span class="c-com"># start in |00...0&gt;</span>
+
+    <span class="c-kw">def</span> <span class="c-fn">gate</span>(self, U, target):
+        <span class="c-str">&quot;&quot;&quot;Apply a single-qubit gate U to one qubit (identity on the rest).&quot;&quot;&quot;</span>
+        ops = [U <span class="c-kw">if</span> q == target <span class="c-kw">else</span> I <span class="c-kw">for</span> q <span class="c-kw">in</span> <span class="c-bi">range</span>(self.n)]
+        self.state = <span class="c-fn">kron_all</span>(ops) @ self.state
+        <span class="c-kw">return</span> self
+
+    <span class="c-kw">def</span> <span class="c-fn">controlled</span>(self, U, control, target):
+        <span class="c-str">&quot;&quot;&quot;Controlled-U = |0&gt;&lt;0| ⊗ I  +  |1&gt;&lt;1| ⊗ U  (on the chosen qubits).&quot;&quot;&quot;</span>
+        if_0 = [P0 <span class="c-kw">if</span> q == control <span class="c-kw">else</span> I <span class="c-kw">for</span> q <span class="c-kw">in</span> <span class="c-bi">range</span>(self.n)]
+        if_1 = [P1 <span class="c-kw">if</span> q == control <span class="c-kw">else</span> (U <span class="c-kw">if</span> q == target <span class="c-kw">else</span> I)
+                <span class="c-kw">for</span> q <span class="c-kw">in</span> <span class="c-bi">range</span>(self.n)]
+        self.state = (<span class="c-fn">kron_all</span>(if_0) + <span class="c-fn">kron_all</span>(if_1)) @ self.state
+        <span class="c-kw">return</span> self
+
+    <span class="c-kw">def</span> <span class="c-fn">cnot</span>(self, control, target):
+        <span class="c-kw">return</span> self.<span class="c-fn">controlled</span>(X, control, target)
+
+    <span class="c-kw">def</span> <span class="c-fn">cz</span>(self, control, target):
+        <span class="c-kw">return</span> self.<span class="c-fn">controlled</span>(Z, control, target)
+
+    <span class="c-kw">def</span> <span class="c-fn">probabilities</span>(self):
+        <span class="c-str">&quot;&quot;&quot;Born rule: probability = |amplitude|^2 for each basis state.&quot;&quot;&quot;</span>
+        probs = np.<span class="c-bi">abs</span>(self.state) ** <span class="c-num">2</span>
+        <span class="c-kw">return</span> {<span class="c-bi">format</span>(i, <span class="c-str">f&quot;0{self.n}b&quot;</span>): <span class="c-bi">round</span>(<span class="c-bi">float</span>(p), <span class="c-num">4</span>)
+                <span class="c-kw">for</span> i, p <span class="c-kw">in</span> <span class="c-bi">enumerate</span>(probs) <span class="c-kw">if</span> p &gt; <span class="c-num">1e-12</span>}
+
+    <span class="c-kw">def</span> <span class="c-fn">measure</span>(self, shots=<span class="c-num">1000</span>, seed=<span class="c-kw">None</span>):
+        <span class="c-str">&quot;&quot;&quot;Sample measurement outcomes, like running the circuit many times.&quot;&quot;&quot;</span>
+        rng = np.random.<span class="c-fn">default_rng</span>(seed)
+        probs = np.<span class="c-bi">abs</span>(self.state) ** <span class="c-num">2</span>
+        outcomes = rng.<span class="c-fn">choice</span>(<span class="c-num">2</span> ** self.n, size=shots, p=probs / probs.<span class="c-bi">sum</span>())
+        counts = {}
+        <span class="c-kw">for</span> o <span class="c-kw">in</span> outcomes:
+            key = <span class="c-bi">format</span>(o, <span class="c-str">f&quot;0{self.n}b&quot;</span>)
+            counts[key] = counts.<span class="c-fn">get</span>(key, <span class="c-num">0</span>) + <span class="c-num">1</span>
+        <span class="c-kw">return</span> <span class="c-bi">dict</span>(<span class="c-bi">sorted</span>(counts.<span class="c-fn">items</span>()))</code></pre></div><p>Now let's use it to reproduce the worked examples from this guide:</p><div class="codebox"><div class="codebox-bar"><span class="dots"><i></i><i></i><i></i></span><span class="codebox-lang">Python</span><button class="copy-btn" type="button">Copy</button></div><pre><code class="lang-python"><span class="c-com"># 1) Interference: H then H returns |0&gt; with certainty</span>
+c = <span class="c-fn">Circuit</span>(<span class="c-num">1</span>).<span class="c-fn">gate</span>(H, <span class="c-num">0</span>)
+<span class="c-bi">print</span>(<span class="c-str">&quot;After one H :&quot;</span>, c.<span class="c-fn">probabilities</span>())
+c.<span class="c-fn">gate</span>(H, <span class="c-num">0</span>)
+<span class="c-bi">print</span>(<span class="c-str">&quot;After two Hs:&quot;</span>, c.<span class="c-fn">probabilities</span>())
+
+<span class="c-com"># 2) Bell state (|00&gt; + |11&gt;)/sqrt(2)</span>
+bell = <span class="c-fn">Circuit</span>(<span class="c-num">2</span>).<span class="c-fn">gate</span>(H, <span class="c-num">0</span>).<span class="c-fn">cnot</span>(<span class="c-num">0</span>, <span class="c-num">1</span>)
+<span class="c-bi">print</span>(<span class="c-str">&quot;Bell amplitudes:&quot;</span>, np.<span class="c-bi">round</span>(bell.state, <span class="c-num">3</span>))
+<span class="c-bi">print</span>(<span class="c-str">&quot;Bell, 1000 shots:&quot;</span>, bell.<span class="c-fn">measure</span>(<span class="c-num">1000</span>, seed=<span class="c-num">7</span>))
+
+<span class="c-com"># 3) Grover search on 4 items, marked item = |11&gt;</span>
+g = <span class="c-fn">Circuit</span>(<span class="c-num">2</span>).<span class="c-fn">gate</span>(H, <span class="c-num">0</span>).<span class="c-fn">gate</span>(H, <span class="c-num">1</span>)
+g.<span class="c-fn">cz</span>(<span class="c-num">0</span>, <span class="c-num">1</span>)                                   <span class="c-com"># oracle: flip sign of |11&gt;</span>
+<span class="c-kw">for</span> q <span class="c-kw">in</span> (<span class="c-num">0</span>, <span class="c-num">1</span>): g.<span class="c-fn">gate</span>(H, q).<span class="c-fn">gate</span>(X, q)     <span class="c-com"># diffusion operator ...</span>
+g.<span class="c-fn">cz</span>(<span class="c-num">0</span>, <span class="c-num">1</span>)
+<span class="c-kw">for</span> q <span class="c-kw">in</span> (<span class="c-num">0</span>, <span class="c-num">1</span>): g.<span class="c-fn">gate</span>(X, q).<span class="c-fn">gate</span>(H, q)
+<span class="c-bi">print</span>(<span class="c-str">&quot;Grover result:&quot;</span>, g.<span class="c-fn">probabilities</span>())
+
+<span class="c-com"># 4) Bernstein-Vazirani: find hidden string s = 101 in ONE query</span>
+s = <span class="c-str">&quot;101&quot;</span>
+n = <span class="c-bi">len</span>(s)
+bv = <span class="c-fn">Circuit</span>(n + <span class="c-num">1</span>)                          <span class="c-com"># last qubit is the helper</span>
+bv.<span class="c-fn">gate</span>(X, n).<span class="c-fn">gate</span>(H, n)                     <span class="c-com"># helper in |-&gt;</span>
+<span class="c-kw">for</span> q <span class="c-kw">in</span> <span class="c-bi">range</span>(n): bv.<span class="c-fn">gate</span>(H, q)
+<span class="c-kw">for</span> q, bit <span class="c-kw">in</span> <span class="c-bi">enumerate</span>(s):                  <span class="c-com"># oracle f(x) = s·x mod 2</span>
+    <span class="c-kw">if</span> bit == <span class="c-str">&quot;1&quot;</span>:
+        bv.<span class="c-fn">cnot</span>(q, n)
+<span class="c-kw">for</span> q <span class="c-kw">in</span> <span class="c-bi">range</span>(n): bv.<span class="c-fn">gate</span>(H, q)
+probs = bv.<span class="c-fn">probabilities</span>()
+<span class="c-bi">print</span>(<span class="c-str">&quot;Bernstein-Vazirani:&quot;</span>, probs)          <span class="c-com"># input qubits read 101</span>
+
+<span class="c-com"># 5) A qubit with 75% chance of 0: Ry(pi/3)|0&gt;</span>
+<span class="c-bi">print</span>(<span class="c-str">&quot;Ry(pi/3):&quot;</span>, <span class="c-fn">Circuit</span>(<span class="c-num">1</span>).<span class="c-fn">gate</span>(<span class="c-fn">RY</span>(np.pi / <span class="c-num">3</span>), <span class="c-num">0</span>).<span class="c-fn">probabilities</span>())</code></pre></div><p><strong>Output:</strong></p><pre class="ascii"><code>After one H : {&#x27;0&#x27;: 0.5, &#x27;1&#x27;: 0.5}
+After two Hs: {&#x27;0&#x27;: 1.0}
+Bell amplitudes: [0.707+0.j 0.   +0.j 0.   +0.j 0.707+0.j]
+Bell, 1000 shots: {&#x27;00&#x27;: 502, &#x27;11&#x27;: 498}
+Grover result: {&#x27;11&#x27;: 1.0}
+Bernstein-Vazirani: {&#x27;1010&#x27;: 0.5, &#x27;1011&#x27;: 0.5}
+Ry(pi/3): {&#x27;0&#x27;: 0.75, &#x27;1&#x27;: 0.25}</code></pre><p>Every line matches a hand calculation from earlier chapters:</p><ul><li><strong>Two Hadamards</strong> give <code>|0⟩</code> with certainty: interference (<a class="xref" href="../chapters/06-quantum-gates-on-a-single-qubit.html#s6-5">Chapter 6.5</a>).</li><li><strong>The Bell state</strong> only ever gives <code>00</code> or <code>11</code> (<a class="xref" href="../chapters/07-many-qubits-and-entanglement.html#s7-4">Chapter 7.4</a>).</li><li><strong>Grover</strong> finds the marked item <code>11</code> with 100% probability in one iteration (<a class="xref" href="../chapters/14-grovers-algorithm-searching-faster.html#s14-3">Chapter 14.3</a>).</li><li><strong>Bernstein–Vazirani</strong> reveals the secret <code>101</code> in one query. The fourth character is the helper qubit, which stays in <code>|−⟩</code>, giving 50/50 (<a class="xref" href="../chapters/11-the-first-algorithms-deutsch.html#s11-3">Chapter 11.3</a>).</li><li><strong>Ry(π/3)</strong> makes the 75/25 state (<a class="xref" href="../chapters/06-quantum-gates-on-a-single-qubit.html#s6-7">Chapter 6.7</a>).</li></ul><aside class="callout idea"><div class="callout-tag"><span aria-hidden="true">💡</span> Lightbulb moment</div><div class="callout-body"><p><strong>Why this simulator can't scale:</strong> the <code>kron_all</code> function builds a <code>2ⁿ × 2ⁿ</code> matrix. At 15 qubits that's already about a billion entries. Real simulators apply gates without building full matrices, but they still need <code>2ⁿ</code> amplitudes. That's the exponential wall from <a class="xref" href="../chapters/01-why-quantum-computing.html">Chapter 1</a>, and the reason we need real quantum hardware.</p></div></aside><aside class="funfact"><div class="ff-tag">🤓 Did you know?</div><p>Microsoft&#x27;s QDK includes a resource estimator that predicts how many physical qubits an algorithm would need on future hardware.</p></aside></section><section class="sec" id="s24-3" data-sec="s24-3"><h2 class="sec-title"><span class="sec-num">24.3</span><span class="sec-text">Qiskit (IBM)</span></h2><p><strong>Install:</strong> <code>pip install qiskit qiskit-aer</code></p><p><strong>A Bell state on a local simulator:</strong></p><div class="codebox"><div class="codebox-bar"><span class="dots"><i></i><i></i><i></i></span><span class="codebox-lang">Python</span><button class="copy-btn" type="button">Copy</button></div><pre><code class="lang-python"><span class="c-kw">from</span> qiskit <span class="c-kw">import</span> QuantumCircuit, transpile
+<span class="c-kw">from</span> qiskit_aer <span class="c-kw">import</span> AerSimulator
+
+qc = <span class="c-fn">QuantumCircuit</span>(<span class="c-num">2</span>, <span class="c-num">2</span>)        <span class="c-com"># 2 qubits, 2 classical bits</span>
+qc.<span class="c-fn">h</span>(<span class="c-num">0</span>)                          <span class="c-com"># superposition on qubit 0</span>
+qc.<span class="c-fn">cx</span>(<span class="c-num">0</span>, <span class="c-num">1</span>)                      <span class="c-com"># entangle: CNOT with control 0, target 1</span>
+qc.<span class="c-fn">measure</span>([<span class="c-num">0</span>, <span class="c-num">1</span>], [<span class="c-num">0</span>, <span class="c-num">1</span>])
+
+<span class="c-bi">print</span>(qc.<span class="c-fn">draw</span>())                 <span class="c-com"># ASCII drawing of the circuit</span>
+
+sim = <span class="c-fn">AerSimulator</span>()
+result = sim.<span class="c-fn">run</span>(<span class="c-fn">transpile</span>(qc, sim), shots=<span class="c-num">1000</span>).<span class="c-fn">result</span>()
+<span class="c-bi">print</span>(result.<span class="c-fn">get_counts</span>())       <span class="c-com"># e.g. {&#x27;00&#x27;: 508, &#x27;11&#x27;: 492}</span></code></pre></div><p><strong>Inspecting the exact state (no measurement):</strong></p><div class="codebox"><div class="codebox-bar"><span class="dots"><i></i><i></i><i></i></span><span class="codebox-lang">Python</span><button class="copy-btn" type="button">Copy</button></div><pre><code class="lang-python"><span class="c-kw">from</span> qiskit <span class="c-kw">import</span> QuantumCircuit
+<span class="c-kw">from</span> qiskit.quantum_info <span class="c-kw">import</span> Statevector
+
+bell = <span class="c-fn">QuantumCircuit</span>(<span class="c-num">2</span>)
+bell.<span class="c-fn">h</span>(<span class="c-num">0</span>)
+bell.<span class="c-fn">cx</span>(<span class="c-num">0</span>, <span class="c-num">1</span>)
+<span class="c-bi">print</span>(<span class="c-fn">Statevector</span>(bell))         <span class="c-com"># amplitudes ≈ [0.707, 0, 0, 0.707]</span></code></pre></div><p><strong>Grover's search on 4 items (marked item <code>11</code>):</strong></p><div class="codebox"><div class="codebox-bar"><span class="dots"><i></i><i></i><i></i></span><span class="codebox-lang">Python</span><button class="copy-btn" type="button">Copy</button></div><pre><code class="lang-python"><span class="c-kw">from</span> qiskit <span class="c-kw">import</span> QuantumCircuit
+
+grover = <span class="c-fn">QuantumCircuit</span>(<span class="c-num">2</span>, <span class="c-num">2</span>)
+grover.<span class="c-fn">h</span>([<span class="c-num">0</span>, <span class="c-num">1</span>])                 <span class="c-com"># equal superposition</span>
+grover.<span class="c-fn">cz</span>(<span class="c-num">0</span>, <span class="c-num">1</span>)                  <span class="c-com"># oracle: flip the sign of |11⟩</span>
+grover.<span class="c-fn">h</span>([<span class="c-num">0</span>, <span class="c-num">1</span>])                 <span class="c-com"># diffusion: reflect about the mean</span>
+grover.<span class="c-fn">x</span>([<span class="c-num">0</span>, <span class="c-num">1</span>])
+grover.<span class="c-fn">cz</span>(<span class="c-num">0</span>, <span class="c-num">1</span>)
+grover.<span class="c-fn">x</span>([<span class="c-num">0</span>, <span class="c-num">1</span>])
+grover.<span class="c-fn">h</span>([<span class="c-num">0</span>, <span class="c-num">1</span>])
+grover.<span class="c-fn">measure</span>([<span class="c-num">0</span>, <span class="c-num">1</span>], [<span class="c-num">0</span>, <span class="c-num">1</span>])
+<span class="c-com"># Running this gives &#x27;11&#x27; every time on an ideal simulator.</span></code></pre></div><p><strong>Running on real IBM hardware</strong> (requires a free IBM Quantum account and <code>pip install qiskit-ibm-runtime</code>; save your API credentials first, following IBM's documentation):</p><div class="codebox"><div class="codebox-bar"><span class="dots"><i></i><i></i><i></i></span><span class="codebox-lang">Python</span><button class="copy-btn" type="button">Copy</button></div><pre><code class="lang-python"><span class="c-kw">from</span> qiskit_ibm_runtime <span class="c-kw">import</span> QiskitRuntimeService, SamplerV2 <span class="c-kw">as</span> Sampler
+<span class="c-kw">from</span> qiskit.transpiler <span class="c-kw">import</span> generate_preset_pass_manager
+
+service = <span class="c-fn">QiskitRuntimeService</span>()
+backend = service.<span class="c-fn">least_busy</span>(operational=<span class="c-kw">True</span>, simulator=<span class="c-kw">False</span>)
+
+pm = <span class="c-fn">generate_preset_pass_manager</span>(backend=backend, optimization_level=<span class="c-num">1</span>)
+isa_circuit = pm.<span class="c-fn">run</span>(qc)         <span class="c-com"># translate to the chip&#x27;s native gates and layout</span>
+
+job = <span class="c-fn">Sampler</span>(mode=backend).<span class="c-fn">run</span>([isa_circuit], shots=<span class="c-num">1000</span>)
+counts = job.<span class="c-fn">result</span>()[<span class="c-num">0</span>].data.c.<span class="c-fn">get_counts</span>()
+<span class="c-bi">print</span>(counts)                    <span class="c-com"># mostly &#x27;00&#x27; and &#x27;11&#x27;, plus a few errors</span></code></pre></div><aside class="callout warn"><div class="callout-tag"><span aria-hidden="true">⚠️</span> Heads up</div><div class="callout-body"><p><strong>Bit order:</strong> Qiskit prints bit strings with <strong>qubit 0 on the right</strong>. So <code>'01'</code> means qubit 0 = 1 and qubit 1 = 0. Our NumPy simulator and most textbooks put qubit 0 on the left.</p></div></aside></section><section class="sec" id="s24-4" data-sec="s24-4"><h2 class="sec-title"><span class="sec-num">24.4</span><span class="sec-text">Cirq (Google)</span></h2><p><strong>Install:</strong> <code>pip install cirq</code></p><div class="codebox"><div class="codebox-bar"><span class="dots"><i></i><i></i><i></i></span><span class="codebox-lang">Python</span><button class="copy-btn" type="button">Copy</button></div><pre><code class="lang-python"><span class="c-kw">import</span> cirq
+
+q0, q1 = cirq.LineQubit.<span class="c-bi">range</span>(<span class="c-num">2</span>)
+circuit = cirq.<span class="c-fn">Circuit</span>(
+    cirq.<span class="c-fn">H</span>(q0),
+    cirq.<span class="c-fn">CNOT</span>(q0, q1),
+    cirq.<span class="c-fn">measure</span>(q0, q1, key=<span class="c-str">&quot;m&quot;</span>),
+)
+<span class="c-bi">print</span>(circuit)
+
+result = cirq.<span class="c-fn">Simulator</span>().<span class="c-fn">run</span>(circuit, repetitions=<span class="c-num">1000</span>)
+<span class="c-bi">print</span>(result.<span class="c-fn">histogram</span>(key=<span class="c-str">&quot;m&quot;</span>))  <span class="c-com"># Counter({0: ~500, 3: ~500})  (0 = &#x27;00&#x27;, 3 = &#x27;11&#x27;)</span></code></pre></div></section><section class="sec" id="s24-5" data-sec="s24-5"><h2 class="sec-title"><span class="sec-num">24.5</span><span class="sec-text">PennyLane (Xanadu): a tiny variational algorithm</span></h2><p><strong>Install:</strong> <code>pip install pennylane</code></p><p>This is the toy VQE from <a class="xref" href="../chapters/16-near-term-algorithms-vqe-qaoa.html#s16-2">Chapter 16.2</a>: find the angle θ that minimises <code>⟨Z⟩</code> for the state <code>Ry(θ)|0⟩</code>.</p><div class="codebox"><div class="codebox-bar"><span class="dots"><i></i><i></i><i></i></span><span class="codebox-lang">Python</span><button class="copy-btn" type="button">Copy</button></div><pre><code class="lang-python"><span class="c-kw">import</span> pennylane <span class="c-kw">as</span> qml
+<span class="c-kw">from</span> pennylane <span class="c-kw">import</span> numpy <span class="c-kw">as</span> np
+
+dev = qml.<span class="c-fn">device</span>(<span class="c-str">&quot;default.qubit&quot;</span>, wires=<span class="c-num">1</span>)
+
+<span class="c-dec">@qml.qnode</span>(dev)
+<span class="c-kw">def</span> <span class="c-fn">energy</span>(theta):
+    qml.<span class="c-fn">RY</span>(theta, wires=<span class="c-num">0</span>)
+    <span class="c-kw">return</span> qml.<span class="c-fn">expval</span>(qml.<span class="c-fn">PauliZ</span>(<span class="c-num">0</span>))     <span class="c-com"># the &quot;energy&quot; ⟨Z⟩ = cos θ</span>
+
+opt = qml.<span class="c-fn">GradientDescentOptimizer</span>(stepsize=<span class="c-num">0.4</span>)
+theta = np.<span class="c-fn">array</span>(<span class="c-num">0.1</span>, requires_grad=<span class="c-kw">True</span>)
+<span class="c-kw">for</span> step <span class="c-kw">in</span> <span class="c-bi">range</span>(<span class="c-num">60</span>):
+    theta = opt.<span class="c-fn">step</span>(energy, theta)
+
+<span class="c-bi">print</span>(theta, <span class="c-fn">energy</span>(theta))   <span class="c-com"># θ → π ≈ 3.14159, energy → −1</span></code></pre></div><p>PennyLane computes gradients of quantum circuits automatically, using the parameter-shift rule on hardware.</p></section><section class="sec" id="s24-6" data-sec="s24-6"><h2 class="sec-title"><span class="sec-num">24.6</span><span class="sec-text">Q# (Microsoft)</span></h2><p><strong>Install:</strong> the Azure Quantum Development Kit (Modern QDK) extension for VS Code, or <code>pip install qsharp</code>.</p><div class="codebox"><div class="codebox-bar"><span class="dots"><i></i><i></i><i></i></span><span class="codebox-lang">Q#</span><button class="copy-btn" type="button">Copy</button></div><pre><code class="lang-qsharp"><span class="c-kw">operation</span> <span class="c-fn">Main</span>() : (Result, Result) {
+    <span class="c-kw">use</span> (q0, q1) = (<span class="c-fn">Qubit</span>(), <span class="c-fn">Qubit</span>());
+    <span class="c-fn">H</span>(q0);
+    <span class="c-fn">CNOT</span>(q0, q1);
+    <span class="c-kw">let</span> results = (<span class="c-fn">M</span>(q0), <span class="c-fn">M</span>(q1));
+    <span class="c-fn">ResetAll</span>([q0, q1]);
+    <span class="c-kw">return</span> results;               <span class="c-com">// always (Zero, Zero) or (One, One)</span>
+}</code></pre></div><p>The QDK also includes a <strong>resource estimator</strong> that predicts how many physical qubits and how much time an algorithm would need on future fault-tolerant hardware.</p></section><section class="sec" id="s24-7" data-sec="s24-7"><h2 class="sec-title"><span class="sec-num">24.7</span><span class="sec-text">CUDA-Q (NVIDIA)</span></h2><p><strong>Install:</strong> <code>pip install cudaq</code></p><div class="codebox"><div class="codebox-bar"><span class="dots"><i></i><i></i><i></i></span><span class="codebox-lang">Python</span><button class="copy-btn" type="button">Copy</button></div><pre><code class="lang-python"><span class="c-kw">import</span> cudaq
+
+<span class="c-dec">@cudaq.kernel</span>
+<span class="c-kw">def</span> <span class="c-fn">bell</span>():
+    q = cudaq.<span class="c-fn">qvector</span>(<span class="c-num">2</span>)
+    <span class="c-fn">h</span>(q[<span class="c-num">0</span>])
+    x.<span class="c-fn">ctrl</span>(q[<span class="c-num">0</span>], q[<span class="c-num">1</span>])            <span class="c-com"># controlled-X = CNOT</span>
+    <span class="c-fn">mz</span>(q)                         <span class="c-com"># measure in the Z basis</span>
+
+<span class="c-bi">print</span>(cudaq.<span class="c-fn">sample</span>(bell, shots_count=<span class="c-num">1000</span>))   <span class="c-com"># { 00:~500 11:~500 }</span></code></pre></div></section><section class="sec" id="s24-8" data-sec="s24-8"><h2 class="sec-title"><span class="sec-num">24.8</span><span class="sec-text">OpenQASM 3: the "assembly language" of quantum circuits</span></h2><div class="codebox"><div class="codebox-bar"><span class="dots"><i></i><i></i><i></i></span><span class="codebox-lang">OpenQASM 3</span><button class="copy-btn" type="button">Copy</button></div><pre><code class="lang-qasm"><span class="c-kw">OPENQASM</span> <span class="c-num">3.0</span>;
+<span class="c-kw">include</span> <span class="c-str">&quot;stdgates.inc&quot;</span>;
+
+<span class="c-kw">qubit</span>[<span class="c-num">2</span>] q;
+<span class="c-kw">bit</span>[<span class="c-num">2</span>] c;
+
+h q[<span class="c-num">0</span>];
+cx q[<span class="c-num">0</span>], q[<span class="c-num">1</span>];
+c = <span class="c-kw">measure</span> q;</code></pre></div><p>Most SDKs can import and export OpenQASM, so it works as a common exchange format.</p></section><section class="sec" id="s24-9" data-sec="s24-9"><h2 class="sec-title"><span class="sec-num">24.9</span><span class="sec-text">Practical tips for quantum programmers</span></h2><ol><li><strong>Start on a simulator.</strong> Debug with exact state vectors before touching hardware.</li><li><strong>Count two-qubit gates and depth.</strong> They dominate errors on real machines. Check the circuit <em>after</em> transpilation.</li><li><strong>Mind the bit ordering</strong> of your SDK.</li><li><strong>Use enough shots,</strong> and remember statistical error scales as <code>1/√shots</code>.</li><li><strong>Add realistic noise models</strong> in simulation to predict hardware behaviour.</li><li><strong>Exploit hardware connectivity:</strong> choose qubit layouts that minimise SWAPs.</li><li><strong>Use error mitigation</strong> options (readout correction, ZNE, dynamical decoupling) on today's hardware.</li><li><strong>Read the docs for your exact version.</strong> APIs move quickly.</li></ol></section><section class="sec" id="s24-10" data-sec="s24-10"><h2 class="sec-title"><span class="sec-num">24.10</span><span class="sec-text">Project ideas, from beginner to advanced</span></h2><div class="table-wrap"><table class="tbl"><thead><tr><th>Level</th><th>Project</th></tr></thead><tbody><tr><td>🟢 Beginner</td><td>Build the NumPy simulator above and add the Y, S and T gates and a SWAP</td></tr><tr><td>🟢 Beginner</td><td>Create all four Bell states and verify them on real hardware</td></tr><tr><td>🟡 Intermediate</td><td>Implement Deutsch–Jozsa and Bernstein–Vazirani for n = 4</td></tr><tr><td>🟡 Intermediate</td><td>Quantum teleportation with mid-circuit measurement and feed-forward</td></tr><tr><td>🟡 Intermediate</td><td>Run a CHSH Bell test on hardware and check whether you beat 75%</td></tr><tr><td>🟡 Intermediate</td><td>Grover's search on 3 qubits (8 items): confirm 2 iterations is optimal</td></tr><tr><td>🔵 Advanced</td><td>VQE for the H₂ molecule, plotting energy vs. bond length</td></tr><tr><td>🔵 Advanced</td><td>QAOA for MaxCut on a small graph, compared with brute force</td></tr><tr><td>🔵 Advanced</td><td>A 3-qubit repetition code with syndrome measurement on real hardware</td></tr><tr><td>🔵 Advanced</td><td>Simulate a distance-3 surface code with Stim and plot logical error vs. physical error</td></tr><tr><td>🔵 Advanced</td><td>Implement the QFT and phase estimation; estimate the phase of the T gate</td></tr></tbody></table></div></section><section class="pros-cons" aria-label="Pros and cons"><h2 class="pc-title">⚖️ Quantum programming today</h2><div class="pc-table"><div class="pc-col pro"><div class="pc-head">👍 The good</div><ul><li>Free tools and free cloud tiers to get started</li><li>Simulators make debugging exact</li><li>Common formats (OpenQASM, QIR) connect the tools</li></ul></div><div class="pc-col con"><div class="pc-head">👎 The tricky</div><ul><li>APIs change quickly between versions</li><li>Simulators hit the exponential wall (about 30 qubits on a laptop)</li><li>Real hardware results are noisy, so mitigation is needed</li></ul></div></div></section><section class="takeaways"><h2>🎒 Pack these 3 ideas</h2><ol><li>The toolbox: Qiskit, Cirq, PennyLane, Q#, CUDA-Q, Braket, pytket, Stim, OpenQASM and more.</li><li>A 70-line NumPy simulator reproduces interference, Bell states, Grover and Bernstein–Vazirani.</li><li>Watch the bit order: Qiskit puts qubit 0 on the right.</li></ol></section><section class="quiz" data-quiz="24" aria-label="Quiz"><h2 class="quiz-title">🧠 Check yourself <small>+10 XP per first-try answer</small></h2><div class="q" data-q="24-0" data-answer="1"><p class="q-text"><b>1.</b> In Qiskit, the printed bit string &#x27;01&#x27; means...</p><div class="q-opts"><button type="button" class="q-opt" data-i="0">qubit 0 = 0, qubit 1 = 1</button><button type="button" class="q-opt" data-i="1">qubit 0 = 1, qubit 1 = 0</button></div><p class="q-why" hidden>Qiskit is little-endian: qubit 0 is on the right.</p></div><div class="q" data-q="24-1" data-answer="0"><p class="q-text"><b>2.</b> Why can&#x27;t the 70-line simulator scale?</p><div class="q-opts"><button type="button" class="q-opt" data-i="0">It builds 2ⁿ × 2ⁿ matrices</button><button type="button" class="q-opt" data-i="1">Python is banned</button><button type="button" class="q-opt" data-i="2">NumPy has no complex numbers</button></div><p class="q-why" hidden>At 15 qubits that&#x27;s already about a billion entries.</p></div><div class="q" data-q="24-2" data-answer="1"><p class="q-text"><b>3.</b> Statistical error scales as...</p><div class="q-opts"><button type="button" class="q-opt" data-i="0">1/shots</button><button type="button" class="q-opt" data-i="1">1/√shots</button><button type="button" class="q-opt" data-i="2">√shots</button></div><p class="q-why" hidden>Shot noise ∝ 1/√N.</p></div></section><div class="ch-end" data-end="24"><span>🏁</span> End of chapter 24</div><a class="next-card" href="../chapters/25-quantum-threats-post-quantum.html" data-next><span class="next-label">Up next · Episode 25</span><span class="next-title">Quantum Threats, Post-Quantum Cryptography and Quantum Key Distribution</span><span class="next-tease">If you can&#x27;t copy photons, how do you build an internet for qubits? Next: quantum networks.</span><span class="next-cta">Keep going →</span></a><div class="prev-row"><a class="prev-link" href="../chapters/23-benchmarks-quantum-supremacy-and.html">← Benchmarks, Quantum Supremacy and Quantum Advantage</a></div></article></div></main><footer class="site-foot">
+  <div class="squiggle" aria-hidden="true"></div>
+  <p class="closing">Quantum computing moves fast. The fundamentals in Parts I to III are timeless, but hardware numbers, records and roadmaps (Parts IV and VII) should be re-checked against current sources. The 2026 results in this guide come from company announcements and preprints, so treat them as reported claims until they're independently confirmed.</p>
+  <p class="small">Every word of <em>Quantum Computing: The Complete Guide</em> (last updated November 2026), sketched into a website. Progress is saved only in this browser.</p>
+</footer>
+<div class="drawer" id="drawer" hidden><div class="drawer-panel" role="dialog" aria-modal="true" aria-label="All episodes"></div></div>
+<div class="modal" id="trophies" hidden><div class="modal-panel" role="dialog" aria-modal="true" aria-label="Your progress"></div></div>
+<div class="toasts" aria-live="polite"></div>
+<script src="../assets/js/data.js?v=4cbd26e3"></script>
+<script src="../assets/js/qsim.js?v=4cbd26e3"></script>
+<script src="../assets/js/widgets.js?v=4cbd26e3"></script>
+<script src="../assets/js/app.js?v=4cbd26e3"></script>
+</body>
+</html>

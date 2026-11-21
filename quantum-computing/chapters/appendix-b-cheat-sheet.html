@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Appendix B: Cheat Sheet · Qubit Sketchbook</title>
+<meta name="description" content="The key states, gates, identities, formulas and numbers from the whole guide, in one place.">
+<meta name="theme-color" content="#FFF8EC">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='%237C5CFF' stroke='%2326243A' stroke-width='4'/%3E%3Ctext x='32' y='43' font-size='32' text-anchor='middle' fill='white' font-family='Georgia'%3EQ%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=JetBrains+Mono:wght@400;600&family=Nunito:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../assets/css/style.css?v=4cbd26e3">
+<script>(function(){try{var t=localStorage.getItem('qsk-theme');if(t)document.documentElement.setAttribute('data-theme',t);}catch(e){}})();</script>
+</head>
+<body data-part="8">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false"><filter id="rough" x="-4%" y="-4%" width="108%" height="108%"><feTurbulence type="fractalNoise" baseFrequency="0.04" numOctaves="2" seed="7" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter></svg>
+<a class="skip" href="#main">Skip to content</a>
+<header class="topbar">
+  <a class="brand" href="../index.html" aria-label="Qubit Sketchbook home"><span class="brand-mark" aria-hidden="true">Q</span><span class="brand-text">Qubit<br>Sketchbook</span></a>
+  <nav class="topnav" aria-label="Main">
+    <a class="pill home-link" href="../../index.html" title="All explainers"><span aria-hidden="true">←</span><span class="hide-sm"> All explainers</span></a>
+    <a class="pill" href="../bites.html"><span aria-hidden="true">📱</span><span class="hide-sm"> Quick Bites</span></a>
+    <button class="pill" type="button" data-open="drawer" aria-label="All episodes"><span aria-hidden="true">📚</span><span class="hide-sm"> Episodes</span></button>
+  </nav>
+  <div class="hud">
+    <button class="xp-chip" type="button" data-open="trophies" aria-label="Your progress and badges"><span aria-hidden="true">⚡</span> <b data-xp>0</b><span class="hide-sm"> XP · <span data-level>Classical Muggle</span></span></button>
+    <span class="streak" title="Daily reading streak"><span aria-hidden="true">🔥</span> <b data-streak>0</b></span>
+    <button class="theme-toggle" type="button" aria-label="Switch between paper and chalkboard"><span aria-hidden="true">🌙</span></button>
+  </div>
+</header>
+<div class="read-progress" aria-hidden="true"><div></div></div>
+<main id="main" class="chapter-page" data-ch="B"><section class="ch-hero">
+  <div class="ch-hero-text">
+    <div class="kicker"><span class="part-tag">📎 Appendices</span><span class="ep">Episode 34 / 36</span></div>
+    <h1><span class="ch-num">B</span><span class="ch-title">Cheat Sheet</span></h1>
+    <div class="meta"><span>⏱ 2 min</span><span>5 sections</span><span class="done-flag" hidden>✅ Completed</span></div>
+    <p class="hook"><span class="hook-label">The hook</span>Everything important on one page. Screenshot it, print it, stick it on your wall.</p>
+  </div>
+  <div class="ch-cover"><svg viewBox="0 0 200 150" class="sk cover" role="img" aria-label="Cheat Sheet"><path d="M38 22 C70 2 140 4 172 26 C198 46 196 98 178 122 C156 148 66 152 34 130 C8 112 4 46 38 22 Z" class="blob"/><g class="rough"><g transform="rotate(-5 100 75)"><rect x="30" y="22" width="140" height="106" rx="6" class="fw"/><path d="M30 44 H170" class="o rc"/><text x="40" y="66" class="tm xs">H|0⟩ = |+⟩</text><text x="40" y="86" class="tm xs">U†U = I</text><text x="40" y="106" class="tm xs">n qubits ↔ 2ⁿ</text><text x="40" y="122" class="tm xs">x + y &gt; z</text></g><circle cx="100" cy="22" r="7" class="fc"/></g><polygon points="14,135 15.3,138.2 18.8,138.5 16.1,140.7 16.9,144 14,142.2 11.1,144 11.9,140.7 9.2,138.5 12.7,138.2" class="fv"/><polygon points="190,6 191.1,8.5 193.8,8.8 191.7,10.6 192.4,13.2 190,11.8 187.6,13.2 188.3,10.6 186.2,8.8 188.9,8.5" class="fc"/></svg></div>
+</section><div class="ch-layout"><nav class="toc-side" aria-label="Sections in this episode"><div class="toc-title">In this episode</div><ol><li><a href="#sb-key-states">Key states</a></li><li><a href="#sb-key-gates">Key gates</a></li><li><a href="#sb-key-identities">Key identities</a></li><li><a href="#sb-key-formulas">Key formulas</a></li><li><a href="#sb-numbers-worth-remembering">Numbers worth remembering</a></li></ol><div class="toc-progress"><div></div></div></nav><article class="prose"><aside class="eli5"><div class="eli5-tag">⚡ In 30 seconds <small>(no jargon, promise)</small></div><p>The key states, gates, identities, formulas and numbers from the whole guide, in one place.</p></aside><details class="toc-mobile"><summary>📍 In this episode (5 sections)</summary><ol><li><a href="#sb-key-states">Key states</a></li><li><a href="#sb-key-gates">Key gates</a></li><li><a href="#sb-key-identities">Key identities</a></li><li><a href="#sb-key-formulas">Key formulas</a></li><li><a href="#sb-numbers-worth-remembering">Numbers worth remembering</a></li></ol></details><section class="sec" id="sb-key-states" data-sec="sb-key-states"><h2 class="sec-title"><span class="sec-text">Key states</span></h2><div class="table-wrap"><table class="tbl"><thead><tr><th>State</th><th>Vector</th><th>Notes</th></tr></thead><tbody><tr><td><code>|0⟩</code></td><td><code>[1, 0]</code></td><td>North pole</td></tr><tr><td><code>|1⟩</code></td><td><code>[0, 1]</code></td><td>South pole</td></tr><tr><td><code>|+⟩</code></td><td><code>[1, 1]/√2</code></td><td><code>H|0⟩</code></td></tr><tr><td><code>|−⟩</code></td><td><code>[1, −1]/√2</code></td><td><code>H|1⟩</code></td></tr><tr><td><code>|+i⟩</code></td><td><code>[1, i]/√2</code></td><td><code>S|+⟩</code></td></tr><tr><td><code>|−i⟩</code></td><td><code>[1, −i]/√2</code></td><td><code>S†|+⟩</code></td></tr><tr><td><code>|Φ⁺⟩</code></td><td><code>[1, 0, 0, 1]/√2</code></td><td>Bell state</td></tr><tr><td><code>|Ψ⁻⟩</code></td><td><code>[0, 1, −1, 0]/√2</code></td><td>The "singlet"</td></tr></tbody></table></div></section><section class="sec" id="sb-key-gates" data-sec="sb-key-gates"><h2 class="sec-title"><span class="sec-text">Key gates</span></h2><pre class="ascii"><code>X = [0 1]   Y = [0 −i]   Z = [1  0]   H = 1/√2 [1  1]   S = [1 0]   T = [1     0    ]
+    [1 0]       [i  0]       [0 −1]            [1 −1]       [0 i]       [0 e^(iπ/4)]
+
+CNOT = [1 0 0 0]     CZ = [1 0 0  0]     SWAP = [1 0 0 0]
+       [0 1 0 0]          [0 1 0  0]            [0 0 1 0]
+       [0 0 0 1]          [0 0 1  0]            [0 1 0 0]
+       [0 0 1 0]          [0 0 0 −1]            [0 0 0 1]</code></pre></section><section class="sec" id="sb-key-identities" data-sec="sb-key-identities"><h2 class="sec-title"><span class="sec-text">Key identities</span></h2><ul><li><code>X² = Y² = Z² = H² = I</code></li><li><code>HXH = Z</code>, <code>HZH = X</code>, <code>HYH = −Y</code></li><li><code>XZ = −ZX</code> (Pauli gates anticommute)</li><li><code>S² = Z</code>, <code>T² = S</code></li><li><code>SWAP = 3 CNOTs</code></li><li><code>CNOT|+⟩|−⟩ = |−⟩|−⟩</code> (phase kickback)</li></ul></section><section class="sec" id="sb-key-formulas" data-sec="sb-key-formulas"><h2 class="sec-title"><span class="sec-text">Key formulas</span></h2><div class="table-wrap"><table class="tbl"><thead><tr><th>Formula</th><th>Meaning</th></tr></thead><tbody><tr><td><code>P(x) = |⟨x|ψ⟩|²</code></td><td>Born rule</td></tr><tr><td><code>|ψ⟩ = cos(θ/2)|0⟩ + e^(iφ) sin(θ/2)|1⟩</code></td><td>Bloch sphere parametrisation</td></tr><tr><td><code>U†U = I</code></td><td>Unitarity</td></tr><tr><td><code>n qubits ↔ 2ⁿ amplitudes</code></td><td>Exponential state space</td></tr><tr><td><code>Grover iterations ≈ (π/4)√(N/M)</code></td><td>M marked items among N</td></tr><tr><td><code>P_success(k) = sin²((2k+1)θ), sin θ = √(M/N)</code></td><td>Grover success after k iterations</td></tr><tr><td><code>gcd(a^(r/2) ± 1, N)</code></td><td>Shor: factors from the period r</td></tr><tr><td><code>p_L ≈ A (p/p_th)^((d+1)/2)</code></td><td>Surface code logical error rate</td></tr><tr><td><code>σ ≈ √(p(1−p)/shots)</code></td><td>Shot-noise uncertainty</td></tr><tr><td><code>x + y &gt; z</code></td><td>Mosca's inequality (start PQC migration)</td></tr></tbody></table></div></section><section class="sec" id="sb-numbers-worth-remembering" data-sec="sb-numbers-worth-remembering"><h2 class="sec-title"><span class="sec-text">Numbers worth remembering</span></h2><div class="table-wrap"><table class="tbl"><thead><tr><th>Quantity</th><th>Value</th></tr></thead><tbody><tr><td>Qubits a laptop can simulate exactly</td><td>~30</td></tr><tr><td>Qubits that exceed all classical memory (generic states)</td><td>~50+</td></tr><tr><td>Surface code threshold</td><td>~1%</td></tr><tr><td>Today's best two-qubit error rates</td><td>~0.1% or a bit lower</td></tr><tr><td>Physical qubits per logical qubit (surface code)</td><td>Hundreds to ~1,000+</td></tr><tr><td>RSA-2048 estimate (2025)</td><td>&lt; 1 million noisy qubits, &lt; 1 week</td></tr><tr><td>CHSH game: classical vs. quantum</td><td>75% vs. ~85.4%</td></tr><tr><td>Superconducting qubit temperature</td><td>~10 mK</td></tr><tr><td>BB84 intercept-resend error rate</td><td>25%</td></tr></tbody></table></div></section><div class="ch-end" data-end="B"><span>🏁</span> End of appendix b</div><a class="next-card" href="../chapters/appendix-c-exercises-with-solutions.html" data-next><span class="next-label">Up next · Appendix C</span><span class="next-title">Exercises with Solutions</span><span class="next-tease">20 hands-on exercises, from probabilities to Shor and BB84, with hidden solutions.</span><span class="next-cta">Keep going →</span></a><div class="prev-row"><a class="prev-link" href="../chapters/appendix-a-glossary.html">← Glossary</a></div></article></div></main><footer class="site-foot">
+  <div class="squiggle" aria-hidden="true"></div>
+  <p class="closing">Quantum computing moves fast. The fundamentals in Parts I to III are timeless, but hardware numbers, records and roadmaps (Parts IV and VII) should be re-checked against current sources. The 2026 results in this guide come from company announcements and preprints, so treat them as reported claims until they're independently confirmed.</p>
+  <p class="small">Every word of <em>Quantum Computing: The Complete Guide</em> (last updated November 2026), sketched into a website. Progress is saved only in this browser.</p>
+</footer>
+<div class="drawer" id="drawer" hidden><div class="drawer-panel" role="dialog" aria-modal="true" aria-label="All episodes"></div></div>
+<div class="modal" id="trophies" hidden><div class="modal-panel" role="dialog" aria-modal="true" aria-label="Your progress"></div></div>
+<div class="toasts" aria-live="polite"></div>
+<script src="../assets/js/data.js?v=4cbd26e3"></script>
+<script src="../assets/js/qsim.js?v=4cbd26e3"></script>
+<script src="../assets/js/widgets.js?v=4cbd26e3"></script>
+<script src="../assets/js/app.js?v=4cbd26e3"></script>
+</body>
+</html>

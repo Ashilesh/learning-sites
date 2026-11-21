@@ -12,6 +12,7 @@ assets/app.js       Renders the catalog (search, category chips, cards, theme to
 assets/style.css    Home page theme. Colors are tokens on :root (light + 2 dark blocks).
 PQC/                Post-quantum cryptography pages (2 pages)
 QUIC/               QUIC protocol sketchbook (1 page)
+quantum-computing/   Qubit Sketchbook (index + bites + 36 chapters). Static topbar in every page; home link is a .pill.home-link in each .topnav.
 wasm/               WebAssembly sketchbook (index + 12 chapters). Its top bar/drawer are built by
                     wasm/assets/js/site.js — the home link lives there, not in each page.
 <TOPIC>/            ← new sub-sites go in their own top-level folder
@@ -45,8 +46,8 @@ Use relative paths only (no leading `/`) so it works at both `user.github.io/` a
 
 ## Existing categories (ids)
 
-security, networking, systems, web, data, ai, cloud, algorithms
-(Only `security`, `networking` and `web` currently have sites.)
+security, networking, systems, web, data, ai, cloud, algorithms, quantum
+(Only `security`, `networking`, `web` and `quantum` currently have sites.)
 
 ## Theme
 

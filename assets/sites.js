@@ -41,6 +41,7 @@ window.CATEGORIES = [
   { id: "ai",         name: "AI & Machine Learning",   icon: "spark",   blurb: "Models, training and inference, minus the hype." },
   { id: "cloud",      name: "Cloud & DevOps",          icon: "cloud",   blurb: "Containers, deployment pipelines and running things at scale." },
   { id: "algorithms", name: "Algorithms & Data Structures", icon: "tree", blurb: "The ideas underneath every fast program." },
+  { id: "quantum",    name: "Quantum Computing",       icon: "atom",    blurb: "Qubits, entanglement and the machines being built from them." },
 ];
 
 /* ---------------------------------------------------------------------
@@ -146,6 +147,21 @@ window.SITES = [
     added: "2026-11-21",
     minutes: 240,
     featured: true,
+  },
+
+  {
+    id: "qubit-sketchbook",
+    title: "Qubit Sketchbook",
+    path: "quantum-computing/index.html",
+    category: "quantum",
+    topic: "Quantum",
+    format: "Interactive guide · 36 episodes",
+    description:
+      "Quantum computing from \"what is a qubit?\" to fault-tolerant machines, in plain language. " +
+      "Superposition, entanglement, Shor and Grover, error correction and real hardware, with 34 widgets to play with and quick bites to swipe.",
+    tags: ["quantum", "quantum computing", "qubit", "superposition", "entanglement", "shor", "grover", "error correction", "bloch sphere", "qiskit", "hardware"],
+    added: "2026-11-21",
+    minutes: 300,
   },
 
   // ↓↓↓ ADD NEW SITES HERE ↓↓↓
