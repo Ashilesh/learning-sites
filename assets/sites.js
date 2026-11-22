@@ -224,5 +224,20 @@ window.SITES = [
     minutes: 2,
   },
 
+  {
+    id: "k8s-sketchbook",
+    title: "The K8s Sketchbook",
+    path: "helm-k8/index.html",
+    category: "cloud",
+    topic: "Kubernetes",
+    format: "Interactive guide · 37 chapters",
+    description:
+      "Kubernetes and Helm, drawn by hand: containers, pods, Services, Ingress, storage, scheduling, security and Helm charts, " +
+      "with a 3D cluster simulator, swipeable shorts, quizzes, and patterns vs anti-patterns from real examples.",
+    tags: ["kubernetes", "k8s", "helm", "kubectl", "containers", "docker", "pods", "deployment", "service", "ingress", "gateway api", "rbac", "devops", "cloud", "gitops", "autoscaling"],
+    added: "2026-11-22",
+    minutes: 300,
+  },
+
   // ↓↓↓ ADD NEW SITES HERE ↓↓↓
 ];
