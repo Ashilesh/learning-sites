@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shaderland — a visual journey into shaders</title>
+<meta name="description" content="An interactive, visual, one-stop guide to shaders: GPUs, the graphics pipeline, vertex & fragment shaders, lighting, textures, raymarching, post-processing and a live playground.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&family=Silkscreen&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%23ff3d9a'/%3E%3Cstop offset='1' stop-color='%2322e4ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M16 2 30 16 16 30 2 16Z' fill='url(%23g)'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<!-- ============================== NAV ============================== -->
+<nav id="topnav">
+  <a class="home-link" href="../index.html" title="All explainers">← <span>All explainers</span></a>
+  <a href="#hero" class="logo"><span class="logo-gem"></span>Shader<b>land</b></a>
+  <button id="toc-btn" class="toc-btn" aria-expanded="false">☰ Levels</button>
+  <div class="xp-hud" title="Earn XP by exploring each level">
+    <span id="xp-level" class="xp-level">LV 1</span>
+    <div class="xp-meta"><span id="xp-name">Curious Pixel</span><div class="xp-bar"><div id="xp-fill"></div></div></div>
+    <span id="xp-num" class="xp-num">0 XP</span>
+  </div>
+  <div class="scroll-progress"><div id="scroll-fill"></div></div>
+</nav>
+<div id="toc-panel" class="toc-panel" hidden></div>
+
+<!-- ============================== HERO ============================== -->
+<header id="hero">
+  <div id="hero-stage" class="hero-stage"></div>
+  <div class="hero-inner">
+    <div class="hero-kicker">An interactive field guide · 16 levels · 100% runs on your GPU</div>
+    <h1 class="hero-title"><span class="t1">Shader</span><span class="t2">land</span></h1>
+    <p class="hero-sub">Shaders are tiny programs that paint every pixel on your screen — <b>millions of times a second</b>. Let's take them apart, one pixel at a time.</p>
+    <div class="hero-cta">
+      <a href="#what" class="btn btn-primary">Start the journey ↓</a>
+      <button class="btn btn-ghost" id="hero-code-btn">👀 Peek at this page's shaders</button>
+    </div>
+    <div class="hero-stats">
+      <div><b>8,294,400</b><span>pixels on a 4K screen</span></div>
+      <div><b>× 120</b><span>frames every second</span></div>
+      <div><b>≈ 1 billion</b><span>fragment-shader runs / sec</span></div>
+    </div>
+  </div>
+  <div class="hero-hint">✋ drag the knot</div>
+</header>
+
+<dialog id="code-modal" class="code-modal">
+  <div class="modal-head"><b>The shaders behind the hero ✨</b><button class="btn btn-small" id="code-modal-close">✕ close</button></div>
+  <div class="modal-body">
+    <div><h4><span class="tag tag-cyan">fragment</span> Background — domain-warped noise</h4><pre class="code" id="hero-bg-code"></pre></div>
+    <div><h4><span class="tag tag-pink">vertex + fragment</span> The wobbly iridescent knot</h4><pre class="code" id="hero-knot-code"></pre></div>
+  </div>
+</dialog>
+
+<main>
+
+<!-- ============================== 01 WHAT ============================== -->
+<section class="chapter" id="what" data-title="What is a shader?" data-icon="🧩" style="--accent:var(--pink);--accent2:var(--violet)">
+  <div class="ch-head">
+    <div class="ch-level">LEVEL 01</div>
+    <h2>What <em>is</em> a shader?</h2>
+    <p class="lede">A shader is a <b>tiny function</b> that your graphics card runs <b>once for every pixel</b> (or every corner of a 3D shape) — <b>all at the same time</b>.</p>
+  </div>
+
+  <div class="eq-strip">
+    <div class="eq-card"><div class="eq-ico">📍</div><b>Input</b><span>which pixel am I?</span><code>(x, y)</code></div>
+    <div class="eq-op">→</div>
+    <div class="eq-card eq-fn"><div class="eq-ico">ƒ</div><b>Your shader</b><span>a few lines of math</span><code>color = f(x, y)</code></div>
+    <div class="eq-op">→</div>
+    <div class="eq-card"><div class="eq-ico">🎨</div><b>Output</b><span>what colour should I be?</span><code>(r, g, b, a)</code></div>
+  </div>
+
+  <div class="demo" id="pixel-machine">
+    <div class="demo-bar">
+      <span class="demo-title">🔬 The Pixel Machine</span>
+      <label class="ctl">Screen resolution <input type="range" id="pm-res" min="0" max="5" step="1" value="1"><output></output></label>
+    </div>
+    <div class="pm-grid">
+      <div class="pm-stage-wrap">
+        <div class="demo-stage pm-stage" id="pm-stage"><div class="pm-cross" id="pm-cross"></div></div>
+        <div class="stage-caption">👆 hover / touch a pixel</div>
+      </div>
+      <div class="pm-flow">
+        <div class="pm-box pm-in"><h4>① Input — this pixel's position</h4>
+          <div class="mono">gl_FragCoord.xy = (<span id="pm-fx">?</span>, <span id="pm-fy">?</span>)</div>
+          <div class="mono">uv = (<span id="pm-u" class="c-pink">?</span>, <span id="pm-v" class="c-lime">?</span>)</div>
+        </div>
+        <div class="pm-arrow">▼</div>
+        <div class="pm-box pm-fn"><h4>② The shader runs (values filled in live)</h4><pre class="code live-code" id="pm-code"></pre></div>
+        <div class="pm-arrow">▼</div>
+        <div class="pm-box pm-out"><h4>③ Output — the pixel's colour</h4>
+          <div class="pm-outrow"><div class="pm-swatch" id="pm-swatch"></div><code id="pm-out" class="mono">vec4(?)</code></div>
+        </div>
+        <div class="pm-count">This frame, the same function ran <b id="pm-runs">…</b> times —<br>once per pixel, <b class="c-yellow">in parallel</b>.</div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sub">🏁 Why a graphics card? The great painting race</h3>
+  <p class="sub-lede">Both chips must paint the same 60×36-pixel picture. The CPU has a few powerful cores. The GPU has thousands of simple ones.</p>
+  <div class="demo" id="race">
+    <div class="demo-bar"><span class="demo-title">CPU vs GPU</span><button id="race-go" class="btn btn-small btn-primary">▶ Start race</button><span class="hint">(slowed way down so you can see it)</span></div>
+    <div class="race-wrap">
+      <div class="race-lane"><div class="race-head"><b class="chip chip-cyan">CPU</b> 8 big brainy cores <span id="race-cpu-t" class="timer">0.00 s</span></div><canvas id="race-cpu"></canvas></div>
+      <div class="race-lane"><div class="race-head"><b class="chip chip-pink">GPU</b> 2,048 tiny cores <span id="race-gpu-t" class="timer">0.00 s</span></div><canvas id="race-gpu"></canvas></div>
+    </div>
+  </div>
+
+  <div class="facts">
+    <div class="fact" style="--c:var(--pink)"><div class="fact-ico">🧬</div><b>Same code, different input</b><p>Every pixel runs the exact same program. Only its position (and data) differ.</p></div>
+    <div class="fact" style="--c:var(--cyan)"><div class="fact-ico">🙈</div><b>No peeking at neighbours</b><p>A pixel can't see what other pixels decided. That's what makes it so parallel.</p></div>
+    <div class="fact" style="--c:var(--yellow)"><div class="fact-ico">🧠</div><b>No memory between frames</b><p>Shaders forget everything after each run. Time is passed in as a number.</p></div>
+    <div class="fact" style="--c:var(--lime)"><div class="fact-ico">🗣️</div><b>Special languages</b><p>GLSL (WebGL/OpenGL), HLSL (DirectX), MSL (Metal), WGSL (WebGPU).</p></div>
+  </div>
+</section>
+
+<!-- ============================== 02 HARDWARE ============================== -->
+<section class="chapter" id="hardware" data-title="Meet the hardware" data-icon="🖥️" style="--accent:var(--cyan);--accent2:var(--blue)">
+  <div class="ch-head">
+    <div class="ch-level">LEVEL 02</div>
+    <h2>Meet the <em>hardware</em></h2>
+    <p class="lede">The <b class="c-cyan">CPU</b> is the manager: it decides <i>what</i> to draw. The <b class="c-pink">GPU</b> is a stadium full of tiny workers that do the drawing. Follow one frame through the machine 👇</p>
+  </div>
+
+  <div class="demo" id="hw">
+    <div class="demo-bar">
+      <div class="seg" id="hw-scene"><button data-v="pc">🖥 Inside the PC</button><button data-v="chips">🧠 CPU vs GPU chips</button></div>
+      <span class="hint">drag to orbit · pinch / ctrl+scroll to zoom</span>
+    </div>
+    <div class="demo-stage tall" id="hw-stage">
+      <div class="hw-panel no-orbit" id="hw-panel">
+        <div class="hw-stepnum" id="hw-stepnum">STEP 0 / 7</div>
+        <h4 id="hw-title">Your computer</h4>
+        <p id="hw-text"></p>
+        <div class="hw-controls">
+          <button class="btn btn-small" id="hw-prev">◀</button>
+          <div class="dots" id="hw-dots"></div>
+          <button class="btn btn-small" id="hw-next">▶</button>
+          <button class="btn btn-small btn-primary" id="hw-play">▶ Play</button>
+        </div>
+      </div>
+      <div class="hw-legend no-orbit" id="hw-legend" hidden>
+        <span><i style="background:#ff8a3d"></i>Control (decides)</span>
+        <span><i style="background:#7cff6b"></i>ALU / core (computes)</span>
+        <span><i style="background:#4d7cff"></i>Cache (memory)</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="vs-grid">
+    <div class="vs-card cpu">
+      <div class="vs-head"><span class="vs-ico">🎓</span><div><b>CPU</b><small>Central Processing Unit</small></div></div>
+      <p>A few <b>professors</b>. Each can solve any hard, twisty problem — fast.</p>
+      <div class="stat"><span>Cores</span><div class="bar"><i style="width:6%"></i></div><em>8 – 24</em></div>
+      <div class="stat"><span>Clock</span><div class="bar"><i style="width:95%"></i></div><em>~5 GHz</em></div>
+      <div class="stat"><span>Cache / core</span><div class="bar"><i style="width:90%"></i></div><em>huge</em></div>
+      <div class="stat"><span>Branchy logic</span><div class="bar"><i style="width:95%"></i></div><em>great</em></div>
+      <p class="vs-good">Great at: game logic, physics, AI, OS — <b>latency</b> (one answer, ASAP).</p>
+    </div>
+    <div class="vs-vs">VS</div>
+    <div class="vs-card gpu">
+      <div class="vs-head"><span class="vs-ico">🐜</span><div><b>GPU</b><small>Graphics Processing Unit</small></div></div>
+      <p>An <b>army of students</b>. Each only does simple sums — but 10,000 at a time.</p>
+      <div class="stat"><span>Cores</span><div class="bar"><i style="width:100%"></i></div><em>2k – 16k+</em></div>
+      <div class="stat"><span>Clock</span><div class="bar"><i style="width:50%"></i></div><em>~2.5 GHz</em></div>
+      <div class="stat"><span>Cache / core</span><div class="bar"><i style="width:12%"></i></div><em>tiny</em></div>
+      <div class="stat"><span>Branchy logic</span><div class="bar"><i style="width:25%"></i></div><em>meh</em></div>
+      <p class="vs-good">Great at: pixels, vertices, matrices, AI training — <b>throughput</b> (millions of answers per tick).</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== 03 PIPELINE ============================== -->
+<section class="chapter" id="pipeline" data-title="The graphics pipeline" data-icon="🏭" style="--accent:var(--yellow);--accent2:var(--orange)">
+  <div class="ch-head">
+    <div class="ch-level">LEVEL 03</div>
+    <h2>The graphics <em>pipeline</em></h2>
+    <p class="lede">Every frame, your 3D model rides an assembly line. Most stations are fixed hardware ⚙️ — but <b class="c-pink">two are programmable</b>. Those are the shaders you write.</p>
+  </div>
+
+  <div class="pipe-bar" id="pipe-bar"></div>
+
+  <div class="demo" id="pipe">
+    <div class="demo-stage tall" id="pipe-stage">
+      <div class="pipe-info no-orbit" id="pipe-info">
+        <div class="pipe-kind" id="pipe-kind"></div>
+        <h4 id="pipe-title"></h4>
+        <p id="pipe-text"></p>
+        <pre class="code" id="pipe-code"></pre>
+      </div>
+      <div class="pipe-extra no-orbit" id="pipe-extra"></div>
+    </div>
+    <div class="demo-bar bottom">
+      <button class="btn btn-small" id="pipe-prev">◀ prev</button>
+      <button class="btn btn-small" id="pipe-next">next ▶</button>
+      <button class="btn btn-small btn-primary" id="pipe-auto">⏵ autoplay</button>
+      <span class="hint">drag to orbit the model</span>
+    </div>
+  </div>
+
+  <h3 class="sub">▦ Rasterization up close — drag the corners!</h3>
+  <p class="sub-lede">The rasterizer checks every pixel centre: <i>"am I inside the triangle?"</i>. Each pixel that says yes becomes a <b>fragment</b> → one fragment-shader run. Values from the corners get <b class="c-pink">blended</b> (interpolated) on the way.</p>
+  <div class="demo" id="raster">
+    <div class="demo-bar">
+      <label class="check"><input type="checkbox" id="rs-interp" checked> interpolate corner colours</label>
+      <label class="check"><input type="checkbox" id="rs-centers" checked> show pixel centres</label>
+      <label class="ctl">pixel size <input type="range" id="rs-size" min="10" max="40" value="22"><output></output></label>
+    </div>
+    <div class="raster-grid">
+      <canvas id="raster-canvas" class="raster-canvas"></canvas>
+      <div class="raster-info" id="raster-info">
+        <div class="big-num"><b id="rs-count">0</b><span>fragments → fragment-shader runs</span></div>
+        <div id="rs-hover" class="rs-hover">Hover a pixel to see its <b>barycentric weights</b>.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== 04 SPACES ============================== -->
+<section class="chapter" id="spaces" data-title="Vertex shaders & spaces" data-icon="📐" style="--accent:var(--lime);--accent2:var(--cyan)">
+  <div class="ch-head">
+    <div class="ch-level">LEVEL 04</div>
+    <h2>Vertex shaders & the <em>journey through space</em></h2>
+    <p class="lede">A vertex shader's #1 job: take every corner of a model and work out <b>where it lands on screen</b>. It does it by multiplying with matrices, hopping through five coordinate spaces.</p>
+  </div>
+
+  <div class="space-chain" id="space-chain">
+    <button data-v="0"><b>Model</b><small>local space</small></button><i>× Model matrix →</i>
+    <button data-v="1"><b>World</b><small>the scene</small></button><i>× View matrix →</i>
+    <button data-v="2"><b>View</b><small>camera at origin</small></button><i>× Projection, ÷ w →</i>
+    <button data-v="3"><b>Clip → NDC</b><small>the squashed cube</small></button><i>× Viewport →</i>
+    <button data-v="4"><b>Screen</b><small>pixels</small></button>
+  </div>
+
+  <div class="demo" id="spaces-demo">
+    <div class="spaces-grid">
+      <div class="demo-stage tall" id="spaces-stage">
+        <div class="space-note no-orbit" id="space-note"></div>
+        <div class="inset-label">📷 what the camera sees</div>
+      </div>
+      <div class="spaces-side">
+        <h4>Model matrix of the <span class="c-pink">pink box</span></h4>
+        <label class="ctl">move x <input type="range" id="sp-tx" min="-2" max="2" step="0.01" value="-0.6"><output></output></label>
+        <label class="ctl">move y <input type="range" id="sp-ty" min="0" max="2" step="0.01" value="0.6"><output></output></label>
+        <label class="ctl">rotate y <input type="range" id="sp-ry" min="-3.14" max="3.14" step="0.01" value="0.6"><output></output></label>
+        <label class="ctl">scale <input type="range" id="sp-s" min="0.3" max="2" step="0.01" value="1"><output></output></label>
+        <div class="matrix" id="sp-matrix"></div>
+        <div class="matrix-legend"><span class="c-pink">■ rotation & scale</span> <span class="c-cyan">■ translation</span></div>
+        <div class="equation">gl_Position = <span class="m-p">P</span> × <span class="m-v">V</span> × <span class="m-m">M</span> × <span class="m-x">pos</span></div>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sub">🌊 Vertex shaders can bend reality</h3>
+  <p class="sub-lede">Moving vertices isn't only about cameras. Edit the function below — every vertex of the mesh runs it, every frame.</p>
+  <div class="demo" id="vplay">
+    <div class="demo-bar">
+      <div class="seg small" id="vp-presets"></div>
+      <div class="seg small" id="vp-shape"><button data-v="sphere">sphere</button><button data-v="plane">flag</button><button data-v="torus">donut</button></div>
+      <label class="check"><input type="checkbox" id="vp-wire"> wireframe</label>
+    </div>
+    <div class="split">
+      <div class="demo-stage" id="vp-stage"></div>
+      <div class="editor-wrap"><div class="editor-head"><span>vertex shader · <code>displace()</code></span><span class="hint">edit me ✍️</span></div><div id="vp-editor"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== 05 DATAFLOW ============================== -->
+<section class="chapter" id="dataflow" data-title="Talking to shaders" data-icon="📡" style="--accent:var(--violet);--accent2:var(--pink)">
+  <div class="ch-head">
+    <div class="ch-level">LEVEL 05</div>
+    <h2>Talking to shaders: <em>in, out & uniform</em></h2>
+    <p class="lede">Shaders can't read your variables. The CPU has to <b>ship data</b> to them — and there are exactly four delivery services.</p>
+  </div>
+  <div class="demo" id="flow">
+    <div class="demo-bar">
+      <div class="seg small" id="flow-filter">
+        <button data-v="all">everything</button>
+        <button data-v="attr" class="t-cyan">attributes</button>
+        <button data-v="uni" class="t-yellow">uniforms</button>
+        <button data-v="vary" class="t-pink">varyings</button>
+        <button data-v="tex" class="t-violet">textures</button>
+      </div>
+    </div>
+    <div class="flow-svg" id="flow-svg"></div>
+  </div>
+  <div class="mail-grid">
+    <div class="mail" style="--c:var(--cyan)"><div class="mail-ico">📦</div><b>Attributes</b><em>different for every vertex</em><pre class="code">in vec3 a_position;
+in vec3 a_normal;
+in vec2 a_uv;</pre><p>Position, normal, UV, colour… read straight from a buffer. Vertex shader only.</p></div>
+    <div class="mail" style="--c:var(--yellow)"><div class="mail-ico">📢</div><b>Uniforms</b><em>same for everyone this draw</em><pre class="code">uniform float u_time;
+uniform mat4  u_model;
+uniform vec3  u_lightDir;</pre><p>Broadcast to every vertex <i>and</i> every pixel. Time, matrices, colours, settings.</p></div>
+    <div class="mail" style="--c:var(--pink)"><div class="mail-ico">🌈</div><b>Varyings</b><em>vertex → fragment, blended</em><pre class="code">// vertex shader
+out vec3 v_color;
+// fragment shader
+in  vec3 v_color;</pre><p>Vertex shader writes them per corner; the rasterizer <b>interpolates</b> them for each pixel.</p></div>
+    <div class="mail" style="--c:var(--violet)"><div class="mail-ico">🖼️</div><b>Textures</b><em>images you can sample</em><pre class="code">uniform sampler2D u_tex;
+vec4 c = texture(u_tex, uv);</pre><p>Big arrays of data (usually pictures) that any shader can look up by coordinate.</p></div>
+  </div>
+</section>
+
+<!-- ============================== 06 FRAGMENT ============================== -->
+<section class="chapter" id="fragment" data-title="Painting with math" data-icon="🎨" style="--accent:var(--pink);--accent2:var(--orange)">
+  <div class="ch-head">
+    <div class="ch-level">LEVEL 06</div>
+    <h2>Fragment shaders: <em>painting with math</em></h2>
+    <p class="lede">A fragment shader answers one question, over and over: <b>"what colour is this pixel?"</b>. Let's cook one up, one ingredient at a time. 🍳</p>
+  </div>
+  <div class="demo" id="recipe">
+    <div class="recipe-steps" id="recipe-steps"></div>
+    <div class="recipe-main">
+      <div class="recipe-stage-wrap">
+        <div class="demo-stage square" id="recipe-stage"><canvas class="overlay2d" id="recipe-overlay"></canvas><div class="readout" id="recipe-readout">hover the image</div></div>
+        <div class="recipe-tools">
+          <label class="check"><input type="checkbox" id="recipe-grid"> show uv grid</label>
+          <button class="btn btn-small" id="recipe-play">✏️ edit in playground</button>
+        </div>
+      </div>
+      <div class="recipe-side">
+        <div class="recipe-stepnum" id="recipe-num"></div>
+        <h4 id="recipe-title"></h4>
+        <p id="recipe-text"></p>
+        <pre class="code" id="recipe-code"></pre>
+        <div class="recipe-nav"><button class="btn btn-small" id="recipe-prev">◀ previous</button><button class="btn btn-small btn-primary" id="recipe-next">next ingredient ▶</button></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== 07 TOOLBOX ============================== -->
+<section class="chapter" id="toolbox" data-title="The GLSL toolbox" data-icon="🧰" style="--accent:var(--orange);--accent2:var(--yellow)">
+  <div class="ch-head">
+    <div class="ch-level">LEVEL 07</div>
+    <h2>The GLSL <em>toolbox</em></h2>
+    <p class="lede">A handful of built-in functions do 90% of the work. Each is just a <b>curve</b> — and when you feed pixel positions into a curve, you get a <b>pattern</b>. The strip under each graph is that curve painted as pixels.</p>
+  </div>
+  <div class="fn-grid" id="fn-grid"></div>
+
+  <h3 class="sub">🃏 Swizzling — shuffle a vector like cards</h3>
+  <p class="sub-lede">Vectors have named slots: <code>.xyzw</code> or <code>.rgba</code> (same slots, different names). You can read them in any order, even repeat them.</p>
+  <div class="demo" id="swizzle">
+    <div class="swz">
+      <div class="swz-src"><div class="swz-label">vec4 color =</div><div class="swz-row" id="swz-src"></div></div>
+      <div class="swz-mid"><code>color.</code><input id="swz-input" value="bgr" maxlength="4" spellcheck="false"><div class="swz-btns" id="swz-btns"></div></div>
+      <div class="swz-dst"><div class="swz-label" id="swz-type">vec3 result =</div><div class="swz-row" id="swz-dst"></div><div class="swz-swatch" id="swz-swatch"></div></div>
+    </div>
+  </div>
+
+  <h3 class="sub">📚 Data types at a glance</h3>
+  <div class="types-grid">
+    <div class="type-card"><div class="type-vis"><div class="tv-bar" style="--w:70%"></div></div><code>float</code><p>one number<br><small>0.5, 3.14, -2.0</small></p></div>
+    <div class="type-card"><div class="type-vis"><svg viewBox="0 0 60 60"><path d="M8 52 L8 8 M8 52 L52 52" stroke="#666" stroke-width="2"/><path d="M8 52 L44 20" stroke="#22e4ff" stroke-width="4" marker-end="url(#arrowC)"/></svg></div><code>vec2</code><p>2 numbers<br><small>uv, a 2D point</small></p></div>
+    <div class="type-card"><div class="type-vis"><div class="tv-rgb"><i style="background:#ff3d6e"></i><i style="background:#3dff8a"></i><i style="background:#3d8aff"></i></div></div><code>vec3</code><p>3 numbers<br><small>RGB colour, 3D position</small></p></div>
+    <div class="type-card"><div class="type-vis"><div class="tv-rgb"><i style="background:#ff3d6e"></i><i style="background:#3dff8a"></i><i style="background:#3d8aff"></i><i class="checker"></i></div></div><code>vec4</code><p>4 numbers<br><small>RGBA, clip position</small></p></div>
+    <div class="type-card"><div class="type-vis"><div class="tv-mat"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div></div><code>mat4</code><p>4×4 grid<br><small>move / rotate / project</small></p></div>
+    <div class="type-card"><div class="type-vis"><div class="tv-tex"></div></div><code>sampler2D</code><p>a texture handle<br><small>look up image colours</small></p></div>
+    <div class="type-card"><div class="type-vis"><div class="tv-bool"><i>T</i><i>F</i></div></div><code>bool / int</code><p>flags & counters<br><small>loops, switches</small></p></div>
+  </div>
+  <svg width="0" height="0" style="position:absolute"><defs><marker id="arrowC" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L10 5 L0 10z" fill="#22e4ff"/></marker></defs></svg>
+</section>
+
+<!-- ============================== 08 LIGHTING ============================== -->
+<section class="chapter" id="lighting" data-title="Let there be light" data-icon="💡" style="--accent:var(--yellow);--accent2:var(--pink)">
+  <div class="ch-head">
+    <div class="ch-level">LEVEL 08</div>
+    <h2>Let there be <em>light</em></h2>
+    <p class="lede">Lighting is geometry + a <b>dot product</b>. For each pixel the fragment shader asks: <i>"how much is my surface facing the light?"</i>. Switch lighting models and watch the code change.</p>
+  </div>
+  <div class="demo" id="light">
+    <div class="demo-bar wrap">
+      <div class="seg small" id="lt-model"></div>
+    </div>
+    <div class="split">
+      <div class="demo-stage tall" id="lt-stage">
+        <div class="lt-ctrls no-orbit">
+          <div class="seg small" id="lt-shape"><button data-v="knot">knot</button><button data-v="sphere">sphere</button><button data-v="torus">donut</button><button data-v="cube">cube</button></div>
+          <label class="ctl mini">surface <input type="color" id="lt-color" value="#ff3d9a"></label>
+          <label class="ctl mini">light <input type="color" id="lt-lcolor" value="#fff4d6"></label>
+          <label class="check mini"><input type="checkbox" id="lt-orbit" checked> orbit light</label>
+        </div>
+      </div>
+      <div class="lt-side">
+        <div class="lt-formula" id="lt-formula"></div>
+        <pre class="code" id="lt-code"></pre>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sub">📐 The vectors behind the magic — drag the ☀️ and the 👁️</h3>
+  <div class="demo" id="vectors">
+    <div class="vec-grid">
+      <canvas id="vec-canvas" class="vec-canvas"></canvas>
+      <div class="vec-side">
+        <div class="vec-row"><span class="vk" style="--c:#7cff6b">N</span>surface normal — which way the surface faces</div>
+        <div class="vec-row"><span class="vk" style="--c:#ffd23f">L</span>direction to the light</div>
+        <div class="vec-row"><span class="vk" style="--c:#22e4ff">V</span>direction to your eye</div>
+        <div class="vec-row"><span class="vk" style="--c:#ff3d9a">R</span>L reflected around N (Phong)</div>
+        <div class="vec-row"><span class="vk" style="--c:#9b5cff">H</span>halfway between L and V (Blinn)</div>
+        <div class="meters" id="vec-meters"></div>
+        <label class="ctl">shininess <input type="range" id="vec-shine" min="2" max="128" value="24"><output></output></label>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== 09 TEXTURES ============================== -->
+<section class="chapter" id="textures" data-title="Textures & UVs" data-icon="🖼️" style="--accent:var(--cyan);--accent2:var(--lime)">
+  <div class="ch-head">
+    <div class="ch-level">LEVEL 09</div>
+    <h2>Textures & <em>UV coordinates</em></h2>
+    <p class="lede">A texture is an image glued onto a 3D shape. Each vertex stores a <b>UV</b> — a 2D address into the image. The fragment shader calls <code>texture(tex, uv)</code> to fetch the colour.</p>
+  </div>
+  <div class="demo" id="tex">
+    <div class="demo-bar">
+      <div class="seg" id="tx-mode"><button data-v="uv">🗺 UV mapping</button><button data-v="filter">🔍 Filtering & wrapping</button></div>
+      <div class="seg small" id="tx-shape"><button data-v="cube">cube</button><button data-v="sphere">sphere</button><button data-v="torus">donut</button></div>
+      <div class="seg small" id="tx-filter" hidden><button data-v="nearest">NEAREST</button><button data-v="linear">LINEAR</button><button data-v="mip">MIPMAP</button><button data-v="aniso">ANISOTROPIC</button></div>
+      <div class="seg small" id="tx-wrap" hidden><button data-v="repeat">REPEAT</button><button data-v="mirror">MIRRORED</button><button data-v="clamp">CLAMP</button></div>
+    </div>
+    <div class="tex-grid">
+      <div class="demo-stage tall" id="tx-stage"><div class="readout" id="tx-readout">hover the shape</div></div>
+      <div class="tex-side" id="tx-side">
+        <div class="tex-map"><canvas id="tx-map"></canvas><div class="tex-axis"><span>u →</span><span>↑ v</span></div></div>
+        <p class="tex-help" id="tx-help">Hover the 3D shape — the <b class="c-yellow">crosshair</b> shows which texel it reads. Hover the image to light up that spot on the shape.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== 10 PARALLEL ============================== -->
+<section class="chapter" id="parallel" data-title="Thinking in parallel" data-icon="🐜" style="--accent:var(--lime);--accent2:var(--yellow)">
+  <div class="ch-head">
+    <div class="ch-level">LEVEL 10</div>
+    <h2>Thinking in <em>parallel</em>: warps & branches</h2>
+    <p class="lede">GPU cores march in squads of 32 (a <b>warp</b> on NVIDIA, a <b>wavefront</b> on AMD) that execute the <b>same instruction</b> at the same moment. That has a funny side effect on <code>if</code> statements…</p>
+  </div>
+  <div class="demo" id="warp">
+    <div class="demo-bar">
+      <div class="seg small" id="warp-mode"><button data-v="uniform">✅ all lanes agree</button><button data-v="half">⚠️ half & half</button><button data-v="random">🎲 random mix</button></div>
+      <button class="btn btn-small btn-primary" id="warp-run">▶ run warp</button>
+    </div>
+    <div class="warp-grid">
+      <pre class="code warp-code" id="warp-code"></pre>
+      <div><canvas id="warp-canvas" class="warp-canvas"></canvas>
+        <div class="warp-stats"><div><b id="warp-cycles">0</b><span>cycles</span></div><div><b id="warp-eff">100%</b><span>lanes busy</span></div></div></div>
+    </div>
+  </div>
+  <h3 class="sub">😴 Hiding the wait: why GPUs juggle many warps</h3>
+  <p class="sub-lede">Reading memory (like a texture) takes hundreds of cycles. Instead of waiting, the scheduler instantly switches to another warp that's ready.</p>
+  <div class="demo" id="latency">
+    <div class="demo-bar"><div class="seg small" id="lat-mode"><button data-v="1">1 warp</button><button data-v="4">4 warps</button><button data-v="8">8 warps</button></div><span class="hint">grey = waiting for memory · colour = doing math</span></div>
+    <canvas id="lat-canvas" class="lat-canvas"></canvas>
+  </div>
+  <div class="facts">
+    <div class="fact" style="--c:var(--lime)"><div class="fact-ico">🚀</div><b>Do</b><p>Use math & built-ins like <code>mix</code>, <code>step</code>, <code>smoothstep</code> instead of <code>if</code> when you can.</p></div>
+    <div class="fact" style="--c:var(--yellow)"><div class="fact-ico">🧮</div><b>Do</b><p>Compute once on the CPU what is the same for every pixel — send it as a <b>uniform</b>.</p></div>
+    <div class="fact" style="--c:var(--pink)"><div class="fact-ico">🐌</div><b>Avoid</b><p>Long loops, many texture reads per pixel, and branches that split neighbouring pixels.</p></div>
+    <div class="fact" style="--c:var(--cyan)"><div class="fact-ico">📏</div><b>Remember</b><p>A 4K frame = 8.3M pixels. 10 extra instructions = 83M extra instructions per frame.</p></div>
+  </div>
+</section>
+
+<!-- ============================== 11 RAYMARCH ============================== -->
+<section class="chapter" id="raymarch" data-title="Raymarching & SDFs" data-icon="🔦" style="--accent:var(--violet);--accent2:var(--cyan)">
+  <div class="ch-head">
+    <div class="ch-level">LEVEL 11</div>
+    <h2>Raymarching: <em>3D worlds with zero triangles</em></h2>
+    <p class="lede">Some shaders draw entire 3D scenes <b>inside one fragment shader</b>. Each pixel shoots a ray and asks a <b>signed distance function</b> (SDF): <i>"how far is the nearest surface?"</i> — then safely jumps that far. Repeat until you hit something.</p>
+  </div>
+  <div class="demo" id="sdf2d">
+    <div class="demo-bar"><span class="demo-title">Sphere tracing in 2D</span><button class="btn btn-small" id="sdf-step">step ⏭</button><button class="btn btn-small btn-primary" id="sdf-auto">⏵ animate</button><span class="hint">drag 👁 the eye and the 🎯 aim point</span></div>
+    <div class="sdf-grid">
+      <canvas id="sdf-canvas" class="sdf-canvas"></canvas>
+      <div class="sdf-side">
+        <div class="big-num"><b id="sdf-steps">0</b><span>steps taken</span></div>
+        <p>The coloured bands are the <b>distance field</b>: each band = same distance to the nearest shape. Blue = outside, orange = <i>inside</i> (negative distance).</p>
+        <p>Each <b class="c-cyan">circle</b> is a "safe sphere": nothing is closer than its radius, so the ray can leap to its edge.</p>
+        <pre class="code">float d = sceneSDF(p);   // distance to nearest
+if (d &lt; 0.001) hit!
+p += rayDir * d;         // jump safely</pre>
+      </div>
+    </div>
+  </div>
+  <div class="demo" id="rm3d">
+    <div class="demo-bar">
+      <span class="demo-title">The same idea in 3D — one fragment shader, no meshes</span>
+      <label class="ctl">blend (smooth min) <input type="range" id="rm-k" min="0.01" max="1" step="0.01" value="0.45"><output></output></label>
+      <label class="check"><input type="checkbox" id="rm-heat"> show step heat-map</label>
+    </div>
+    <div class="demo-stage tall" id="rm-stage"></div>
+  </div>
+</section>
+
+<!-- ============================== 12 POSTFX ============================== -->
+<section class="chapter" id="postfx" data-title="Post-processing" data-icon="🎞️" style="--accent:var(--orange);--accent2:var(--pink)">
+  <div class="ch-head">
+    <div class="ch-level">LEVEL 12</div>
+    <h2>Post-processing: <em>Instagram filters for games</em></h2>
+    <p class="lede">Render the whole scene into a texture first. Then draw one big rectangle over the screen with a shader that reads that texture and <b>remixes every pixel</b>. Drag the divider to compare.</p>
+  </div>
+  <div class="passes">
+    <div class="pass"><span>Pass 1</span>🎬 draw the 3D scene<br>into a <b>texture</b></div><div class="pass-arrow">→</div>
+    <div class="pass"><span>Pass 2</span>🟦 full-screen quad +<br><b>effect shader</b></div><div class="pass-arrow">→</div>
+    <div class="pass"><span>Result</span>🖥️ on screen</div>
+  </div>
+  <div class="demo" id="pfx">
+    <div class="demo-bar wrap"><div class="seg small" id="pfx-list"></div></div>
+    <div class="split">
+      <div class="demo-stage tall" id="pfx-stage"><div class="pfx-divider" id="pfx-divider"><span>⟷</span></div><div class="pfx-tag left">original</div><div class="pfx-tag right" id="pfx-tag">effect</div></div>
+      <div class="lt-side"><pre class="code" id="pfx-code"></pre></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== 13 COMPUTE ============================== -->
+<section class="chapter" id="compute" data-title="Beyond drawing: GPGPU" data-icon="✨" style="--accent:var(--pink);--accent2:var(--cyan)">
+  <div class="ch-head">
+    <div class="ch-level">LEVEL 13</div>
+    <h2>Beyond drawing: <em>the GPU as a supercomputer</em></h2>
+    <p class="lede">Shaders don't have to make pictures. Store numbers in textures and a shader becomes a <b>massively parallel calculator</b>. Here, a shader updates the position & velocity of every particle, every frame. (That's how AI, physics and crypto use GPUs too.)</p>
+  </div>
+  <div class="demo" id="particles">
+    <div class="demo-bar wrap">
+      <div class="seg small" id="pt-count"><button data-v="128">16K</button><button data-v="256">65K</button><button data-v="512">262K</button><button data-v="1024">1M</button></div>
+      <div class="seg small" id="pt-mode"><button data-v="flow">🌊 flow field</button><button data-v="galaxy">🌌 galaxy</button><button data-v="boom">💥 explode</button></div>
+      <span class="hint">move the mouse over it — particles are attracted</span>
+    </div>
+    <div class="demo-stage tall" id="pt-stage"><div class="pt-hud no-orbit"><b id="pt-num">65,536</b> particles updated in parallel <b id="pt-fps">60</b>×/sec</div></div>
+  </div>
+  <div class="gpgpu-diagram">
+    <div class="gd-box"><div class="gd-tex" style="--h:190"></div><b>positions.tex</b><small>each texel = 1 particle<br>(x, y, vx, vy)</small></div>
+    <div class="gd-arrow">→ <span>update shader<br>runs per texel</span> →</div>
+    <div class="gd-box"><div class="gd-tex" style="--h:300"></div><b>positions'.tex</b><small>new state</small></div>
+    <div class="gd-arrow">↺ <span>swap ("ping-pong")<br>& repeat</span></div>
+  </div>
+</section>
+
+<!-- ============================== 14 FAMILY ============================== -->
+<section class="chapter" id="family" data-title="The shader family" data-icon="👪" style="--accent:var(--cyan);--accent2:var(--violet)">
+  <div class="ch-head">
+    <div class="ch-level">LEVEL 14</div>
+    <h2>The shader <em>family</em> & their languages</h2>
+    <p class="lede">Vertex and fragment shaders are the famous siblings. Modern GPUs have a whole family — each runs at a different point in the frame.</p>
+  </div>
+  <div class="family-grid">
+    <div class="fam" style="--c:var(--lime)"><div class="fam-vis fv-vertex"><i></i><i></i><i></i><i></i><i></i></div><b>Vertex shader</b><small>runs per <u>vertex</u></small><p>Moves corners: transforms, skinning, waves, wind in grass.</p><div class="fam-api"><span class="on">WebGL</span><span class="on">WebGPU</span><span class="on">Vulkan/DX</span></div></div>
+    <div class="fam" style="--c:var(--pink)"><div class="fam-vis fv-frag"></div><b>Fragment / pixel shader</b><small>runs per <u>pixel</u></small><p>Colours pixels: lighting, textures, materials. DirectX calls it a "pixel shader".</p><div class="fam-api"><span class="on">WebGL</span><span class="on">WebGPU</span><span class="on">Vulkan/DX</span></div></div>
+    <div class="fam" style="--c:var(--yellow)"><div class="fam-vis fv-compute"></div><b>Compute shader</b><small>runs per <u>work item</u></small><p>General number crunching: particles, physics, AI, image processing, culling.</p><div class="fam-api"><span>WebGL</span><span class="on">WebGPU</span><span class="on">Vulkan/DX</span></div></div>
+    <div class="fam" style="--c:var(--cyan)"><div class="fam-vis fv-tess"><svg viewBox="0 0 100 80"><path class="t0" d="M10 72 L50 8 L90 72 Z"/><path class="t1" d="M30 40 L70 40 L50 72 Z M10 72 L50 72 M30 40 L50 8 L70 40"/><path class="t2" d="M20 56 L40 56 L30 72Z M60 56 L80 56 L70 72Z M40 24 L60 24 L50 40Z M40 56 L60 56 L50 40Z"/></svg></div><b>Tessellation shaders</b><small>hull + domain</small><p>Split triangles into many smaller ones on the GPU — for detailed terrain & smooth curves.</p><div class="fam-api"><span>WebGL</span><span>WebGPU</span><span class="on">Vulkan/DX</span></div></div>
+    <div class="fam" style="--c:var(--orange)"><div class="fam-vis fv-geom"><svg viewBox="0 0 100 80"><path d="M20 70 L50 20 L80 70Z" class="g0"/><path d="M35 70 L38 30 L41 70 M50 70 L52 18 L54 70 M65 70 L62 34 L59 70" class="g1"/></svg></div><b>Geometry shader</b><small>runs per <u>primitive</u></small><p>Can create or delete whole triangles (e.g. one point → a blade of grass). Mostly replaced by mesh shaders.</p><div class="fam-api"><span>WebGL</span><span>WebGPU</span><span class="on">Vulkan/DX</span></div></div>
+    <div class="fam" style="--c:var(--violet)"><div class="fam-vis fv-mesh"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div><b>Task & mesh shaders</b><small>runs per <u>meshlet</u></small><p>The modern way: a compute-style shader generates small chunks of geometry directly.</p><div class="fam-api"><span>WebGL</span><span>WebGPU</span><span class="on">Vulkan/DX</span></div></div>
+    <div class="fam" style="--c:var(--red)"><div class="fam-vis fv-ray"><svg viewBox="0 0 100 80"><circle cx="70" cy="40" r="16" class="r0"/><path d="M8 20 L56 34 L90 8" class="r1"/><path d="M8 60 L95 66" class="r2"/></svg></div><b>Ray-tracing shaders</b><small>ray-gen · hit · miss</small><p>Shoot real rays through a scene: closest-hit shaders shade surfaces, miss shaders paint the sky.</p><div class="fam-api"><span>WebGL</span><span>WebGPU</span><span class="on">Vulkan/DX</span></div></div>
+    <div class="fam" style="--c:var(--lime)"><div class="fam-vis fv-nodes"><svg viewBox="0 0 100 80"><rect x="6" y="10" width="30" height="18" rx="4"/><rect x="6" y="48" width="30" height="18" rx="4"/><rect x="62" y="28" width="32" height="22" rx="4"/><path d="M36 19 C50 19 48 36 62 36 M36 57 C50 57 48 42 62 42"/></svg></div><b>Visual shader graphs</b><small>no typing required</small><p>Unity Shader Graph, Unreal Materials, Blender nodes — boxes & wires that compile to shader code.</p><div class="fam-api"><span class="on">Unity</span><span class="on">Unreal</span><span class="on">Blender</span></div></div>
+  </div>
+
+  <h3 class="sub">🗣️ Same shader, five languages</h3>
+  <p class="sub-lede">A pixel that's red on the left, blue on the right. Different syntax — same idea.</p>
+  <div class="demo" id="langs">
+    <div class="demo-bar"><div class="seg small" id="lang-tabs"><button data-v="glsl">GLSL</button><button data-v="hlsl">HLSL</button><button data-v="msl">Metal (MSL)</button><button data-v="wgsl">WGSL</button><button data-v="spirv">SPIR-V</button></div></div>
+    <div class="lang-grid">
+      <pre class="code" id="lang-code"></pre>
+      <div class="lang-info" id="lang-info"></div>
+    </div>
+  </div>
+
+  <h3 class="sub">⚙️ How your text becomes GPU machine code</h3>
+  <div class="compile-path">
+    <div class="cp"><span>✍️</span><b>Your source</b><small>GLSL / HLSL / WGSL</small></div><i>→</i>
+    <div class="cp"><span>🧪</span><b>Front-end compiler</b><small>glslang · DXC · Naga · Tint</small></div><i>→</i>
+    <div class="cp"><span>📜</span><b>Intermediate code</b><small>SPIR-V · DXIL · AIR</small></div><i>→</i>
+    <div class="cp"><span>🔧</span><b>GPU driver</b><small>optimises for your exact chip</small></div><i>→</i>
+    <div class="cp hot"><span>⚡</span><b>Machine code (ISA)</b><small>runs on the cores</small></div>
+  </div>
+  <p class="note">💡 That driver step is why some games "compile shaders" on first launch — and why you sometimes see stutter the first time a new effect appears.</p>
+</section>
+
+<!-- ============================== 15 PLAYGROUND ============================== -->
+<section class="chapter" id="playground" data-title="The playground" data-icon="🛝" style="--accent:var(--lime);--accent2:var(--pink)">
+  <div class="ch-head">
+    <div class="ch-level">LEVEL 15</div>
+    <h2>The <em>playground</em></h2>
+    <p class="lede">Your turn. Pick a preset, break it, fix it, make it yours. It recompiles as you type. Available: <code>u_time</code>, <code>u_resolution</code>, <code>u_mouse</code>.</p>
+  </div>
+  <div class="demo" id="pg">
+    <div class="demo-bar wrap">
+      <select id="pg-preset" class="select"></select>
+      <button class="btn btn-small" id="pg-pause">⏸ pause</button>
+      <button class="btn btn-small" id="pg-restart">⟲ time = 0</button>
+      <button class="btn btn-small" id="pg-full">⛶ fullscreen</button>
+      <button class="btn btn-small" id="pg-copy">⧉ copy code</button>
+      <button class="btn btn-small" id="pg-random">🎲 surprise me</button>
+    </div>
+    <div class="split pg-split">
+      <div class="demo-stage tall" id="pg-stage"><div class="pg-time" id="pg-time">t = 0.0</div></div>
+      <div class="editor-wrap"><div class="editor-head"><span>fragment shader</span><span class="hint">header: <code>uniform float u_time; uniform vec2 u_resolution, u_mouse; out vec4 fragColor;</code></span></div><div id="pg-editor" class="tall-editor"></div></div>
+    </div>
+  </div>
+  <div class="cheats">
+    <div class="cheat"><code>vec2 uv = gl_FragCoord.xy / u_resolution;</code><span>0→1 across the screen</span></div>
+    <div class="cheat"><code>vec2 p = (2.0*gl_FragCoord.xy - u_resolution) / u_resolution.y;</code><span>centred, square pixels</span></div>
+    <div class="cheat"><code>0.5 + 0.5*cos(u_time + uv.xyx + vec3(0,2,4))</code><span>instant rainbow</span></div>
+    <div class="cheat"><code>smoothstep(0.3, 0.29, length(p))</code><span>anti-aliased circle</span></div>
+    <div class="cheat"><code>fract(uv * 8.0)</code><span>repeat 8× (tiles)</span></div>
+    <div class="cheat"><code>mix(colorA, colorB, t)</code><span>blend two colours</span></div>
+  </div>
+</section>
+
+<!-- ============================== 16 FINALE ============================== -->
+<section class="chapter" id="finale" data-title="Boss level" data-icon="👾" style="--accent:var(--yellow);--accent2:var(--pink)">
+  <div class="ch-head">
+    <div class="ch-level">LEVEL 16 · BOSS</div>
+    <h2>Boss level: <em>prove it!</em></h2>
+    <p class="lede">Eight questions stand between you and the title of <b>Shader Wizard</b> 🧙.</p>
+  </div>
+  <div class="quiz" id="quiz"></div>
+
+  <h3 class="sub">📖 Glossary — tap a card to flip it</h3>
+  <div class="glossary" id="glossary"></div>
+
+  <h3 class="sub">🗺️ Where to go next</h3>
+  <div class="res-grid">
+    <a class="res" href="https://thebookofshaders.com" target="_blank" rel="noopener"><b>The Book of Shaders</b><span>gentle, visual intro to fragment shaders</span></a>
+    <a class="res" href="https://www.shadertoy.com" target="_blank" rel="noopener"><b>Shadertoy</b><span>thousands of live shaders to read & remix</span></a>
+    <a class="res" href="https://iquilezles.org/articles/" target="_blank" rel="noopener"><b>Inigo Quilez — articles</b><span>SDFs, noise, raymarching: the bible</span></a>
+    <a class="res" href="https://learnopengl.com" target="_blank" rel="noopener"><b>LearnOpenGL</b><span>the full pipeline, lighting & PBR</span></a>
+    <a class="res" href="https://webglfundamentals.org" target="_blank" rel="noopener"><b>WebGL Fundamentals</b><span>WebGL from first principles</span></a>
+    <a class="res" href="https://webgpufundamentals.org" target="_blank" rel="noopener"><b>WebGPU Fundamentals</b><span>the modern web GPU API & WGSL</span></a>
+    <a class="res" href="https://developer.nvidia.com/gpugems/gpugems/foreword" target="_blank" rel="noopener"><b>GPU Gems</b><span>classic advanced techniques, free online</span></a>
+    <a class="res" href="https://www.realtimerendering.com" target="_blank" rel="noopener"><b>Real-Time Rendering</b><span>the deep-dive reference book</span></a>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="footer-gem"></div>
+  <p><b>Shaderland</b> — every moving picture on this page is a shader running on <i>your</i> GPU, drawn by a tiny hand-made WebGL engine.</p>
+  <p class="muted">Built with plain HTML, CSS & WebGL2 · no libraries · <a href="#hero">back to top ↑</a> · <button class="linklike" id="xp-reset">reset XP</button></p>
+</footer>
+
+<div id="toasts"></div>
+
+<script src="js/core/engine.js"></script>
+<script src="js/core/ui.js"></script>
+<script src="js/demos/hero.js"></script>
+<script src="js/demos/what.js"></script>
+<script src="js/demos/hardware.js"></script>
+<script src="js/demos/pipeline.js"></script>
+<script src="js/demos/spaces.js"></script>
+<script src="js/demos/dataflow.js"></script>
+<script src="js/demos/fragment.js"></script>
+<script src="js/demos/toolbox.js"></script>
+<script src="js/demos/lighting.js"></script>
+<script src="js/demos/textures.js"></script>
+<script src="js/demos/parallel.js"></script>
+<script src="js/demos/raymarch.js"></script>
+<script src="js/demos/postfx.js"></script>
+<script src="js/demos/compute.js"></script>
+<script src="js/demos/family.js"></script>
+<script src="js/demos/playground.js"></script>
+<script src="js/demos/finale.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>

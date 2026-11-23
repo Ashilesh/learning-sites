@@ -42,6 +42,7 @@ window.CATEGORIES = [
   { id: "cloud",      name: "Cloud & DevOps",          icon: "cloud",   blurb: "Containers, deployment pipelines and running things at scale." },
   { id: "algorithms", name: "Algorithms & Data Structures", icon: "tree", blurb: "The ideas underneath every fast program." },
   { id: "quantum",    name: "Quantum Computing",       icon: "atom",    blurb: "Qubits, entanglement and the machines being built from them." },
+  { id: "graphics",   name: "Graphics & GPUs",         icon: "prism",   blurb: "Shaders, pixels and how the GPU paints every frame." },
 ];
 
 /* ---------------------------------------------------------------------
@@ -237,6 +238,21 @@ window.SITES = [
     tags: ["kubernetes", "k8s", "helm", "kubectl", "containers", "docker", "pods", "deployment", "service", "ingress", "gateway api", "rbac", "devops", "cloud", "gitops", "autoscaling"],
     added: "2026-11-22",
     minutes: 300,
+  },
+
+  {
+    id: "shaderland",
+    title: "Shaderland",
+    path: "shaders/index.html",
+    category: "graphics",
+    topic: "Shaders",
+    format: "Interactive guide · 16 levels",
+    description:
+      "A visual journey into shaders, from \"what is a shader?\" to raymarching, post-processing and a million GPU particles. " +
+      "Everything moving on the page is a real WebGL2 shader, with a live playground, XP levels and a boss quiz.",
+    tags: ["shaders", "glsl", "webgl", "webgl2", "gpu", "graphics", "graphics pipeline", "vertex shader", "fragment shader", "lighting", "textures", "raymarching", "sdf", "post-processing", "gpgpu", "particles", "hlsl", "wgsl"],
+    added: "2026-11-24",
+    minutes: 120,
   },
 
   // ↓↓↓ ADD NEW SITES HERE ↓↓↓

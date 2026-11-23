@@ -21,6 +21,7 @@
     cloud: '<path d="M7 18.5a4.5 4.5 0 0 1-.6-8.96A6 6 0 0 1 18 9.5a4.5 4.5 0 0 1-.5 9z"/>',
     tree: '<circle cx="12" cy="4.5" r="2"/><circle cx="6" cy="12" r="2"/><circle cx="18" cy="12" r="2"/><circle cx="3.5" cy="19.5" r="2"/><circle cx="8.5" cy="19.5" r="2"/><path d="M10.6 6l-3.2 4.5M13.4 6l3.2 4.5M5.2 13.8l-1 3.8M6.8 13.8l1 3.8"/>',
     code: '<path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/>',
+    prism: '<path d="M12 3L3 19h18z"/><path d="M1 13l7.5-1.5M15.5 10.5L23 8M15.5 10.5L23 12M15.5 10.5L23 16"/>',
     atom: '<circle cx="12" cy="12" r="1.8"/><ellipse cx="12" cy="12" rx="9.5" ry="3.8"/><ellipse cx="12" cy="12" rx="9.5" ry="3.8" transform="rotate(60 12 12)"/><ellipse cx="12" cy="12" rx="9.5" ry="3.8" transform="rotate(-60 12 12)"/>',
   };
 
