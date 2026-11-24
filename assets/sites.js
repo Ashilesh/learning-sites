@@ -255,5 +255,20 @@ window.SITES = [
     minutes: 120,
   },
 
+  {
+    id: "ebpf-sketchbook",
+    title: "The eBPF Sketchbook",
+    path: "eBPF/index.html",
+    category: "systems",
+    topic: "eBPF",
+    format: "Interactive guide · 12 chapters",
+    description:
+      "A hand-drawn guide to eBPF: tiny, safe programs that run inside the Linux kernel. The verifier, the eBPF machine, " +
+      "hooks, maps and real code, drawn with a home-made 3D engine, with games, a nerd mode and a quiz.",
+    tags: ["ebpf", "bpf", "linux", "kernel", "verifier", "jit", "maps", "kprobes", "tracepoints", "xdp", "observability", "tracing", "networking", "security", "cilium", "bpftrace"],
+    added: "2026-11-25",
+    minutes: 60,
+  },
+
   // ↓↓↓ ADD NEW SITES HERE ↓↓↓
 ];

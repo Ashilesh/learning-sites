@@ -1,0 +1,478 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The eBPF Sketchbook</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="description" content="A hand-drawn, interactive guide to eBPF: tiny safe programs that run inside the Linux kernel. With a home-made 3D engine, games and real code.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Caveat+Brush&family=JetBrains+Mono:wght@400;700&family=Shantell+Sans:ital,wght@0,400;0,600;0,700;0,800;1,400&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-bee" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="9" rx="4" ry="6" transform="rotate(-25 12 9)" fill="#fff"/><ellipse cx="19" cy="9" rx="4" ry="6" transform="rotate(20 19 9)" fill="#fff"/><ellipse cx="16" cy="19" rx="10" ry="7" style="fill:var(--yellow)"/><path d="M12 12.5v13M17 12v14"/><path d="M6 19H3"/><circle cx="22" cy="17.5" r="1.2" fill="currentColor"/></g></symbol>
+    <symbol id="i-shield" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3l10 4v8c0 7-4.5 11.5-10 14C10.5 26.5 6 22 6 15V7z" style="fill:var(--blue)"/><path d="M11 16l4 4 7-8"/></g></symbol>
+    <symbol id="i-jar" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="8" y="4" width="16" height="5" rx="1" style="fill:var(--red)"/><path d="M8 9h16l2 4v13a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V13z" fill="#fff"/><path d="M6.5 18h19v8a2 2 0 0 1-2 2h-15a2 2 0 0 1-2-2z" fill="#f5a623"/></g></symbol>
+    <symbol id="i-hook" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M18 3v15a6 6 0 0 1-12 0v-3"/><path d="M6 15l-2 3"/><circle cx="18" cy="3" r="1.5" fill="currentColor"/></g></symbol>
+    <symbol id="i-bolt" viewBox="0 0 32 32"><path d="M18 2L6 18h8l-3 12 13-17h-8l3-11z" style="fill:var(--yellow)" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M2 16s5-9 14-9 14 9 14 9-5 9-14 9S2 16 2 16z" fill="#fff"/><circle cx="16" cy="16" r="5" style="fill:var(--blue)"/><circle cx="16" cy="16" r="1.8" fill="currentColor"/></g></symbol>
+    <symbol id="i-net" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2"><circle cx="16" cy="16" r="12" style="fill:var(--green)"/><ellipse cx="16" cy="16" rx="5" ry="12"/><path d="M4 16h24M6 10h20M6 22h20"/></g></symbol>
+    <symbol id="i-cpu" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 3v4M16 3v4M21 3v4M11 25v4M16 25v4M21 25v4M3 11h4M3 16h4M3 21h4M25 11h4M25 16h4M25 21h4"/><rect x="7" y="7" width="18" height="18" rx="2" style="fill:var(--pink)"/><rect x="12" y="12" width="8" height="8" fill="#fff"/></g></symbol>
+    <symbol id="i-gauge" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M4 22a12 12 0 0 1 24 0" style="fill:var(--orange)"/><path d="M16 22l6-8"/><circle cx="16" cy="22" r="2" fill="currentColor"/></g></symbol>
+    <symbol id="i-phone" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="3" width="14" height="26" rx="3" style="fill:var(--purple)"/><rect x="11.5" y="7" width="9" height="15" fill="#fff"/><circle cx="16" cy="25.5" r="1.2" fill="currentColor"/></g></symbol>
+    <symbol id="i-loop" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M26 16a10 10 0 1 1-4-8"/><path d="M23 3l-1 5 5 1"/></g></symbol>
+    <symbol id="i-lock" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2.2"><path d="M10 14V10a6 6 0 0 1 12 0v4"/><rect x="6" y="14" width="20" height="14" rx="2" style="fill:var(--yellow)"/><circle cx="16" cy="21" r="2" fill="currentColor"/></g></symbol>
+    <symbol id="i-check" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="16" cy="16" r="12" style="fill:var(--green)"/><path d="M10 16l4 4 8-9"/></g></symbol>
+    <symbol id="i-drawer" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><rect x="4" y="6" width="24" height="20" rx="2" style="fill:var(--orange)"/><path d="M4 16h24"/><path d="M13 11h6M13 21h6" stroke-linecap="round"/></g></symbol>
+    <symbol id="i-bag" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M11 9V7a5 5 0 0 1 10 0v2"/><rect x="6" y="9" width="20" height="19" rx="4" style="fill:var(--purple)"/><path d="M10 17h12v6H10z" fill="#fff"/></g></symbol>
+    <symbol id="i-wrench" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 4a7 7 0 0 0-6 9L4 23l5 5 10-10a7 7 0 0 0 9-6l-4 1-3-3 1-4z" style="fill:var(--blue)"/></g></symbol>
+    <symbol id="i-clock" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="16" cy="17" r="11" style="fill:var(--pink)"/><path d="M16 10v7l5 3"/><path d="M12 3h8"/></g></symbol>
+    <symbol id="i-door" viewBox="0 0 32 32"><g fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"><path d="M7 28V5h14v23" style="fill:var(--green)"/><path d="M4 28h24"/><circle cx="17" cy="17" r="1.4" fill="currentColor"/><path d="M24 12l4 4-4 4" stroke-linecap="round"/></g></symbol>
+  </defs>
+</svg>
+
+<nav class="topbar" aria-label="Chapters">
+  <div class="wrap topbar-in">
+    <a class="home-link" href="../index.html" title="All explainers">←<span> All explainers</span></a>
+    <a class="brand" href="#top"><svg class="ico" aria-hidden="true"><use href="#i-bee"/></svg><span>eBPF Sketchbook</span></a>
+    <div class="navlinks" id="navlinks">
+      <a href="#story">Story</a>
+      <a href="#why">Why</a>
+      <a href="#how">How</a>
+      <a href="#verifier">Guard</a>
+      <a href="#machine">Machine</a>
+      <a href="#hooks">Hooks</a>
+      <a href="#maps">Maps</a>
+      <a href="#action">In action</a>
+      <a href="#code">Code</a>
+      <a href="#words">Words</a>
+      <a href="#history">History</a>
+      <a href="#quiz">Quiz</a>
+    </div>
+    <div class="toggles">
+      <button class="switch" id="nerdBtn" type="button" aria-pressed="false" title="Show the real kernel details everywhere"><span class="knob" aria-hidden="true"></span>Nerd mode</button>
+      <button class="iconbtn" id="themeBtn" type="button" aria-label="Switch between paper and chalkboard">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="5" style="fill:var(--yellow)" stroke="currentColor" stroke-width="2"/><path d="M12 1.5v3M12 19.5v3M1.5 12h3M19.5 12h3M4.6 4.6l2.1 2.1M17.3 17.3l2.1 2.1M4.6 19.4l2.1-2.1M17.3 6.7l2.1-2.1" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="binding" aria-hidden="true"></div>
+  <div class="wrap hero-in">
+    <div class="hero-text">
+      <p class="eyebrow">A field guide for curious people, age 8&nbsp;to&nbsp;80</p>
+      <h1>The <span class="mk">eBPF</span> Sketchbook</h1>
+      <p class="lede">eBPF lets you slip tiny, safe programs into the heart of a running Linux computer, the <b>kernel</b>, to watch it, measure it and protect it. No reboot. No risk of crashing it.</p>
+      <div class="sticky kid-note" style="--rot:-1.5deg">
+        <b>In kid words:</b> the kernel is a castle that runs your computer. eBPF programs are little helper <b>bees</b>. A strict guard checks every bee before it may fly in. Inside, bees watch the doors and leave notes in <b>honey jars</b> for you.
+      </div>
+      <p class="techie">eBPF is an in-kernel virtual machine. You load sandboxed bytecode with the <code>bpf()</code> system call; the <b>verifier</b> proves it is safe, a <b>JIT</b> compiles it to native code, and it runs every time the <b>hook</b> it is attached to fires. It shares data with user space through <b>maps</b>.</p>
+      <div class="hero-cta">
+        <a class="btn" href="#story">Start the story</a>
+        <a class="btn ghost" href="#verifier">Play the verifier game</a>
+      </div>
+      <p class="nerd-hint">Want the real kernel details too? Flip on <button class="linkish" type="button" data-nerd-on>Nerd mode</button> in the top bar.</p>
+    </div>
+    <figure class="hero-fig">
+      <div class="stage hero-stage">
+        <canvas id="hero3d" aria-label="A 3D drawing of a computer as a three-floor castle: apps on top, the kernel castle in the middle with bees and honey jars, hardware chips at the bottom. Drag to spin it."></canvas>
+        <span class="hint">drag to spin · double-click to reset</span>
+      </div>
+      <figcaption class="legend">
+        <span><i class="dot" style="--c:var(--blue)"></i>apps</span>
+        <span><i class="dot" style="--c:var(--orange)"></i>kernel</span>
+        <span><i class="dot" style="--c:var(--purple)"></i>hardware</span>
+        <span><svg class="ico sm" aria-hidden="true"><use href="#i-bee"/></svg>eBPF program</span>
+        <span><svg class="ico sm" aria-hidden="true"><use href="#i-jar"/></svg>map</span>
+        <span><svg class="ico sm" aria-hidden="true"><use href="#i-shield"/></svg>verifier</span>
+      </figcaption>
+    </figure>
+  </div>
+</header>
+
+<main>
+
+<!-- ============ 1. STORY ============ -->
+<section class="page" id="story">
+  <div class="wrap">
+    <div class="page-head">
+      <span class="chapter">Chapter 1</span>
+      <h2>The whole idea in six pictures</h2>
+      <p class="sub">Read it like a comic strip. Everything in it moves a little.</p>
+    </div>
+    <ol class="comic">
+      <li class="panel"><canvas data-comic="1" aria-label="A castle labelled kernel controlling a screen, the internet, files and the CPU"></canvas>
+        <p><b>Meet the kernel.</b> Every computer has a boss program called the <em>kernel</em>. Think of it as a castle that controls everything: the screen, the files, the internet, and whose turn it is to use the processor.</p></li>
+      <li class="panel"><canvas data-comic="2" aria-label="Small app houses send a request to the castle window and get an answer"></canvas>
+        <p><b>Apps live outside.</b> Your browser and games can't touch the hardware themselves. They knock on the castle window and ask. That knock is called a <em>system call</em>.</p></li>
+      <li class="panel"><canvas data-comic="3" aria-label="A snail slowly carrying a new feature, and a castle cracking after a buggy module"></canvas>
+        <p><b>Changing the castle is hard.</b> Adding a new rule to the kernel can take years. The shortcut, a <em>kernel module</em>, is risky: one wrong brick and the whole castle falls down.</p></li>
+      <li class="panel"><canvas data-comic="4" aria-label="Bees fly from a laptop into the running castle"></canvas>
+        <p><b>Send in the bees!</b> eBPF lets you write tiny programs (our bees) and send them into the castle while it keeps running. No rebuilding. No restarting.</p></li>
+      <li class="panel"><canvas data-comic="5" aria-label="A guard with a magnifying glass checks a bee; an unsafe bee is turned away"></canvas>
+        <p><b>The guard checks every bee.</b> Before a bee goes in, a strict guard called the <em>verifier</em> makes sure it can't break anything and will always come back. Unsafe bees are turned away.</p></li>
+      <li class="panel"><canvas data-comic="6" aria-label="A bee on the castle door counts visitors and fills a honey jar that a laptop reads"></canvas>
+        <p><b>Bees watch and report.</b> Inside, bees sit at doors and windows. They count visitors, stop troublemakers and drop notes into <em>honey jars</em> (called maps) that your apps can read.</p></li>
+    </ol>
+    <div class="techie">
+      <b>The same story, in kernel words.</b> Apps run in <i>user space</i> and enter the kernel through system calls such as <code>openat()</code> or <code>execve()</code>. New kernel behaviour used to mean a kernel patch (merged upstream, then shipped by distributions years later) or a loadable kernel module (full privileges, no safety net). eBPF adds a third option: verified, sandboxed programs loaded at runtime and attached to events.
+    </div>
+  </div>
+</section>
+
+<!-- ============ 2. WHY ============ -->
+<section class="page" id="why">
+  <div class="wrap">
+    <div class="page-head">
+      <span class="chapter">Chapter 2</span>
+      <h2>Why not just change the kernel?</h2>
+      <p class="sub">Say you want the kernel to do something new, like count every network packet or block a sneaky program. There are three ways to do it. Let's race them.</p>
+    </div>
+    <div class="stage race-stage">
+      <canvas id="race" aria-label="A race between a snail (changing the kernel), a car (a kernel module) and a bee (eBPF)"></canvas>
+    </div>
+    <div class="row-btns"><button class="btn" id="raceBtn" type="button">Start the race</button></div>
+    <div class="table-scroll">
+      <table class="compare">
+        <thead><tr><th scope="col"></th><th scope="col">Change the kernel itself</th><th scope="col">Write a kernel module</th><th scope="col" class="win">Write an eBPF program</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">How long until I can use it?</th><td>Years (review, release, then every distro)</td><td>Minutes</td><td class="win">Seconds</td></tr>
+          <tr><th scope="row">Can a bug crash the computer?</th><td>Yes</td><td>Yes, very easily</td><td class="win">No. The verifier blocks unsafe code</td></tr>
+          <tr><th scope="row">Need to reboot?</th><td>Yes</td><td>No</td><td class="win">No</td></tr>
+          <tr><th scope="row">Works on other kernel versions?</th><td>Only newer ones</td><td>Must rebuild for each kernel</td><td class="win">Usually yes (with CO-RE)</td></tr>
+          <tr><th scope="row">Who can do it?</th><td>Kernel developers</td><td>Brave experts</td><td class="win">Anyone with admin rights</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="techie">Kernel modules run with full kernel privileges and no checks: one null-pointer dereference means a kernel panic, and they are tied to the exact kernel build. eBPF programs are verified before loading, can only call approved helpers, and with BTF plus CO-RE (Compile Once, Run Everywhere) one binary adapts to many kernel versions. A popular way to put it: eBPF does to the kernel what JavaScript did to web pages.</p>
+  </div>
+</section>
+
+<!-- ============ 3. HOW ============ -->
+<section class="page" id="how">
+  <div class="wrap">
+    <div class="page-head">
+      <span class="chapter">Chapter 3</span>
+      <h2>How eBPF works, step by step</h2>
+      <p class="sub">Follow one little program on its trip from your keyboard into the kernel. Click the numbers, or press Play.</p>
+    </div>
+    <div class="journey">
+      <div class="stage journey-stage">
+        <canvas id="journey3d" aria-label="3D map of the eight steps: write, compile, load, verify, JIT, attach, run, share through maps"></canvas>
+        <span class="hint">drag to look around</span>
+      </div>
+      <aside class="card journey-panel">
+        <div class="steps" id="jSteps" role="tablist" aria-label="Steps"></div>
+        <h3 id="jTitle">Write a tiny program</h3>
+        <p id="jText"></p>
+        <div class="techie" id="jTech"></div>
+        <pre class="code small" id="jCode"></pre>
+        <div class="jnav">
+          <button class="btn ghost sm" id="jPrev" type="button">Back</button>
+          <button class="btn sm" id="jPlay" type="button">Play</button>
+          <button class="btn ghost sm" id="jNext" type="button">Next</button>
+        </div>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 4. VERIFIER ============ -->
+<section class="page" id="verifier">
+  <div class="wrap">
+    <div class="page-head">
+      <span class="chapter">Chapter 4</span>
+      <h2>The verifier: the strictest guard in town</h2>
+      <p class="sub">Before any eBPF program runs, the verifier reads it and imagines <b>every possible way</b> it could run. If even one path could hurt the kernel, the whole program is turned away. These are its rules.</p>
+    </div>
+    <ul class="rules">
+      <li class="sticky" style="--bg:var(--yellow);--rot:-1.2deg"><svg class="ico lg" aria-hidden="true"><use href="#i-loop"/></svg><h3>It must finish</h3><p>No endless loops. A bee that never comes back would freeze the castle.</p><p class="techie">The control-flow graph must reach <code>exit</code>. Loops are allowed only when the verifier can prove they end (bounded loops since Linux 5.3, plus helpers like <code>bpf_loop()</code>).</p></li>
+      <li class="sticky" style="--bg:var(--pink);--rot:1deg"><svg class="ico lg" aria-hidden="true"><use href="#i-lock"/></svg><h3>Don't touch what isn't yours</h3><p>A program may only read and write memory it was given, and never past the end.</p><p class="techie">Every register has a tracked type (context, packet, map value, stack…) and a min/max range. Each load and store is checked against those bounds.</p></li>
+      <li class="sticky" style="--bg:var(--green);--rot:-0.6deg"><svg class="ico lg" aria-hidden="true"><use href="#i-check"/></svg><h3>Check before you open</h3><p>Looking something up in a map might find nothing. You must check before using it.</p><p class="techie"><code>bpf_map_lookup_elem()</code> returns <code>PTR_TO_MAP_VALUE_OR_NULL</code>. Dereferencing it before a NULL check is rejected.</p></li>
+      <li class="sticky" style="--bg:var(--orange);--rot:1.4deg"><svg class="ico lg" aria-hidden="true"><use href="#i-drawer"/></svg><h3>No reading empty drawers</h3><p>You can't read a box you never filled. It might hold leftover secrets.</p><p class="techie">Reading uninitialised registers or stack slots is rejected, so kernel memory can't leak out.</p></li>
+      <li class="sticky" style="--bg:var(--blue);--rot:-1.6deg"><svg class="ico lg" aria-hidden="true"><use href="#i-bag"/></svg><h3>A small backpack</h3><p>Each program gets only 512 bytes of scratch space. Big data goes into maps.</p><p class="techie">The BPF stack is 512 bytes, addressed from the read-only frame pointer R10.</p></li>
+      <li class="sticky" style="--bg:var(--purple);--rot:0.8deg"><svg class="ico lg" aria-hidden="true"><use href="#i-wrench"/></svg><h3>Only approved tools</h3><p>Programs can only call kernel functions from an approved toolbox, and only with the right kinds of things.</p><p class="techie">Allowed helpers and kfuncs depend on the program type; argument types are checked, and some helpers need a GPL-compatible license.</p></li>
+      <li class="sticky" style="--bg:var(--pink);--rot:-0.9deg"><svg class="ico lg" aria-hidden="true"><use href="#i-clock"/></svg><h3>Easy enough to check</h3><p>The guard will look at up to one million steps. Programs that are too twisty are sent back.</p><p class="techie">The complexity limit is 1,000,000 processed instructions. State pruning skips paths it has already proven safe.</p></li>
+      <li class="sticky" style="--bg:var(--green);--rot:1.2deg"><svg class="ico lg" aria-hidden="true"><use href="#i-door"/></svg><h3>Leave properly</h3><p>Every path must end with a clear answer, like "let this packet pass".</p><p class="techie">R0 must hold a valid return value at <code>exit</code>, and the value must make sense for the program type.</p></li>
+    </ul>
+
+    <div class="lab" id="lab">
+      <div class="lab-head">
+        <h3 class="big">Be the verifier</h3>
+        <p>Pick a program. Guess whether the guard lets it in. Then watch the guard walk every path.</p>
+      </div>
+      <div class="lab-picker" id="labPicker" role="tablist" aria-label="Programs to check"></div>
+      <div class="lab-main">
+        <div class="stage lab-stage">
+          <canvas id="cfg" aria-label="The program drawn as boxes and arrows (a control-flow graph) with the guard walking through it"></canvas>
+          <div class="stamp" id="stamp" aria-hidden="true"></div>
+        </div>
+        <aside class="clipboard" aria-live="polite">
+          <div class="clip-top" aria-hidden="true"></div>
+          <p class="clip-title">Officer Verifier's notes</p>
+          <p id="labAsk" class="lab-ask"></p>
+          <div class="guess" id="labGuess">
+            <button class="btn green-btn sm" type="button" data-guess="safe">Looks safe</button>
+            <button class="btn red-btn sm" type="button" data-guess="unsafe">Looks unsafe</button>
+          </div>
+          <div class="regs-mini" id="labRegs"></div>
+          <ol class="log" id="labLog"></ol>
+          <div class="lab-result" id="labResult"></div>
+          <button class="btn ghost sm" id="labReplay" type="button" hidden>Watch again</button>
+        </aside>
+      </div>
+      <p class="score">Correct guesses: <b id="labScore">0</b> of <span id="labTotal">8</span></p>
+    </div>
+
+    <div class="after">
+      <div class="sticky" style="--bg:var(--yellow);--rot:-1deg">
+        <h3>After the guard says yes</h3>
+        <p>A <b>JIT compiler</b> translates the program into the CPU's own language so it runs at full speed. Then the program's memory is locked so nobody can change it.</p>
+        <p class="techie">The JIT emits native x86-64, arm64, riscv64 (and more) code. The image is made read-only, constants can be blinded to resist JIT spraying, and Spectre mitigations are applied.</p>
+      </div>
+      <div class="sticky" style="--bg:var(--blue);--rot:1deg">
+        <h3>Who may load programs?</h3>
+        <p>Only trusted users, like an administrator. Ordinary apps can't sneak bees into the castle.</p>
+        <p class="techie">Loading usually needs <code>CAP_BPF</code> plus <code>CAP_PERFMON</code> or <code>CAP_NET_ADMIN</code> (or root). Unprivileged BPF is disabled by default on most distributions via <code>kernel.unprivileged_bpf_disabled</code>.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 5. MACHINE ============ -->
+<section class="page" id="machine">
+  <div class="wrap">
+    <div class="page-head">
+      <span class="chapter">Chapter 5</span>
+      <h2>Inside the tiny eBPF computer</h2>
+      <p class="sub">eBPF programs don't run as the C you write. They're turned into <b>bytecode</b>: instructions for a tiny made-up computer with 11 registers (think of them as 11 hands that can each hold one number) and a 512-byte backpack called the stack. Step through a real program.</p>
+    </div>
+    <div class="machine card">
+      <div class="m-prog">
+        <p class="m-label">The program <span class="muted">(each line is one 8-byte instruction)</span></p>
+        <ol class="insns" id="insns"></ol>
+      </div>
+      <div class="m-state">
+        <p class="m-label">Registers (the hands)</p>
+        <div class="regs" id="regs"></div>
+        <p class="m-label">Stack (the backpack, 512 bytes)</p>
+        <div class="stack" id="stack" aria-label="64 stack slots of 8 bytes"></div>
+        <div class="m-narr" id="mNarr" aria-live="polite"></div>
+        <div class="row-btns">
+          <button class="btn sm" id="mStep" type="button">Step</button>
+          <button class="btn ghost sm" id="mRun" type="button">Run all</button>
+          <button class="btn ghost sm" id="mReset" type="button">Start over</button>
+        </div>
+      </div>
+    </div>
+    <div class="anatomy">
+      <h3>Anatomy of one instruction</h3>
+      <p>Every eBPF instruction is exactly 64 bits. Here's <code>r1 += r2</code> taken apart:</p>
+      <div class="bits" role="img" aria-label="64 bits split into opcode 8 bits, destination register 4 bits, source register 4 bits, offset 16 bits, immediate 32 bits">
+        <div class="bf" style="--w:8;--c:var(--pink)"><b>0x0f</b><span>opcode · 8 bits<br><small>"add, 64-bit, register"</small></span></div>
+        <div class="bf" style="--w:4;--c:var(--yellow)"><b>1</b><span>dst · 4<br><small>r1</small></span></div>
+        <div class="bf" style="--w:4;--c:var(--green)"><b>2</b><span>src · 4<br><small>r2</small></span></div>
+        <div class="bf" style="--w:16;--c:var(--blue)"><b>0</b><span>offset · 16 bits<br><small>used by jumps &amp; memory</small></span></div>
+        <div class="bf" style="--w:32;--c:var(--purple)"><b>0</b><span>immediate · 32 bits<br><small>a constant number</small></span></div>
+      </div>
+      <p class="techie">Register conventions: <b>R0</b> holds return values, <b>R1–R5</b> pass arguments to helpers (R1 starts as the context pointer), <b>R6–R9</b> survive helper calls, and <b>R10</b> is the read-only frame pointer. The instruction set is standardised in RFC 9669. Run <code>bpftool prog dump xlated id &lt;N&gt;</code> to see a loaded program's bytecode, or <code>dump jited</code> for the machine code.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 6. HOOKS ============ -->
+<section class="page" id="hooks">
+  <div class="wrap">
+    <div class="page-head">
+      <span class="chapter">Chapter 6</span>
+      <h2>Hooks: where the bees can sit</h2>
+      <p class="sub">An eBPF program sleeps until something happens. The places where it can wait are called <b>hooks</b>. They're everywhere, from apps at the top down to the network card. Click a pin.</p>
+    </div>
+    <div class="hooks">
+      <div class="stage hooks-stage">
+        <canvas id="hooks3d" aria-label="3D layer cake of a computer (apps, system calls, kernel, drivers, hardware) with clickable hook pins"></canvas>
+        <span class="hint">click a pin · drag to spin</span>
+      </div>
+      <aside class="card hook-card" id="hookCard" aria-live="polite"></aside>
+    </div>
+    <div class="hook-list" id="hookList" aria-label="All hooks"></div>
+  </div>
+</section>
+
+<!-- ============ 7. MAPS ============ -->
+<section class="page" id="maps">
+  <div class="wrap">
+    <div class="page-head">
+      <span class="chapter">Chapter 7</span>
+      <h2>Maps: the honey jars</h2>
+      <p class="sub">A bee forgets everything when its job is done. To remember things, or to pass notes to your app outside the castle, it puts them in a <b>map</b>. There are different jars for different jobs.</p>
+    </div>
+    <ul class="maptypes" id="mapTypes"></ul>
+    <div class="ring-wrap">
+      <div class="ring-text">
+        <h3 class="big">Watch a ring buffer</h3>
+        <p>A ring buffer is a merry-go-round of slots. The kernel bee drops events in on one side. Your app picks them up on the other, in order. If the app is too slow and the ring fills up, new events are dropped. Try it.</p>
+        <label class="slider" for="prodRate"><span>Kernel writes <b id="prodVal">4</b> events/s</span><input type="range" id="prodRate" min="0" max="16" value="4"></label>
+        <label class="slider" for="consRate"><span>App reads <b id="consVal">3</b> events/s</span><input type="range" id="consRate" min="0" max="16" value="3"></label>
+        <div class="counters">
+          <div><b id="rProd">0</b><span>written</span></div>
+          <div><b id="rCons">0</b><span>read</span></div>
+          <div class="bad"><b id="rDrop">0</b><span>dropped</span></div>
+          <div><b id="rFill">0/16</b><span>in the ring</span></div>
+        </div>
+        <p class="techie"><code>BPF_MAP_TYPE_RINGBUF</code> (Linux 5.8) is one buffer shared by all CPUs, keeps events in order, and lets the program reserve space then submit. User space polls it through an epoll-able file descriptor; libbpf wraps this as <code>ring_buffer__poll()</code>.</p>
+      </div>
+      <div class="stage ring-stage">
+        <canvas id="ring3d" aria-label="3D ring buffer: a circle of 16 slots, a bee writing events and an app reading them"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 8. ACTION ============ -->
+<section class="page" id="action">
+  <div class="wrap">
+    <div class="page-head">
+      <span class="chapter">Chapter 8</span>
+      <h2>What can you build with eBPF?</h2>
+      <p class="sub">Lots! Start with a game. Your server is about to be flooded by an attacker. Put an XDP bee at the front door to throw bad packets out before they get inside.</p>
+    </div>
+    <div class="xdp">
+      <div class="stage xdp-stage">
+        <canvas id="xdp3d" aria-label="3D game: packets fly from the internet to a server; an XDP bee at the network card drops bad ones"></canvas>
+        <div class="xdp-key" aria-hidden="true"><span><i class="dot" style="--c:var(--green)"></i>visitor</span><span><i class="dot" style="--c:var(--blue)"></i>ping</span><span><i class="dot" style="--c:var(--red)"></i>attack</span></div>
+      </div>
+      <aside class="card xdp-panel">
+        <button class="switch big" id="xdpOn" type="button" aria-pressed="true"><span class="knob" aria-hidden="true"></span>XDP program is ON</button>
+        <fieldset class="rules-box">
+          <legend>Drop these packets at the door</legend>
+          <label><input type="checkbox" id="ruleAttack" checked> attack packets <small>(from 6.6.6.6)</small></label>
+          <label><input type="checkbox" id="rulePing"> pings</label>
+          <label><input type="checkbox" id="ruleWeb"> visitors <small>(oops?)</small></label>
+        </fieldset>
+        <button class="btn red-btn" id="attackBtn" type="button">Launch the attack!</button>
+        <div class="meter"><span>Server busy</span><div class="bar"><i id="cpuBar"></i></div><b id="cpuPct">0%</b></div>
+        <div class="scores"><span>happy visitors <b id="happy">0</b></span><span>visitors lost <b id="lost">0</b></span></div>
+        <p class="m-label">Live map: <code>xdp_stats</code></p>
+        <table class="maptable"><thead><tr><th>packet</th><th>passed</th><th>dropped</th></tr></thead><tbody id="xdpMap"></tbody></table>
+      </aside>
+    </div>
+    <div class="xdp-code">
+      <p class="m-label">The XDP program you just built (it updates as you click):</p>
+      <pre class="code" id="xdpCode"></pre>
+      <p class="techie">XDP runs in the network driver before the kernel allocates an <code>sk_buff</code>, so dropping there costs almost nothing. Meta's Katran load balancer and Cloudflare's DDoS defences use XDP. Verdicts: <code>XDP_PASS</code>, <code>XDP_DROP</code>, <code>XDP_TX</code> (bounce back), <code>XDP_REDIRECT</code> (send elsewhere) and <code>XDP_ABORTED</code>.</p>
+    </div>
+
+    <h3 class="big uses-title">More superpowers</h3>
+    <ul class="uses" id="uses"></ul>
+  </div>
+</section>
+
+<!-- ============ 9. CODE ============ -->
+<section class="page" id="code">
+  <div class="wrap">
+    <div class="page-head">
+      <span class="chapter">Chapter 9</span>
+      <h2>Real code you can run</h2>
+      <p class="sub">On a Linux machine with admin rights, you can try these today. The numbered notes explain the tricky lines.</p>
+    </div>
+    <div class="tabs" id="codeTabs" role="tablist" aria-label="Code examples"></div>
+    <div class="code-panel" id="codePanel"></div>
+  </div>
+</section>
+
+<!-- ============ 10. WORDS ============ -->
+<section class="page" id="words">
+  <div class="wrap">
+    <div class="page-head">
+      <span class="chapter">Chapter 10</span>
+      <h2>Words to know</h2>
+      <p class="sub">Tap a card to flip it. The front is the simple version, the back is how engineers say it.</p>
+    </div>
+    <ul class="flips" id="flips"></ul>
+  </div>
+</section>
+
+<!-- ============ 11. HISTORY ============ -->
+<section class="page" id="history">
+  <div class="wrap">
+    <div class="page-head">
+      <span class="chapter">Chapter 11</span>
+      <h2>How we got here</h2>
+      <p class="sub">eBPF grew out of a small packet filter from 1992. Scroll along the road.</p>
+    </div>
+    <div class="road-scroll">
+      <ol class="road">
+        <li style="--c:var(--muted);--yc:var(--ink)"><b class="yr">1992</b><h4>BPF is born</h4><p>Steven McCanne and Van Jacobson describe the BSD Packet Filter. <code>tcpdump</code> uses it to pick which packets to show.</p></li>
+        <li style="--c:var(--muted);--yc:var(--ink)"><b class="yr">1997</b><h4>Linux gets BPF</h4><p>Linux 2.1.75 adds the socket filter, BPF's first home in Linux.</p></li>
+        <li style="--c:var(--muted);--yc:var(--ink)"><b class="yr">2011</b><h4>Made fast</h4><p>A JIT compiler turns classic BPF into native machine code (Linux 3.0).</p></li>
+        <li style="--c:var(--muted);--yc:var(--ink)"><b class="yr">2012</b><h4>seccomp-bpf</h4><p>Programs like Chrome use BPF filters to limit which system calls they may make (Linux 3.5).</p></li>
+        <li style="--c:var(--yellow)"><b class="yr">2014</b><h4>eBPF arrives</h4><p>Alexei Starovoitov's extended BPF lands, and Linux 3.18 adds the <code>bpf()</code> system call.</p></li>
+        <li style="--c:var(--blue)"><b class="yr">2015</b><h4>Tracing superpowers</h4><p>eBPF can attach to kprobes (Linux 4.1). The BCC toolkit appears.</p></li>
+        <li style="--c:var(--green)"><b class="yr">2016</b><h4>XDP</h4><p>eXpress Data Path lets eBPF handle packets right in the driver (Linux 4.8).</p></li>
+        <li style="--c:var(--pink)"><b class="yr">2018</b><h4>BTF &amp; bpftrace</h4><p>BPF Type Format arrives (Linux 4.18) and bpftrace makes one-liners easy.</p></li>
+        <li style="--c:var(--orange)"><b class="yr">2019</b><h4>Loops &amp; CO-RE</h4><p>The verifier accepts bounded loops (Linux 5.3). CO-RE: compile once, run everywhere.</p></li>
+        <li style="--c:var(--red)"><b class="yr">2020</b><h4>Security &amp; rings</h4><p>LSM programs can enforce security rules (5.7). The ring buffer map arrives (5.8).</p></li>
+        <li style="--c:var(--purple)"><b class="yr">2021</b><h4>Going big</h4><p>The eBPF Foundation forms under the Linux Foundation. Microsoft announces eBPF for Windows.</p></li>
+        <li style="--c:var(--green)"><b class="yr">2023</b><h4>Cilium graduates</h4><p>The eBPF-based networking project becomes a graduated CNCF project.</p></li>
+        <li style="--c:var(--yellow)"><b class="yr">2024</b><h4>Schedulers &amp; a standard</h4><p>sched_ext lets eBPF decide who gets the CPU (Linux 6.12). RFC 9669 standardises the instruction set.</p></li>
+        <li style="--c:var(--pink)"><b class="yr">Now</b><h4>Everywhere</h4><p>From Android phones to the biggest clouds, eBPF quietly watches, routes and protects.</p></li>
+      </ol>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 12. QUIZ ============ -->
+<section class="page" id="quiz">
+  <div class="wrap">
+    <div class="page-head">
+      <span class="chapter">Chapter 12</span>
+      <h2>Quiz: are you a beekeeper yet?</h2>
+      <p class="sub">Eight questions. No pressure, the guard isn't watching.</p>
+    </div>
+    <div class="quiz card" id="quizBox" aria-live="polite"></div>
+  </div>
+</section>
+
+<section class="page" id="learn">
+  <div class="wrap">
+    <div class="page-head">
+      <span class="chapter">Keep going</span>
+      <h2>Where to learn more</h2>
+    </div>
+    <ul class="learn">
+      <li><a href="https://ebpf.io" target="_blank" rel="noopener">ebpf.io</a><span>The community home: intro, project list, news.</span></li>
+      <li><a href="https://docs.kernel.org/bpf/" target="_blank" rel="noopener">Kernel BPF docs</a><span>The official reference, including the verifier and the instruction set.</span></li>
+      <li><a href="https://github.com/bpftrace/bpftrace" target="_blank" rel="noopener">bpftrace</a><span>Ask the kernel questions in one line.</span></li>
+      <li><a href="https://github.com/libbpf/libbpf-bootstrap" target="_blank" rel="noopener">libbpf-bootstrap</a><span>Ready-made starter projects in C and Rust.</span></li>
+      <li><a href="https://github.com/iovisor/bcc" target="_blank" rel="noopener">BCC</a><span>Dozens of ready tools like <code>execsnoop</code> and <code>opensnoop</code>.</span></li>
+      <li><a href="https://www.brendangregg.com/ebpf.html" target="_blank" rel="noopener">Brendan Gregg on eBPF</a><span>Performance tools, flame graphs and diagrams.</span></li>
+      <li><span class="book">Book</span><b>Learning eBPF</b> by Liz Rice (O'Reilly, 2023)<span>A friendly, hands-on first book.</span></li>
+      <li><span class="book">Book</span><b>BPF Performance Tools</b> by Brendan Gregg (2019)<span>The big book of tracing tools.</span></li>
+    </ul>
+  </div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <p>Every drawing here is made of wobbly pencil strokes from a tiny home-made 3D engine. No real bees were harmed.</p>
+    <p class="muted">eBPF runs on Linux (and in progress on Windows). Kernel versions above are when a feature first appeared upstream.</p>
+  </div>
+</footer>
+
+<canvas id="confetti" aria-hidden="true"></canvas>
+
+<script src="js/sketch.js"></script>
+<script src="js/engine3d.js"></script>
+<script src="js/scenes.js"></script>
+<script src="js/widgets.js"></script>
+</body>
+</html>
