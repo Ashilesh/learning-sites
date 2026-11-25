@@ -1,0 +1,1091 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cyber Sketchbook — Cybersecurity for Everyone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600&family=Patrick+Hand&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=7">
+<script>
+  // pick the theme before the page paints: saved choice, else the device setting
+  (function () {
+    var t = null; try { t = localStorage.getItem("cyber-theme"); } catch (e) {}
+    if (!t) t = matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    document.documentElement.dataset.theme = t;
+  })();
+</script>
+</head>
+<body>
+<div class="progress-bar" id="progress"></div>
+
+<!-- Reusable doodles -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <!-- Byte: our shield-robot mascot -->
+    <symbol id="byte" viewBox="0 0 200 220">
+      <line x1="100" y1="30" x2="100" y2="8" stroke="#23243a" stroke-width="4"/>
+      <circle cx="100" cy="8" r="7" fill="#ff4f8b" stroke="#23243a" stroke-width="3"/>
+      <path d="M100 28 L170 50 Q172 140 100 200 Q28 140 30 50 Z" fill="#3a86ff" stroke="#23243a" stroke-width="5" stroke-linejoin="round"/>
+      <path d="M100 42 L156 60 Q156 132 100 184 Q44 132 44 60 Z" fill="#8fd3ff" stroke="#23243a" stroke-width="3"/>
+      <g class="blink"><ellipse cx="78" cy="92" rx="12" ry="15" fill="#fff" stroke="#23243a" stroke-width="3"/><ellipse cx="122" cy="92" rx="12" ry="15" fill="#fff" stroke="#23243a" stroke-width="3"/>
+      <circle cx="81" cy="95" r="6" fill="#23243a"/><circle cx="125" cy="95" r="6" fill="#23243a"/></g>
+      <path d="M78 126 Q100 146 122 126" fill="none" stroke="#23243a" stroke-width="4" stroke-linecap="round"/>
+      <circle cx="62" cy="118" r="7" fill="#ff8fb5" opacity=".8"/><circle cx="138" cy="118" r="7" fill="#ff8fb5" opacity=".8"/>
+      <path d="M30 90 Q8 100 14 126" fill="none" stroke="#23243a" stroke-width="5" stroke-linecap="round"/>
+      <path d="M170 90 Q194 80 190 56" fill="none" stroke="#23243a" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="190" cy="52" r="8" fill="#ffd23f" stroke="#23243a" stroke-width="3"/>
+    </symbol>
+    <!-- Glitch: a sneaky hacker gremlin -->
+    <symbol id="glitch" viewBox="0 0 200 200">
+      <path d="M40 70 Q30 20 70 30 L100 10 L130 30 Q170 20 160 70 Q190 130 150 170 Q100 200 50 170 Q10 130 40 70Z" fill="#8338ec" stroke="#23243a" stroke-width="5"/>
+      <path d="M45 85 L155 85 L150 110 L50 110Z" fill="#23243a"/>
+      <circle cx="78" cy="97" r="7" fill="#06d6a0"/><circle cx="122" cy="97" r="7" fill="#06d6a0"/>
+      <path d="M75 140 L88 132 L100 142 L112 132 L125 140" fill="none" stroke="#fff" stroke-width="4" stroke-linejoin="round"/>
+      <path d="M60 30 L50 5 L75 25 M140 30 L150 5 L125 25" fill="#8338ec" stroke="#23243a" stroke-width="4"/>
+    </symbol>
+    <filter id="rough"><feTurbulence type="fractalNoise" baseFrequency="0.03" numOctaves="2" result="n"/><feDisplacementMap in="SourceGraphic" in2="n" scale="3"/></filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#23243a"/></marker>
+  </defs>
+</svg>
+
+<nav class="top">
+  <div class="wrap">
+    <a class="home-link" href="../index.html" title="All explainers">←<span> All explainers</span></a>
+    <a href="#home" class="logo">🛡️ Cyber Sketchbook</a>
+    <button class="theme-toggle" id="themeToggle" type="button" aria-label="Switch to night mode"><span class="icon">🌙</span> <span class="lbl">Night</span></button>
+    <a class="note" style="--c:#ffd23f;--r:-2deg" href="#map">🗺️ Map</a>
+    <a class="note" style="--c:#7ff0cc;--r:2deg" href="#what">What is it?</a>
+    <a class="note" style="--c:#ffb3cc;--r:-1deg" href="#cia">Big 3</a>
+    <a class="note" style="--c:#c9b3ff;--r:1deg" href="#risk">Risk</a>
+    <a class="note" style="--c:#a8d1ff;--r:-2deg" href="#castle-sec">3D Castle</a>
+    <a class="note" style="--c:#ffc89e;--r:2deg" href="#villains">Villains</a>
+    <a class="note" style="--c:#ffd23f;--r:-1deg" href="#heroes">Heroes</a>
+    <a class="note" style="--c:#7ff0cc;--r:1deg" href="#auth">Login & Access</a>
+    <a class="note" style="--c:#ffb3cc;--r:-2deg" href="#journey-sec">Packet Trip</a>
+    <a class="note" style="--c:#c9b3ff;--r:2deg" href="#crypto">Secret Codes</a>
+    <a class="note" style="--c:#a8d1ff;--r:-1deg" href="#hash">Hashing</a>
+    <a class="note" style="--c:#ffc89e;--r:1deg" href="#password">Passwords</a>
+    <a class="note" style="--c:#ffd23f;--r:-2deg" href="#phish">Phish Game</a>
+    <a class="note" style="--c:#7ff0cc;--r:2deg" href="#urls">Link Detective</a>
+    <a class="note" style="--c:#ffb3cc;--r:-1deg" href="#webattacks">Web Tricks</a>
+    <a class="note" style="--c:#c9b3ff;--r:1deg" href="#privacy">Privacy</a>
+    <a class="note" style="--c:#a8d1ff;--r:-2deg" href="#story">Hack Story</a>
+    <a class="note" style="--c:#ffc89e;--r:2deg" href="#uhoh">Got Hacked?</a>
+    <a class="note" style="--c:#ffd23f;--r:-1deg" href="#ebpf">eBPF</a>
+    <a class="note" style="--c:#7ff0cc;--r:1deg" href="#world">Real World</a>
+    <a class="note" style="--c:#ffb3cc;--r:-2deg" href="#quiz">Quiz</a>
+    <a class="note" style="--c:#c9b3ff;--r:2deg" href="#pledge">Pledge</a>
+  </div>
+</nav>
+
+<!-- ================= HERO ================= -->
+<header class="hero" id="home">
+  <div class="wrap hero-grid">
+    <div>
+      <p class="scribble" style="color:var(--purple);margin:0">Hi friend! 👋 Welcome to my notebook about…</p>
+      <h1><span class="c1">Cyber</span><span class="c2">security</span><br><span class="c3">made fun!</span></h1>
+      <p class="sub">Cybersecurity means <span class="hl">keeping our computers, phones, games and secrets safe</span> from sneaky people on the internet. Just like locks keep your house safe! 🏠🔒</p>
+      <p>I'm <b>Byte</b> 🛡️, your guide. Scroll down, click everything, flip the cards, play the games. No boring stuff, promise.</p>
+      <div class="stickers">
+        <span class="sticker" style="--c:#ffd23f;--r:-4deg">🎮 20+ mini games</span>
+        <span class="sticker" style="--c:#7ff0cc;--r:3deg">🏰 3D castle</span>
+        <span class="sticker" style="--c:#ffb3cc;--r:-2deg">🐝 eBPF explained</span>
+        <span class="sticker" style="--c:#c9b3ff;--r:4deg">🧒 kid friendly</span>
+      </div>
+      <p style="margin-top:1.4rem"><a class="btn pink" href="#map" style="text-decoration:none">Open the treasure map ↓</a></p>
+    </div>
+    <div class="center">
+      <svg viewBox="0 0 420 380" width="100%" style="max-width:460px" role="img" aria-label="Byte the shield robot blocking Glitch the hacker">
+        <ellipse cx="210" cy="360" rx="170" ry="14" fill="#23243a18"/>
+        <g class="mascot-float"><use href="#byte" x="150" y="80" width="240" height="264"/></g>
+        <g transform="translate(10 150) rotate(-10)"><use href="#glitch" width="130" height="130"/></g>
+        <path d="M140 220 Q160 200 175 215" stroke="#ef233c" stroke-width="4" fill="none" marker-end="url(#arrow)"/>
+        <text x="20" y="130" font-family="Permanent Marker" font-size="18" fill="#8338ec" transform="rotate(-8 20 130)">Let me in!! 😈</text>
+        <g transform="translate(260 40) rotate(6)">
+          <rect x="0" y="0" width="150" height="56" rx="14" fill="#fff" stroke="#23243a" stroke-width="3"/>
+          <path d="M30 56 L24 74 L46 56" fill="#fff" stroke="#23243a" stroke-width="3" stroke-linejoin="round"/>
+          <text x="75" y="35" text-anchor="middle" font-family="Permanent Marker" font-size="20" fill="#23243a">Nope! 🙅</text>
+        </g>
+        <g fill="#ffd23f" stroke="#23243a" stroke-width="2"><path class="wiggle" d="M60 40 l6 14 15 2 -11 10 3 15 -13 -8 -13 8 3 -15 -11 -10 15 -2z"/><path class="wiggle" d="M380 300 l4 9 10 1 -7 7 2 10 -9 -5 -9 5 2 -10 -7 -7 10 -1z"/></g>
+      </svg>
+    </div>
+  </div>
+</header>
+
+<main>
+<!-- ================= MAP ================= -->
+<section id="map">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter" style="background:var(--pink);color:#fff">Start here</span><h2>Your Cyber Treasure Map 🗺️</h2></div>
+    <p class="lead">This notebook covers <b>everything</b> you need to understand cybersecurity: from "what is it?" all the way to pro stuff like eBPF. Follow the path or jump to any stop. Every place you visit gets a <b>✓ stamp</b>!</p>
+    <div class="sketch map-card">
+      <svg id="mapSvg" role="img" aria-label="Map of every topic in this notebook"></svg>
+      <div class="map-legend" id="mapLegend"></div>
+      <p class="center" style="margin-bottom:0"><span class="scribble" id="mapProgress">0 places explored</span> <button class="chip" id="mapReset" type="button">↺ reset stamps</button></p>
+    </div>
+  </div>
+</section>
+
+<!-- ================= WHAT IS IT ================= -->
+<section id="what">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter auto"></span><h2>What is <span class="underline-squiggle">cybersecurity</span>?</h2></div>
+    <p class="lead">Imagine your computer is a <b>house</b>. Inside are your treasures: photos, games, messages, money. Cybersecurity is everything we do to <span class="hl-pink">keep bad guys out</span> and <span class="hl-teal">keep treasures safe</span>. Click the things on the house! 👇</p>
+
+    <div class="analogy-row reveal">
+      <div class="sketch yellow tilt-l">
+        <svg id="house" viewBox="0 0 400 330" width="100%" role="img" aria-label="A house with security features labelled">
+          <!-- ground -->
+          <path d="M0 300 Q200 290 400 302" stroke="#23243a" stroke-width="3" fill="none"/>
+          <!-- fence (firewall) -->
+          <g class="house-hotspot" data-k="fence">
+            <g stroke="#23243a" stroke-width="3" fill="#ff9f68">
+              <rect x="8" y="235" width="16" height="65"/><rect x="30" y="235" width="16" height="65"/><rect x="52" y="235" width="16" height="65"/>
+              <rect x="332" y="235" width="16" height="65"/><rect x="354" y="235" width="16" height="65"/><rect x="376" y="235" width="16" height="65"/>
+            </g>
+            <line x1="5" y1="258" x2="72" y2="258" stroke="#23243a" stroke-width="3"/><line x1="328" y1="258" x2="395" y2="258" stroke="#23243a" stroke-width="3"/>
+          </g>
+          <!-- house -->
+          <path d="M90 140 L200 50 L310 140" fill="#ff4f8b" stroke="#23243a" stroke-width="4" stroke-linejoin="round"/>
+          <rect x="105" y="138" width="190" height="162" fill="#fffdf5" stroke="#23243a" stroke-width="4"/>
+          <!-- window (encryption curtains) -->
+          <g class="house-hotspot" data-k="curtain">
+            <rect x="125" y="160" width="60" height="55" fill="#8fd3ff" stroke="#23243a" stroke-width="3"/>
+            <path d="M125 160 Q140 190 128 215 L125 215Z M185 160 Q170 190 182 215 L185 215Z" fill="#8338ec" stroke="#23243a" stroke-width="2"/>
+          </g>
+          <!-- door + lock (password) -->
+          <g class="house-hotspot" data-k="lock">
+            <rect x="215" y="200" width="55" height="100" fill="#3a86ff" stroke="#23243a" stroke-width="4"/>
+            <rect x="254" y="244" width="12" height="14" fill="#ffd23f" stroke="#23243a" stroke-width="2"/>
+            <path d="M256 244 v-6 a4 4 0 0 1 8 0 v6" fill="none" stroke="#23243a" stroke-width="2"/>
+          </g>
+          <!-- camera (monitoring) -->
+          <g class="house-hotspot" data-k="camera">
+            <rect x="275" y="150" width="30" height="16" rx="4" fill="#23243a"/><circle cx="278" cy="158" r="4" fill="#ef233c"/>
+            <line x1="300" y1="158" x2="308" y2="142" stroke="#23243a" stroke-width="3"/>
+          </g>
+          <!-- dog (antivirus) -->
+          <g class="house-hotspot" data-k="dog">
+            <ellipse cx="95" cy="288" rx="24" ry="13" fill="#c68b59" stroke="#23243a" stroke-width="3"/>
+            <circle cx="73" cy="276" r="12" fill="#c68b59" stroke="#23243a" stroke-width="3"/>
+            <circle cx="70" cy="274" r="2" fill="#23243a"/><path d="M66 266 l-4 -8 8 4" fill="#8b5a2b" stroke="#23243a" stroke-width="2"/>
+            <path d="M119 284 q10 -10 6 -18" stroke="#23243a" stroke-width="3" fill="none"/>
+          </g>
+          <!-- safe (backup) -->
+          <g class="house-hotspot" data-k="safe">
+            <rect x="140" y="245" width="40" height="40" fill="#a0a4b8" stroke="#23243a" stroke-width="3"/>
+            <circle cx="160" cy="265" r="8" fill="#fff" stroke="#23243a" stroke-width="2"/><line x1="160" y1="265" x2="165" y2="260" stroke="#23243a" stroke-width="2"/>
+          </g>
+          <!-- mailbox (phishing) -->
+          <g class="house-hotspot" data-k="mail">
+            <line x1="350" y1="300" x2="350" y2="215" stroke="#23243a" stroke-width="4"/>
+            <path d="M330 195 h40 v24 h-40 z" fill="#06d6a0" stroke="#23243a" stroke-width="3"/>
+            <path d="M370 198 v-14 h12 v8 h-12" fill="#ef233c" stroke="#23243a" stroke-width="2"/>
+          </g>
+          <!-- sun -->
+          <circle cx="360" cy="50" r="22" fill="#ffd23f" stroke="#23243a" stroke-width="3"/>
+          <text x="200" y="30" text-anchor="middle" font-family="Permanent Marker" font-size="18" fill="#23243a">👆 tap the doodles!</text>
+        </svg>
+      </div>
+      <div class="eq">=</div>
+      <div class="sketch blue tilt-r">
+        <h3>Your house 🏠 ↔ Your computer 💻</h3>
+        <table class="map-table" id="mapTable">
+          <tr data-k="lock"><td>🔐</td><td><b>Door lock</b> = <b>Password</b><br><small>Only people with the key get in.</small></td></tr>
+          <tr data-k="fence"><td>🚧</td><td><b>Fence</b> = <b>Firewall</b><br><small>Decides who may even walk up to the house.</small></td></tr>
+          <tr data-k="curtain"><td>🪟</td><td><b>Curtains</b> = <b>Encryption</b><br><small>People outside can't peek at what's inside.</small></td></tr>
+          <tr data-k="dog"><td>🐕</td><td><b>Guard dog</b> = <b>Antivirus</b><br><small>Sniffs out intruders that sneaked in.</small></td></tr>
+          <tr data-k="camera"><td>📹</td><td><b>Camera</b> = <b>Monitoring</b> (like eBPF!)<br><small>Watches everything, raises an alarm.</small></td></tr>
+          <tr data-k="safe"><td>🗄️</td><td><b>Safe</b> = <b>Backups</b><br><small>Even if a thief gets in, your treasure has a copy.</small></td></tr>
+          <tr data-k="mail"><td>📬</td><td><b>Mailbox</b> = <b>Email</b><br><small>Watch out for tricky letters (phishing)!</small></td></tr>
+        </table>
+      </div>
+    </div>
+
+    <div class="grid g3" style="margin-top:2.5rem">
+      <div class="sketch pink reveal tilt-l center">
+        <div style="font-size:3rem">🦹</div><h3>Bad guys want…</h3>
+        <p>to <b>steal</b> (passwords, money), <b>spy</b> (read your chats), or <b>break</b> things (lock your files, crash websites).</p>
+      </div>
+      <div class="sketch teal reveal center">
+        <div style="font-size:3rem">🦸</div><h3>Good guys do…</h3>
+        <p><b>Protect</b> (locks & walls), <b>Detect</b> (cameras & alarms), <b>Respond</b> (kick them out), <b>Recover</b> (fix & restore).</p>
+      </div>
+      <div class="sketch purple reveal tilt-r center">
+        <div style="font-size:3rem">🧠</div><h3>You can help!</h3>
+        <p>Most attacks start by <b>tricking a person</b>. A smart human is the best shield. That's you after this notebook! 😎</p>
+      </div>
+    </div>
+
+    <!-- Protect detect respond cycle -->
+    <div class="sketch reveal" style="margin-top:2.5rem">
+      <h3 class="center">The Security Circle of Life 🔄 <small class="scribble">(it never stops!)</small></h3>
+      <svg viewBox="0 0 900 300" width="100%" role="img" aria-label="Cycle: Identify, Protect, Detect, Respond, Recover">
+        <g font-family="Permanent Marker" text-anchor="middle" font-size="18">
+          <path d="M150 150 C 250 40, 350 40, 330 70" class="flow" stroke="#23243a" stroke-width="3" fill="none"/>
+          <circle cx="110" cy="150" r="70" fill="#ffd23f" stroke="#23243a" stroke-width="4"/><text x="110" y="140">🔎</text><text x="110" y="170">Identify</text>
+          <circle cx="280" cy="80" r="62" fill="#3a86ff" stroke="#23243a" stroke-width="4"/><text x="280" y="70" fill="#fff">🛡️</text><text x="280" y="100" fill="#fff">Protect</text>
+          <circle cx="450" cy="150" r="62" fill="#ff4f8b" stroke="#23243a" stroke-width="4"/><text x="450" y="140" fill="#fff">🚨</text><text x="450" y="170" fill="#fff">Detect</text>
+          <circle cx="620" cy="80" r="62" fill="#fb5607" stroke="#23243a" stroke-width="4"/><text x="620" y="70" fill="#fff">🥊</text><text x="620" y="100" fill="#fff">Respond</text>
+          <circle cx="790" cy="150" r="70" fill="#06d6a0" stroke="#23243a" stroke-width="4"/><text x="790" y="140">🩹</text><text x="790" y="170">Recover</text>
+          <g stroke="#23243a" stroke-width="3" fill="none" marker-end="url(#arrow)">
+            <path d="M170 115 Q200 80 215 82"/><path d="M340 95 Q380 110 392 130"/><path d="M510 135 Q540 105 556 98"/><path d="M680 95 Q710 110 725 125"/>
+            <path d="M790 222 Q450 330 110 222" class="flow"/>
+          </g>
+          <text x="450" y="275" font-size="15" fill="#55576e">…learn from it and start again, stronger every time 💪</text>
+        </g>
+        <g font-family="Patrick Hand" font-size="15" text-anchor="middle" fill="#23243a">
+          <text x="110" y="245">"What treasures do I have?"</text>
+          <text x="280" y="170">"Lock them up!"</text>
+          <text x="450" y="240">"Something's wrong!"</text>
+          <text x="620" y="170">"Kick them out!"</text>
+          <text x="790" y="245">"Fix & restore"</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CIA ================= -->
+<section id="cia">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter auto"></span><h2>The Big 3 Promises 🤞</h2></div>
+    <p class="lead">Every security expert in the world protects the same 3 things. They call it the <b>CIA Triad</b> (not the spy agency 😄). Click each corner!</p>
+    <div class="cia-wrap">
+      <svg viewBox="0 0 460 420" width="100%" id="ciaSvg" role="img" aria-label="CIA triangle">
+        <path d="M230 70 L70 340 L390 340 Z" fill="#fff3b8" stroke="#23243a" stroke-width="5" stroke-linejoin="round"/>
+        <text x="230" y="260" text-anchor="middle" font-family="Permanent Marker" font-size="26">YOUR DATA</text>
+        <text x="230" y="290" text-anchor="middle" font-size="40">💎</text>
+        <g class="cia-node" data-k="c"><circle cx="230" cy="70" r="55" fill="#ff4f8b" stroke="#23243a" stroke-width="4"/><text x="230" y="64" text-anchor="middle" font-size="30">🤫</text><text x="230" y="95" text-anchor="middle" font-family="Permanent Marker" fill="#fff" font-size="15">Secret</text></g>
+        <g class="cia-node" data-k="i"><circle cx="70" cy="340" r="55" fill="#3a86ff" stroke="#23243a" stroke-width="4"/><text x="70" y="334" text-anchor="middle" font-size="30">✅</text><text x="70" y="365" text-anchor="middle" font-family="Permanent Marker" fill="#fff" font-size="15">Correct</text></g>
+        <g class="cia-node" data-k="a"><circle cx="390" cy="340" r="55" fill="#06d6a0" stroke="#23243a" stroke-width="4"/><text x="390" y="334" text-anchor="middle" font-size="30">⏰</text><text x="390" y="365" text-anchor="middle" font-family="Permanent Marker" font-size="15">Ready</text></g>
+      </svg>
+      <div class="sketch cia-info" id="ciaInfo">
+        <h3>👈 Pick a corner</h3>
+        <p>Each corner is one promise we make about your data.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= RISK ================= -->
+<section id="risk">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter auto"></span><h2>Threat + Weak Spot = Risk ☔</h2></div>
+    <p class="lead">Security experts use three words all the time. The easiest way to understand them is a <b>rainy day</b>:</p>
+    <div class="sketch reveal">
+      <svg viewBox="0 0 900 270" width="100%" role="img" aria-label="Threat (rain) plus vulnerability (hole in roof) equals risk (wet carpet)">
+        <g font-family="Patrick Hand" text-anchor="middle" fill="#23243a">
+          <!-- threat: rain cloud -->
+          <path d="M60 90 a30 30 0 0 1 20 -50 a40 40 0 0 1 76 -6 a30 30 0 0 1 40 44 a22 22 0 0 1 -12 12z" fill="#a0a4b8" stroke="#23243a" stroke-width="4"/>
+          <path d="M120 98 l-14 26 h16 l-12 26" fill="none" stroke="#ffd23f" stroke-width="5" stroke-linejoin="round"/>
+          <g stroke="#3a86ff" stroke-width="4" stroke-linecap="round" class="rain"><line x1="70" y1="108" x2="62" y2="126"/><line x1="160" y1="108" x2="152" y2="126"/><line x1="185" y1="104" x2="177" y2="122"/><line x1="90" y1="135" x2="82" y2="153"/><line x1="170" y1="138" x2="162" y2="156"/></g>
+          <text x="128" y="200" font-family="Permanent Marker" font-size="24" fill="#ef233c">THREAT</text>
+          <text x="128" y="224" font-size="17">something bad that could happen</text>
+          <text x="128" y="246" font-size="15" fill="#55576e">(rain = a hacker, a virus)</text>
+          <text x="290" y="120" font-family="Permanent Marker" font-size="54" fill="#ff4f8b">+</text>
+          <!-- vulnerability: roof with hole -->
+          <path d="M340 130 L450 50 L560 130" fill="#ff9f68" stroke="#23243a" stroke-width="4" stroke-linejoin="round"/>
+          <rect x="355" y="128" width="190" height="45" fill="#fffdf5" stroke="#23243a" stroke-width="4"/>
+          <path d="M470 78 l14 -6 10 12 -6 16 -16 2 -8 -12z" fill="#23243a"/>
+          <text x="520" y="70" font-size="22">👈</text>
+          <text x="450" y="200" font-family="Permanent Marker" font-size="24" fill="#fb5607">VULNERABILITY</text>
+          <text x="450" y="224" font-size="17">a weak spot</text>
+          <text x="450" y="246" font-size="15" fill="#55576e">(hole = old software, weak password)</text>
+          <text x="612" y="120" font-family="Permanent Marker" font-size="54" fill="#ff4f8b">=</text>
+          <!-- risk: wet carpet -->
+          <rect x="680" y="135" width="170" height="20" rx="4" fill="#8338ec" stroke="#23243a" stroke-width="3"/>
+          <ellipse cx="765" cy="138" rx="60" ry="10" fill="#8fd3ff" stroke="#23243a" stroke-width="2"/>
+          <g stroke="#3a86ff" stroke-width="4" stroke-linecap="round"><line x1="765" y1="60" x2="765" y2="78"/><line x1="765" y1="92" x2="765" y2="110"/></g>
+          <text x="820" y="100" font-size="36">😢</text>
+          <text x="765" y="200" font-family="Permanent Marker" font-size="24" fill="#8338ec">RISK</text>
+          <text x="765" y="224" font-size="17">chance of a soggy carpet</text>
+          <text x="765" y="246" font-size="15" fill="#55576e">× how much it would hurt</text>
+        </g>
+      </svg>
+      <p class="center" style="margin:0">You can't stop the rain ☔, but you <b>can fix the roof</b> 🔨. That's what most of cybersecurity is: <span class="hl">find the holes and fix them before the rain comes.</span></p>
+    </div>
+
+    <div class="grid g2" style="margin-top:2rem">
+      <div class="sketch yellow reveal">
+        <h3>🎯 The Risk-o-meter</h3>
+        <p style="font-size:1.05rem">Risk = <b>how likely</b> × <b>how bad</b>. Tap an example to see where it lands, then press <b>Fix it!</b></p>
+        <div class="chips" id="riskChips"></div>
+        <div class="risk-board">
+          <div class="risk-y">how bad →</div>
+          <div class="risk-grid" id="riskGrid"></div>
+          <div class="risk-x">how likely →</div>
+        </div>
+        <div class="verdict" id="riskExplain">👆 pick an example</div>
+        <p style="margin:.6rem 0 0"><button class="btn teal" id="riskFix" disabled>🛠️ Fix it!</button></p>
+      </div>
+      <div class="sketch blue reveal">
+        <h3>🐛 A Bug's Life (why updates matter)</h3>
+        <svg id="bugLife" viewBox="0 0 520 210" width="100%" role="img" aria-label="Timeline of a software bug from discovery to your update">
+          <line x1="20" y1="110" x2="505" y2="110" stroke="#23243a" stroke-width="4" marker-end="url(#arrow)"/>
+          <rect id="dangerZone" x="250" y="96" width="30" height="28" fill="#ef233c" opacity=".55"/>
+          <g font-family="Patrick Hand" font-size="14" text-anchor="middle" fill="#23243a">
+            <text x="45" y="100" font-size="26">🐛</text><text x="45" y="140">bug sneaks</text><text x="45" y="156">into an app</text>
+            <text x="145" y="100" font-size="26">🔎</text><text x="145" y="140">someone</text><text x="145" y="156">finds it</text>
+            <text x="250" y="100" font-size="26">🩹</text><text x="250" y="140">fix released</text><text x="250" y="156">(day 0)</text>
+            <g id="youUpdate"><text x="280" y="100" font-size="26">📲</text><text x="280" y="140">you</text><text x="280" y="156">update</text></g>
+            <text x="145" y="34" font-size="20">😇</text><text x="145" y="52" font-size="13">good hacker reports it</text><text x="145" y="66" font-size="13">(gets a bug bounty 💰)</text>
+            <text x="380" y="34" font-size="20">😈</text><text x="380" y="52" font-size="13">bad guys read the fix notes</text><text x="380" y="66" font-size="13">and attack everyone NOT updated</text>
+            <path d="M380 72 Q 330 80 300 96" fill="none" stroke="#ef233c" stroke-width="2.5" stroke-dasharray="5 4" marker-end="url(#arrow)"/>
+            <text x="260" y="196" font-size="14" fill="#ef233c">🟥 red zone = days your door is open</text>
+          </g>
+        </svg>
+        <p style="margin:.3rem 0">You install the update after <b id="updDays">3</b> days</p>
+        <input type="range" id="updSlider" min="0" max="60" value="3" aria-label="Days before updating">
+        <div class="meter" style="margin-top:.5rem"><div id="updBar"></div></div>
+        <p id="updMsg" style="font-size:1.05rem"></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= 3D CASTLE ================= -->
+<section id="castle-sec">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter auto"></span><h2>The 3D Castle of Defense 🏰</h2></div>
+    <p class="lead">Pros never trust <b>one</b> lock. They stack many walls, like an onion 🧅 or a castle. This is called <span class="hl">Defense in Depth</span>. <b>Drag to spin</b> the castle, then press <b>Attack!</b> and watch the red bad-guy dots try to reach the treasure.</p>
+    <div class="castle-box">
+      <div>
+        <canvas id="castle" aria-label="Interactive 3D castle with defensive layers"></canvas>
+        <div class="row" style="margin-top:1rem">
+          <button class="btn red" id="attackBtn">⚔️ Attack!</button>
+          <button class="btn teal" id="spinBtn">🔄 Auto-spin</button>
+          <span class="stat-pill">🛑 Blocked: <b id="blockedCount">0</b></span>
+          <span class="stat-pill">💎 Reached treasure: <b id="reachedCount">0</b></span>
+        </div>
+      </div>
+      <div class="sketch alt">
+        <h3>The layers (outside → inside)</h3>
+        <ul class="layer-list" id="layerList"></ul>
+        <p style="font-size:1rem;margin-top:.6rem">💡 Click a layer to <b>switch it off</b> and see how many more bad guys get through. Every layer catches some, so <b>together</b> they catch almost all!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= VILLAINS ================= -->
+<section id="villains">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter auto"></span><h2>Meet the Villains 😈</h2></div>
+    <p class="lead">These are the tricks bad guys use. <b>Tap a card to flip it</b> and see how the trick works and how to beat it.</p>
+    <div class="grid g4" id="villainGrid"></div>
+  </div>
+</section>
+
+<!-- ================= HEROES ================= -->
+<section id="heroes">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter auto"></span><h2>Meet the Heroes 🦸</h2></div>
+    <p class="lead">For every villain, there's a hero. Flip them to learn their superpowers!</p>
+    <div class="grid g4" id="heroGrid"></div>
+  </div>
+</section>
+
+<!-- ================= AUTH ================= -->
+<section id="auth">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter auto"></span><h2>Who Are You? What Can You Do? 🪪</h2></div>
+    <p class="lead">Two different questions with two big words. <b>Authentication</b> = <span class="hl">proving who you are</span> (showing your ticket at the cinema door 🎟️). <b>Authorization</b> = <span class="hl-teal">what you're allowed to do</span> once inside (your ticket gets you into Screen 3, not the projector room 🎞️).</p>
+    <div class="grid g2">
+      <div class="sketch pink reveal">
+        <h3>🔐 The 3 kinds of proof</h3>
+        <div class="factor-row">
+          <div class="factor"><span class="big">🧠</span><b>Something you KNOW</b><br>password, PIN, secret answer</div>
+          <div class="factor"><span class="big">📱</span><b>Something you HAVE</b><br>phone, key card, security key</div>
+          <div class="factor"><span class="big">🫆</span><b>Something you ARE</b><br>fingerprint, face</div>
+        </div>
+        <p style="font-size:1.05rem;margin-top:.8rem">Real <b>2-factor login</b> uses 2 <u>different</u> kinds. Pick any two and I'll tell you if it's the real deal:</p>
+        <div class="chips" id="factorChips"></div>
+        <div class="verdict" id="factorVerdict">👆 pick two</div>
+      </div>
+      <div class="sketch teal reveal">
+        <h3>🏫 Which doors does your badge open?</h3>
+        <p style="font-size:1.05rem">Pick a badge and watch the school doors:</p>
+        <div class="chips" id="badgeChips"></div>
+        <div class="school" id="school"></div>
+        <div class="verdict" id="badgeMsg">👆 pick a badge</div>
+        <p style="font-size:1rem;margin-bottom:0">This is called <b>least privilege</b>: everyone gets <i>only</i> the keys they need. If a hacker steals a visitor badge, they still can't reach the exam vault!</p>
+      </div>
+    </div>
+
+    <div class="sketch reveal" style="margin-top:2rem">
+      <h3 class="center">🏰 The old way vs ✈️ Zero Trust</h3>
+      <svg viewBox="0 0 900 270" width="100%" role="img" aria-label="Castle that checks once versus airport that checks at every gate">
+        <g font-family="Patrick Hand" text-anchor="middle" fill="#23243a">
+          <!-- castle: check once -->
+          <ellipse cx="220" cy="150" rx="200" ry="95" fill="#8fd3ff" stroke="#23243a" stroke-width="3"/>
+          <rect x="90" y="80" width="260" height="140" rx="8" fill="#fffdf5" stroke="#23243a" stroke-width="4"/>
+          <g stroke="#23243a" stroke-width="3" fill="#fff3b8">
+            <rect x="105" y="95" width="70" height="50"/><rect x="185" y="95" width="70" height="50"/><rect x="265" y="95" width="70" height="50"/>
+            <rect x="105" y="155" width="110" height="50"/><rect x="225" y="155" width="110" height="50" fill="#ffd1dc"/>
+          </g>
+          <text x="140" y="127" font-size="20">📚</text><text x="220" y="127" font-size="20">🍕</text><text x="300" y="127" font-size="20">🗂️</text>
+          <text x="160" y="187" font-size="20">🧪</text><text x="280" y="187" font-size="20">💎</text>
+          <rect x="200" y="214" width="40" height="14" fill="#c68b59" stroke="#23243a" stroke-width="2"/>
+          <text x="220" y="258" font-size="22">💂 ✓</text>
+          <path d="M215 210 C 160 170, 120 140, 140 112 S 260 100, 280 175" fill="none" stroke="#ef233c" stroke-width="3" stroke-dasharray="6 5" class="flow"/>
+          <circle cx="280" cy="175" r="9" fill="#ef233c" stroke="#23243a" stroke-width="2"/>
+          <text x="220" y="40" font-family="Permanent Marker" font-size="20">Old way: check once at the gate</text>
+          <text x="220" y="62" font-size="16" fill="#ef233c">…then a sneaky guest can wander everywhere 😬</text>
+          <!-- airport: check every gate -->
+          <text x="680" y="40" font-family="Permanent Marker" font-size="20">Zero Trust: check at EVERY door</text>
+          <text x="680" y="62" font-size="16" fill="#0a8a65">never trust, always verify, even people already inside ✅</text>
+          <line x1="480" y1="170" x2="880" y2="170" stroke="#23243a" stroke-width="4" stroke-dasharray="12 8"/>
+          <g>
+            <rect x="490" y="110" width="70" height="50" rx="8" fill="#d6fbef" stroke="#23243a" stroke-width="3"/><text x="525" y="143" font-size="22">🛂</text><text x="525" y="195" font-size="14">entrance</text>
+            <rect x="590" y="110" width="70" height="50" rx="8" fill="#d6fbef" stroke="#23243a" stroke-width="3"/><text x="625" y="143" font-size="22">🧳</text><text x="625" y="195" font-size="14">security</text>
+            <rect x="690" y="110" width="70" height="50" rx="8" fill="#d6fbef" stroke="#23243a" stroke-width="3"/><text x="725" y="143" font-size="22">🎫</text><text x="725" y="195" font-size="14">gate</text>
+            <rect x="790" y="110" width="70" height="50" rx="8" fill="#d6fbef" stroke="#23243a" stroke-width="3"/><text x="825" y="143" font-size="22">✈️</text><text x="825" y="195" font-size="14">plane door</text>
+            <text x="525" y="100" font-size="18">✅</text><text x="625" y="100" font-size="18">✅</text><text x="725" y="100" font-size="18">✅</text><text x="825" y="100" font-size="18">✅</text>
+          </g>
+          <text x="680" y="240" font-size="16">Each check asks: who are you? is your device healthy? should you be here right now?</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PACKET JOURNEY ================= -->
+<section id="journey-sec">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter auto"></span><h2>How the Internet Delivers a Message 📦</h2></div>
+    <p class="lead">When you send a message, it's chopped into tiny envelopes called <b>packets</b>. They travel through many places. A <b>firewall</b> checks every packet like a guard at a gate. Send some packets and watch!</p>
+    <div class="sketch">
+      <svg id="journey" viewBox="0 0 1000 330" role="img" aria-label="Packets travelling from laptop through router, firewall, internet, to server">
+        <path id="jpath" d="M110 230 C 220 230, 230 140, 330 140 S 470 140, 500 140 S 620 230, 720 200 S 840 120, 890 160" fill="none" stroke="#23243a" stroke-width="4" class="flow"/>
+        <!-- laptop -->
+        <g transform="translate(40 180)"><rect x="10" y="0" width="110" height="70" rx="6" fill="#dde9ff" stroke="#23243a" stroke-width="4"/><path d="M0 75 h130 l-10 14 h-110z" fill="#a0a4b8" stroke="#23243a" stroke-width="4"/><text x="65" y="45" text-anchor="middle" font-size="30">🙂</text><text x="65" y="115" text-anchor="middle" font-family="Permanent Marker" font-size="17">You</text></g>
+        <!-- router -->
+        <g transform="translate(290 105)"><rect x="0" y="15" width="80" height="40" rx="8" fill="#ffd23f" stroke="#23243a" stroke-width="4"/><line x1="15" y1="15" x2="5" y2="-10" stroke="#23243a" stroke-width="4"/><line x1="65" y1="15" x2="75" y2="-10" stroke="#23243a" stroke-width="4"/><circle cx="25" cy="35" r="4" fill="#06d6a0"/><circle cx="40" cy="35" r="4" fill="#06d6a0"/><text x="40" y="85" text-anchor="middle" font-family="Permanent Marker" font-size="17">Router</text></g>
+        <!-- firewall -->
+        <g transform="translate(470 60)" id="fwGroup">
+          <g stroke="#23243a" stroke-width="3">
+            <rect x="0" y="20" width="60" height="22" fill="#fb5607"/><rect x="0" y="42" width="30" height="22" fill="#ff9f68"/><rect x="30" y="42" width="30" height="22" fill="#fb5607"/>
+            <rect x="0" y="64" width="60" height="22" fill="#ff9f68"/><rect x="0" y="86" width="30" height="22" fill="#fb5607"/><rect x="30" y="86" width="30" height="22" fill="#ff9f68"/>
+            <rect x="0" y="108" width="60" height="22" fill="#fb5607"/>
+          </g>
+          <text x="30" y="12" text-anchor="middle" font-size="22">🔥</text>
+          <text x="30" y="160" text-anchor="middle" font-family="Permanent Marker" font-size="17">Firewall</text>
+          <g id="fwBubble" opacity="0"><rect x="-40" y="-55" width="140" height="40" rx="10" fill="#ef233c" stroke="#23243a" stroke-width="3"/><text x="30" y="-28" text-anchor="middle" fill="#fff" font-family="Permanent Marker" font-size="18">BLOCKED! ✋</text></g>
+        </g>
+        <!-- cloud -->
+        <g transform="translate(640 150)"><path d="M20 60 a28 28 0 0 1 10 -52 a36 36 0 0 1 66 -2 a26 26 0 0 1 30 40 a20 20 0 0 1 -10 14z" fill="#fff" stroke="#23243a" stroke-width="4"/><text x="62" y="45" text-anchor="middle" font-family="Permanent Marker" font-size="15">Internet</text></g>
+        <!-- server -->
+        <g transform="translate(860 100)"><rect x="0" y="0" width="80" height="120" rx="6" fill="#c9b3ff" stroke="#23243a" stroke-width="4"/><line x1="10" y1="30" x2="70" y2="30" stroke="#23243a" stroke-width="3"/><line x1="10" y1="60" x2="70" y2="60" stroke="#23243a" stroke-width="3"/><line x1="10" y1="90" x2="70" y2="90" stroke="#23243a" stroke-width="3"/><circle cx="62" cy="15" r="4" fill="#06d6a0"/><text x="40" y="150" text-anchor="middle" font-family="Permanent Marker" font-size="17">Game server</text></g>
+        <g id="packets"></g>
+        <text x="500" y="320" text-anchor="middle" font-size="15" fill="#55576e">🔒 = encrypted (HTTPS): spies in the middle see only scrambled gibberish</text>
+      </svg>
+      <div class="row" style="margin:1rem 0">
+        <button class="btn teal" data-pkt="good">📨 Send "hi friend!"</button>
+        <button class="btn blue" data-pkt="secure">🔒 Send encrypted password</button>
+        <button class="btn red" data-pkt="evil">💣 Hacker sends virus</button>
+        <button class="btn purple" data-pkt="flood">🌊 Flood attack (DDoS)</button>
+      </div>
+      <div class="journey-log" id="jlog"><div class="info">// firewall log — waiting for packets…</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= CRYPTO ================= -->
+<section id="crypto">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter auto"></span><h2>Secret Codes (Encryption) 🔐</h2></div>
+    <p class="lead">Encryption turns your message into gibberish that only the right <b>key</b> can unlock. Julius Caesar did it 2000 years ago by <b>shifting letters</b>. Try it: type a message and move the slider!</p>
+    <div class="grid g2">
+      <div class="sketch purple tilt-l reveal">
+        <h3>🔤 Caesar's Secret Wheel</h3>
+        <input type="text" id="plain" value="MEET ME AT THE PARK" maxlength="60" aria-label="Message to encrypt">
+        <p style="margin:.8rem 0 .2rem">Secret key (shift): <b id="shiftVal">3</b></p>
+        <input type="range" id="shift" min="1" max="25" value="3" aria-label="Shift amount">
+        <p style="margin:.8rem 0 .2rem">🔒 Scrambled message:</p>
+        <div class="cipher-out" id="cipherOut"></div>
+        <div class="wheel-wrap"><svg id="cipherWheel" viewBox="0 0 260 260" width="240" aria-hidden="true"></svg></div>
+      </div>
+      <div class="sketch teal tilt-r reveal">
+        <h3>📮 The Magic Padlock (how HTTPS works)</h3>
+        <p>Today computers use <b>much</b> stronger math. Here's the clever trick, called <b>public-key encryption</b>:</p>
+        <svg viewBox="0 0 440 300" width="100%" role="img" aria-label="Public key padlock story">
+          <g font-family="Patrick Hand" font-size="15" text-anchor="middle">
+            <!-- step 1 -->
+            <text x="70" y="22" font-family="Permanent Marker">1. Server</text>
+            <text x="70" y="70" font-size="40">🖥️</text>
+            <text x="70" y="108">gives everyone</text><text x="70" y="126">OPEN padlocks 🔓</text>
+            <text x="70" y="144">keeps the only key 🗝️</text>
+            <!-- step 2 -->
+            <text x="220" y="22" font-family="Permanent Marker">2. You</text>
+            <text x="220" y="70" font-size="40">🧒</text>
+            <text x="220" y="108">put your secret in</text><text x="220" y="126">a box and SNAP 🔒</text>
+            <text x="220" y="144">the padlock shut</text>
+            <!-- step 3 -->
+            <text x="370" y="22" font-family="Permanent Marker">3. Server</text>
+            <text x="370" y="70" font-size="40">📦</text>
+            <text x="370" y="108">only its key</text><text x="370" y="126">can open it! 🗝️✨</text>
+            <g stroke="#23243a" stroke-width="3" fill="none" marker-end="url(#arrow)"><path d="M120 60 Q145 40 170 60"/><path d="M270 60 Q295 40 320 60"/></g>
+            <!-- spy -->
+            <rect x="110" y="180" width="220" height="100" rx="16" fill="#fff" stroke="#23243a" stroke-width="3" stroke-dasharray="6 4"/>
+            <text x="160" y="240" font-size="44">🕵️</text>
+            <text x="260" y="215">Spy grabs the box…</text>
+            <text x="260" y="238">but has no key!</text>
+            <text x="260" y="262" font-family="Permanent Marker" fill="#ef233c">"Argh! 😤"</text>
+          </g>
+        </svg>
+        <p style="font-size:1rem">See the 🔒 next to a website address? That means this magic padlock is protecting you!</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HASHING ================= -->
+<section id="hash">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter auto"></span><h2>Digital Fingerprints (Hashing) 🫆</h2></div>
+    <p class="lead">A <b>hash</b> turns any text into a fixed-size "fingerprint". It's like a <b>smoothie blender</b> 🥤: the same fruit always makes the exact same smoothie, but nobody can turn a smoothie back into fruit!</p>
+    <div class="grid g2">
+      <div class="sketch purple reveal">
+        <h3>🧪 Fingerprint lab</h3>
+        <p style="font-size:1.05rem">Type in both boxes. Change just <b>one letter</b> and watch the whole fingerprint change!</p>
+        <div class="hash-pair">
+          <div><input type="text" id="hashA" value="hello" aria-label="Text A"><div class="identicon" id="iconA"></div><div class="hex" id="hexA"></div></div>
+          <div><input type="text" id="hashB" value="Hello" aria-label="Text B"><div class="identicon" id="iconB"></div><div class="hex" id="hexB"></div></div>
+        </div>
+        <div class="verdict" id="hashDiff"></div>
+        <p style="font-size:.95rem;margin-bottom:0">(This uses <b>SHA-256</b>, the same real fingerprint maker that protects downloads, Bitcoin and website certificates.)</p>
+      </div>
+      <div class="sketch yellow reveal">
+        <h3>🗄️ How good websites store your password</h3>
+        <svg viewBox="0 0 440 210" width="100%" role="img" aria-label="Password is hashed before it is stored">
+          <g font-family="Patrick Hand" font-size="15" text-anchor="middle" fill="#23243a">
+            <text x="55" y="40" font-size="30">🔑</text><text x="55" y="64">"PurpleTiger"</text>
+            <path d="M100 45 h45" stroke="#23243a" stroke-width="3" marker-end="url(#arrow)"/>
+            <text x="190" y="44" font-size="34">🥤</text><text x="190" y="64">hash it</text>
+            <path d="M235 45 h45" stroke="#23243a" stroke-width="3" marker-end="url(#arrow)"/>
+            <rect x="290" y="16" width="135" height="58" rx="10" fill="#fff" stroke="#23243a" stroke-width="3"/>
+            <text x="357" y="40" font-size="14">🗄️ database saves</text><text x="357" y="60" font-family="Courier New" font-size="13">9f2c…b71a</text>
+            <text x="220" y="108" font-size="16">Log in later → hash what you type → same fingerprint? ✅ you're in!</text>
+            <rect x="40" y="128" width="360" height="66" rx="12" fill="#ffe0eb" stroke="#23243a" stroke-width="2.5" stroke-dasharray="6 4"/>
+            <text x="85" y="172" font-size="34">🦹</text>
+            <text x="250" y="156">Hacker steals the database…</text>
+            <text x="250" y="178">gets only smoothies, not the fruit! 🤷</text>
+          </g>
+        </svg>
+        <label class="switch" style="font-size:1rem;margin-top:.4rem"><input type="checkbox" id="saltToggle"><span class="track"></span> Add a pinch of salt 🧂</label>
+        <table class="salt-table" id="saltTable" aria-live="polite"></table>
+        <div class="verdict" id="saltMsg"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PASSWORDS ================= -->
+<section id="password">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter auto"></span><h2>Password Power Meter 💪</h2></div>
+    <p class="lead">Hackers use super-fast computers that guess <b>billions</b> of passwords a second. How long would yours survive? <small>(Type a <b>made-up</b> one. Nothing leaves this page, but never type real passwords into random sites!)</small></p>
+    <div class="grid g2">
+      <div class="sketch yellow reveal">
+        <input type="text" id="pw" placeholder="try: cat, then: PurpleTigerEats7Tacos!" autocomplete="off" aria-label="Practice password">
+        <div class="meter" style="margin-top:1rem"><div id="pwBar"></div></div>
+        <p style="margin-top:1rem">A hacker computer would crack it in about…</p>
+        <div class="crack-time" id="crackTime">⌨️ start typing!</div>
+        <ul class="checks" id="pwChecks">
+          <li data-c="len">12+ letters long</li>
+          <li data-c="lower">small letters</li>
+          <li data-c="upper">BIG letters</li>
+          <li data-c="num">numbers 123</li>
+          <li data-c="sym">symbols !@#</li>
+          <li data-c="common">not a common one</li>
+        </ul>
+      </div>
+      <div class="sketch pink reveal">
+        <h3>🧁 The Passphrase Recipe</h3>
+        <svg viewBox="0 0 420 220" width="100%" role="img" aria-label="Passphrase recipe">
+          <g font-family="Permanent Marker" font-size="16" text-anchor="middle">
+            <rect x="10" y="20" width="90" height="50" rx="10" fill="#ffd23f" stroke="#23243a" stroke-width="3" transform="rotate(-4 55 45)"/><text x="55" y="52">Purple</text>
+            <rect x="110" y="20" width="90" height="50" rx="10" fill="#7ff0cc" stroke="#23243a" stroke-width="3" transform="rotate(3 155 45)"/><text x="155" y="52">Tiger</text>
+            <rect x="210" y="20" width="90" height="50" rx="10" fill="#a8d1ff" stroke="#23243a" stroke-width="3" transform="rotate(-2 255 45)"/><text x="255" y="52">Eats7</text>
+            <rect x="310" y="20" width="100" height="50" rx="10" fill="#c9b3ff" stroke="#23243a" stroke-width="3" transform="rotate(4 360 45)"/><text x="360" y="52">Tacos!</text>
+            <path d="M210 85 v30" stroke="#23243a" stroke-width="3" marker-end="url(#arrow)"/>
+            <rect x="40" y="125" width="340" height="50" rx="12" fill="#fff" stroke="#23243a" stroke-width="4"/>
+            <text x="210" y="158" font-size="20">PurpleTigerEats7Tacos!</text>
+            <text x="210" y="205" font-family="Patrick Hand" font-size="17">Easy for YOU to remember 🧠, centuries for a robot 🤖</text>
+          </g>
+        </svg>
+        <ul>
+          <li>🎲 Use <b>4 random words</b> + a number + a symbol.</li>
+          <li>🔁 <b>Different</b> password for every app (a password manager helps!).</li>
+          <li>📱 Turn on <b>2-step login</b>: even if they guess it, they need your phone too.</li>
+          <li>🤐 Never share it. Not even with your best friend.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PHISHING GAME ================= -->
+<section id="phish">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter auto"></span><h2>Spot the Phish! 🎣</h2></div>
+    <p class="lead"><b>Phishing</b> = a fake message that tries to trick you into clicking a bad link or giving away secrets. This email is a trap! <b>Find all 6 red flags</b> by clicking on suspicious parts.</p>
+    <div class="grid g2">
+      <div class="email reveal">
+        <div class="bar"><i style="background:#ff5f57"></i><i style="background:#febc2e"></i><i style="background:#28c840"></i></div>
+        <div class="body">
+          <div class="meta">
+            <div><b>From:</b> <span class="flag" data-f="1">MegaGame Support &lt;support@megagame-prizes.xyz&gt;</span></div>
+            <div><b>Subject:</b> <span class="flag" data-f="2">⚠️ URGENT!!! Your account will be DELETED in 1 hour</span></div>
+          </div>
+          <p><span class="flag" data-f="3">Dear user,</span></p>
+          <p>We noticed strange activity. <span class="flag" data-f="4">Congratulation, you also won 10,000 free gems!!</span></p>
+          <p>To keep your account, <span class="flag" data-f="5">reply with your username and password</span> or click below:</p>
+          <p><span class="flag" data-f="6"><span class="fake-btn">Claim gems now 💎</span> <small style="color:#888">→ http://megagame.login-verify.ru/claim</small></span></p>
+          <p style="color:#666;font-size:14px">Thanks, The MegaGame Team</p>
+        </div>
+      </div>
+      <div class="sketch orange reveal">
+        <h3>Red flags found: <span id="flagCount">0</span>/6 🚩</h3>
+        <ol class="flag-list" id="flagList">
+          <li data-f="1"><b>Weird sender:</b> real companies don't email from strange addresses like "-prizes.xyz".</li>
+          <li data-f="2"><b>Panic & hurry:</b> "URGENT! 1 hour!" They want you to act before you think.</li>
+          <li data-f="3"><b>No name:</b> real services usually know your name. "Dear user" is lazy.</li>
+          <li data-f="4"><b>Too good to be true</b> + spelling mistakes ("Congratulation").</li>
+          <li data-f="5"><b>Asks for your password:</b> NO real company EVER asks for it. Ever!</li>
+          <li data-f="6"><b>Sneaky link:</b> the button goes to a totally different website. Hover before you click!</li>
+        </ol>
+        <p id="phishWin" style="display:none" class="scribble">🎉 You're a phish-spotting pro! When in doubt, ask a grown-up or go to the app directly, never through the link.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= LINK DETECTIVE ================= -->
+<section id="urls">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter auto"></span><h2>Link Detective 🔍</h2></div>
+    <p class="lead">Tricksters make links that <b>look</b> real. The secret skill: find the <span class="hl">real owner</span> of a link. It's the part right before the first single <code>/</code>. Read it <b>right to left</b>!</p>
+    <div class="sketch reveal">
+      <svg viewBox="0 0 900 215" width="100%" role="img" aria-label="Parts of a web address">
+        <g font-family="Courier New" font-size="30" font-weight="bold" text-anchor="middle">
+          <rect x="40" y="40" width="160" height="56" rx="10" fill="#a8d1ff" stroke="#23243a" stroke-width="3"/><text x="120" y="78">https://</text>
+          <rect x="205" y="40" width="160" height="56" rx="10" fill="#fff3b8" stroke="#23243a" stroke-width="3"/><text x="285" y="78">support.</text>
+          <rect x="370" y="34" width="240" height="68" rx="12" fill="#ffb3cc" stroke="#23243a" stroke-width="5"/><text x="490" y="78">megagame.com</text>
+          <rect x="615" y="40" width="110" height="56" rx="10" fill="#c6f6e3" stroke="#23243a" stroke-width="3"/><text x="670" y="78">/help</text>
+        </g>
+        <g font-family="Patrick Hand" font-size="16" text-anchor="middle" fill="#23243a">
+          <text x="490" y="24" font-family="Permanent Marker" font-size="17" fill="#ef233c">👑 THE REAL OWNER: check this!</text>
+          <text x="120" y="126">🔒 private road</text><text x="120" y="146">(encrypted, but NOT</text><text x="120" y="166">proof it's safe!)</text>
+          <text x="285" y="126">a room in the house</text><text x="285" y="146">(the owner can add</text><text x="285" y="166">any room name)</text>
+          <text x="490" y="126">the house itself</text><text x="490" y="146">(only megagame owns it)</text>
+          <text x="670" y="126">the page</text><text x="670" y="146">(could say anything)</text>
+          <text x="815" y="70" font-size="40">🕵️</text>
+          <text x="450" y="205" font-size="17">Rule: what's right before the first "/" must be exactly the name you expect. Everything else is decoration.</text>
+        </g>
+      </svg>
+    </div>
+    <div class="sketch orange reveal" style="margin-top:2rem">
+      <h3>Real or fake? Score: <span id="urlScore">0</span> / <span id="urlTotal">0</span></h3>
+      <p style="font-size:1.05rem;margin-top:0">You want to log in to <b>megagame.com</b> (a made-up game). Which links are really theirs?</p>
+      <div id="urlGame"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= WEBSITE ATTACKS ================= -->
+<section id="webattacks">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter auto"></span><h2>Tricking a Website 🧙</h2></div>
+    <p class="lead">Websites keep their data in a <b>database</b> and talk to it in a language called <b>SQL</b>. Imagine a <b>robot librarian</b> 🤖 who obeys written notes word-for-word. If a website pastes whatever you type straight into the note, a trickster can write <i>instructions</i> instead of a name!</p>
+    <div class="grid g2">
+      <div class="sketch blue reveal">
+        <h3>🤖 The Robot Librarian <small class="scribble">(SQL injection)</small></h3>
+        <label class="field">Username <input type="text" id="sqlUser" value="admin" autocomplete="off"></label>
+        <label class="field">Password <input type="text" id="sqlPass" value="" placeholder="type a guess…" autocomplete="off"></label>
+        <div class="row" style="margin:.6rem 0">
+          <button class="btn" id="sqlTrick" type="button">🪄 Try the trick</button>
+          <button class="btn teal" id="sqlLogin" type="button">Log in</button>
+        </div>
+        <label class="switch" style="font-size:1rem"><input type="checkbox" id="sqlSafe"><span class="track"></span> Safe mode: sealed envelopes ✉️</label>
+        <p style="margin:.6rem 0 .2rem;font-size:1rem">The note the robot reads:</p>
+        <pre class="code-note" id="sqlQuery"></pre>
+        <div class="verdict" id="sqlResult">Press <b>Log in</b> to hand the note to the robot.</div>
+      </div>
+      <div class="sketch pink reveal">
+        <h3>💬 The Sneaky Comment <small class="scribble">(XSS)</small></h3>
+        <p style="font-size:1.05rem">A website shows everyone's comments. What if someone posts <b>hidden code</b> instead of words? If the site isn't careful, that code runs in <b>every visitor's browser</b>!</p>
+        <div class="comment-wall" id="commentWall">
+          <div class="comment"><b>maya_draws:</b> love this drawing!! 🎨</div>
+          <div class="comment"><b>leo99:</b> how did you do the shading?</div>
+        </div>
+        <div class="row" style="margin-top:.6rem;flex-wrap:nowrap"><input type="text" id="commentIn" placeholder="write a comment…" aria-label="Comment"><button class="btn" id="commentPost" type="button">Post</button></div>
+        <div class="row" style="margin-top:.6rem">
+          <button class="btn red" id="commentEvil" type="button">😈 Post sneaky comment</button>
+          <label class="switch" style="font-size:1rem"><input type="checkbox" id="xssSafe"><span class="track"></span> Safe mode</label>
+        </div>
+        <div class="verdict" id="xssResult">Try the sneaky comment with safe mode OFF, then ON.</div>
+      </div>
+    </div>
+    <div class="grid g2" style="margin-top:1.6rem">
+      <div class="sketch teal reveal"><b>🛡️ How builders stop this:</b> they keep <b>data</b> and <b>instructions</b> apart (sealed envelopes), check every input, and follow a famous checklist of the most common website mistakes called the <b>OWASP Top 10</b>.</div>
+      <div class="sketch yellow reveal"><b>⚖️ Important rule:</b> only try tricks like these on practice sites you own or have permission to test (like CTF games). Doing it to a real website without permission is <b>against the law</b>. Pros get permission first and report what they find.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PRIVACY ================= -->
+<section id="privacy">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter auto"></span><h2>Your Digital Footprint 👣</h2></div>
+    <p class="lead">Everything you post leaves footprints in <b>wet cement</b>: easy to make, really hard to erase. Strangers can put tiny clues together like a puzzle 🧩. This made-up post looks innocent… <b>find the 6 clues</b> a stranger could use!</p>
+    <div class="grid g2">
+      <div class="sketch post reveal" id="post">
+        <div class="post-head">
+          <div class="av">😎</div>
+          <div><b>@sunny_kid</b> · 🌍 public<br><span class="flag" data-c="6">📍 Springfield Park · 2 min ago</span></div>
+        </div>
+        <svg viewBox="0 0 400 260" role="img" aria-label="Photo: a kid with a birthday cake and a dog in front of a house">
+          <rect x="0" y="190" width="400" height="70" fill="#9be38a"/>
+          <circle cx="350" cy="45" r="24" fill="#ffd23f" stroke="#23243a" stroke-width="3"/>
+          <!-- house -->
+          <path d="M20 95 L110 35 L200 95" fill="#ff4f8b" stroke="#23243a" stroke-width="4" stroke-linejoin="round"/>
+          <rect x="32" y="93" width="156" height="110" fill="#fffdf5" stroke="#23243a" stroke-width="4"/>
+          <rect x="90" y="135" width="40" height="68" fill="#3a86ff" stroke="#23243a" stroke-width="3"/>
+          <g class="clue" data-c="1"><rect x="93" y="104" width="34" height="24" rx="4" fill="#fff" stroke="#23243a" stroke-width="3"/><text x="110" y="122" text-anchor="middle" font-family="Permanent Marker" font-size="16">42</text></g>
+          <rect x="45" y="110" width="32" height="30" fill="#8fd3ff" stroke="#23243a" stroke-width="3"/>
+          <!-- kid with school shirt -->
+          <circle cx="250" cy="105" r="22" fill="#ffd9b3" stroke="#23243a" stroke-width="3"/>
+          <circle cx="243" cy="102" r="2.5" fill="#23243a"/><circle cx="257" cy="102" r="2.5" fill="#23243a"/><path d="M242 112 q8 8 16 0" fill="none" stroke="#23243a" stroke-width="2.5"/>
+          <path d="M226 92 q24 -30 48 0" fill="#c68b59" stroke="#23243a" stroke-width="2.5"/>
+          <g class="clue" data-c="2"><path d="M218 128 h64 l8 70 h-80z" fill="#06d6a0" stroke="#23243a" stroke-width="3"/><text x="250" y="152" text-anchor="middle" font-family="Permanent Marker" font-size="10">MAPLE ST.</text><text x="250" y="165" text-anchor="middle" font-family="Permanent Marker" font-size="10">SCHOOL</text></g>
+          <!-- cake -->
+          <g class="clue" data-c="3"><rect x="300" y="168" width="70" height="36" rx="5" fill="#fff3b8" stroke="#23243a" stroke-width="3"/><path d="M300 180 q9 8 17 0 q9 8 18 0 q9 8 17 0 q9 8 18 0" fill="none" stroke="#ff4f8b" stroke-width="3"/>
+            <text x="335" y="164" text-anchor="middle" font-family="Permanent Marker" font-size="20" fill="#8338ec">10</text><path d="M323 140 q3 -6 0 -10 M347 140 q3 -6 0 -10" stroke="#fb5607" stroke-width="3" fill="none"/></g>
+          <!-- dog with tag -->
+          <g class="clue" data-c="4"><ellipse cx="140" cy="228" rx="30" ry="15" fill="#c68b59" stroke="#23243a" stroke-width="3"/><circle cx="110" cy="214" r="14" fill="#c68b59" stroke="#23243a" stroke-width="3"/><circle cx="106" cy="211" r="2" fill="#23243a"/>
+            <rect x="88" y="228" width="52" height="18" rx="5" fill="#ffd23f" stroke="#23243a" stroke-width="2"/><text x="114" y="241" text-anchor="middle" font-family="Permanent Marker" font-size="10">BISCUIT</text></g>
+        </svg>
+        <p class="cap"><b>@sunny_kid</b> Best 10th birthday ever!!! 🎉🎂 <span class="flag" data-c="5">We're at the park ALL DAY, house totally empty lol</span> #MapleStreet #Springfield</p>
+      </div>
+      <div class="sketch teal reveal">
+        <h3>Clues found: <span id="clueCount">0</span> / 6 🧩</h3>
+        <ol class="flag-list" id="clueList">
+          <li data-c="1"><b>🏠 House number:</b> together with the photo of the house, it's easy to find where you live.</li>
+          <li data-c="2"><b>👕 School shirt:</b> tells strangers where you are every weekday.</li>
+          <li data-c="3"><b>🎂 "10th birthday" today:</b> your exact birthday, often used to prove who you are.</li>
+          <li data-c="4"><b>🐶 Pet's name tag:</b> "first pet" is a super common secret question and password!</li>
+          <li data-c="5"><b>🏚️ "House empty all day":</b> basically an invitation for burglars.</li>
+          <li data-c="6"><b>📍 Live location + public account:</b> anyone in the world can see where you are right now.</li>
+        </ol>
+        <p id="clueWin" style="display:none" class="scribble">🎉 Detective skills unlocked! Post the fun stuff <i>after</i> you're home, keep your account private, and crop out names, numbers and badges.</p>
+      </div>
+    </div>
+
+    <div class="grid g2" style="margin-top:2rem">
+      <div class="sketch purple reveal">
+        <h3>🔦 App permission check</h3>
+        <p style="font-size:1.05rem">You download <b>"Super Flashlight"</b>. It asks for these. Allow or deny?</p>
+        <div id="permList"></div>
+        <div class="verdict" id="permResult">A flashlight only needs… a light. Let's see!</div>
+      </div>
+      <div class="sketch yellow reveal">
+        <h3>🍪 Cookies & trackers</h3>
+        <svg viewBox="0 0 420 170" width="100%" role="img" aria-label="A tracking cookie follows you from site to site">
+          <g font-family="Patrick Hand" font-size="14" text-anchor="middle" fill="#23243a">
+            <g stroke="#23243a" stroke-width="3" fill="#fff"><rect x="10" y="30" width="110" height="80" rx="8"/><rect x="155" y="30" width="110" height="80" rx="8"/><rect x="300" y="30" width="110" height="80" rx="8"/></g>
+            <g fill="#a8d1ff" stroke="#23243a" stroke-width="2"><rect x="10" y="30" width="110" height="16" rx="6"/><rect x="155" y="30" width="110" height="16" rx="6"/><rect x="300" y="30" width="110" height="16" rx="6"/></g>
+            <text x="65" y="85" font-size="28">👟</text><text x="210" y="85" font-size="28">🎮</text><text x="355" y="85" font-size="28">🍕</text>
+            <text x="65" y="130">shoe shop</text><text x="210" y="130">game site</text><text x="355" y="130">pizza site</text>
+            <text x="100" y="62" font-size="18">🍪</text><text x="245" y="62" font-size="18">🍪</text><text x="390" y="62" font-size="18">🍪</text>
+            <path d="M100 18 Q 172 -4 245 18 Q 318 -4 390 18" fill="none" stroke="#ef233c" stroke-width="2.5" stroke-dasharray="5 4"/>
+            <text x="210" y="160" font-size="15">"Tracking cookies" follow you like a shadow 👤 to learn what you like</text>
+          </g>
+        </svg>
+        <ul style="font-size:1.02rem;margin-bottom:0">
+          <li>🍪 <b>Cookies</b> are little notes websites leave in your browser. Good ones remember your login; tracking ones follow you around.</li>
+          <li>🪧 <b>Billboard test:</b> would you be OK with it on a giant billboard? No? Don't post it.</li>
+          <li>🔒 Keep accounts <b>private</b> and turn off location on photos.</li>
+          <li>🙋 <b>Ask friends</b> before posting photos of them.</li>
+          <li>🆓 If an app is free, <b>you and your data</b> are often what's being sold.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= STORY ================= -->
+<section id="story">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter auto"></span><h2>Comic: How a Hack Happens 📖</h2></div>
+    <p class="lead">Real attacks happen in <b>steps</b> (experts call it the "kill chain"). The good news: defenders get a chance to stop them at <b>every</b> step! 🟢</p>
+    <div class="comic" id="comic"></div>
+  </div>
+</section>
+
+<!-- ================= UH-OH ================= -->
+<section id="uhoh">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter auto"></span><h2>Uh-oh! I Think I Got Hacked 🚑</h2></div>
+    <p class="lead">Even experts get hacked sometimes. What matters is spotting it and acting <b>fast and calm</b>. First, the warning signs:</p>
+    <div class="grid g3">
+      <div class="sketch sign pink reveal"><span class="ic">💬</span>Friends get weird messages or links "from you"</div>
+      <div class="sketch sign yellow reveal"><span class="ic">🔑</span>Your password suddenly stops working</div>
+      <div class="sketch sign blue reveal"><span class="ic">📧</span>"New login from a faraway place" alerts</div>
+      <div class="sketch sign orange reveal"><span class="ic">🐢</span>Device is super slow, hot, or full of pop-ups</div>
+      <div class="sketch sign purple reveal"><span class="ic">📲</span>Apps appear that you never installed</div>
+      <div class="sketch sign teal reveal"><span class="ic">💎</span>Gems, money or files go missing</div>
+    </div>
+    <h3 style="margin-top:2.4rem">🩹 The First-Aid Plan <small class="scribble">(tap each step as you practise it)</small></h3>
+    <div class="aid" id="aidSteps"></div>
+    <div class="verdict" id="aidMsg" style="margin-top:1.2rem">0 / 8 steps practised</div>
+    <div class="sketch pink reveal" style="margin-top:1.4rem"><b>🚫 Never pay</b> a ransom, and never pay someone who promises to "recover" your account for money. That's very often a <b>second scam</b>!</div>
+  </div>
+</section>
+
+<!-- ================= eBPF ================= -->
+<section id="ebpf">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter auto" data-suffix=" · Bonus"></span><h2>eBPF: Tiny Robot Guards in the Brain 🐝</h2></div>
+    <p class="lead">Every computer has a <b>kernel</b>: the boss of the computer that every app has to ask permission from ("Can I open this file?", "Can I talk to the internet?"). <span class="hl">eBPF</span> lets us put <b>tiny, safe robot guards</b> right inside the kernel, at the doors where those questions are asked, <b>without rebuilding the kernel or restarting the computer</b>. It's like adding smart cameras inside the walls of a building while everyone keeps working. 📹</p>
+
+    <div class="ebpf-stage">
+      <svg id="ebpfSvg" viewBox="0 0 700 530" role="img" aria-label="Diagram of user space apps, kernel hooks with eBPF programs, and hardware">
+        <!-- user space -->
+        <rect x="15" y="15" width="670" height="140" rx="18" fill="#dde9ff" stroke="#23243a" stroke-width="3"/>
+        <text x="30" y="40" font-family="Permanent Marker" font-size="16">👥 USER SPACE: where apps live</text>
+        <g font-family="Patrick Hand" font-size="15" text-anchor="middle">
+          <g id="app0"><rect x="50" y="60" width="90" height="70" rx="12" fill="#fff" stroke="#23243a" stroke-width="3"/><text x="95" y="95" font-size="28">🌐</text><text x="95" y="120">browser</text></g>
+          <g id="app1"><rect x="185" y="60" width="90" height="70" rx="12" fill="#fff" stroke="#23243a" stroke-width="3"/><text x="230" y="95" font-size="28">🎮</text><text x="230" y="120">game</text></g>
+          <g id="app2"><rect x="320" y="60" width="100" height="70" rx="12" fill="#ffd1dc" stroke="#ef233c" stroke-width="3" stroke-dasharray="5 3"/><text x="370" y="95" font-size="28">😈</text><text x="370" y="120">sneaky.bin</text></g>
+          <g id="toolBox"><rect x="510" y="55" width="150" height="80" rx="12" fill="#fff3b8" stroke="#23243a" stroke-width="3"/><text x="585" y="88" font-size="26">📊</text><text x="585" y="110">Security dashboard</text><text x="585" y="127" font-size="12">(Falco, Tetragon, Cilium…)</text></g>
+        </g>
+        <!-- syscall wall -->
+        <line x1="15" y1="172" x2="685" y2="172" stroke="#23243a" stroke-width="4" stroke-dasharray="14 6"/>
+        <rect x="235" y="161" width="230" height="22" rx="6" fill="#fff" stroke="#23243a" stroke-width="2"/>
+        <text x="350" y="177" text-anchor="middle" font-family="Permanent Marker" font-size="13">🚪 system-call doors</text>
+        <!-- kernel -->
+        <rect x="15" y="190" width="670" height="215" rx="18" fill="#eadcff" stroke="#23243a" stroke-width="3"/>
+        <text x="30" y="395" font-family="Permanent Marker" font-size="16">🧠 KERNEL: the computer's boss</text>
+        <g font-family="Patrick Hand" font-size="14" text-anchor="middle">
+          <g><circle cx="95" cy="235" r="22" fill="#fff" stroke="#23243a" stroke-width="3" id="hook0"/><text x="95" y="240">▶️</text><text x="95" y="275">run program</text></g>
+          <g><circle cx="230" cy="235" r="22" fill="#fff" stroke="#23243a" stroke-width="3" id="hook1"/><text x="230" y="240">📄</text><text x="230" y="275">open file</text></g>
+          <g><circle cx="370" cy="235" r="22" fill="#fff" stroke="#23243a" stroke-width="3" id="hook2"/><text x="370" y="240">🔌</text><text x="370" y="275">connect</text></g>
+        </g>
+        <!-- eBPF bees -->
+        <g id="bees" opacity="0" style="transition:opacity .5s">
+          <g transform="translate(120 205)"><g class="wiggle"><ellipse cx="0" cy="0" rx="13" ry="9" fill="#ffd23f" stroke="#23243a" stroke-width="2"/><path d="M-4 -8 v16 M4 -8 v16" stroke="#23243a" stroke-width="2"/><ellipse cx="-3" cy="-11" rx="7" ry="5" fill="#fff" stroke="#23243a" stroke-width="1.5" opacity=".9"/></g></g>
+          <g transform="translate(255 205)"><g class="wiggle"><ellipse cx="0" cy="0" rx="13" ry="9" fill="#ffd23f" stroke="#23243a" stroke-width="2"/><path d="M-4 -8 v16 M4 -8 v16" stroke="#23243a" stroke-width="2"/><ellipse cx="-3" cy="-11" rx="7" ry="5" fill="#fff" stroke="#23243a" stroke-width="1.5" opacity=".9"/></g></g>
+          <g transform="translate(395 205)"><g class="wiggle"><ellipse cx="0" cy="0" rx="13" ry="9" fill="#ffd23f" stroke="#23243a" stroke-width="2"/><path d="M-4 -8 v16 M4 -8 v16" stroke="#23243a" stroke-width="2"/><ellipse cx="-3" cy="-11" rx="7" ry="5" fill="#fff" stroke="#23243a" stroke-width="1.5" opacity=".9"/></g></g>
+          <g transform="translate(150 440)"><g class="wiggle"><ellipse cx="0" cy="0" rx="13" ry="9" fill="#ffd23f" stroke="#23243a" stroke-width="2"/><path d="M-4 -8 v16 M4 -8 v16" stroke="#23243a" stroke-width="2"/><ellipse cx="-3" cy="-11" rx="7" ry="5" fill="#fff" stroke="#23243a" stroke-width="1.5" opacity=".9"/></g></g>
+          <!-- map -->
+          <rect x="500" y="215" width="160" height="90" rx="10" fill="#fff" stroke="#23243a" stroke-width="3"/>
+          <text x="580" y="240" text-anchor="middle" font-family="Permanent Marker" font-size="14">🗃️ eBPF Map</text>
+          <text x="580" y="262" text-anchor="middle" font-family="Courier New" font-size="12">shared notebook</text>
+          <text x="580" y="280" text-anchor="middle" font-family="Courier New" font-size="12">bees ✍️ → app 👀</text>
+          <path d="M420 235 Q460 235 496 250" stroke="#8338ec" stroke-width="3" fill="none" class="flow" marker-end="url(#arrow)"/>
+          <path d="M585 212 L585 140" stroke="#8338ec" stroke-width="3" fill="none" class="flow" marker-end="url(#arrow)"/>
+        </g>
+        <!-- hardware -->
+        <rect x="15" y="415" width="670" height="100" rx="18" fill="#d6fbef" stroke="#23243a" stroke-width="3"/>
+        <text x="670" y="505" text-anchor="end" font-family="Permanent Marker" font-size="16">⚙️ HARDWARE</text>
+        <g font-family="Patrick Hand" font-size="14" text-anchor="middle">
+          <rect x="60" y="440" width="70" height="50" rx="8" fill="#fff" stroke="#23243a" stroke-width="3"/><text x="95" y="465" font-size="20">📶</text><text x="95" y="484">network card</text>
+          <text x="210" y="470" font-size="13" fill="#55576e">← XDP hook: check</text><text x="210" y="486" font-size="13" fill="#55576e">packets at the very door</text>
+          <rect x="320" y="440" width="70" height="50" rx="8" fill="#fff" stroke="#23243a" stroke-width="3"/><text x="355" y="465" font-size="20">💽</text><text x="355" y="484">disk</text>
+          <rect x="440" y="440" width="70" height="50" rx="8" fill="#fff" stroke="#23243a" stroke-width="3"/><text x="475" y="465" font-size="20">🧮</text><text x="475" y="484">CPU</text>
+        </g>
+        <g id="ebpfDots"></g>
+      </svg>
+
+      <div>
+        <div class="row" style="margin-bottom:.9rem">
+          <label class="switch"><input type="checkbox" id="ebpfToggle"><span class="track"></span> Load eBPF guards 🐝</label>
+        </div>
+        <div class="row" style="margin-bottom:.9rem">
+          <label class="switch"><input type="checkbox" id="ebpfEnforce"><span class="track"></span> Block mode 🛑</label>
+        </div>
+        <div class="terminal" id="ebpfTerm"><div class="t-dim">$ watching kernel events…</div><div class="t-dim"># guards are OFF: nobody is watching! 🙈</div></div>
+        <div class="row" style="margin-top:.8rem">
+          <button class="btn red" id="ebpfAttack">😈 Make sneaky.bin attack</button>
+        </div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:3rem">How a tiny eBPF guard gets hired 👷</h3>
+    <div class="steps">
+      <div class="sketch step reveal"><svg viewBox="0 0 160 90"><rect x="30" y="10" width="100" height="70" rx="6" fill="#fff" stroke="#23243a" stroke-width="3"/><path d="M42 28 h50 M42 42 h70 M42 56 h40" stroke="#8338ec" stroke-width="4" stroke-linecap="round"/><text x="118" y="34" font-size="22">✏️</text></svg><b>Write</b><br><small>A programmer writes a tiny guard program: "if someone opens a secret file, tell me!"</small></div>
+      <div class="sketch step reveal"><svg viewBox="0 0 160 90"><circle cx="80" cy="45" r="34" fill="#ffd23f" stroke="#23243a" stroke-width="3"/><text x="80" y="57" text-anchor="middle" font-size="34">🔍</text></svg><b>Verifier checks</b><br><small>A strict inspector makes sure it can't crash the computer or loop forever. Unsafe? Rejected!</small></div>
+      <div class="sketch step reveal"><svg viewBox="0 0 160 90"><text x="40" y="60" font-size="34">📜</text><path d="M78 45 h20" stroke="#23243a" stroke-width="3" marker-end="url(#arrow)"/><text x="105" y="60" font-size="34">⚡</text></svg><b>Translate (JIT)</b><br><small>It's turned into super-fast machine language so it barely slows anything down.</small></div>
+      <div class="sketch step reveal"><svg viewBox="0 0 160 90"><circle cx="80" cy="50" r="24" fill="#fff" stroke="#23243a" stroke-width="3"/><text x="80" y="58" text-anchor="middle" font-size="22">🚪</text><text x="110" y="30" font-size="26">🐝</text></svg><b>Attach to a hook</b><br><small>The guard sits at a door: running a program, opening files, network packets…</small></div>
+      <div class="sketch step reveal"><svg viewBox="0 0 160 90"><rect x="20" y="20" width="60" height="50" rx="6" fill="#fff" stroke="#23243a" stroke-width="3"/><text x="50" y="52" text-anchor="middle" font-size="22">🗃️</text><path d="M84 45 h30" stroke="#23243a" stroke-width="3" marker-end="url(#arrow)"/><text x="125" y="55" font-size="26">📊</text></svg><b>Report & act</b><br><small>It writes what it sees into a shared notebook (a "map"), or blocks bad actions right away.</small></div>
+    </div>
+
+    <div class="grid g2" style="margin-top:2.5rem">
+      <div class="sketch blue reveal">
+        <h3>🌊 XDP: stopping a flood at the front door</h3>
+        <p style="font-size:1.05rem">In a DDoS, millions of junk packets arrive. eBPF's <b>XDP</b> guard throws them out at the network card, <b>before</b> the kernel wastes energy on them.</p>
+        <div class="xdp-bars" id="xdpBars">
+          <div class="bar" style="background:#ff8fa3" id="barIn"><span id="barInL">0</span></div>
+          <div class="bar" style="background:#06d6a0" id="barDrop"><span id="barDropL">0</span></div>
+          <div class="bar" style="background:#3a86ff" id="barPass"><span id="barPassL">0</span></div>
+        </div>
+        <div class="row" style="justify-content:space-around;font-size:.95rem"><span>incoming</span><span>dropped by XDP</span><span>real users ✓</span></div>
+        <div class="row" style="margin-top:.8rem"><button class="btn purple" id="xdpBtn">🌊 Start flood</button><label class="switch" style="font-size:.95rem"><input type="checkbox" id="xdpToggle" checked><span class="track"></span> XDP guard</label></div>
+        <p style="font-size:1rem" id="xdpMsg">CPU load: <b id="cpuLoad">5%</b></p>
+      </div>
+      <div class="sketch yellow reveal">
+        <h3>🧰 What people build with eBPF</h3>
+        <ul style="font-size:1.05rem">
+          <li>🚨 <b>Intrusion alarms</b>: tools like <b>Falco</b> & <b>Tetragon</b> shout when a container suddenly opens a shell or reads password files.</li>
+          <li>🧱 <b>Super-fast firewalls</b>: <b>Cilium</b> and XDP filters drop bad traffic at millions of packets per second.</li>
+          <li>🛑 <b>Block bad actions</b>: <b>BPF-LSM</b> can say "NO" to dangerous system calls in real time.</li>
+          <li>🔭 <b>See everything</b>: who talked to whom, which program ran what, without changing the apps.</li>
+          <li>⚠️ <b>Careful!</b> Because it's so powerful, only admins (root) may load eBPF programs, and attackers sometimes try to misuse it too. Guards must be guarded!</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= REAL WORLD ================= -->
+<section id="world">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter auto"></span><h2>What Cybersecurity Makes Possible 🌍</h2></div>
+    <p class="lead">Security isn't just about stopping bad guys. It's what lets the whole modern world <b>trust</b> computers. Here's what it protects every single day:</p>
+    <div class="grid g3" id="worldGrid"></div>
+
+    <div class="sketch reveal" style="margin-top:2.5rem">
+      <h3>📰 True-story style examples (simplified)</h3>
+      <div class="grid g3" style="margin-top:1rem">
+        <div class="sketch pink alt"><b>💊 The hospital lock-out</b><p style="font-size:1rem">Ransomware once locked computers at many hospitals, so doctors had to go back to paper. <b>Lesson:</b> updates + backups would have saved them.</p></div>
+        <div class="sketch teal"><b>🔑 The leaked password list</b><p style="font-size:1rem">Websites get hacked and millions of passwords leak. People who reused one password lost <i>all</i> accounts. <b>Lesson:</b> unique passwords + 2-step login.</p></div>
+        <div class="sketch blue alt"><b>🎣 The fake boss email</b><p style="font-size:1rem">Companies have lost millions when someone pretended to be the boss and asked for an urgent money transfer. <b>Lesson:</b> double-check by phone.</p></div>
+      </div>
+    </div>
+
+    <div class="sketch reveal" style="margin-top:2.5rem">
+      <h3 class="center">🎩 Hacker Hats & Team Colours</h3>
+      <svg viewBox="0 0 900 230" width="100%" role="img" aria-label="White hat, grey hat and black hat hackers">
+        <g font-family="Patrick Hand" text-anchor="middle" fill="#23243a">
+          <g transform="translate(150 0)">
+            <ellipse cx="0" cy="110" rx="80" ry="16" fill="#fff" stroke="#23243a" stroke-width="4"/>
+            <path d="M-45 108 L-40 30 Q0 18 40 30 L45 108 Z" fill="#fff" stroke="#23243a" stroke-width="4"/>
+            <rect x="-43" y="86" width="86" height="14" fill="#06d6a0" stroke="#23243a" stroke-width="2"/>
+            <text y="62" font-size="28">😇</text>
+            <text y="158" font-family="Permanent Marker" font-size="20">White hat</text>
+            <text y="182" font-size="16">hacks to PROTECT,</text><text y="202" font-size="16">always with permission ✅</text>
+          </g>
+          <g transform="translate(450 0)">
+            <ellipse cx="0" cy="110" rx="80" ry="16" fill="#a0a4b8" stroke="#23243a" stroke-width="4"/>
+            <path d="M-45 108 L-40 30 Q0 18 40 30 L45 108 Z" fill="#a0a4b8" stroke="#23243a" stroke-width="4"/>
+            <rect x="-43" y="86" width="86" height="14" fill="#ffd23f" stroke="#23243a" stroke-width="2"/>
+            <text y="62" font-size="28">😐</text>
+            <text y="158" font-family="Permanent Marker" font-size="20">Grey hat</text>
+            <text y="182" font-size="16">no permission, "means well"</text><text y="202" font-size="16">still breaking the law ⚠️</text>
+          </g>
+          <g transform="translate(750 0)">
+            <ellipse cx="0" cy="110" rx="80" ry="16" fill="#23243a" stroke="#23243a" stroke-width="4"/>
+            <path d="M-45 108 L-40 30 Q0 18 40 30 L45 108 Z" fill="#23243a" stroke="#23243a" stroke-width="4"/>
+            <rect x="-43" y="86" width="86" height="14" fill="#ef233c" stroke="#23243a" stroke-width="2"/>
+            <text y="62" font-size="28">😈</text>
+            <text y="158" font-family="Permanent Marker" font-size="20">Black hat</text>
+            <text y="182" font-size="16">hacks to steal or break</text><text y="202" font-size="16">= a criminal 🚔</text>
+          </g>
+        </g>
+      </svg>
+      <div class="teams">
+        <div class="team" style="background:#ef233c">🔴 <b>Red team</b><br>pretends to be the attacker (with permission) to find weak spots</div>
+        <div class="team" style="background:#3a86ff">🔵 <b>Blue team</b><br>defends: watches alarms, blocks attacks, fixes holes</div>
+        <div class="team" style="background:#8338ec">🟣 <b>Purple team</b><br>red + blue working together so everyone learns faster</div>
+      </div>
+      <h3 style="margin-top:1.4rem">📜 The Good Hacker Code</h3>
+      <div class="grid g4">
+        <div class="sketch yellow alt"><b>1. Permission first</b><br><small>Get written OK from the owner before testing anything.</small></div>
+        <div class="sketch teal"><b>2. Do no harm</b><br><small>Don't break things or peek at data you don't need.</small></div>
+        <div class="sketch pink alt"><b>3. Report it</b><br><small>Tell the owner privately so they can fix it. Many pay "bug bounties"! 💰</small></div>
+        <div class="sketch blue"><b>4. Practise legally</b><br><small>CTF games, practice labs and your own computers are the playground.</small></div>
+      </div>
+    </div>
+
+    <h3 style="margin-top:2.5rem" class="center">🧑‍🚀 Cyber superhero jobs you could have one day</h3>
+    <div class="glossary" style="margin-top:1rem">
+      <div class="gloss" style="--c:#ffd23f;--r:-3deg"><b>🕵️ Ethical Hacker</b>Gets paid to break in (with permission!) and find holes first.</div>
+      <div class="gloss" style="--c:#7ff0cc;--r:2deg"><b>🚨 SOC Analyst</b>Watches the alarms 24/7, like a security-camera room.</div>
+      <div class="gloss" style="--c:#ffb3cc;--r:-2deg"><b>🔬 Malware Detective</b>Takes viruses apart to learn how they work.</div>
+      <div class="gloss" style="--c:#c9b3ff;--r:3deg"><b>🏗️ Security Engineer</b>Builds the walls, locks and eBPF guards.</div>
+      <div class="gloss" style="--c:#a8d1ff;--r:-1deg"><b>🧮 Cryptographer</b>Invents the secret-code math that protects the internet.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= GLOSSARY ================= -->
+<section id="glossary">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter">Sticker wall</span><h2>Cyber Words Cheat Sheet 📝</h2></div>
+    <div class="glossary" id="glossWall"></div>
+  </div>
+</section>
+
+<!-- ================= QUIZ ================= -->
+<section id="quiz">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter">Test time</span><h2>Are You a Cyber Hero? 🏆</h2></div>
+    <div class="sketch yellow" style="max-width:760px;margin:0 auto">
+      <div class="dots" id="quizDots"></div>
+      <div id="quizBox"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= PLEDGE ================= -->
+<section id="pledge">
+  <div class="wrap">
+    <div class="section-head"><span class="chapter">Last page</span><h2>My Cyber Hero Pledge ✋</h2></div>
+    <div class="grid g2" style="align-items:center">
+      <div class="sketch teal">
+        <p>Tick all of them to earn your badge!</p>
+        <ul class="pledge" id="pledgeList" style="padding:0">
+          <li><label><input type="checkbox"> 🔑 I'll use long, different passwords</label></li>
+          <li><label><input type="checkbox"> 📱 I'll turn on 2-step login</label></li>
+          <li><label><input type="checkbox"> 🎣 I'll stop and think before clicking links</label></li>
+          <li><label><input type="checkbox"> 🔄 I'll install updates when asked</label></li>
+          <li><label><input type="checkbox"> 💾 I'll back up my important stuff</label></li>
+          <li><label><input type="checkbox"> 🤐 I'll never share my password</label></li>
+          <li><label><input type="checkbox"> 🔍 I'll check who really owns a link before I log in</label></li>
+          <li><label><input type="checkbox"> 👣 I'll think before I post (billboard test!)</label></li>
+          <li><label><input type="checkbox"> 🔦 I'll only give apps the permissions they need</label></li>
+          <li><label><input type="checkbox"> 🗣️ I'll tell a grown-up if something feels weird</label></li>
+        </ul>
+      </div>
+      <div class="center">
+        <svg class="badge" id="badge" viewBox="0 0 200 200" role="img" aria-label="Cyber hero badge">
+          <g transform="translate(100 100)">
+            <path d="M0 -95 L22 -70 L55 -78 L58 -45 L90 -30 L75 0 L90 30 L58 45 L55 78 L22 70 L0 95 L-22 70 L-55 78 L-58 45 L-90 30 L-75 0 L-90 -30 L-58 -45 L-55 -78 L-22 -70Z" fill="#ffd23f" stroke="#23243a" stroke-width="4"/>
+            <circle r="58" fill="#ff4f8b" stroke="#23243a" stroke-width="4"/>
+            <text y="-12" text-anchor="middle" font-size="40">🛡️</text>
+            <text y="22" text-anchor="middle" font-family="Permanent Marker" font-size="16" fill="#fff">CYBER</text>
+            <text y="42" text-anchor="middle" font-family="Permanent Marker" font-size="16" fill="#fff">HERO</text>
+          </g>
+        </svg>
+        <p class="scribble" id="badgeMsg">0 / 10 promises</p>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <svg viewBox="0 0 200 220" width="80"><use href="#byte"/></svg>
+    <p class="scribble">"Stay curious, stay careful!" — Byte 🛡️</p>
+    <p style="font-size:1rem;color:var(--muted)">Cyber Sketchbook · made for learners of every age · all examples are made up for teaching</p>
+  </div>
+</footer>
+
+<script src="app.js?v=3"></script>
+<script src="labs.js?v=4"></script>
+</body>
+</html>

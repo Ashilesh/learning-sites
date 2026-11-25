@@ -270,5 +270,20 @@ window.SITES = [
     minutes: 60,
   },
 
+  {
+    id: "cyber-sketchbook",
+    title: "Cyber Sketchbook",
+    path: "Cybersecurity/index.html",
+    category: "security",
+    topic: "Cybersecurity",
+    format: "Interactive guide · 23 pages",
+    description:
+      "Cybersecurity for everyone, in a hand-drawn notebook with Byte the shield robot: the CIA triad, threats and risk, " +
+      "a 3D castle of defenses, passwords, hashing, phishing and link-spotting games, web tricks, privacy, and a quiz and pledge.",
+    tags: ["cybersecurity", "security", "beginners", "cia triad", "risk", "defense in depth", "malware", "authentication", "mfa", "encryption", "hashing", "passwords", "phishing", "urls", "sql injection", "xss", "privacy", "cookies", "incident response", "ebpf", "quiz"],
+    added: "2026-11-26",
+    minutes: 90,
+  },
+
   // ↓↓↓ ADD NEW SITES HERE ↓↓↓
 ];
