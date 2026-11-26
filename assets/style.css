@@ -25,6 +25,7 @@
   --c-algorithms: #059669;
   --c-quantum: #6d4aff;
   --c-graphics: #e11d74;
+  --c-architecture: #c2410c;
   --c-default: #64748b;
 
   --f-body: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -58,6 +59,7 @@
     --c-algorithms: #4fe0a8;
     --c-quantum: #a993ff;
     --c-graphics: #ff6bb0;
+    --c-architecture: #ff9f5a;
     --c-default: #94a3b8;
     color-scheme: dark;
   }
@@ -86,6 +88,7 @@
   --c-algorithms: #4fe0a8;
   --c-quantum: #a993ff;
   --c-graphics: #ff6bb0;
+  --c-architecture: #ff9f5a;
   --c-default: #94a3b8;
   color-scheme: dark;
 }

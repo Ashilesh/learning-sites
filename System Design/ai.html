@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI &amp; ML Systems</title>
+<meta name="description" content="How AI apps are built: embeddings and vector search, RAG, serving large language models (batching, streaming, GPUs), caching, guardrails, evaluation and recommendation systems.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🤖</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script>try{var t=localStorage.getItem('sd-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<style>
+  .vec { font-family: var(--f-mono); font-size: .82rem; word-break: break-all; }
+  .near { display: flex; flex-wrap: wrap; gap: 6px; min-height: 2.2em; }
+  .llm-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media (max-width: 820px) { .llm-grid { grid-template-columns: 1fr; } }
+  .bubble { min-height: 96px; background: var(--card-2); border: 2px dashed color-mix(in srgb, var(--ink) 35%, transparent); border-radius: 14px 14px 14px 4px; padding: 8px 10px; font-size: 1rem; line-height: 1.35; }
+  .bubble .cursor { display: inline-block; width: 8px; height: 1.05em; background: var(--ink); vertical-align: -2px; animation: blink 1s infinite; }
+  .mini { display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; font-size: .95rem; margin: 8px 0; }
+  .mini b { font-family: var(--f-mono); font-size: .85rem; text-align: right; }
+  .funnel { display: grid; gap: 8px; justify-items: center; }
+  .fstep { border: 2.5px solid var(--ink); border-radius: 12px; padding: 8px 12px; text-align: center; color: #1f2430; box-shadow: 3px 3px 0 var(--shadow); transition: transform .2s; max-width: 100%; }
+  .fstep:hover { transform: scale(1.02); }
+  .fstep b { font-family: var(--f-head); font-weight: 400; }
+</style>
+</head>
+<body data-page="ai">
+<main class="wrap">
+
+  <section class="hero">
+    <span class="chapter-tag">Chapter 12 · AI &amp; ML Systems</span>
+    <h1>Designing AI-powered apps 🤖</h1>
+    <p class="lead">An AI chatbot isn't just “a model”. It's a whole <b>system</b>: gateways, search, caches, GPU servers, safety checks and monitoring — all the ideas from earlier chapters, plus a few new ones.</p>
+    <ul class="toc">
+      <li><a class="chip" href="#big">🗺️ Big picture</a></li>
+      <li><a class="chip" href="#emb">🧭 Embeddings</a></li>
+      <li><a class="chip" href="#rag">📚 RAG</a></li>
+      <li><a class="chip" href="#serve">⚡ Serving LLMs</a></li>
+      <li><a class="chip" href="#cachecost">💾 Caching &amp; cost</a></li>
+      <li><a class="chip" href="#safe">🛡️ Safety &amp; evals</a></li>
+      <li><a class="chip" href="#recs">🎯 Recommendations</a></li>
+      <li><a class="chip" href="#aitrade">⚖️ AI trade-offs</a></li>
+    </ul>
+  </section>
+
+  <section class="sec" id="big">
+    <div class="sec-head"><span class="sec-num">12.1</span><h2><span class="em">🗺️</span>What happens when you ask an AI assistant a question?</h2></div>
+    <div class="diagram" id="aiBox">
+      <div class="scroll-x"><div id="aiFlow"></div></div>
+      <p class="cap"></p>
+      <div class="row" style="justify-content:center"><button class="btn primary sm" data-act="play">▶ Ask a question</button><button class="btn sm" data-act="next">⏭ Step</button><button class="btn sm" data-act="reset">↺</button></div>
+    </div>
+    <div class="callout kid"><span class="lbl">👶 Like you're 5</span><p class="mb0">A super-smart friend (the model) answers questions, but a whole team helps: a door guard checks your ticket, a librarian finds the right pages, a safety buddy double-checks the answer, and a notebook remembers questions others already asked.</p></div>
+  </section>
+
+  <section class="sec" id="emb">
+    <div class="sec-head"><span class="sec-num">12.2</span><h2><span class="em">🧭</span>Embeddings &amp; vector search: a map of meaning</h2></div>
+    <div class="two">
+      <div>
+        <p class="lead">An <b>embedding</b> turns words, sentences or pictures into a long list of numbers. Things with <b>similar meaning land close together</b> on this “meaning map”.</p>
+        <div class="pre vec">“puppy” → [0.12, -0.83, 0.44, 0.07, -0.31, … 1,536 numbers]</div>
+        <p class="mt">Pick a search word. The vector database finds the <b>nearest</b> points — even if they share no letters!</p>
+        <div class="chips" id="qChips"></div>
+        <label class="field mt"><span>🎯 How many neighbors (top-k) <b id="kV">3</b></span><input type="range" id="kN" min="1" max="6" value="3"></label>
+        <div class="near" id="nearList"></div>
+      </div>
+      <div class="diagram"><div id="embSvg"></div></div>
+    </div>
+    <div class="grid mt">
+      <div class="card"><h4>🛣️ HNSW index</h4><p class="mb0">A multi-level “highway” graph: zoom across the map on fast roads, then walk local streets to the nearest points.</p></div>
+      <div class="card"><h4>🏘️ IVF index</h4><p class="mb0">Group points into neighborhoods; only search the few neighborhoods closest to the query.</p></div>
+      <div class="card"><h4>🎯 Approximate = fast</h4><p class="mb0">Exact search over billions of vectors is too slow; ANN indexes trade a tiny bit of accuracy for huge speed.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="rag">
+    <div class="sec-head"><span class="sec-num">12.3</span><h2><span class="em">📚</span>RAG: give the model an open book</h2></div>
+    <p class="lead"><b>Retrieval-Augmented Generation</b>: before answering, look up the most relevant pieces of <i>your</i> documents and paste them into the prompt. The model answers from real, fresh facts — with sources.</p>
+    <div class="diagram" id="ragBox">
+      <div class="scroll-x"><div id="ragFlow"></div></div>
+      <p class="cap"></p>
+      <div class="row" style="justify-content:center"><button class="btn primary sm" data-act="play">▶ Play both phases</button><button class="btn sm" data-act="next">⏭ Step</button><button class="btn sm" data-act="reset">↺</button></div>
+    </div>
+    <div class="grid mt">
+      <div class="sticky"><b>✂️ Chunking</b> — split docs into ~200–800 token pieces with a little overlap so ideas aren't cut in half.</div>
+      <div class="sticky b"><b>🔀 Hybrid search</b> — combine keyword search (exact names, codes) with vector search (meaning).</div>
+      <div class="sticky g"><b>🥇 Re-ranking</b> — fetch 50 candidates fast, then a smarter model picks the best 5.</div>
+      <div class="sticky p"><b>🔐 Permissions</b> — only retrieve chunks the user is allowed to see!</div>
+      <div class="sticky o"><b>🔄 Freshness</b> — re-index when docs change (events / CDC feed the indexer).</div>
+      <div class="sticky v"><b>📎 Citations</b> — return the sources so people can verify the answer.</div>
+    </div>
+  </section>
+
+  <section class="sec" id="serve">
+    <div class="sec-head"><span class="sec-num">12.4</span><h2><span class="em">⚡</span>Serving large language models</h2></div>
+    <p class="lead">Models write <b>one token</b> (≈ a word-piece) at a time on expensive GPUs. Two numbers matter: <span class="hl">time to first token</span> (feels responsive) and <span class="hl-blue">tokens per second</span> (reading speed). <b>Batching</b> many users together boosts total throughput but slows each one a bit.</p>
+    <div class="card">
+      <label class="field"><span>👥 Batch size (users served together on one GPU) <b id="bV">8</b></span><input type="range" id="bN" min="1" max="64" value="8"></label>
+      <div class="row"><button class="btn primary sm" id="askAll">▶ Ask all three models</button><span class="small muted">Illustrative numbers — real ones depend on hardware &amp; model.</span></div>
+      <div class="llm-grid mt" id="llmGrid"></div>
+    </div>
+    <div class="grid mt">
+      <div class="card"><h4>🧠 KV cache</h4><p class="mb0">The model remembers work done on earlier tokens so each new token is cheaper. Uses lots of GPU memory → limits batch size.</p></div>
+      <div class="card"><h4>🚌 Continuous batching</h4><p class="mb0">Like a bus that lets passengers on and off at every stop instead of waiting for a full trip — keeps GPUs busy.</p></div>
+      <div class="card"><h4>🔀 Model routing</h4><p class="mb0">Send easy questions to a small, cheap model and hard ones to a big model. Big savings, small quality loss.</p></div>
+      <div class="card"><h4>📡 Streaming</h4><p class="mb0">Send tokens as they're made (Server-Sent Events). Users start reading in ~0.3 s instead of waiting 10 s.</p></div>
+      <div class="card"><h4>🎟️ Quotas &amp; rate limits</h4><p class="mb0">GPUs are scarce: limit tokens per minute per user/team, queue the rest, and shed load fairly.</p></div>
+      <div class="card"><h4>🗜️ Quantization</h4><p class="mb0">Store model weights with fewer bits — smaller &amp; faster, with a small accuracy cost.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="cachecost">
+    <div class="sec-head"><span class="sec-num">12.5</span><h2><span class="em">💾</span>Caching &amp; cost control</h2></div>
+    <div class="grid">
+      <div class="sticky"><h4>🎯 Exact cache</h4>Same question text → reuse the answer. Cheap, but rarely an exact match.</div>
+      <div class="sticky b"><h4>🧭 Semantic cache</h4>“How do I reset my password?” ≈ “forgot my password” — similar embeddings (above a threshold) reuse an answer. Careful with personal data!</div>
+      <div class="sticky g"><h4>📌 Prompt / prefix caching</h4>Long, repeated instructions at the start of prompts are processed once and reused — faster and cheaper.</div>
+      <div class="sticky p"><h4>💸 Token budgets</h4>Cost ≈ (input tokens + output tokens) × price. Trim prompts, cap answer length, pick the smallest good model.</div>
+    </div>
+  </section>
+
+  <section class="sec" id="safe">
+    <div class="sec-head"><span class="sec-num">12.6</span><h2><span class="em">🛡️</span>Safety, evaluation &amp; monitoring</h2></div>
+    <div class="two">
+      <div class="stack">
+        <div class="card"><h4>🚧 Guardrails</h4><p class="mb0">Check inputs and outputs: block harmful requests, strip personal data (PII), stop prompt-injection tricks hidden in documents, enforce the allowed topics.</p></div>
+        <div class="card"><h4>🧪 Evaluation (“evals”)</h4><p class="mb0">A test set of questions with good answers, scored automatically (rules, or another model as judge) on every change — like unit tests for AI quality.</p></div>
+        <div class="card"><h4>📊 Monitoring</h4><p class="mb0">Track latency, errors, cost per request, 👍/👎 feedback, and “I don't know” rates. Sample conversations for human review.</p></div>
+      </div>
+      <div class="stack">
+        <div class="callout warn"><span class="lbl">⚠️ Hallucinations</span><p class="mb0">Models can sound confident and be wrong. Ground answers in retrieved sources, ask for citations, and allow “I don't know”.</p></div>
+        <div class="callout good"><span class="lbl">🔁 Fallbacks</span><p class="mb0">Timeouts on model calls, retry on another region or a smaller model, and a helpful non-AI fallback (search results, a human agent).</p></div>
+        <div class="callout pro"><span class="lbl">🧠 Treat prompts like code</span><p class="mb0">Version them, review them, test them with evals, and roll them out with canaries — exactly like deployments.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="recs">
+    <div class="sec-head"><span class="sec-num">12.7</span><h2><span class="em">🎯</span>Recommendation systems: the funnel</h2></div>
+    <div class="two">
+      <div class="funnel" id="funnel"></div>
+      <div class="stack">
+        <p class="lead">“Videos you might like” can't score 100 million videos for every user in 100 ms. So it works like a <b>funnel</b>: cheap filters first, expensive smart models only on the few survivors.</p>
+        <div class="card"><h4>🏪 Feature store</h4><p class="mb0">One place for facts about users &amp; items (watch history, popularity) — same values for training (offline) and serving (online).</p></div>
+        <div class="card"><h4>🧪 A/B testing</h4><p class="mb0">Show the new model to 5% of users, compare watch time / clicks against the old one, then decide.</p></div>
+        <div class="card"><h4>🔄 Feedback loop</h4><p class="mb0">Clicks and skips flow back (via event streams) to retrain models daily — or update in near real time.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="aitrade">
+    <div class="sec-head"><span class="sec-num">12.8</span><h2><span class="em">⚖️</span>AI trade-offs</h2></div>
+    <div class="grid">
+      <div class="card tilt-l"><h3>📚 RAG vs 🏋️ fine-tuning</h3><p class="mb0"><b>RAG</b> = open-book exam: easy to update facts, shows sources. <b>Fine-tuning</b> = studying for the exam: teaches style and skills, but facts get stale and retraining costs money. Often: RAG for knowledge, fine-tune for behavior.</p></div>
+      <div class="card"><h3>🐘 Big vs 🐭 small model</h3><p class="mb0">Big = smarter but slower and pricier. Small = fast and cheap. Route by difficulty, and measure with evals before switching.</p></div>
+      <div class="card tilt-r"><h3>🔺 Quality · Latency · Cost</h3><p class="mb0">Pick two to optimize first. A support bot needs fast + cheap + “good enough”; a medical summary needs quality above all.</p></div>
+      <div class="card"><h3>🛒 API vs 🏗️ self-host</h3><p class="mb0">Hosted APIs: zero ops, pay per token. Self-hosting open models: control and possibly cheaper at huge scale — but you run the GPUs.</p></div>
+    </div>
+  </section>
+
+</main>
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"></script>
+<script src="js/app.js"></script>
+<script src="js/ai.js"></script>
+</body>
+</html>

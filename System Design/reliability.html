@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Reliability &amp; Ops</title>
+<meta name="description" content="Failures, redundancy, failover, retries with backoff and jitter, circuit breakers, rate limiting, disaster recovery, deployments, observability and security.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🛡️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script>try{var t=localStorage.getItem('sd-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<style>
+  .cb-states { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .cb-state { padding: 8px 14px; border: 2.5px solid var(--ink); border-radius: var(--radius-sk); background: var(--card-2); opacity: .45; transition: all .3s; text-align: center; min-width: 120px; }
+  .cb-state.on { opacity: 1; transform: scale(1.08) rotate(-2deg); box-shadow: 3px 3px 0 var(--shadow); }
+  .cb-state.closed.on { background: var(--sticky-g); color: #1f2430; } .cb-state.open.on { background: #ffa8a8; color: #1f2430; } .cb-state.half.on { background: var(--sticky-y); color: #1f2430; }
+  .bucket { position: relative; width: 150px; height: 170px; margin: 0 auto; border: 3px solid var(--ink); border-top: 0; border-radius: 0 0 26px 26px; background: var(--card-2); display: flex; flex-wrap: wrap-reverse; align-content: flex-start; gap: 4px; padding: 6px; justify-content: center; }
+  .tok { width: 26px; height: 26px; border-radius: 50%; background: var(--yellow); border: 2px solid var(--ink); display: grid; place-items: center; font-size: .75rem; color: #1f2430; animation: pop .25s; }
+  .tap { text-align: center; font-size: 1.8rem; line-height: 1; }
+  .ring-castle { max-width: 440px; margin: 0 auto; }
+  .jwt { font-family: var(--f-mono); font-size: .85rem; word-break: break-all; line-height: 1.6; }
+  .jwt .h { color: var(--red); } .jwt .p { color: var(--purple); } .jwt .s { color: var(--teal); }
+  .dr { display: grid; gap: 8px; }
+  .dr-row { display: grid; grid-template-columns: 1.3fr 2fr 1fr 1fr; gap: 10px; align-items: center; padding: 8px 12px; border: 2px solid var(--ink); border-radius: var(--radius-card); background: var(--card); }
+  @media (max-width: 680px) { .dr-row { grid-template-columns: 1fr 1fr; } .dr-row .d { grid-column: 1 / -1; } }
+  .signal { text-align: center; }
+  .signal .e { font-size: 2.2rem; display: block; }
+</style>
+</head>
+<body data-page="reliability">
+<main class="wrap">
+
+  <section class="hero">
+    <span class="chapter-tag">Chapter 7 · Reliability &amp; Ops</span>
+    <h1>Everything breaks. Plan for it! 🛡️</h1>
+    <p class="lead">Disks die, networks hiccup, people make typos, and traffic explodes. <b>Reliable</b> systems expect failure and keep serving anyway.</p>
+    <ul class="toc">
+      <li><a class="chip" href="#fail">💥 Failures</a></li>
+      <li><a class="chip" href="#failover">🔁 Failover</a></li>
+      <li><a class="chip" href="#retry">⏳ Retries &amp; jitter</a></li>
+      <li><a class="chip" href="#cb">🔌 Circuit breaker</a></li>
+      <li><a class="chip" href="#rl">🪣 Rate limiting</a></li>
+      <li><a class="chip" href="#degrade">🚢 Bulkheads</a></li>
+      <li><a class="chip" href="#dr">🌪️ Disaster recovery</a></li>
+      <li><a class="chip" href="#deploy">🚀 Deployments</a></li>
+      <li><a class="chip" href="#obs">🔭 Observability</a></li>
+      <li><a class="chip" href="#sec">🔐 Security</a></li>
+    </ul>
+  </section>
+
+  <section class="sec" id="fail">
+    <div class="sec-head"><span class="sec-num">7.1</span><h2><span class="em">💥</span>The many ways things fail</h2></div>
+    <div class="grid sm">
+      <div class="sticky"><span class="emoji-xl">💾</span><h4>Hardware</h4>Disks, memory and power supplies wear out. With 10,000 machines, something breaks every day.</div>
+      <div class="sticky p"><span class="emoji-xl">🐛</span><h4>Bugs</h4>A bad deploy, a memory leak, a leap-second surprise.</div>
+      <div class="sticky b"><span class="emoji-xl">🌐</span><h4>Network</h4>Packets lost, slow links, a cut cable, DNS gone wrong.</div>
+      <div class="sticky g"><span class="emoji-xl">🙈</span><h4>Humans</h4>A typo in a config is one of the most common causes of big outages.</div>
+      <div class="sticky o"><span class="emoji-xl">🌊</span><h4>Overload</h4>A viral post or a sale: 50× normal traffic in minutes.</div>
+      <div class="sticky v"><span class="emoji-xl">🔗</span><h4>Dependencies</h4>A payment provider or cloud service you rely on goes down.</div>
+    </div>
+    <div class="callout pro"><span class="lbl">🧠 The goal</span><p>Remove <b>single points of failure</b> (SPOF): anything that, if it breaks alone, breaks everything. Ask of every box in your diagram: <i>“what if this dies right now?”</i></p></div>
+  </section>
+
+  <section class="sec" id="failover">
+    <div class="sec-head"><span class="sec-num">7.2</span><h2><span class="em">🔁</span>Redundancy &amp; failover</h2></div>
+    <div class="two">
+      <div class="stack">
+        <div class="card"><h4>🧍‍♂️🧍 Active–passive</h4><p class="mb0">A standby waits, copying data. If the main one dies, the standby takes over. Simple; the standby sits idle.</p></div>
+        <div class="card"><h4>🧍🧍 Active–active</h4><p class="mb0">All copies serve traffic all the time. Better use of money and instant failover; harder to keep data in sync.</p></div>
+        <div class="callout kid"><span class="lbl">👶 Like you're 5</span><p class="mb0">A plane has two engines. If one stops, the other keeps it flying until landing. ✈️</p></div>
+      </div>
+      <div class="diagram" id="foBox">
+        <div id="foFlow"></div>
+        <p class="cap"></p>
+        <div class="row" style="justify-content:center"><button class="btn primary sm" data-act="play">▶ Play failover</button><button class="btn sm" data-act="next">⏭</button><button class="btn sm" data-act="reset">↺</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="retry">
+    <div class="sec-head"><span class="sec-num">7.3</span><h2><span class="em">⏳</span>Timeouts, retries, backoff &amp; jitter</h2></div>
+    <div class="grid">
+      <div class="card"><h4>⏰ Always set a timeout</h4><p class="mb0">Never wait forever. A stuck call holds threads, memory and connections until everything jams.</p></div>
+      <div class="card"><h4>🔁 Retry… carefully</h4><p class="mb0">Retry only temporary errors (timeouts, 503), only safe (idempotent) operations, with a limit.</p></div>
+      <div class="card"><h4>📈 Backoff + 🎲 jitter</h4><p class="mb0">Wait longer each time (1s, 2s, 4s…) and add randomness so clients don't all retry at the same instant.</p></div>
+    </div>
+    <div class="diagram mt">
+      <div class="chips" id="retryChips" style="justify-content:center;margin:6px 0 10px"></div>
+      <canvas class="sim" id="retryCv" aria-label="Retry timing chart"></canvas>
+      <p class="cap" id="retryCap"></p>
+    </div>
+  </section>
+
+  <section class="sec" id="cb">
+    <div class="sec-head"><span class="sec-num">7.4</span><h2><span class="em">🔌</span>Circuit breaker: stop calling a broken friend</h2></div>
+    <div class="two">
+      <div>
+        <p class="lead">Like the breaker in your house: if a service keeps failing, <b>trip</b> the breaker and fail fast for a while instead of piling up slow, doomed calls. Then carefully test if it's healthy again.</p>
+        <ul><li><b>🟢 Closed</b>: calls flow normally; count failures.</li><li><b>🔴 Open</b>: too many failures → reject instantly (use a fallback).</li><li><b>🟡 Half-open</b>: after a cool-down, let one trial call through. Success → close. Fail → open again.</li></ul>
+      </div>
+      <div class="card">
+        <div class="cb-states"><div class="cb-state closed" id="cbC">🟢 Closed</div><div class="cb-state open" id="cbO">🔴 Open</div><div class="cb-state half" id="cbH">🟡 Half-open</div></div>
+        <div class="row mt" style="justify-content:center">
+          <label class="check"><input type="checkbox" id="cbHealthy" checked> <span>Payment service is healthy</span></label>
+        </div>
+        <div class="row" style="justify-content:center"><button class="btn primary sm" id="cbSend">📨 Send request</button><button class="btn sm" id="cbAuto">🔁 Auto-send</button></div>
+        <div class="stat-row mt"><div class="stat"><span class="v" id="cbFails">0/3</span><span class="k">failures in a row</span></div><div class="stat"><span class="v" id="cbTimer">–</span><span class="k">cool-down</span></div></div>
+        <div class="log mt" id="cbLog" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="rl">
+    <div class="sec-head"><span class="sec-num">7.5</span><h2><span class="em">🪣</span>Rate limiting: the token bucket</h2></div>
+    <div class="two">
+      <div>
+        <p class="lead">Protect your service from floods (and unfair users). A bucket holds <b>tokens</b> that drip in at a steady rate. Each request takes a token. Empty bucket → <b>429 Too Many Requests</b>.</p>
+        <p>The bucket size allows short <b>bursts</b>, the drip rate sets the long-term limit.</p>
+        <div class="table-wrap"><table class="sk">
+          <tr><th>Algorithm</th><th>Idea</th></tr>
+          <tr><td>🪣 Token bucket</td><td>Tokens drip in; allows bursts. Most popular.</td></tr>
+          <tr><td>💧 Leaky bucket</td><td>Requests leak out at a fixed pace; smooths traffic.</td></tr>
+          <tr><td>🪟 Fixed window</td><td>100 per minute; simple, but bursty at window edges.</td></tr>
+          <tr><td>🎞️ Sliding window</td><td>Counts over the last 60 s; fair and smooth.</td></tr>
+        </table></div>
+      </div>
+      <div class="card">
+        <div class="tap">🚰</div>
+        <div class="bucket" id="bucket" aria-label="Token bucket"></div>
+        <label class="field mt"><span>💧 Refill rate <b id="refV">2 tokens/s</b></span><input type="range" id="refill" min="0.5" max="6" step="0.5" value="2"></label>
+        <div class="row" style="justify-content:center"><button class="btn primary sm" id="rl1">📨 1 request</button><button class="btn pink sm" id="rl10">💥 Burst of 10</button></div>
+        <div class="stat-row mt"><div class="stat"><span class="v" id="rlOk">0</span><span class="k">✅ allowed</span></div><div class="stat"><span class="v" id="rlNo">0</span><span class="k">🚫 429s</span></div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="degrade">
+    <div class="sec-head"><span class="sec-num">7.6</span><h2><span class="em">🚢</span>Bulkheads, graceful degradation &amp; load shedding</h2></div>
+    <div class="grid">
+      <div class="card tilt-l"><span class="emoji-xl">🚢</span><h3>Bulkheads</h3><p class="mb0">Ships have walls inside so one leak doesn't sink the ship. Give each dependency its <b>own</b> pool of threads/connections, so a slow one can't eat them all.</p></div>
+      <div class="card"><span class="emoji-xl">🪫</span><h3>Graceful degradation</h3><p class="mb0">If recommendations are down, show “popular items” instead of an error page. Keep the core working (play the video!), drop the extras.</p></div>
+      <div class="card tilt-r"><span class="emoji-xl">🧯</span><h3>Load shedding</h3><p class="mb0">When overloaded, quickly reject some low-priority requests so the important ones (checkout!) still succeed.</p></div>
+      <div class="card"><span class="emoji-xl">🐒</span><h3>Chaos engineering</h3><p class="mb0">Break things <b>on purpose</b> (kill servers, add latency) in a controlled way to prove your system survives — before real life tests it for you.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="dr">
+    <div class="sec-head"><span class="sec-num">7.7</span><h2><span class="em">🌪️</span>Disaster recovery: RPO &amp; RTO</h2></div>
+    <div id="rpoSvg" class="diagram"></div>
+    <div class="grid mt">
+      <div class="sticky p"><h4>⏪ RPO — Recovery Point Objective</h4>How much <b>data</b> can you afford to lose? “At most 5 minutes of orders.” → back up / replicate at least that often.</div>
+      <div class="sticky b"><h4>⏩ RTO — Recovery Time Objective</h4>How long can you be <b>down</b>? “Back within 1 hour.” → practice restoring that fast.</div>
+    </div>
+    <h3 class="mt2">The DR ladder: more money → faster recovery</h3>
+    <div class="dr">
+      <div class="dr-row"><b>🧊 Backup &amp; restore</b><span class="d">Copies saved elsewhere; rebuild from scratch.</span><span>⏱️ hours–days</span><span>💰</span></div>
+      <div class="dr-row"><b>🔥 Pilot light</b><span class="d">Data replicated, minimal core running, scale up when needed.</span><span>⏱️ ~hour</span><span>💰💰</span></div>
+      <div class="dr-row"><b>♨️ Warm standby</b><span class="d">A smaller full copy always running in another region.</span><span>⏱️ minutes</span><span>💰💰💰</span></div>
+      <div class="dr-row"><b>🌍 Multi-site active–active</b><span class="d">Every region serves live traffic.</span><span>⏱️ ~0</span><span>💰💰💰💰</span></div>
+    </div>
+    <div class="callout warn"><span class="lbl">⚠️ The 3-2-1 backup rule</span><p>Keep <b>3</b> copies, on <b>2</b> different kinds of storage, with <b>1</b> off-site. And <b>test restores</b> — a backup you've never restored is just a hope.</p></div>
+  </section>
+
+  <section class="sec" id="deploy">
+    <div class="sec-head"><span class="sec-num">7.8</span><h2><span class="em">🚀</span>Shipping changes safely</h2></div>
+    <div class="grid lg">
+      <div class="diagram"><h3 class="center">🎢 Rolling</h3><div id="dRoll"></div><p class="cap">Replace servers a few at a time.</p></div>
+      <div class="diagram"><h3 class="center">🔵🟢 Blue–green</h3><div id="dBG"></div><p class="cap">Two full copies; flip traffic at once, flip back if bad.</p></div>
+      <div class="diagram"><h3 class="center">🐤 Canary</h3><div id="dCan"></div><p class="cap">Send 5% to the new version, watch metrics, then grow.</p></div>
+    </div>
+    <div class="callout pro"><span class="lbl">🧠 Also</span><p><b>Feature flags</b> let you turn features on/off without deploying. Make database changes <b>backward compatible</b> (expand → migrate → contract) so old and new code can run side by side. Automate <b>rollback</b>.</p></div>
+  </section>
+
+  <section class="sec" id="obs">
+    <div class="sec-head"><span class="sec-num">7.9</span><h2><span class="em">🔭</span>Observability: seeing inside your system</h2></div>
+    <div class="grid">
+      <div class="card"><span class="emoji-xl">📈</span><h3>Metrics</h3><p class="mb0">Numbers over time: requests/sec, error %, p99 latency, CPU. Cheap; great for dashboards &amp; alerts.</p></div>
+      <div class="card"><span class="emoji-xl">📜</span><h3>Logs</h3><p class="mb0">Diary lines of what happened: “order 42 failed: card declined”. Use structured (JSON) logs with request IDs.</p></div>
+      <div class="card"><span class="emoji-xl">🧵</span><h3>Traces</h3><p class="mb0">Follow ONE request through every service and see where the time went (below ↓).</p></div>
+    </div>
+    <div class="diagram mt"><div class="scroll-x"><div id="traceSvg"></div></div><p class="cap">A trace waterfall: the request spent most of its time in the slow DB query → fix that first!</p></div>
+    <h3 class="mt2">🚦 The four golden signals</h3>
+    <div class="grid sm">
+      <div class="card signal"><span class="e">⏱️</span><b>Latency</b><br><span class="small">how long (watch p99!)</span></div>
+      <div class="card signal"><span class="e">🚗</span><b>Traffic</b><br><span class="small">how much demand</span></div>
+      <div class="card signal"><span class="e">💥</span><b>Errors</b><br><span class="small">how many fail</span></div>
+      <div class="card signal"><span class="e">🧃</span><b>Saturation</b><br><span class="small">how full (CPU, memory, queues)</span></div>
+    </div>
+    <div class="callout pro"><span class="lbl">🧠 Alerting that people trust</span><p>Alert on <b>symptoms users feel</b> (SLO burn rate, error spikes), not every CPU blip. Every alert should be actionable and link to a runbook. Too many alerts → people ignore them all.</p></div>
+  </section>
+
+  <section class="sec" id="sec">
+    <div class="sec-head"><span class="sec-num">7.10</span><h2><span class="em">🔐</span>Security: defense in depth</h2></div>
+    <div class="two">
+      <div class="diagram ring-castle"><div id="castle"></div><p class="cap">Like a castle: many walls, so one breach isn't game over</p></div>
+      <div class="stack">
+        <div class="card"><h4>🪪 Authentication vs 🎟️ Authorization</h4><p class="mb0"><b>AuthN</b> = <i>who are you?</i> (show your ID card). <b>AuthZ</b> = <i>what may you do?</i> (does your ticket let you into the VIP room?).</p></div>
+        <div class="card"><h4>🗝️ OAuth = a valet key</h4><p class="mb0">Give an app a limited key (“read my photos”) instead of your password — like a car valet key that can't open the trunk.</p></div>
+        <div class="card"><h4>🎫 JWT: a signed wristband</h4><div class="jwt"><span class="h">eyJhbGciOiJIUzI1NiJ9</span>.<span class="p">eyJ1c2VyIjoiYW5hIiwicm9sZSI6InVzZXIifQ</span>.<span class="s">Sf3x9…Q8w</span></div><p class="small mb0"><span style="color:var(--red)">header</span> · <span style="color:var(--purple)">payload (who + role)</span> · <span style="color:var(--teal)">signature</span>. Anyone can read it, nobody can fake it without the secret. Keep it short-lived!</p></div>
+      </div>
+    </div>
+    <div class="grid mt">
+      <div class="sticky"><b>🔒 Encrypt</b> in transit (TLS everywhere) and at rest (disks, backups).</div>
+      <div class="sticky b"><b>🤏 Least privilege</b> — every service/person gets only the access it needs.</div>
+      <div class="sticky g"><b>🧼 Validate input</b> — never trust it (SQL injection, XSS). Use parameterized queries.</div>
+      <div class="sticky p"><b>🗝️ Secrets in a vault</b>, never in code. Rotate keys regularly.</div>
+      <div class="sticky o"><b>🛡️ WAF + DDoS protection</b> at the edge; rate limit login attempts.</div>
+      <div class="sticky v"><b>📋 Audit logs</b> of who did what. Patch dependencies quickly.</div>
+    </div>
+  </section>
+
+</main>
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"></script>
+<script src="js/app.js"></script>
+<script src="js/reliability.js"></script>
+</body>
+</html>

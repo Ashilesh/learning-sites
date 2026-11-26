@@ -40,6 +40,7 @@ window.CATEGORIES = [
   { id: "data",       name: "Databases & Storage",     icon: "db",      blurb: "Indexes, transactions and keeping data safe on disk." },
   { id: "ai",         name: "AI & Machine Learning",   icon: "spark",   blurb: "Models, training and inference, minus the hype." },
   { id: "cloud",      name: "Cloud & DevOps",          icon: "cloud",   blurb: "Containers, deployment pipelines and running things at scale." },
+  { id: "architecture", name: "System Design",         icon: "blocks",  blurb: "Servers, caches, queues and databases wired together so big apps don't fall over." },
   { id: "algorithms", name: "Algorithms & Data Structures", icon: "tree", blurb: "The ideas underneath every fast program." },
   { id: "quantum",    name: "Quantum Computing",       icon: "atom",    blurb: "Qubits, entanglement and the machines being built from them." },
   { id: "graphics",   name: "Graphics & GPUs",         icon: "prism",   blurb: "Shaders, pixels and how the GPU paints every frame." },
@@ -283,6 +284,21 @@ window.SITES = [
     tags: ["cybersecurity", "security", "beginners", "cia triad", "risk", "defense in depth", "malware", "authentication", "mfa", "encryption", "hashing", "passwords", "phishing", "urls", "sql injection", "xss", "privacy", "cookies", "incident response", "ebpf", "quiz"],
     added: "2026-11-26",
     minutes: 90,
+  },
+
+  {
+    id: "system-design-sketchbook",
+    title: "System Design Sketchbook",
+    path: "System%20Design/index.html",
+    category: "architecture",
+    topic: "System Design",
+    format: "Interactive guide · 15 chapters",
+    description:
+      "System design, doodled: from \"what is a server?\" to load balancers, caching, sharding, CAP, queues, consensus and p99 latency, " +
+      "with a pizza-restaurant analogy, a 3D data center, 12 real-world designs, AI systems, a design-doc template and a quiz.",
+    tags: ["system design", "architecture", "distributed systems", "scalability", "load balancer", "caching", "cdn", "database", "sharding", "replication", "cap theorem", "queues", "pub/sub", "microservices", "consensus", "latency", "p99", "reliability", "rate limiting", "rag", "vector search", "interview"],
+    added: "2026-11-27",
+    minutes: 180,
   },
 
   // ↓↓↓ ADD NEW SITES HERE ↓↓↓

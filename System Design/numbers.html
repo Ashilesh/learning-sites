@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Speed &amp; Numbers</title>
+<meta name="description" content="Latency, throughput, p50/p90/p99 percentiles, availability nines, SLOs and back-of-the-envelope estimation — visual and interactive.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⏱️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script>try{var t=localStorage.getItem('sd-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<style>
+  .lat-row { display: grid; grid-template-columns: minmax(130px, 1.1fr) 2fr minmax(92px, .7fr); gap: 10px; align-items: center; padding: 5px 0; border-bottom: 1.5px dashed color-mix(in srgb, var(--ink) 18%, transparent); }
+  .lat-row .bar { height: 20px; border: 2px solid var(--ink); border-radius: 4px 12px 6px 10px; transition: width .6s; min-width: 6px; }
+  .lat-row .v { font-family: var(--f-mono); font-size: .85rem; text-align: right; }
+  .lat-row .what { line-height: 1.15; }
+  .lat-row .what small { color: var(--ink-soft); display: block; font-size: .9rem; }
+  @media (max-width: 560px) { .lat-row { grid-template-columns: 1fr 92px; } .lat-row .bar-wrap { grid-column: 1 / -1; grid-row: 2; } }
+  .kids { display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px; max-width: 460px; }
+  .kid { aspect-ratio: 1; border-radius: 50%; border: 2px solid var(--ink); display: grid; place-items: center; font-size: .62rem; font-family: var(--f-mono); color: #1f2430; position: relative; transition: background .4s; }
+  .kid.mark { outline: 3px solid var(--ink); outline-offset: 2px; transform: scale(1.12); z-index: 1; }
+  .kid .tagp { position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-family: var(--f-head); font-size: .7rem; color: var(--ink); white-space: nowrap; background: var(--card); padding: 0 3px; border-radius: 4px; }
+  .pct-vals { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+  .pct-vals .stat { border: 2px solid var(--ink); border-radius: var(--radius-card); padding: 6px; background: var(--card); }
+  .year { display: grid; grid-template-columns: repeat(auto-fill, minmax(11px, 1fr)); gap: 2px; }
+  .year i { aspect-ratio: 1; border-radius: 2px; background: var(--hl-green); border: 1px solid color-mix(in srgb, var(--ink) 25%, transparent); }
+  .year i.dn { background: var(--red); }
+  .nines { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chain { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: center; font-size: 1.1rem; }
+  .chain .box { border: 2.5px solid var(--ink); border-radius: var(--radius-card); padding: 8px 12px; background: var(--card); text-align: center; min-width: 110px; }
+  .budget { height: 34px; border: 2.5px solid var(--ink); border-radius: 10px; overflow: hidden; background: var(--card-2); position: relative; }
+  .budget i { position: absolute; left: 0; top: 0; bottom: 0; background: repeating-linear-gradient(45deg, var(--red) 0 8px, color-mix(in srgb, var(--red) 70%, transparent) 8px 16px); transition: width .4s; }
+  .budget b { position: absolute; inset: 0; display: grid; place-items: center; font-family: var(--f-head); font-size: 1rem; }
+  .calc-out .stat { border: 2px dashed color-mix(in srgb, var(--ink) 45%, transparent); border-radius: 12px; padding: 8px; }
+</style>
+</head>
+<body data-page="numbers">
+<main class="wrap">
+
+  <section class="hero">
+    <span class="chapter-tag">Chapter 3 · Speed &amp; Numbers</span>
+    <h1>How fast? How much? How often? ⏱️</h1>
+    <p class="lead">Engineers talk in numbers: <b>latency</b>, <b>throughput</b>, <b>p99</b>, <b>nines</b>. Here's what they mean — with ice-cream lines, highways and calendars.</p>
+    <ul class="toc">
+      <li><a class="chip" href="#lt">🛣️ Latency vs throughput</a></li>
+      <li><a class="chip" href="#ln">🐌 Latency numbers</a></li>
+      <li><a class="chip" href="#pct">🍦 p50 / p99</a></li>
+      <li><a class="chip" href="#tail">🎯 Tail at scale</a></li>
+      <li><a class="chip" href="#avail">🟢 The nines</a></li>
+      <li><a class="chip" href="#slo">📜 SLI/SLO/SLA</a></li>
+      <li><a class="chip" href="#est">🧮 Napkin math</a></li>
+    </ul>
+  </section>
+
+  <section class="sec" id="lt">
+    <div class="sec-head"><span class="sec-num">3.1</span><h2><span class="em">🛣️</span>Latency, throughput &amp; bandwidth</h2></div>
+    <div class="grid">
+      <div class="sticky"><h3>⏳ Latency</h3>How long <b>one</b> trip takes. “My order took 3 seconds.” Lower is better.</div>
+      <div class="sticky b"><h3>🚚 Throughput</h3>How <b>many</b> trips finish per second. “We serve 5,000 orders/sec.” Higher is better.</div>
+      <div class="sticky g"><h3>🛣️ Bandwidth</h3>The <b>max capacity</b> of the road — how many lanes. Throughput can't go above it.</div>
+    </div>
+    <div class="diagram mt">
+      <canvas class="sim" id="roadCv" aria-label="Highway animation showing latency and throughput"></canvas>
+      <div class="two mt" style="align-items:center">
+        <div>
+          <label class="field"><span>🛣️ Lanes (bandwidth) <b id="laneV">2</b></span><input type="range" id="lanes" min="1" max="5" value="2"></label>
+          <label class="field"><span>📏 Road length (distance) <b id="lenV">medium</b></span><input type="range" id="roadLen" min="1" max="3" value="2"></label>
+        </div>
+        <div class="stat-row">
+          <div class="stat"><span class="v" id="latOut">–</span><span class="k">latency (one car)</span></div>
+          <div class="stat"><span class="v" id="thrOut">–</span><span class="k">throughput</span></div>
+        </div>
+      </div>
+      <p class="cap">More lanes → more cars per second, but each trip takes the same time. A shorter road → faster trips.</p>
+    </div>
+    <div class="callout pro"><span class="lbl">🧠 Little's Law (a tiny superpower)</span><p><b>Things in the system = arrival rate × time each spends inside.</b> If 1,000 requests/sec arrive and each takes 0.2 s, about <b>200 requests</b> are in flight at once — so you need room for ~200 concurrent connections.</p></div>
+  </section>
+
+  <section class="sec" id="ln">
+    <div class="sec-head"><span class="sec-num">3.2</span><h2><span class="em">🐌</span>Latency numbers everyone should know</h2></div>
+    <p class="lead">Computers are fast, but <b>distance and disks are slow</b>. Flip the switch to stretch time so <span class="hl">1 nanosecond = 1 second</span>.</p>
+    <div class="row mb0"><button class="btn primary sm" id="humanBtn">🧒 Show in human time</button><span class="muted small">Bars use a log scale — each step is ~10× longer.</span></div>
+    <div class="card mt" id="latList"></div>
+    <div class="callout kid"><span class="lbl">👶 The lesson</span><p>Reading memory is like grabbing a snack. Asking a server across the ocean is like <b>a 5-year trip around the world</b>. That's why we use caches and put servers near users!</p></div>
+  </section>
+
+  <section class="sec" id="pct">
+    <div class="sec-head"><span class="sec-num">3.3</span><h2><span class="em">🍦</span>Percentiles: p50, p90, p99</h2></div>
+    <div class="two">
+      <div>
+        <p class="lead">100 kids wait in line for ice cream. Line them up from <b>fastest</b> to <b>slowest</b> service:</p>
+        <ul>
+          <li><b>p50 (median)</b> = the wait of kid #50. Half waited less.</li>
+          <li><b>p90</b> = kid #90. Only 10 waited longer.</li>
+          <li><b>p99</b> = kid #99. The unlucky <b>1 in 100</b>. 😤</li>
+        </ul>
+        <div class="callout warn"><span class="lbl">⚠️ Why not just the average?</span><p>Averages hide pain. If 99 kids wait 1 minute and one waits 60, the average is ~1.6 min — “looks fine!” — but that one kid is crying. Big companies watch <b>p99</b> because their most active users hit it the most.</p></div>
+      </div>
+      <div class="card">
+        <div class="kids" id="kids" aria-label="100 requests sorted by latency"></div>
+        <p class="small muted mt mb0">Each circle = one request, sorted fastest → slowest (ms). Green fast, red slow.</p>
+      </div>
+    </div>
+    <div class="diagram mt">
+      <canvas class="sim" id="histCv" aria-label="Latency histogram with percentile markers"></canvas>
+      <div class="two mt" style="align-items:center">
+        <div>
+          <label class="field"><span>🐢 Slow-request chance (GC pauses, cold cache…) <b id="slowV">3%</b></span><input type="range" id="slow" min="0" max="15" value="3"></label>
+          <div class="row"><button class="btn primary sm" id="regen">🎲 New 1,000 requests</button></div>
+        </div>
+        <div class="pct-vals" id="pctVals"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="tail">
+    <div class="sec-head"><span class="sec-num">3.4</span><h2><span class="em">🎯</span>The tail at scale: why p99 matters MORE in big systems</h2></div>
+    <div class="two">
+      <div>
+        <p class="lead">One page often calls <b>many</b> services at once (profile, feed, ads, friends…). The page is only as fast as the <b>slowest</b> one.</p>
+        <label class="field"><span>Services called per page <b id="fanV">10</b></span><input type="range" id="fan" min="1" max="200" value="10"></label>
+        <p class="small muted">If each service is slow just 1% of the time (its p99)…</p>
+      </div>
+      <div class="card center">
+        <div class="muted">chance a page is slow</div>
+        <div class="stat"><span class="v" id="fanOut" style="font-size:3rem">10%</span></div>
+        <div class="meter mt"><i id="fanBar"></i></div>
+        <p class="small mt mb0" id="fanNote"></p>
+      </div>
+    </div>
+    <div class="callout pro"><span class="lbl">🧠 Fixes for tail latency</span><p>Set <b>timeouts</b>, send a <b>hedged request</b> to a second server if the first is slow, keep caches warm, avoid huge garbage-collection pauses, and reduce how many services each request needs.</p></div>
+  </section>
+
+  <section class="sec" id="avail">
+    <div class="sec-head"><span class="sec-num">3.5</span><h2><span class="em">🟢</span>Availability &amp; “the nines”</h2></div>
+    <p class="lead"><b>Availability</b> = the % of time your system works. Each extra <b>9</b> cuts allowed downtime by 10×. Pick one and see a whole year (each square = a day):</p>
+    <div class="nines" id="nines"></div>
+    <div class="card mt">
+      <div class="stat-row" id="ninesStats"></div>
+      <div class="year mt" id="year" aria-label="365 days of the year, red shows downtime"></div>
+      <p class="small muted mt mb0" id="ninesNote"></p>
+    </div>
+    <h3 class="mt2">🔗 Chains vs 🪢 backups</h3>
+    <p>When parts depend on each other <b>in a chain</b>, availability <b>multiplies down</b>. When you have <b>backups side by side</b>, it multiplies up.</p>
+    <div class="two">
+      <div class="card">
+        <label class="field"><span>Part A availability <b id="aV">99.9%</b></span><input type="range" id="aA" min="900" max="9999" value="9990"></label>
+        <label class="field"><span>Part B availability <b id="bV">99.5%</b></span><input type="range" id="aB" min="900" max="9999" value="9950"></label>
+      </div>
+      <div class="stack">
+        <div class="card flat"><div class="chain"><div class="box">A</div>→<div class="box">B</div></div><p class="center mb0">In series (need both): <b id="serOut"></b></p></div>
+        <div class="card flat"><div class="chain"><div class="box">A</div>or<div class="box">A′ (copy)</div></div><p class="center mb0">In parallel (need either): <b id="parOut"></b></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="slo">
+    <div class="sec-head"><span class="sec-num">3.6</span><h2><span class="em">📜</span>SLI, SLO, SLA &amp; error budgets</h2></div>
+    <div class="grid">
+      <div class="sticky"><h3>📏 SLI — Indicator</h3>What you <b>measure</b>. “95% of pizzas arrived in 28 minutes this week.”</div>
+      <div class="sticky b"><h3>🎯 SLO — Objective</h3>Your <b>internal goal</b>. “95% of pizzas within 30 minutes.”</div>
+      <div class="sticky p"><h3>🤝 SLA — Agreement</h3>A <b>promise with a penalty</b>. “Late? Your pizza is free!” (SLA is looser than the SLO.)</div>
+    </div>
+    <div class="card mt">
+      <h3>💸 Error budget: how much failure you're allowed</h3>
+      <p>An SLO of 99.9% over 30 days lets you be down <b>43 minutes</b>. That's your budget to spend on risky launches. Spent it? Stop shipping features and fix reliability.</p>
+      <label class="field"><span>SLO target <b id="sloV">99.9%</b></span><select id="sloSel"><option value="0.99">99%</option><option value="0.995">99.5%</option><option value="0.999" selected>99.9%</option><option value="0.9995">99.95%</option><option value="0.9999">99.99%</option></select></label>
+      <label class="field"><span>Downtime so far this month <b id="usedV">10 min</b></span><input type="range" id="used" min="0" max="120" value="10"></label>
+      <div class="budget"><i id="budBar"></i><b id="budTxt"></b></div>
+      <p class="big mt mb0" id="budVerdict"></p>
+    </div>
+  </section>
+
+  <section class="sec" id="est">
+    <div class="sec-head"><span class="sec-num">3.7</span><h2><span class="em">🧮</span>Back-of-the-envelope estimation</h2></div>
+    <p class="lead">Before designing, estimate! Rough numbers tell you if you need 1 server or 1,000. Play with this calculator for a photo-sharing app:</p>
+    <div class="two">
+      <div class="card">
+        <label class="field"><span>👥 Daily active users <b id="dauV"></b></span><input type="range" id="dau" min="3" max="9" step="0.1" value="7"></label>
+        <label class="field"><span>✍️ Posts per user per day <b id="wpuV"></b></span><input type="range" id="wpu" min="0.1" max="10" step="0.1" value="1"></label>
+        <label class="field"><span>👀 Reads per write <b id="rwV"></b></span><input type="range" id="rw" min="1" max="200" value="100"></label>
+        <label class="field"><span>📦 Size of one post <b id="sizeV"></b></span><input type="range" id="size" min="0" max="7" step="0.1" value="5.3"></label>
+        <label class="field"><span>📅 Keep data for (years) <b id="yrsV"></b></span><input type="range" id="yrs" min="1" max="10" value="5"></label>
+        <label class="field"><span>🔥 Peak vs average <b id="peakV"></b></span><input type="range" id="peak" min="1" max="10" value="3"></label>
+      </div>
+      <div class="calc-out stack">
+        <div class="stat-row" id="calcOut"></div>
+        <div class="callout good mb0" id="calcSay"></div>
+      </div>
+    </div>
+    <div class="grid mt2">
+      <div class="card"><h3>⏰ Time cheats</h3><ul class="mb0"><li>1 day ≈ <b>86,400 s</b> ≈ 10<sup>5</sup> s</li><li>1 million/day ≈ <b>12 per second</b></li><li>1 billion/day ≈ <b>12,000 per second</b></li><li>1 month ≈ 2.5 million s</li></ul></div>
+      <div class="card"><h3>💾 Size cheats</h3><ul class="mb0"><li>1 char ≈ 1 byte · tweet ≈ 300 B</li><li>Photo ≈ 200 KB–2 MB</li><li>1 min HD video ≈ 50–100 MB</li><li>KB → MB → GB → TB → PB (×1000 each)</li></ul></div>
+      <div class="card"><h3>🖥️ Capacity rules of thumb</h3><ul class="mb0"><li>Web server: ~1K–10K simple req/s</li><li>SQL DB: ~5K–20K simple queries/s</li><li>Redis: ~100K+ ops/s per node</li><li>Use <b>2–3×</b> headroom for peaks</li></ul></div>
+    </div>
+    <p class="small muted">Rules of thumb vary a lot with hardware and workload — they're for quick sizing, not promises.</p>
+  </section>
+
+</main>
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"></script>
+<script src="js/app.js"></script>
+<script src="js/numbers.js"></script>
+</body>
+</html>

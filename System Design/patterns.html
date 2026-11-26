@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Advanced Patterns</title>
+<meta name="description" content="Message queues, pub/sub, event streams, idempotency, microservices, Raft consensus, sagas, CQRS, event sourcing, bloom filters and Snowflake IDs.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧩</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script>try{var t=localStorage.getItem('sd-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<style>
+  .bits { display: grid; grid-template-columns: repeat(16, 1fr); gap: 3px; }
+  .bit { aspect-ratio: 1; border: 2px solid var(--ink); border-radius: 4px; display: grid; place-items: center; font-family: var(--f-mono); font-size: .7rem; background: var(--card-2); transition: background .25s, transform .2s; }
+  .bit.on { background: var(--yellow); color: #1f2430; }
+  .bit.ping { transform: scale(1.25); background: var(--pink); color: #fff; }
+  .bit.miss { background: var(--red); color: #fff; transform: scale(1.25); }
+  @media (max-width: 560px) { .bits { grid-template-columns: repeat(8, 1fr); } }
+  .snow { display: flex; height: 44px; border: 2.5px solid var(--ink); border-radius: 10px; overflow: hidden; font-family: var(--f-mono); font-size: .75rem; }
+  .snow div { display: grid; place-items: center; color: #1f2430; border-right: 2px solid var(--ink); text-align: center; line-height: 1.1; padding: 0 2px; }
+  .snow div:last-child { border-right: 0; }
+  .idlist { font-family: var(--f-mono); font-size: .85rem; }
+  .events { display: flex; flex-direction: column; gap: 6px; }
+  .ev { display: flex; justify-content: space-between; gap: 10px; padding: 6px 10px; border: 2px solid var(--ink); border-radius: 8px; background: var(--card); animation: pop .25s; }
+  .ev.dep { border-left: 8px solid var(--green); } .ev.wd { border-left: 8px solid var(--red); }
+  .wallet { font-family: var(--f-head); font-size: 2.2rem; }
+  .charges { min-height: 48px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .charge { padding: 4px 10px; border: 2px solid var(--ink); border-radius: 8px; background: var(--sticky-p); color: #1f2430; animation: pop .25s; }
+</style>
+</head>
+<body data-page="patterns">
+<main class="wrap">
+
+  <section class="hero">
+    <span class="chapter-tag">Chapter 6 · Advanced Patterns</span>
+    <h1>Clever tricks of big systems 🧩</h1>
+    <p class="lead">Once you have many machines, new puzzles appear: How do they share work? Agree on things? Undo half-finished jobs? These patterns are the answers.</p>
+    <ul class="toc">
+      <li><a class="chip" href="#async">📮 Sync vs async</a></li>
+      <li><a class="chip" href="#queue">📬 Queues</a></li>
+      <li><a class="chip" href="#pubsub">📢 Pub/Sub &amp; streams</a></li>
+      <li><a class="chip" href="#idem">🛗 Idempotency</a></li>
+      <li><a class="chip" href="#micro">🏘️ Microservices</a></li>
+      <li><a class="chip" href="#raft">🗳️ Consensus</a></li>
+      <li><a class="chip" href="#saga">🧳 Sagas</a></li>
+      <li><a class="chip" href="#cqrs">📒 CQRS &amp; events</a></li>
+      <li><a class="chip" href="#bloom">🌸 Bloom filter</a></li>
+      <li><a class="chip" href="#ids">❄️ Unique IDs</a></li>
+    </ul>
+  </section>
+
+  <section class="sec" id="async">
+    <div class="sec-head"><span class="sec-num">6.1</span><h2><span class="em">📮</span>Synchronous vs asynchronous</h2></div>
+    <div class="two">
+      <div class="card tilt-l"><h3>📞 Synchronous = a phone call</h3><p>You ask and <b>wait on the line</b> until you get the answer. Simple, but if the other side is slow or down, you're stuck too.</p><div id="syncFlow"></div></div>
+      <div class="card tilt-r"><h3>💌 Asynchronous = a text message</h3><p>You send it and <b>go on with your day</b>. The other side handles it when ready. Survives spikes and outages!</p><div id="asyncFlow"></div></div>
+    </div>
+  </section>
+
+  <section class="sec" id="queue">
+    <div class="sec-head"><span class="sec-num">6.2</span><h2><span class="em">📬</span>Message queues absorb the rush</h2></div>
+    <p class="lead">Orders pour in (producers). Workers process them (consumers). The <b>queue</b> in the middle is a buffer — like a ticket rail in a busy kitchen. Hit <b>Spike!</b> and watch it soak up the rush.</p>
+    <div class="diagram">
+      <canvas class="sim" id="qCv" aria-label="Message queue simulation"></canvas>
+      <div class="two mt" style="align-items:center">
+        <div>
+          <label class="field"><span>📥 Incoming jobs/sec <b id="inV">4</b></span><input type="range" id="inRate" min="1" max="20" value="4"></label>
+          <label class="field"><span>👷 Workers (each does 1.5 jobs/sec) <b id="wkV">3</b></span><input type="range" id="workers" min="1" max="10" value="3"></label>
+          <div class="row"><button class="btn pink sm" id="spike">🔥 Spike! (+60 jobs)</button></div>
+        </div>
+        <div class="stat-row" id="qStats"></div>
+      </div>
+      <p class="cap" id="qCap"></p>
+    </div>
+    <div class="grid mt">
+      <div class="card"><h4>🔗 Decoupling</h4><p class="mb0">Producers don't need to know who processes the job, or if they're even online.</p></div>
+      <div class="card"><h4>🪣 Load leveling</h4><p class="mb0">Spikes become a longer line, not a crash. Workers chew through at a steady pace.</p></div>
+      <div class="card"><h4>☠️ Dead-letter queue</h4><p class="mb0">Jobs that keep failing get parked in a DLQ for humans to inspect, instead of blocking the line.</p></div>
+      <div class="card"><h4>🛑 Backpressure</h4><p class="mb0">If the queue grows forever, tell producers to slow down (or shed load). A queue hides problems — watch its length!</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="pubsub">
+    <div class="sec-head"><span class="sec-num">6.3</span><h2><span class="em">📢</span>Queue vs Pub/Sub vs Event stream</h2></div>
+    <div class="grid lg">
+      <div class="diagram"><h3 class="center">📬 Queue</h3><div id="fQueue"></div><p class="cap">Each message goes to <b>one</b> worker. Splits the work.</p></div>
+      <div class="diagram"><h3 class="center">📢 Pub/Sub</h3><div id="fPubsub"></div><p class="cap">Each message goes to <b>every</b> subscriber. Like a group chat.</p></div>
+      <div class="diagram"><h3 class="center">📜 Event stream (log)</h3><div id="fStream"></div><p class="cap">An append-only diary. Readers keep a bookmark (offset) and can <b>replay</b> history.</p></div>
+    </div>
+    <div class="callout pro"><span class="lbl">🧠 Event streams (Kafka-style)</span><p>Messages are kept for days and split into <b>partitions</b> (lanes). Order is guaranteed <b>within</b> a partition, so use a key like <code>user_id</code> to keep one user's events in order. Many teams can read the same stream independently.</p></div>
+  </section>
+
+  <section class="sec" id="idem">
+    <div class="sec-head"><span class="sec-num">6.4</span><h2><span class="em">🛗</span>Delivery guarantees &amp; idempotency</h2></div>
+    <div class="grid">
+      <div class="sticky p"><h4>🎯 At-most-once</h4>Send once, never retry. Might get lost. OK for metrics.</div>
+      <div class="sticky"><h4>🔁 At-least-once</h4>Retry until acknowledged. Never lost, but might arrive <b>twice</b>. The most common!</div>
+      <div class="sticky g"><h4>💎 Exactly-once</h4>Really = at-least-once + <b>idempotent</b> processing (duplicates have no effect).</div>
+    </div>
+    <div class="two mt2">
+      <div>
+        <p class="lead"><b>Idempotent</b> = doing it twice has the same effect as doing it once.</p>
+        <div class="callout kid"><span class="lbl">👶 Like you're 5</span><p>Pressing the elevator button 10 times still calls <b>one</b> elevator 🛗. “Set volume to 5” is idempotent; “turn volume up by 1” is not.</p></div>
+        <p>Trick: the client sends a unique <b>idempotency key</b>. The server remembers keys it has seen and ignores repeats.</p>
+      </div>
+      <div class="card">
+        <h3>💳 Try it: pay $10 on a flaky network</h3>
+        <label class="check"><input type="checkbox" id="useKey"> <span>Use an idempotency key</span></label>
+        <div class="row"><button class="btn primary sm" id="payBtn">💸 Pay $10 (network glitches → app retries 3×)</button><button class="btn sm" id="payReset">↺</button></div>
+        <p class="mt mb0">Charges on your card:</p>
+        <div class="charges" id="charges"></div>
+        <p class="note-font mb0" id="payMsg"></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="micro">
+    <div class="sec-head"><span class="sec-num">6.5</span><h2><span class="em">🏘️</span>Monolith vs Microservices</h2></div>
+    <div class="two">
+      <div class="diagram"><div id="monoFlow"></div><p class="cap">🏰 Monolith: one big app, one deploy, one database</p></div>
+      <div class="diagram"><div id="microFlow"></div><p class="cap">🏘️ Microservices: small apps, each owns its data</p></div>
+    </div>
+    <div class="table-wrap mt"><table class="sk">
+      <tr><th></th><th>🏰 Monolith</th><th>🏘️ Microservices</th></tr>
+      <tr><td>Start-up speed</td><td>✅ Fast & simple</td><td>🐢 Lots of setup</td></tr>
+      <tr><td>Teams</td><td>Gets crowded with 50+ engineers</td><td>✅ Teams own & ship services independently</td></tr>
+      <tr><td>Scaling</td><td>Scale everything together</td><td>✅ Scale only the busy part</td></tr>
+      <tr><td>Failures</td><td>One bug can take down everything</td><td>Isolated… but network calls fail in new ways</td></tr>
+      <tr><td>Debugging</td><td>✅ One place, one stack trace</td><td>Needs tracing across many services</td></tr>
+      <tr><td>Data</td><td>✅ Easy transactions & JOINs</td><td>Each service owns its DB → sagas, events</td></tr>
+    </table></div>
+    <div class="callout pro"><span class="lbl">🧠 The wise path</span><p>Start with a <b>modular monolith</b> (clean modules inside one app). Split a module into a service only when a <b>team</b> or <b>scaling</b> need clearly demands it. A “distributed monolith” (services that must deploy together) is the worst of both worlds.</p></div>
+    <div class="diagram mt"><div class="scroll-x"><div id="meshFlow"></div></div><p class="cap">Gateway at the front door, a registry so services find each other, and sidecar proxies (a “service mesh”) handling retries, TLS and metrics</p></div>
+  </section>
+
+  <section class="sec" id="raft">
+    <div class="sec-head"><span class="sec-num">6.6</span><h2><span class="em">🗳️</span>Consensus: how machines agree (Raft)</h2></div>
+    <div class="two">
+      <div>
+        <p class="lead">5 servers must agree on one <b>leader</b> who orders all writes. The leader sends <b>heartbeats</b> 💓. If followers stop hearing them, someone becomes a <b>candidate</b> and asks for votes. A <b>majority</b> (3 of 5) wins!</p>
+        <div class="callout kid"><span class="lbl">👶 Like you're 5</span><p>The class captain keeps saying “I'm here!”. If the captain goes home sick, the first kid who notices says “Vote for me!”. Get most of the class's votes → new captain.</p></div>
+        <p class="small muted">Used inside etcd, Consul, CockroachDB, Kafka (KRaft) and more. A majority means the cluster survives 2 of 5 machines failing.</p>
+      </div>
+      <div class="diagram">
+        <div id="raftSvg"></div>
+        <div class="row" style="justify-content:center"><button class="btn red sm" id="raftKill">💥 Crash the leader</button><button class="btn sm" id="raftRevive">💚 Revive crashed</button></div>
+        <p class="cap" id="raftCap">Leader is sending heartbeats 💓</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="saga">
+    <div class="sec-head"><span class="sec-num">6.7</span><h2><span class="em">🧳</span>Distributed transactions: 2PC vs Sagas</h2></div>
+    <p class="lead">Booking a trip needs a <b>flight</b>, a <b>hotel</b> and a <b>car</b> — three different services with their own databases. What if the car fails after the flight is booked?</p>
+    <div class="two">
+      <div class="card"><h3>🤝 Two-phase commit (2PC)</h3><p>A coordinator asks everyone “<b>Ready?</b>” (prepare). Only if <b>all</b> say yes, it says “<b>Commit!</b>”.</p><p class="small mb0"><span class="tag g">all-or-nothing</span><span class="tag r">slow, locks held</span><span class="tag r">coordinator dies = everyone stuck</span></p></div>
+      <div class="card"><h3>🧳 Saga</h3><p>Do each step for real, one by one. If a step fails, run <b>compensating</b> steps to undo the earlier ones (cancel the hotel, refund the flight).</p><p class="small mb0"><span class="tag g">no global locks</span><span class="tag g">scales</span><span class="tag r">briefly inconsistent</span><span class="tag r">must design “undo”s</span></p></div>
+    </div>
+    <div class="diagram mt" id="sagaBox">
+      <label class="check" style="justify-content:center"><input type="checkbox" id="carFail" checked> <span>🚗 Make the car rental fail</span></label>
+      <div class="scroll-x"><div id="sagaFlow"></div></div>
+      <p class="cap"></p>
+      <div class="row" style="justify-content:center"><button class="btn primary sm" data-act="play">▶ Play saga</button><button class="btn sm" data-act="next">⏭ Step</button><button class="btn sm" data-act="reset">↺</button></div>
+    </div>
+  </section>
+
+  <section class="sec" id="cqrs">
+    <div class="sec-head"><span class="sec-num">6.8</span><h2><span class="em">📒</span>Event sourcing &amp; CQRS</h2></div>
+    <div class="two">
+      <div class="card">
+        <h3>📒 Event sourcing: keep the diary, not just the total</h3>
+        <p>Instead of storing “balance = $70”, store every <b>event</b>. The balance is computed by replaying them. You get a perfect history & time travel!</p>
+        <div class="row"><button class="btn green sm" id="dep">➕ Deposit $20</button><button class="btn red sm" id="wd">➖ Withdraw $10</button><button class="btn sm" id="replay">⏪ Replay</button></div>
+        <div class="row mt" style="justify-content:space-between"><span>Balance:</span><span class="wallet" id="bal">$0</span></div>
+        <div class="events mt" id="events"></div>
+      </div>
+      <div class="stack">
+        <div class="diagram"><div id="cqrsFlow"></div><p class="cap">CQRS: separate the <b>write</b> model from the <b>read</b> models</p></div>
+        <div class="callout"><span class="lbl">🧠 Why split reads and writes?</span><p class="mb0">Writes need rules and validation; reads need speed and many shapes (search, dashboards, feeds). Events flow from the write side to build fast <b>read views</b> — at the cost of a short delay (eventual consistency).</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="bloom">
+    <div class="sec-head"><span class="sec-num">6.9</span><h2><span class="em">🌸</span>Bloom filter: a tiny memory that says “definitely not” or “maybe”</h2></div>
+    <div class="two">
+      <div>
+        <p class="lead">A row of light switches (bits). Adding a word flips <b>3 switches</b> chosen by 3 hash functions. Checking a word looks at its 3 switches: if any is off → <b>definitely not seen</b>. All on → <b>probably seen</b>.</p>
+        <p>Used to skip useless disk reads in databases, check “is this username taken?”, avoid showing you the same post twice, and block known-bad URLs — using very little memory.</p>
+        <div class="callout warn"><span class="lbl">⚠️ The catch</span><p class="mb0">False positives can happen (switches turned on by other words), but <b>never false negatives</b>. You also can't delete items easily.</p></div>
+      </div>
+      <div class="card">
+        <div class="row"><input type="text" id="bfIn" placeholder="type a word, e.g. cat" maxlength="20" style="flex:1;min-width:140px" aria-label="Word for bloom filter"><button class="btn primary sm" id="bfAdd">➕ Add</button><button class="btn sm" id="bfCheck">❓ Check</button></div>
+        <div class="bits mt" id="bfBits"></div>
+        <p class="note-font mt" id="bfMsg">Add a few words, then check some others!</p>
+        <p class="small muted mb0" id="bfSet">Added: (nothing yet)</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="ids">
+    <div class="sec-head"><span class="sec-num">6.10</span><h2><span class="em">❄️</span>Unique IDs across many machines</h2></div>
+    <p class="lead">One database can count 1, 2, 3… but 1,000 servers creating IDs at once would collide. Twitter's <b>Snowflake</b> idea packs time + machine + counter into 64 bits:</p>
+    <div class="card">
+      <div class="snow" id="snowBar"></div>
+      <div class="row mt"><button class="btn primary sm" id="snowGen">❄️ Generate IDs</button><label class="small">Machine # <input type="number" id="snowM" value="7" min="0" max="1023" style="width:90px"></label></div>
+      <div class="idlist mt" id="snowList"></div>
+    </div>
+    <div class="table-wrap mt"><table class="sk">
+      <tr><th>ID style</th><th>Pros</th><th>Cons</th></tr>
+      <tr><td>🔢 Auto-increment</td><td>Tiny, ordered</td><td>One DB bottleneck; guessable</td></tr>
+      <tr><td>🎲 UUID v4</td><td>No coordination at all</td><td>128 bits, random order hurts indexes</td></tr>
+      <tr><td>⏱️ UUID v7 / ULID</td><td>No coordination + time-sorted</td><td>Still 128 bits</td></tr>
+      <tr><td>❄️ Snowflake</td><td>64 bits, time-sorted, fast</td><td>Needs machine IDs & synced clocks</td></tr>
+    </table></div>
+  </section>
+
+  <section class="sec" id="batch">
+    <div class="sec-head"><span class="sec-num">6.11</span><h2><span class="em">🏭</span>Batch vs stream processing</h2></div>
+    <div class="grid">
+      <div class="card tilt-l"><h3>🧺 Batch</h3><p>Collect a big pile, process it all at once (every night). Like doing laundry once a week.</p><p class="small mb0">Reports, billing, ML training. Tools: Spark, MapReduce, dbt.</p></div>
+      <div class="card tilt-r"><h3>🚰 Stream</h3><p>Process each event the moment it arrives. Like washing each dish right after using it.</p><p class="small mb0">Fraud detection, live dashboards, alerts. Tools: Flink, Kafka Streams.</p></div>
+      <div class="card"><h3>🗺️ MapReduce in one line</h3><p class="mb0"><b>Map</b>: many workers each count words in their own pages. <b>Reduce</b>: add up the counts per word. Split → work in parallel → combine.</p></div>
+    </div>
+  </section>
+
+</main>
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"></script>
+<script src="js/app.js"></script>
+<script src="js/patterns.js"></script>
+</body>
+</html>

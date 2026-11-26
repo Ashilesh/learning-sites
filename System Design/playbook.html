@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design Doc &amp; Playbook</title>
+<meta name="description" content="An 8-step method for any system design (interviews or real projects) plus a copy-ready design document template with a filled example.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📝</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script>try{var t=localStorage.getItem('sd-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<style>
+  .road { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; position: relative; margin: 10px 0 18px; }
+  .road::before { content: ""; position: absolute; left: 4%; right: 4%; top: 30px; height: 6px; background: repeating-linear-gradient(90deg, var(--ink) 0 14px, transparent 14px 24px); opacity: .5; }
+  .mile { position: relative; z-index: 1; font: inherit; color: var(--ink); background: none; border: 0; cursor: pointer; text-align: center; padding: 0; }
+  .mile .dot { width: 60px; height: 60px; margin: 0 auto; border-radius: 50%; border: 3px solid var(--ink); background: var(--card); display: grid; place-items: center; font-size: 1.6rem; transition: transform .2s, background .2s; }
+  .mile.on .dot { background: var(--yellow); transform: scale(1.12) rotate(-6deg); box-shadow: 3px 3px 0 var(--shadow); }
+  .mile .t { font-size: .95rem; line-height: 1.1; display: block; margin-top: 4px; }
+  @media (max-width: 760px) { .road { grid-template-columns: repeat(4, 1fr); row-gap: 14px; } .road::before { display: none; } .mile .dot { width: 50px; height: 50px; } }
+  .step-detail { display: grid; grid-template-columns: 1.3fr 1fr; gap: 18px; }
+  @media (max-width: 820px) { .step-detail { grid-template-columns: 1fr; } }
+  .time-badge { display: inline-block; font-family: var(--f-note); font-size: 1.3rem; padding: 0 10px; border: 2px dashed var(--ink); border-radius: 10px; }
+  details.sec-card { background: var(--card); border: 2px solid var(--ink); border-radius: var(--radius-card); padding: 8px 14px; }
+  details.sec-card summary { cursor: pointer; font-family: var(--f-head); font-size: 1.05rem; list-style: none; display: flex; gap: 8px; align-items: center; }
+  details.sec-card summary::-webkit-details-marker { display: none; }
+  details.sec-card summary::after { content: "＋"; margin-left: auto; }
+  details.sec-card[open] summary::after { content: "－"; }
+  details.sec-card p, details.sec-card ul { margin-top: 8px; }
+  .doc-pre { max-height: 460px; overflow: auto; }
+  .q-chips a { text-decoration: none; }
+</style>
+</head>
+<body data-page="playbook">
+<main class="wrap">
+
+  <section class="hero">
+    <span class="chapter-tag">Chapter 11 · Playbook</span>
+    <h1>How to design anything (and write it down) 📝</h1>
+    <p class="lead">A repeatable recipe for interviews <b>and</b> real projects, plus a design document template you can copy in one click.</p>
+    <ul class="toc">
+      <li><a class="chip" href="#method">🛣️ The 8-step method</a></li>
+      <li><a class="chip" href="#ask">❓ Questions to ask</a></li>
+      <li><a class="chip" href="#doc">📄 Doc template</a></li>
+      <li><a class="chip" href="#diagram">🖍️ Diagram tips</a></li>
+      <li><a class="chip" href="#review">🔍 Review checklist</a></li>
+      <li><a class="chip" href="#practice">🏋️ Practice list</a></li>
+    </ul>
+  </section>
+
+  <section class="sec" id="method">
+    <div class="sec-head"><span class="sec-num">11.1</span><h2><span class="em">🛣️</span>The 8-step method</h2></div>
+    <p class="lead">Tap each milestone. The times are a guide for a 45-minute interview; for a real project each step might take days.</p>
+    <div class="road" id="road"></div>
+    <div class="card" id="stepCard"></div>
+  </section>
+
+  <section class="sec" id="ask">
+    <div class="sec-head"><span class="sec-num">11.2</span><h2><span class="em">❓</span>Great questions to ask first</h2></div>
+    <div class="grid sm">
+      <div class="sticky">👥 Who are the users and how many (daily / at peak)?</div>
+      <div class="sticky b">🎯 Which 2–3 features matter most? What's out of scope?</div>
+      <div class="sticky g">👀 More reads or more writes? By how much?</div>
+      <div class="sticky p">⚡ How fast must it feel? (p99 target)</div>
+      <div class="sticky o">🟢 How bad is downtime? (availability target)</div>
+      <div class="sticky v">🎯 Is slightly stale data OK? Where must it be exact?</div>
+      <div class="sticky">🌍 One country or worldwide? Any data-location laws?</div>
+      <div class="sticky b">💾 How long do we keep data? How big is each item?</div>
+      <div class="sticky g">🔐 What's sensitive (payments, health, kids' data)?</div>
+      <div class="sticky p">💰 Any budget, team-size or timeline limits?</div>
+    </div>
+  </section>
+
+  <section class="sec" id="doc">
+    <div class="sec-head"><span class="sec-num">11.3</span><h2><span class="em">📄</span>The design document template</h2></div>
+    <p class="lead">A design doc lets your team <b>review the idea before building it</b> — catching problems when they cost an eraser, not a rewrite. Open each section to see what goes in it.</p>
+    <div class="two">
+      <div class="stack" id="docSections"></div>
+      <div class="card" style="position:sticky;top:calc(var(--bar-h) + 12px)">
+        <h3>📋 Grab it</h3>
+        <div class="tabs">
+          <div class="tablist"><button class="chip" data-tab="blank" aria-selected="true">📄 Blank template</button><button class="chip" data-tab="ex">🔗 Filled example</button></div>
+          <div class="tabpanel" data-panel="blank"><div class="pre doc-pre" id="mdBlank"></div></div>
+          <div class="tabpanel" data-panel="ex"><div class="pre doc-pre" id="mdEx"></div></div>
+        </div>
+        <div class="row mt"><button class="btn primary sm" id="copyMd">📋 Copy Markdown</button><button class="btn sm" id="dlMd">⬇️ Download .md</button></div>
+        <p class="small muted mt mb0">Paste into Google Docs, Notion, Confluence or a GitHub README.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="diagram">
+    <div class="sec-head"><span class="sec-num">11.4</span><h2><span class="em">🖍️</span>Drawing diagrams people understand</h2></div>
+    <div class="grid">
+      <div class="card tilt-l"><h4>➡️ Flow left to right</h4><p class="mb0">Users on the left, data stores on the right. Readers follow the request like a story.</p></div>
+      <div class="card"><h4>🏷️ Label every arrow</h4><p class="mb0">“HTTPS”, “publishes OrderPlaced”, “reads profile”. An unlabeled arrow means nothing.</p></div>
+      <div class="card tilt-r"><h4>🎨 Style = meaning</h4><p class="mb0">Solid = synchronous call, dashed = async/event. Same color for the same kind of box.</p></div>
+      <div class="card"><h4>🔢 Number the steps</h4><p class="mb0">For a key flow, put ①②③ on arrows so the walk-through is obvious.</p></div>
+      <div class="card tilt-l"><h4>📏 Add numbers</h4><p class="mb0">QPS on arrows, sizes on stores. Numbers turn a picture into a design.</p></div>
+      <div class="card"><h4>🔍 One question per diagram</h4><p class="mb0">High-level overview first, then zoom-in diagrams for each deep dive.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="review">
+    <div class="sec-head"><span class="sec-num">11.5</span><h2><span class="em">🔍</span>Questions reviewers will ask (ask them yourself first!)</h2></div>
+    <div class="grid sm">
+      <div class="card flat">💥 What happens when <b>each box</b> dies?</div>
+      <div class="card flat">📈 What breaks first at <b>10×</b> traffic?</div>
+      <div class="card flat">⏱️ What's the <b>p99</b> of the main flow?</div>
+      <div class="card flat">🎯 Where is the <b>single point of failure</b>?</div>
+      <div class="card flat">🔁 Are retries <b>safe</b> (idempotent)?</div>
+      <div class="card flat">🔙 How do we <b>roll back</b>?</div>
+      <div class="card flat">📊 How do we <b>know</b> it's healthy?</div>
+      <div class="card flat">🔐 What data could <b>leak</b>, and to whom?</div>
+      <div class="card flat">💰 What does it <b>cost</b> per month?</div>
+      <div class="card flat">🧹 What's the <b>simplest</b> version that works?</div>
+    </div>
+  </section>
+
+  <section class="sec" id="practice">
+    <div class="sec-head"><span class="sec-num">11.6</span><h2><span class="em">🏋️</span>Practice list (classic design questions)</h2></div>
+    <p>Try each with the 8 steps. The ones with a 🔗 are drawn out in <a href="cases.html">Real-World Designs</a>.</p>
+    <div class="chips q-chips" id="practiceList"></div>
+  </section>
+
+</main>
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"></script>
+<script src="js/app.js"></script>
+<script src="js/playbook.js"></script>
+</body>
+</html>

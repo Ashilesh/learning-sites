@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scaling Up</title>
+<meta name="description" content="Vertical vs horizontal scaling, load balancing algorithms (interactive), caching strategies, LRU, CDNs and autoscaling.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📈</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script>try{var t=localStorage.getItem('sd-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<style>
+  .scale-stage { height: 190px; display: flex; align-items: flex-end; justify-content: center; gap: 6px; flex-wrap: wrap-reverse; align-content: flex-start; border-bottom: 3px solid var(--ink); padding-bottom: 4px; overflow: hidden; }
+  .bigbox { background: var(--sticky-y); border: 2.5px solid var(--ink); border-radius: 6px 12px 8px 10px; display: grid; place-items: center; font-size: 1.6rem; transition: width .4s, height .4s; color: #1f2430; }
+  .smallbox { width: 42px; height: 42px; background: var(--sticky-b); border: 2.5px solid var(--ink); border-radius: 6px 10px 6px 9px; display: grid; place-items: center; font-size: 1.2rem; animation: pop .3s; }
+  .lru { display: flex; gap: 8px; flex-wrap: wrap; min-height: 74px; align-items: center; }
+  .slot { width: 64px; height: 64px; border: 2.5px dashed var(--ink); border-radius: 12px; display: grid; place-items: center; font-family: var(--f-head); font-size: 1.5rem; background: var(--card-2); transition: background .3s; }
+  .slot.full { border-style: solid; background: var(--sticky-y); color: #1f2430; animation: pop .25s; }
+  .slot.hit { background: var(--sticky-g); }
+  .keys { display: flex; flex-wrap: wrap; gap: 8px; }
+  .keys .btn { width: 52px; justify-content: center; font-family: var(--f-head); }
+  .evicted { font-family: var(--f-note); font-size: 1.4rem; color: var(--red); min-height: 1.6em; }
+  .lb-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 10px; }
+</style>
+</head>
+<body data-page="scaling">
+<main class="wrap">
+
+  <section class="hero">
+    <span class="chapter-tag">Chapter 4 · Scaling Up</span>
+    <h1>Handling more and more people 📈</h1>
+    <p class="lead"><b>Scalability</b> means: when 10× more people show up, you can add resources and keep things fast — without rebuilding everything.</p>
+    <ul class="toc">
+      <li><a class="chip" href="#vh">🏋️ Up vs out</a></li>
+      <li><a class="chip" href="#stateless">🎒 Stateless</a></li>
+      <li><a class="chip" href="#lb">🚦 Load balancing</a></li>
+      <li><a class="chip" href="#cache">⚡ Caching</a></li>
+      <li><a class="chip" href="#cdn">🌐 CDN</a></li>
+      <li><a class="chip" href="#auto">🤖 Autoscaling</a></li>
+    </ul>
+  </section>
+
+  <section class="sec" id="vh">
+    <div class="sec-head"><span class="sec-num">4.1</span><h2><span class="em">🏋️</span>Scale up (vertical) vs scale out (horizontal)</h2></div>
+    <p class="lead">Need more power? Buy a <b>bigger machine</b>… or <b>more machines</b>. Click the buttons and watch capacity and cost.</p>
+    <div class="two">
+      <div class="card">
+        <h3>⬆️ Vertical: one giant robot</h3>
+        <div class="scale-stage" id="vStage"><div class="bigbox" id="vBox">🤖</div></div>
+        <div class="stat-row mt"><div class="stat"><span class="v" id="vCap">1×</span><span class="k">capacity</span></div><div class="stat"><span class="v" id="vCost">$1</span><span class="k">cost</span></div></div>
+        <div class="row mt"><button class="btn primary sm" id="vUp">➕ Bigger machine</button><button class="btn sm" id="vKill">💥 Crash it</button></div>
+        <p class="small mt mb0"><span class="tag g">simple</span><span class="tag g">no code changes</span><span class="tag r">hard ceiling</span><span class="tag r">pricey at the top</span><span class="tag r">single point of failure</span></p>
+      </div>
+      <div class="card">
+        <h3>➡️ Horizontal: a team of small robots</h3>
+        <div class="scale-stage" id="hStage"></div>
+        <div class="stat-row mt"><div class="stat"><span class="v" id="hCap">1×</span><span class="k">capacity</span></div><div class="stat"><span class="v" id="hCost">$1</span><span class="k">cost</span></div></div>
+        <div class="row mt"><button class="btn primary sm" id="hUp">➕ More machines</button><button class="btn sm" id="hKill">💥 Crash one</button></div>
+        <p class="small mt mb0"><span class="tag g">almost no ceiling</span><span class="tag g">survives failures</span><span class="tag g">cheap boxes</span><span class="tag r">needs load balancer</span><span class="tag r">stateless code</span><span class="tag r">more moving parts</span></p>
+      </div>
+    </div>
+    <p class="note-font center mt" id="vhMsg">Start small — then try crashing each one! 💥</p>
+  </section>
+
+  <section class="sec" id="stateless">
+    <div class="sec-head"><span class="sec-num">4.2</span><h2><span class="em">🎒</span>Stateless servers: the secret to scaling out</h2></div>
+    <div class="two">
+      <div>
+        <p class="lead">If a server <b>remembers</b> you (your cart, your login) in its own memory, you must always go back to <i>that</i> server. If it dies, your cart is gone. 😢</p>
+        <p class="lead"><b>Stateless</b> servers keep nothing personal. Your session lives in a shared store (like Redis) or a signed token, so <span class="hl">any server can serve anyone</span>.</p>
+        <div class="callout kid"><span class="lbl">👶 Like you're 5</span><p>Instead of one waiter memorizing your order, the order is written on a <b>shared board</b>. Any waiter can bring your food!</p></div>
+      </div>
+      <div class="stack">
+        <div class="diagram"><div id="stickyFlow"></div><p class="cap">😬 Sticky: Bob must always reach server 1</p></div>
+        <div class="diagram"><div id="sharedFlow"></div><p class="cap">😎 Stateless: any server, sessions in a shared store</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="lb">
+    <div class="sec-head"><span class="sec-num">4.3</span><h2><span class="em">🚦</span>Load balancing — play with it!</h2></div>
+    <p class="lead">Requests (dots) arrive at the load balancer, which picks a server. Server 4 is an <b>old, slow</b> machine. Try different algorithms, crank up traffic, and kill a server.</p>
+    <div class="diagram">
+      <div class="chips" id="algoChips" style="justify-content:center;margin:6px 0 10px"></div>
+      <canvas class="sim" id="lbCv" aria-label="Load balancer simulation"></canvas>
+      <div class="two mt" style="align-items:center">
+        <div>
+          <label class="field"><span>🚗 Traffic (requests/sec) <b id="rateV">10</b></span><input type="range" id="rate" min="2" max="30" value="10"></label>
+          <div class="row"><button class="btn sm" id="kill2">💥 Kill server 2</button><button class="btn sm" id="resetLb">↺ Reset stats</button></div>
+        </div>
+        <div class="lb-stats" id="lbStats"></div>
+      </div>
+      <p class="cap" id="algoCap"></p>
+    </div>
+    <div class="grid mt">
+      <div class="card"><h3>🔁 Round robin</h3><p class="mb0">Take turns: 1, 2, 3, 4, 1, 2… Fair if all servers are equal. Bad when one is slow.</p></div>
+      <div class="card"><h3>📉 Least connections</h3><p class="mb0">Send to whoever is least busy right now. Adapts to slow servers & long requests.</p></div>
+      <div class="card"><h3>⚖️ Weighted</h3><p class="mb0">Big servers get more turns. Great for mixed hardware or slowly testing a new version (canary).</p></div>
+      <div class="card"><h3>#️⃣ IP / key hash</h3><p class="mb0">Same user → same server (sticky). Good for caches; uneven if a few users are huge.</p></div>
+      <div class="card"><h3>🎲 Power of two choices</h3><p class="mb0">Pick 2 random servers, use the less busy one. Simple, surprisingly excellent at scale.</p></div>
+      <div class="card"><h3>❤️ Health checks</h3><p class="mb0">The LB pings servers (“/health”) every few seconds and stops sending to ones that don't answer.</p></div>
+    </div>
+    <div class="table-wrap mt"><table class="sk">
+      <tr><th>Layer 4 load balancer 📦</th><th>Layer 7 load balancer 📨</th></tr>
+      <tr><td>Looks only at the envelope (IP + port)</td><td>Opens the letter (URL, headers, cookies)</td></tr>
+      <tr><td>Super fast, handles any TCP/UDP traffic</td><td>Smart routing: <code>/api</code> → API servers, <code>/img</code> → image servers</td></tr>
+      <tr><td>E.g. AWS NLB, LVS</td><td>E.g. NGINX, Envoy, AWS ALB — can also do HTTPS, auth, retries</td></tr>
+    </table></div>
+  </section>
+
+  <section class="sec" id="cache">
+    <div class="sec-head"><span class="sec-num">4.4</span><h2><span class="em">⚡</span>Caching: remember the popular answers</h2></div>
+    <div class="two">
+      <div>
+        <p class="lead">A <b>cache</b> stores copies of answers in fast memory. Memory is ~<b>100× faster</b> than a database trip, so a good cache makes apps fly and protects the database.</p>
+        <div class="callout kid"><span class="lbl">👶 Like you're 5</span><p>Your teacher asks “what's 7 × 8?” every day. Instead of counting each time, you write <b>56</b> on a sticky note. That sticky note is a cache! 📝</p></div>
+      </div>
+      <div class="diagram"><div id="layersFlow"></div><p class="cap">Caches live at every layer, from your browser to the database</p></div>
+    </div>
+
+    <h3 class="mt2">How apps use a cache: pick a strategy</h3>
+    <div class="tabs">
+      <div class="tablist">
+        <button class="chip" data-tab="aside" aria-selected="true">Cache-aside (lazy)</button>
+        <button class="chip" data-tab="wt">Write-through</button>
+        <button class="chip" data-tab="wb">Write-back</button>
+        <button class="chip" data-tab="wa">Write-around</button>
+      </div>
+      <div class="tabpanel" data-panel="aside"><div class="diagram" data-strat="aside"><div class="fl"></div><p class="cap"></p><div class="row" style="justify-content:center"><button class="btn primary sm" data-act="play">▶ Play</button><button class="btn sm" data-act="next">⏭ Step</button><button class="btn sm" data-act="reset">↺</button></div></div>
+        <p class="mt"><b>Most popular.</b> App checks cache → on miss, reads DB and fills the cache. <span class="tag g">only caches what's used</span><span class="tag r">first read is slow</span><span class="tag r">can go stale</span></p></div>
+      <div class="tabpanel" data-panel="wt"><div class="diagram" data-strat="wt"><div class="fl"></div><p class="cap"></p><div class="row" style="justify-content:center"><button class="btn primary sm" data-act="play">▶ Play</button><button class="btn sm" data-act="next">⏭ Step</button><button class="btn sm" data-act="reset">↺</button></div></div>
+        <p class="mt">Every write goes to the cache <b>and</b> the DB together. <span class="tag g">cache always fresh</span><span class="tag r">slower writes</span><span class="tag r">caches data nobody reads</span></p></div>
+      <div class="tabpanel" data-panel="wb"><div class="diagram" data-strat="wb"><div class="fl"></div><p class="cap"></p><div class="row" style="justify-content:center"><button class="btn primary sm" data-act="play">▶ Play</button><button class="btn sm" data-act="next">⏭ Step</button><button class="btn sm" data-act="reset">↺</button></div></div>
+        <p class="mt">Write to cache only, save to DB <b>later</b> in batches. <span class="tag g">super-fast writes</span><span class="tag r">data loss if cache dies first!</span></p></div>
+      <div class="tabpanel" data-panel="wa"><div class="diagram" data-strat="wa"><div class="fl"></div><p class="cap"></p><div class="row" style="justify-content:center"><button class="btn primary sm" data-act="play">▶ Play</button><button class="btn sm" data-act="next">⏭ Step</button><button class="btn sm" data-act="reset">↺</button></div></div>
+        <p class="mt">Writes skip the cache and go straight to the DB; cache fills on reads. <span class="tag g">no cache pollution</span><span class="tag r">recent writes read slowly</span></p></div>
+    </div>
+
+    <h3 class="mt2">🧹 When the cache is full: eviction (try LRU!)</h3>
+    <div class="two">
+      <div class="card">
+        <p><b>LRU = Least Recently Used.</b> The cache holds 4 items. Request letters — the one untouched for the longest gets kicked out.</p>
+        <div class="keys" id="lruKeys"></div>
+        <div class="lru mt" id="lruSlots" aria-live="polite"></div>
+        <div class="row small muted" style="justify-content:space-between"><span>⬅ most recent</span><span>least recent ➡</span></div>
+        <div class="evicted" id="lruMsg"></div>
+        <div class="stat-row"><div class="stat"><span class="v" id="lruHit">0</span><span class="k">hits ✅</span></div><div class="stat"><span class="v" id="lruMiss">0</span><span class="k">misses ❌</span></div><div class="stat"><span class="v" id="lruRate">–</span><span class="k">hit rate</span></div></div>
+      </div>
+      <div class="stack">
+        <div class="sticky"><b>⏰ TTL (time to live)</b> — every item expires after N seconds, so stale data fixes itself.</div>
+        <div class="sticky b"><b>🕰️ LRU</b> — kick out the oldest-used. Great default.</div>
+        <div class="sticky g"><b>🔢 LFU</b> — kick out the least-often-used. Good for stable popular items.</div>
+        <div class="sticky p"><b>📥 FIFO</b> — first in, first out. Simple but ignores popularity.</div>
+      </div>
+    </div>
+
+    <h3 class="mt2">💣 Classic cache troubles</h3>
+    <div class="grid">
+      <div class="card"><h4>🐃 Stampede (thundering herd)</h4><p class="mb0">A hot key expires and 10,000 requests hit the DB at once. <b>Fix:</b> lock so one request refills; add random jitter to TTLs; refresh early.</p></div>
+      <div class="card"><h4>👻 Penetration</h4><p class="mb0">Requests for things that don't exist always miss and hit the DB. <b>Fix:</b> cache “not found” briefly, or use a bloom filter.</p></div>
+      <div class="card"><h4>🔥 Hot key</h4><p class="mb0">One celebrity's profile gets millions of reads, melting one cache node. <b>Fix:</b> replicate hot keys, add a small local cache.</p></div>
+      <div class="card"><h4>🥖 Stale data</h4><p class="mb0">DB changed but cache still has the old value. <b>Fix:</b> short TTLs, delete-on-write, or change events.</p></div>
+    </div>
+    <div class="callout pro"><span class="lbl">🧠 Famous saying</span><p>“There are only two hard things in computer science: cache invalidation and naming things.” — Phil Karlton. Cache what is <b>read often, changes rarely, and is OK to be a bit old</b>.</p></div>
+  </section>
+
+  <section class="sec" id="cdn">
+    <div class="sec-head"><span class="sec-num">4.5</span><h2><span class="em">🌐</span>CDN: bring the files closer to people</h2></div>
+    <p class="lead">Our only server lives in <b>Virginia, USA</b>. Pick where a user lives and compare fetching a photo from the far-away origin vs the nearest CDN edge.</p>
+    <div class="diagram">
+      <div class="chips" id="cdnChips" style="justify-content:center;margin:6px 0 8px"></div>
+      <div class="scroll-x"><div id="cdnMap"></div></div>
+      <div class="stat-row mt"><div class="stat"><span class="v" id="cdnOrigin">–</span><span class="k">🐌 from origin</span></div><div class="stat"><span class="v" id="cdnEdge">–</span><span class="k">⚡ from nearest edge</span></div><div class="stat"><span class="v" id="cdnX">–</span><span class="k">faster</span></div></div>
+      <p class="cap">Light in fiber travels ~200 km per millisecond — distance is a speed limit nobody can break!</p>
+    </div>
+    <div class="grid mt">
+      <div class="card"><h4>📥 Pull CDN</h4><p class="mb0">Edge fetches from origin on the first request, then keeps a copy (with a TTL). Easy; first user waits.</p></div>
+      <div class="card"><h4>📤 Push CDN</h4><p class="mb0">You upload files to the CDN ahead of time. Great for big, predictable content (like a new movie).</p></div>
+      <div class="card"><h4>🏷️ Cache-Control</h4><p class="mb0">Headers like <code>max-age=86400</code> tell browsers & CDNs how long to keep a file. Put a version in file names (<code>app.v42.js</code>) to bust caches.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="auto">
+    <div class="sec-head"><span class="sec-num">4.6</span><h2><span class="em">🤖</span>Autoscaling: add servers when it's busy, remove when quiet</h2></div>
+    <p class="lead">Traffic rises in the day and drops at night. An autoscaler watches CPU or requests and adds or removes servers. But new servers take time to boot…</p>
+    <div class="diagram">
+      <div id="autoChart"></div>
+      <div class="two mt">
+        <label class="field"><span>⏱️ Time to boot a new server <b id="bootV">10 min</b></span><input type="range" id="boot" min="0" max="60" step="5" value="10"></label>
+        <label class="field"><span>🛟 Minimum servers (always on) <b id="minV">2</b></span><input type="range" id="minS" min="1" max="8" value="2"></label>
+      </div>
+      <p class="cap" id="autoCap"></p>
+    </div>
+    <div class="callout pro"><span class="lbl">🧠 Autoscaling tips</span><p>Scale on a signal that leads the pain (queue length, requests per server), keep a buffer of warm capacity, scale <b>up fast and down slowly</b>, and pre-scale before known events (sales, big matches).</p></div>
+  </section>
+
+</main>
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"></script>
+<script src="js/app.js"></script>
+<script src="js/scaling.js"></script>
+</body>
+</html>

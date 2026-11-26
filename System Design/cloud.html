@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cloud &amp; Infrastructure</title>
+<meta name="description" content="Where code runs: bare metal, VMs, containers, serverless, Kubernetes self-healing, regions and availability zones, DNS and HTTP deep dives, CI/CD and cloud costs.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>☁️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script>try{var t=localStorage.getItem('sd-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<style>
+  .stackcol { display: flex; flex-direction: column-reverse; gap: 4px; margin: 10px 0; }
+  .layer { border: 2px solid var(--ink); border-radius: 8px; padding: 3px 8px; text-align: center; font-size: .95rem; color: #1f2430; }
+  .layer.hw { background: #ced4da; } .layer.os { background: #a5d8ff; } .layer.hv { background: #ffd8a8; } .layer.rt { background: #b2f2bb; }
+  .layer.app { background: #ffec99; } .layer.fn { background: #fcc2d7; } .layer.cloud { background: repeating-linear-gradient(45deg, #e9ecef 0 8px, #dee2e6 8px 16px); color: #495057; }
+  .layer.row { display: flex; gap: 4px; padding: 0; border: 0; background: none; }
+  .layer.row > .layer { flex: 1; }
+  .proto { display: grid; grid-template-columns: 110px 1fr 70px; gap: 10px; align-items: center; margin: 8px 0; }
+  @media (max-width: 560px) { .proto { grid-template-columns: 80px 1fr 56px; } }
+  .files { display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; }
+  .file { height: 26px; border: 2px solid var(--ink); border-radius: 5px; background: var(--card-2); transition: background .2s; }
+  .file.go { background: var(--sticky-y); } .file.done { background: var(--green); } .file.stall { background: var(--red); }
+  .ptime { font-family: var(--f-mono); font-size: .85rem; text-align: right; }
+  .cost-out .stat .v { font-size: 1.5rem; }
+  .rec { display: grid; grid-template-columns: 90px 1fr; gap: 8px; align-items: center; padding: 6px 0; border-bottom: 1.5px dashed color-mix(in srgb, var(--ink) 22%, transparent); }
+  .rec code { font-size: .9rem; }
+</style>
+</head>
+<body data-page="cloud">
+<main class="wrap">
+
+  <section class="hero">
+    <span class="chapter-tag">Chapter 6 · Cloud &amp; Infrastructure</span>
+    <h1>Where does the code actually run? ☁️</h1>
+    <p class="lead">“The cloud” is just <b>other people's computers</b> — millions of them, in buildings all over the world. Let's see how we rent them, pack our apps into them, and ship changes safely.</p>
+    <ul class="toc">
+      <li><a class="chip" href="#run">🏠 VMs, containers, serverless</a></li>
+      <li><a class="chip" href="#k8s">☸️ Kubernetes</a></li>
+      <li><a class="chip" href="#geo">🌍 Regions &amp; zones</a></li>
+      <li><a class="chip" href="#dns">📖 DNS deep dive</a></li>
+      <li><a class="chip" href="#http">🚀 HTTP/1 vs 2 vs 3</a></li>
+      <li><a class="chip" href="#cicd">🏭 CI/CD</a></li>
+      <li><a class="chip" href="#cost">💰 Cloud costs</a></li>
+    </ul>
+  </section>
+
+  <section class="sec" id="run">
+    <div class="sec-head"><span class="sec-num">6.1</span><h2><span class="em">🏠</span>Bare metal, VMs, containers, serverless</h2></div>
+    <p class="lead">Four ways to run your code — from “own the whole house” to “just call a taxi”.</p>
+    <div class="grid">
+      <div class="card">
+        <h3>🏠 Bare metal</h3><p class="small">Like <b>owning a house</b>: total control, but you fix the roof yourself.</p>
+        <div class="stackcol"><div class="layer hw">🖥️ Physical server</div><div class="layer os">Operating system</div><div class="layer app">Your app</div></div>
+        <p class="small mb0"><span class="tag g">max speed</span><span class="tag r">slow to get more</span></p>
+      </div>
+      <div class="card">
+        <h3>🏢 Virtual machines</h3><p class="small">Like <b>apartments</b>: one building split into private homes, each with its own OS.</p>
+        <div class="stackcol"><div class="layer hw">🖥️ Physical server</div><div class="layer hv">Hypervisor</div><div class="layer row"><div class="layer os">OS</div><div class="layer os">OS</div></div><div class="layer row"><div class="layer app">App A</div><div class="layer app">App B</div></div></div>
+        <p class="small mb0"><span class="tag g">strong isolation</span><span class="tag r">heavy, minutes to boot</span></p>
+      </div>
+      <div class="card">
+        <h3>📦 Containers</h3><p class="small">Like <b>shipping containers</b>: a standard box that runs the same everywhere. Share one OS, start in seconds.</p>
+        <div class="stackcol"><div class="layer hw">🖥️ Server (or VM)</div><div class="layer os">One OS</div><div class="layer rt">Container runtime (Docker)</div><div class="layer row"><div class="layer app">App A</div><div class="layer app">App B</div><div class="layer app">App C</div></div></div>
+        <p class="small mb0"><span class="tag g">light &amp; portable</span><span class="tag r">needs orchestration</span></p>
+      </div>
+      <div class="card">
+        <h3>🚕 Serverless</h3><p class="small">Like <b>taking a taxi</b>: no car to own; pay per ride. You upload a function, the cloud runs it when called.</p>
+        <div class="stackcol"><div class="layer cloud">☁️ the cloud handles everything below</div><div class="layer row"><div class="layer fn">ƒ resize()</div><div class="layer fn">ƒ email()</div></div></div>
+        <p class="small mb0"><span class="tag g">scale to zero</span><span class="tag r">cold starts, time limits</span></p>
+      </div>
+    </div>
+    <div class="table-wrap mt"><table class="sk">
+      <tr><th></th><th>Bare metal</th><th>VM</th><th>Container</th><th>Serverless</th></tr>
+      <tr><td>Start time</td><td class="num">hours–days</td><td class="num">minutes</td><td class="num">seconds</td><td class="num">ms (cold: ~1 s)</td></tr>
+      <tr><td>You manage</td><td>everything</td><td>OS &amp; up</td><td>app + image</td><td>just code</td></tr>
+      <tr><td>Pay for</td><td>whole machine</td><td>VM hours</td><td>cluster capacity</td><td>each call</td></tr>
+      <tr><td>Great for</td><td>huge steady loads, special hardware</td><td>legacy apps, full control</td><td>most modern services</td><td>spiky or rare jobs, glue code</td></tr>
+    </table></div>
+  </section>
+
+  <section class="sec" id="k8s">
+    <div class="sec-head"><span class="sec-num">6.2</span><h2><span class="em">☸️</span>Kubernetes: the robot manager for containers</h2></div>
+    <div class="two">
+      <div>
+        <p class="lead">You tell Kubernetes <b>what you want</b> (“run 4 copies of my app”). It keeps checking reality and <b>fixes any difference</b> — forever. That's called a <span class="hl">control loop</span>.</p>
+        <div class="callout kid"><span class="lbl">👶 Like you're 5</span><p class="mb0">A teacher who must always have 4 kids on the field. If one gets tired, the teacher sends in another — without being asked.</p></div>
+        <div class="grid sm mt">
+          <div class="sticky"><b>🖥️ Node</b> — a machine in the cluster</div>
+          <div class="sticky b"><b>🫛 Pod</b> — one running copy of your container(s)</div>
+          <div class="sticky g"><b>📋 Deployment</b> — “keep N pods of version X”</div>
+          <div class="sticky p"><b>🔌 Service</b> — one stable address in front of the pods</div>
+          <div class="sticky o"><b>📈 Autoscaler</b> — changes N based on load</div>
+          <div class="sticky v"><b>🔐 ConfigMap / Secret</b> — settings &amp; passwords</div>
+        </div>
+      </div>
+      <div class="diagram">
+        <div id="k8sSvg"></div>
+        <label class="field"><span>🎯 Desired pods <b id="kWantV">4</b></span><input type="range" id="kWant" min="1" max="9" value="4"></label>
+        <div class="row" style="justify-content:center"><button class="btn red sm" id="kKillPod">💥 Kill a pod</button><button class="btn sm" id="kKillNode">🔥 Kill a node</button><button class="btn green sm" id="kFixNode">💚 Add node back</button></div>
+        <div class="log mt" id="kLog" aria-live="polite"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="geo">
+    <div class="sec-head"><span class="sec-num">6.3</span><h2><span class="em">🌍</span>Regions, availability zones &amp; edge locations</h2></div>
+    <div class="two">
+      <div class="diagram"><div class="scroll-x"><div id="azFlow"></div></div><p class="cap">One region = several zones (separate buildings, power &amp; cooling) a few miles apart</p></div>
+      <div class="stack">
+        <div class="card"><h4>🗺️ Region</h4><p class="mb0">A geographic area (e.g. “US-East”, “Europe-West”). Pick one close to your users and allowed by data laws.</p></div>
+        <div class="card"><h4>🏢 Availability Zone (AZ)</h4><p class="mb0">An independent data center inside a region. Fires, floods or power cuts usually hit only <b>one</b> zone — so run copies in <b>at least two</b>.</p></div>
+        <div class="card"><h4>📍 Edge location</h4><p class="mb0">Small sites in hundreds of cities for CDN caching and DNS — closest to users.</p></div>
+        <div class="callout pro mb0"><span class="lbl">🧠 Rule of thumb</span><p class="mb0">Multi-AZ = survive a building failure (cheap, do it always). Multi-region = survive a regional disaster (costly, do it when downtime is very expensive).</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="dns">
+    <div class="sec-head"><span class="sec-num">6.4</span><h2><span class="em">📖</span>DNS deep dive: finding pizza.com</h2></div>
+    <p class="lead">Turning a name into an address is a little treasure hunt across the world's DNS servers — then the answer is cached so next time is instant.</p>
+    <div class="diagram" id="dnsBox">
+      <div class="scroll-x"><div id="dnsFlow"></div></div>
+      <p class="cap"></p>
+      <div class="row" style="justify-content:center"><button class="btn primary sm" data-act="play">▶ Play lookup</button><button class="btn sm" data-act="next">⏭ Step</button><button class="btn sm" data-act="reset">↺</button></div>
+    </div>
+    <div class="two mt">
+      <div class="card">
+        <h3>📇 Common DNS records</h3>
+        <div class="rec"><code>A</code><span>name → IPv4 address <span class="muted">(pizza.com → 93.184.216.34)</span></span></div>
+        <div class="rec"><code>AAAA</code><span>name → IPv6 address</span></div>
+        <div class="rec"><code>CNAME</code><span>nickname → another name <span class="muted">(www → pizza.com)</span></span></div>
+        <div class="rec"><code>MX</code><span>where email for the domain goes</span></div>
+        <div class="rec"><code>NS</code><span>which servers are in charge of the domain</span></div>
+        <div class="rec"><code>TXT</code><span>notes for verification &amp; email security</span></div>
+      </div>
+      <div class="stack">
+        <div class="sticky"><b>⏰ TTL</b> — every answer says how long it may be cached (e.g. 300 s). Low TTL = fast changes; high TTL = fewer lookups.</div>
+        <div class="sticky b"><b>🧭 GeoDNS / latency routing</b> — answer with the closest healthy region's address.</div>
+        <div class="sticky p"><b>⚠️ Gotcha</b> — after you change a record, old answers live on in caches until their TTL runs out. Lower the TTL <i>before</i> a migration.</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="http">
+    <div class="sec-head"><span class="sec-num">6.5</span><h2><span class="em">🚀</span>HTTP/1.1 vs HTTP/2 vs HTTP/3 — race them!</h2></div>
+    <p class="lead">A web page needs <b>12 files</b>. Watch each protocol fetch them. Turn on <b>packet loss</b> (like bad mobile signal) and see who copes best.</p>
+    <div class="card">
+      <div class="row"><button class="btn primary sm" id="raceBtn">🏁 Start race</button><label class="check" style="padding:0"><input type="checkbox" id="lossBox"> <span>📶 Bad network (packet loss)</span></label></div>
+      <div class="proto"><b>HTTP/1.1</b><div class="files" id="pf1"></div><span class="ptime" id="pt1">–</span></div>
+      <div class="proto"><b>HTTP/2</b><div class="files" id="pf2"></div><span class="ptime" id="pt2">–</span></div>
+      <div class="proto"><b>HTTP/3</b><div class="files" id="pf3"></div><span class="ptime" id="pt3">–</span></div>
+      <p class="small muted mb0">🟨 loading · 🟩 done · 🟥 stuck waiting for a lost packet · (simplified timings)</p>
+    </div>
+    <div class="grid mt">
+      <div class="card"><h4>🚗 HTTP/1.1</h4><p class="mb0">One file at a time per connection, so browsers open ~6 connections. Each needs its own handshake. A slow file blocks the ones behind it.</p></div>
+      <div class="card"><h4>🛣️ HTTP/2</h4><p class="mb0">One connection, many files at once (<b>multiplexing</b>). But it runs on TCP: one lost packet pauses <b>every</b> file (head-of-line blocking).</p></div>
+      <div class="card"><h4>✈️ HTTP/3 (QUIC)</h4><p class="mb0">Runs on UDP with its own reliability per stream. A lost packet only pauses <b>its own</b> file, and the handshake is faster.</p></div>
+      <div class="card"><h4>🔒 TLS handshake</h4><p class="mb0">“Hello!” → server shows its certificate (ID card) → both agree on a secret key → everything after is encrypted. TLS 1.3 does it in one round trip.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="cicd">
+    <div class="sec-head"><span class="sec-num">6.6</span><h2><span class="em">🏭</span>CI/CD: a factory line for code</h2></div>
+    <p class="lead"><b>Continuous Integration</b> checks every change automatically. <b>Continuous Delivery</b> ships it safely, many times a day.</p>
+    <div class="diagram" id="ciBox">
+      <label class="check" style="justify-content:center"><input type="checkbox" id="bugBox"> <span>🐛 Sneak a bug into this commit</span></label>
+      <div class="scroll-x"><div id="ciFlow"></div></div>
+      <p class="cap"></p>
+      <div class="row" style="justify-content:center"><button class="btn primary sm" data-act="play">▶ Push a commit</button><button class="btn sm" data-act="next">⏭ Step</button><button class="btn sm" data-act="reset">↺</button></div>
+    </div>
+    <div class="grid mt">
+      <div class="sticky"><b>📜 Infrastructure as Code</b> — servers, networks &amp; databases described in files (e.g. Terraform), reviewed like code, recreated with one command.</div>
+      <div class="sticky b"><b>🐤 Progressive delivery</b> — canary first, watch metrics, auto-rollback if errors rise.</div>
+      <div class="sticky g"><b>🧪 Test pyramid</b> — many fast unit tests, fewer integration tests, a few end-to-end tests.</div>
+    </div>
+  </section>
+
+  <section class="sec" id="cost">
+    <div class="sec-head"><span class="sec-num">6.7</span><h2><span class="em">💰</span>Cloud costs (the bill is a design input!)</h2></div>
+    <div class="two">
+      <div class="card">
+        <h3>🧾 Monthly bill estimator</h3>
+        <label class="field"><span>🖥️ Servers running 24/7 <b id="cSrvV">10</b></span><input type="range" id="cSrv" min="1" max="200" value="10"></label>
+        <label class="field"><span>🏷️ Pricing model <b id="cModelV"></b></span><select id="cModel"><option value="1">On-demand (walk-in hotel rate)</option><option value="0.6">Reserved 1 year (book ahead)</option><option value="0.3">Spot (standby ticket, can be taken away)</option></select></label>
+        <label class="field"><span>💾 Storage (TB) <b id="cStoV">5</b></span><input type="range" id="cSto" min="0" max="500" value="5"></label>
+        <label class="field"><span>📤 Data sent to users (TB/month) <b id="cEgrV">20</b></span><input type="range" id="cEgr" min="0" max="500" value="20"></label>
+        <div class="stat-row cost-out mt" id="cOut"></div>
+        <p class="small muted mt mb0">Example prices only (≈ $0.10/server-hour, $23/TB-month storage, $80/TB egress) — real prices vary by provider and size.</p>
+      </div>
+      <div class="stack">
+        <div class="sticky o"><b>📤 Egress is sneaky</b> — moving data <i>out</i> of the cloud (to users or other clouds) often costs more than storing it. CDNs help.</div>
+        <div class="sticky"><b>🧊 Storage tiers</b> — hot (fast, pricey) → cool → archive (cheap, slow to fetch). Move old data down automatically.</div>
+        <div class="sticky g"><b>📉 Right-size &amp; autoscale</b> — most servers idle at 10–20% CPU. Smaller machines + autoscaling save a lot.</div>
+        <div class="sticky p"><b>🎯 Each extra 9 costs more</b> — going from 99.9% to 99.99% can mean another region and double the bill. Spend where downtime hurts.</div>
+      </div>
+    </div>
+  </section>
+
+</main>
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"></script>
+<script src="js/app.js"></script>
+<script src="js/cloud.js"></script>
+</body>
+</html>

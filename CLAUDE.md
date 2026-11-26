@@ -25,6 +25,9 @@ eBPF/               The eBPF Sketchbook (single page + css/ + js/). Home link is
                     outside #navlinks so the scroll-spy ignores it.
 Cybersecurity/      Cyber Sketchbook (single page + styles.css/app.js/labs.js). Home link is a dashed .home-link
                     first in nav.top, not class .note, so the scroll-spy (nav.top a.note) ignores it.
+System Design/      System Design Sketchbook (index + 14 chapter pages + css/ + js/). Folder name has a space, so
+                    links use System%20Design/. Top bar + chapter menu are built by js/app.js (SD.CHAPTERS):
+                    the dashed .home-link lives there, not in each page.
 <TOPIC>/            ← new sub-sites go in their own top-level folder
 ```
 
@@ -56,8 +59,9 @@ Use relative paths only (no leading `/`) so it works at both `user.github.io/` a
 
 ## Existing categories (ids)
 
-security, networking, systems, web, data, ai, cloud, algorithms, quantum, graphics
-(Only `security`, `networking`, `systems`, `web`, `cloud`, `quantum` and `graphics` currently have sites.)
+security, networking, systems, web, data, ai, cloud, architecture, algorithms, quantum, graphics
+(Only `security`, `networking`, `systems`, `web`, `cloud`, `architecture`, `quantum` and `graphics` currently have sites.
+`architecture` is shown as "System Design".)
 
 ## Theme
 

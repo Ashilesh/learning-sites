@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Distributed Deep Dives</title>
+<meta name="description" content="Race conditions and locking, isolation levels, clocks and Lamport timestamps, gossip, distributed locks and fencing tokens, the outbox pattern, CRDTs and HyperLogLog — interactive.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔬</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script>try{var t=localStorage.getItem('sd-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<style>
+  .iso td, .iso th { text-align: center !important; }
+  .iso td:first-child, .iso th:first-child { text-align: left !important; }
+  .verdict { font-family: var(--f-head); font-size: 1.15rem; text-align: center; min-height: 1.6em; }
+  .device { text-align: center; }
+  .device .num { font-family: var(--f-head); font-size: 2rem; display: block; }
+  .device .sub { font-size: .9rem; color: var(--ink-soft); }
+  .hll-out .stat .v { font-size: 1.5rem; }
+</style>
+</head>
+<body data-page="deep">
+<main class="wrap">
+
+  <section class="hero">
+    <span class="chapter-tag">Chapter 8 · Distributed Deep Dives</span>
+    <h1>The tricky stuff under the hood 🔬</h1>
+    <p class="lead">When many computers (and many users) act <b>at the same time</b>, weird things happen: two people buy the same seat, clocks disagree, messages get lost. Here's how real systems tame the chaos.</p>
+    <ul class="toc">
+      <li><a class="chip" href="#race">🎟️ Race conditions</a></li>
+      <li><a class="chip" href="#iso">🧱 Isolation levels</a></li>
+      <li><a class="chip" href="#clocks">⏰ Clocks &amp; ordering</a></li>
+      <li><a class="chip" href="#gossip">🗣️ Gossip</a></li>
+      <li><a class="chip" href="#fence">🔐 Locks &amp; fencing</a></li>
+      <li><a class="chip" href="#outbox">📤 Outbox &amp; CDC</a></li>
+      <li><a class="chip" href="#crdt">🤝 CRDTs</a></li>
+      <li><a class="chip" href="#hll">🎲 HyperLogLog</a></li>
+    </ul>
+  </section>
+
+  <section class="sec" id="race">
+    <div class="sec-head"><span class="sec-num">8.1</span><h2><span class="em">🎟️</span>Race conditions: two fans, one last seat</h2></div>
+    <p class="lead">Ana and Bo click “Buy” on the <b>last concert seat</b> at the same moment. Pick a strategy and watch what the database does.</p>
+    <div class="diagram">
+      <div class="chips" id="raceChips" style="justify-content:center;margin:6px 0 10px"></div>
+      <div id="raceSeq"></div>
+      <p class="verdict" id="raceVerdict"></p>
+    </div>
+    <div class="grid mt">
+      <div class="card"><h4>🔒 Pessimistic locking</h4><p class="mb0">“Lock first, then work.” Safe and simple, but others wait in line. Good when conflicts are common.</p></div>
+      <div class="card"><h4>🔢 Optimistic locking</h4><p class="mb0">“Work freely, check the version at the end.” Fast when conflicts are rare; the loser retries.</p></div>
+      <div class="card"><h4>⚛️ Atomic conditional write</h4><p class="mb0">One statement does check-and-set: <code>UPDATE … WHERE seat_free</code>. Often the simplest fix!</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="iso">
+    <div class="sec-head"><span class="sec-num">8.2</span><h2><span class="em">🧱</span>Isolation levels: how much can transactions see of each other?</h2></div>
+    <div class="table-wrap"><table class="sk iso">
+      <tr><th>Weird thing (anomaly)</th><th>Read uncommitted</th><th>Read committed</th><th>Repeatable read</th><th>Serializable</th></tr>
+      <tr><td>👻 <b>Dirty read</b> — seeing someone's unfinished change</td><td>😬</td><td>✅</td><td>✅</td><td>✅</td></tr>
+      <tr><td>🔄 <b>Non-repeatable read</b> — same row, different answer</td><td>😬</td><td>😬</td><td>✅</td><td>✅</td></tr>
+      <tr><td>🫥 <b>Phantom</b> — re-running a search finds new rows</td><td>😬</td><td>😬</td><td>⚠️ depends</td><td>✅</td></tr>
+      <tr><td>✍️ <b>Lost update / write skew</b> — two updates based on old data</td><td>😬</td><td>😬</td><td>⚠️ depends</td><td>✅</td></tr>
+    </table></div>
+    <p class="small muted">😬 can happen · ✅ prevented · ⚠️ varies by database. Stronger isolation = fewer surprises but more waiting/retries.</p>
+    <div class="grid mt">
+      <div class="sticky"><b>📸 MVCC</b> (multi-version concurrency control): each transaction reads a <b>snapshot</b> — like a photo of the data — so readers never block writers. Used by PostgreSQL, MySQL InnoDB and more.</div>
+      <div class="sticky b"><b>🧠 Practical tip:</b> most apps run at “read committed” and protect the few critical spots (money, seats, stock) with locks or conditional writes.</div>
+    </div>
+  </section>
+
+  <section class="sec" id="clocks">
+    <div class="sec-head"><span class="sec-num">8.3</span><h2><span class="em">⏰</span>Time is tricky: clocks &amp; ordering</h2></div>
+    <div class="two">
+      <div>
+        <p class="lead">Every computer's clock drifts a little. Two servers can disagree by <b>milliseconds or even seconds</b>. So “which happened first?” using wall-clock time can be wrong!</p>
+        <div class="callout warn"><span class="lbl">⚠️ Last-write-wins gone wrong</span><p class="mb0">Server A (clock 2 s fast) saves “x=1” at 10:00:05. Server B saves “x=2” a moment <i>later</i> but stamps it 10:00:04. Sorting by time keeps x=1 — the newer write is silently lost.</p></div>
+        <div class="callout kid"><span class="lbl">👶 Lamport clock = a pass-the-number game</span><p class="mb0">Everyone keeps a counter. Do something → add 1. Send a note → write your counter on it. Receive a note → jump to <b>bigger of (yours, note's) + 1</b>. Now causes always have smaller numbers than effects!</p></div>
+      </div>
+      <div class="diagram" id="lamBox">
+        <div id="lamSvg"></div>
+        <p class="cap"></p>
+        <div class="row" style="justify-content:center"><button class="btn primary sm" data-act="play">▶ Play</button><button class="btn sm" data-act="next">⏭ Step</button><button class="btn sm" data-act="reset">↺</button></div>
+      </div>
+    </div>
+    <div class="grid mt">
+      <div class="card"><h4>🧮 Vector clocks</h4><p class="mb0">Each node keeps a counter <i>for every node</i>. Lets you tell “happened before” from “happened at the same time” (a conflict to merge).</p></div>
+      <div class="card"><h4>🛰️ TrueTime / hybrid clocks</h4><p class="mb0">Some databases use GPS + atomic clocks with an uncertainty window, and simply wait it out to order transactions globally.</p></div>
+      <div class="card"><h4>🔢 Sequence numbers</h4><p class="mb0">Often the simplest answer: let one leader hand out increasing numbers (or use a log like Kafka) instead of trusting clocks.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="gossip">
+    <div class="sec-head"><span class="sec-num">8.4</span><h2><span class="em">🗣️</span>Gossip: spreading news like a playground rumor</h2></div>
+    <div class="two">
+      <div>
+        <p class="lead">No boss, no central list. Every round, each server that knows the news tells a few <b>random</b> others. The news reaches everyone surprisingly fast — about <b>log(N)</b> rounds.</p>
+        <p>Used for membership (“who's alive?”), failure detection and spreading cluster state in Cassandra, DynamoDB-style stores and Consul.</p>
+        <label class="field"><span>🗣️ Friends told per round (fan-out) <b id="fanV">2</b></span><input type="range" id="fan" min="1" max="4" value="2"></label>
+        <div class="row"><button class="btn primary sm" id="gossipGo">📣 Start a rumor</button></div>
+        <p class="note-font mt" id="gossipMsg">48 servers, nobody knows yet.</p>
+      </div>
+      <div class="diagram"><div id="gossipSvg"></div></div>
+    </div>
+    <div class="callout pro"><span class="lbl">🧠 Failure detection</span><p class="mb0">Nodes send <b>heartbeats</b>. Miss a few → “suspected”, miss more → “dead”. Smart detectors (phi-accrual) adapt to how jittery the network is, so a slow network doesn't trigger false alarms.</p></div>
+  </section>
+
+  <section class="sec" id="fence">
+    <div class="sec-head"><span class="sec-num">8.5</span><h2><span class="em">🔐</span>Distributed locks, leases &amp; fencing tokens</h2></div>
+    <p class="lead">Only one worker should edit a file at a time, so they take a <b>lock</b> from a lock service. Locks expire (a <b>lease</b>) so a crashed worker can't hold them forever. But what if a worker just… freezes for a while?</p>
+    <div class="diagram" id="fenceBox">
+      <div class="scroll-x"><div id="fenceFlow"></div></div>
+      <p class="cap"></p>
+      <div class="row" style="justify-content:center"><button class="btn primary sm" data-act="play">▶ Play</button><button class="btn sm" data-act="next">⏭ Step</button><button class="btn sm" data-act="reset">↺</button></div>
+    </div>
+    <div class="grid mt">
+      <div class="sticky"><b>🎫 Fencing token</b> = a number that goes up every time the lock is handed out. Storage rejects writes with an older number.</div>
+      <div class="sticky b"><b>🧠 Split brain</b> = two nodes both think they're the leader. Majority votes (quorums) + fencing tokens prevent damage.</div>
+      <div class="sticky p"><b>🛠️ Use proven tools</b> like etcd or ZooKeeper for locks and leader election — this is very hard to get right yourself.</div>
+    </div>
+  </section>
+
+  <section class="sec" id="outbox">
+    <div class="sec-head"><span class="sec-num">8.6</span><h2><span class="em">📤</span>The dual-write problem &amp; the outbox pattern</h2></div>
+    <p class="lead">Saving an order to the database <b>and</b> publishing an “OrderPlaced” event are two separate writes. If the service crashes in between, the two worlds disagree.</p>
+    <div class="diagram" id="obBox">
+      <label class="check" style="justify-content:center"><input type="checkbox" id="obMode"> <span>✅ Use the outbox pattern</span></label>
+      <div class="scroll-x"><div id="obFlow"></div></div>
+      <p class="cap"></p>
+      <div class="row" style="justify-content:center"><button class="btn primary sm" data-act="play">▶ Play</button><button class="btn sm" data-act="next">⏭ Step</button><button class="btn sm" data-act="reset">↺</button></div>
+    </div>
+    <div class="grid mt">
+      <div class="card"><h4>📥 Outbox table</h4><p class="mb0">Write the business row <b>and</b> an outbox row in one local transaction. A relay publishes outbox rows later — guaranteed, never lost.</p></div>
+      <div class="card"><h4>📜 CDC (change data capture)</h4><p class="mb0">Tools like Debezium read the database's own change log and turn every change into an event stream — no extra code in the app.</p></div>
+      <div class="card"><h4>🔁 Consumers must be idempotent</h4><p class="mb0">Relays may publish an event twice after a crash. Consumers skip IDs they've already processed.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="crdt">
+    <div class="sec-head"><span class="sec-num">8.7</span><h2><span class="em">🤝</span>CRDTs: merge without fighting (offline editing)</h2></div>
+    <p class="lead">Your phone and laptop both edit a <b>like counter</b> while offline. When they reconnect, how do we merge? Tap the buttons, then press <b>Sync</b>.</p>
+    <div class="two">
+      <div class="card device"><h3>📱 Phone</h3><span class="num" id="dPhone">0</span><span class="sub" id="dPhoneS"></span><div class="row mt" style="justify-content:center"><button class="btn primary sm" data-inc="phone">❤️ +1 like</button></div></div>
+      <div class="card device"><h3>💻 Laptop</h3><span class="num" id="dLap">0</span><span class="sub" id="dLapS"></span><div class="row mt" style="justify-content:center"><button class="btn primary sm" data-inc="laptop">❤️ +1 like</button></div></div>
+    </div>
+    <div class="row mt" style="justify-content:center"><button class="btn green" id="crdtSync">🔄 Sync devices</button><button class="btn sm" id="crdtReset">↺ Reset</button></div>
+    <div class="stat-row mt" id="crdtOut"></div>
+    <div class="grid mt">
+      <div class="sticky"><b>🧮 G-Counter CRDT</b>: each device counts <i>its own</i> likes; merge = take the max per device, total = sum. Never loses a like!</div>
+      <div class="sticky b"><b>📝 Collaborative docs</b> (Google Docs, Figma, Notion) use CRDTs or Operational Transformation (OT) so everyone's typing merges sensibly.</div>
+      <div class="sticky p"><b>⚖️ Trade-off</b>: CRDTs need extra metadata and only some data types merge nicely; “last write wins” is simpler but drops changes.</div>
+    </div>
+  </section>
+
+  <section class="sec" id="hll">
+    <div class="sec-head"><span class="sec-num">8.8</span><h2><span class="em">🎲</span>HyperLogLog: count millions of visitors in a few hundred bytes</h2></div>
+    <div class="two">
+      <div>
+        <p class="lead">Counting <b>unique</b> visitors exactly means remembering every ID — gigabytes. HyperLogLog <b>estimates</b> it with a tiny memory and ~3% error.</p>
+        <div class="callout kid"><span class="lbl">👶 The coin-flip trick</span><p class="mb0">If someone says “my longest streak was 10 heads in a row”, they probably flipped about 2¹⁰ ≈ 1,000 times. HyperLogLog hashes each visitor to random bits and remembers only the <b>longest streak of zeros</b> it has seen (in many small buckets, then averages).</p></div>
+        <label class="field"><span>👥 Unique visitors <b id="hllV"></b></span><input type="range" id="hllN" min="3" max="6.3" step="0.05" value="5"></label>
+        <button class="btn primary sm" id="hllGo">🎲 Count them with HyperLogLog</button>
+      </div>
+      <div class="stack">
+        <div class="card"><div class="stat-row hll-out" id="hllOut"></div></div>
+        <div class="grid sm">
+          <div class="sticky g"><b>📊 Count-Min Sketch</b>: approximate “how often?” counts — find heavy hitters / top-K trending hashtags in tiny memory.</div>
+          <div class="sticky o"><b>🌸 Bloom filter</b>: “definitely not / maybe” membership (see Advanced Patterns).</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"></script>
+<script src="js/app.js"></script>
+<script src="js/deep.js"></script>
+</body>
+</html>

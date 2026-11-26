@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trade-offs &amp; Best Practices</title>
+<meta name="description" content="Interactive seesaws of system design trade-offs, decision helpers, a best-practices checklist and anti-patterns to avoid.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>⚖️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script>try{var t=localStorage.getItem('sd-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<style>
+  .ss { position: relative; height: 120px; margin: 10px 0 6px; }
+  .plank { position: absolute; left: 4%; right: 4%; top: 46px; height: 12px; background: var(--orange); border: 2.5px solid var(--ink); border-radius: 6px; transition: transform .7s cubic-bezier(.3, 1.6, .5, 1); transform-origin: 50% 50%; }
+  .ss.l .plank { transform: rotate(-10deg); } .ss.r .plank { transform: rotate(10deg); }
+  .end { position: absolute; bottom: 12px; font: inherit; font-size: .98rem; line-height: 1.05; color: var(--ink); background: var(--card); border: 2.5px solid var(--ink); border-radius: var(--radius-sk); padding: 4px 10px; cursor: pointer; min-width: 92px; max-width: 46%; box-shadow: 2px 2px 0 var(--shadow); }
+  .end .e { font-size: 1.5rem; display: block; }
+  .end.l { left: -2px; } .end.r { right: -2px; }
+  .ss.l .end.l, .ss.r .end.r { background: var(--yellow); color: #1f2430; }
+  .fulcrum { position: absolute; left: 50%; top: 56px; width: 0; height: 0; transform: translateX(-50%); border-left: 22px solid transparent; border-right: 22px solid transparent; border-bottom: 44px solid var(--ink); }
+  .why { min-height: 3.2em; margin: 0; }
+  .tree { min-height: 230px; }
+  .tree .q { font-size: 1.35rem; margin-bottom: 12px; }
+  .tree .ans { font-size: 1.3rem; padding: 12px; border: 2.5px dashed var(--green); border-radius: 12px; background: var(--hl-green); }
+  .crumbs { font-size: .95rem; color: var(--ink-soft); margin-bottom: 8px; }
+  .bp-group h3 { margin-top: 0; }
+  .anti { position: relative; }
+  .anti::after { content: "✗"; position: absolute; top: 4px; right: 12px; font-family: var(--f-head); font-size: 2rem; color: var(--red); transform: rotate(10deg); }
+</style>
+</head>
+<body data-page="tradeoffs">
+<main class="wrap">
+
+  <section class="hero">
+    <span class="chapter-tag">Chapter 10 · Trade-offs</span>
+    <h1>There's no perfect design — only good trade-offs ⚖️</h1>
+    <p class="lead">Every choice makes something better <b>and</b> something worse. Great engineers don't know “the right answer” — they know <span class="hl">what each option costs</span> and pick based on the requirements.</p>
+    <ul class="toc">
+      <li><a class="chip" href="#seesaws">⚖️ Seesaws</a></li>
+      <li><a class="chip" href="#helpers">🧭 Decision helpers</a></li>
+      <li><a class="chip" href="#practices">✅ Best practices</a></li>
+      <li><a class="chip" href="#anti">🚫 Anti-patterns</a></li>
+      <li><a class="chip" href="#ladder">🪜 Simple → complex</a></li>
+    </ul>
+  </section>
+
+  <section class="sec" id="seesaws">
+    <div class="sec-head"><span class="sec-num">10.1</span><h2><span class="em">⚖️</span>The trade-off seesaws</h2></div>
+    <p class="lead">Tap a side to see <b>when</b> you'd pick it.</p>
+    <div class="grid" id="ssGrid"></div>
+  </section>
+
+  <section class="sec" id="helpers">
+    <div class="sec-head"><span class="sec-num">10.2</span><h2><span class="em">🧭</span>Decision helpers</h2></div>
+    <p class="lead">Answer a few questions and get a sensible starting point.</p>
+    <div class="grid lg" id="trees"></div>
+  </section>
+
+  <section class="sec" id="practices">
+    <div class="sec-head"><span class="sec-num">10.3</span><h2><span class="em">✅</span>Best-practices checklist</h2></div>
+    <p class="lead">Use this when reviewing any design (yours or someone else's). Your ticks are saved on this device.</p>
+    <div class="card"><div class="row" style="justify-content:space-between"><b id="bpCount"></b><button class="btn sm" id="bpReset">↺ Clear ticks</button></div><div class="meter mt"><i id="bpBar"></i></div></div>
+    <div class="grid lg mt" id="bpGrid"></div>
+  </section>
+
+  <section class="sec" id="anti">
+    <div class="sec-head"><span class="sec-num">10.4</span><h2><span class="em">🚫</span>Anti-patterns (don't do these!)</h2></div>
+    <div class="grid" id="antiGrid"></div>
+  </section>
+
+  <section class="sec" id="ladder">
+    <div class="sec-head"><span class="sec-num">10.5</span><h2><span class="em">🪜</span>From simple to complex — climb only when needed</h2></div>
+    <div class="diagram"><div class="scroll-x"><div id="ladderFlow"></div></div><p class="cap">Each step up solves a real, measured problem — and adds cost and things that can break.</p></div>
+  </section>
+
+</main>
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"></script>
+<script src="js/app.js"></script>
+<script src="js/tradeoffs.js"></script>
+</body>
+</html>

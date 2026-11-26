@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>The Toolbox</title>
+<meta name="description" content="Every building block of system design — DNS, CDN, load balancers, caches, queues — and how services talk (REST, gRPC, WebSockets).">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🧰</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script>try{var t=localStorage.getItem('sd-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<style>
+  .flip { perspective: 900px; min-height: 250px; cursor: pointer; }
+  .flip .inner { position: relative; width: 100%; height: 100%; min-height: 250px; transition: transform .6s; transform-style: preserve-3d; }
+  .flip.on .inner { transform: rotateY(180deg); }
+  .flip .face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; overflow: auto; }
+  .flip .back { transform: rotateY(180deg); }
+  .flip .face .e { font-size: 2.6rem; display: block; line-height: 1.1; }
+  .flip .hint { position: absolute; right: 12px; bottom: 8px; font-family: var(--f-note); font-size: 1.15rem; color: var(--ink-soft); }
+  .flip .back .card, .flip .front.card { height: 100%; }
+  .status { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+  .status div { text-align: center; padding: 8px; border: 2px solid var(--ink); border-radius: var(--radius-card); background: var(--card); }
+  .status .code { font-family: var(--f-head); font-size: 1.5rem; display: block; }
+  .status .e { font-size: 1.8rem; }
+  .s2 { border-color: var(--green) !important; } .s4 { border-color: var(--orange) !important; } .s5 { border-color: var(--red) !important; }
+  .endpoint { display: flex; gap: 10px; align-items: baseline; padding: 6px 0; border-bottom: 1.5px dashed color-mix(in srgb, var(--ink) 25%, transparent); flex-wrap: wrap; }
+  .verb { font-family: var(--f-mono); font-size: .85rem; font-weight: 700; padding: 1px 8px; border-radius: 6px; color: #1f2430; }
+  .verb.get { background: #8ce99a; } .verb.post { background: #ffd43b; } .verb.put { background: #74c0fc; } .verb.del { background: #ffa8a8; } .verb.patch { background: #d0bfff; }
+</style>
+</head>
+<body data-page="toolbox">
+<main class="wrap">
+
+  <section class="hero">
+    <span class="chapter-tag">Chapter 2 · The Toolbox</span>
+    <h1>The LEGO bricks of every system 🧱</h1>
+    <p class="lead">Every app on Earth is built from the same handful of pieces. Learn the pieces, and you can read <span class="hl">any architecture diagram</span>.</p>
+    <ul class="toc">
+      <li><a class="chip" href="#cs">🗣️ Client & server</a></li>
+      <li><a class="chip" href="#blocks">🧱 Building blocks</a></li>
+      <li><a class="chip" href="#net">🌐 Networking 101</a></li>
+      <li><a class="chip" href="#api">🔌 APIs</a></li>
+      <li><a class="chip" href="#realtime">📡 Real-time</a></li>
+      <li><a class="chip" href="#proxy">🕴️ Proxies</a></li>
+    </ul>
+  </section>
+
+  <section class="sec" id="cs">
+    <div class="sec-head"><span class="sec-num">2.1</span><h2><span class="em">🗣️</span>Client & Server: asking and answering</h2></div>
+    <div class="two">
+      <div>
+        <p class="lead">The internet is mostly <b>questions and answers</b>. Your phone (the <b>client</b>) sends a <span class="hl">request</span>. A computer far away (the <b>server</b>) sends back a <span class="hl-blue">response</span>.</p>
+        <div class="callout kid"><span class="lbl">👶 Like you're 5</span><p>A server is just a computer <b>without a screen</b> that sits in a big building (a <b>data center</b>) and waits all day for questions. It never sleeps! 😴❌</p></div>
+        <p>Thousands of servers live in racks in a data center, with huge power supplies, cooling and fat internet cables.</p>
+      </div>
+      <div class="diagram">
+        <div id="csFlow"></div>
+        <p class="cap">request → ← response (again and again!)</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="blocks">
+    <div class="sec-head"><span class="sec-num">2.2</span><h2><span class="em">🧱</span>The building blocks</h2></div>
+    <p class="lead">Tap any card to flip it and see its everyday twin + real tools people use. <span class="arrow-doodle">↻ tap!</span></p>
+    <div class="grid" id="blockGrid"></div>
+  </section>
+
+  <section class="sec" id="net">
+    <div class="sec-head"><span class="sec-num">2.3</span><h2><span class="em">🌐</span>Networking 101 in pictures</h2></div>
+    <div class="grid">
+      <div class="sticky"><h3>🏠 IP address</h3>A computer's home address on the internet, like <code>142.250.80.46</code>. DNS turns names into these.</div>
+      <div class="sticky b"><h3>🚪 Port</h3>The apartment number at that address. Web = <code>443</code> (HTTPS), databases often <code>5432</code>.</div>
+      <div class="sticky g"><h3>📦 Packets</h3>Big messages are chopped into small envelopes that travel separately and get put back together.</div>
+      <div class="sticky p"><h3>🔒 HTTPS</h3>HTTP inside a <b>sealed envelope</b> (TLS encryption) so nobody on the way can read or change it.</div>
+    </div>
+    <div class="two mt2">
+      <div>
+        <h3>TCP vs UDP 📞 vs 📢</h3>
+        <div class="table-wrap"><table class="sk">
+          <tr><th></th><th>TCP 📞</th><th>UDP 📢</th></tr>
+          <tr><td>Like…</td><td>A phone call: “Can you hear me?” “Yes!”</td><td>Shouting across a playground</td></tr>
+          <tr><td>Delivery</td><td>Guaranteed, in order</td><td>Best effort, may lose some</td></tr>
+          <tr><td>Speed</td><td>A bit slower (handshakes, re-sends)</td><td>Very fast, no waiting</td></tr>
+          <tr><td>Used for</td><td>Web pages, APIs, email, files</td><td>Video calls, games, live streams, DNS</td></tr>
+        </table></div>
+        <p class="mt small muted">Newer: <b>QUIC / HTTP/3</b> runs on UDP but adds TCP-like reliability — faster connection setup, especially on mobile.</p>
+      </div>
+      <div class="diagram" id="tcpBox">
+        <div id="tcpSeq"></div>
+        <p class="cap">The TCP 3-way handshake: hello, hello back, great!</p>
+        <div class="row" style="justify-content:center"><button class="btn sm primary" id="tcpPlay">▶ Replay</button></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="api">
+    <div class="sec-head"><span class="sec-num">2.4</span><h2><span class="em">🔌</span>APIs: how programs talk to each other</h2></div>
+    <p class="lead">An <b>API</b> is a <span class="hl">menu</span>: a list of things you're allowed to ask a service for, and exactly how to ask.</p>
+    <div class="grid">
+      <div class="card tilt-l"><h3>🍽️ REST</h3><p>A fixed menu of dishes at addresses (URLs). Uses HTTP verbs: <code>GET</code> read, <code>POST</code> create, <code>PUT</code>/<code>PATCH</code> update, <code>DELETE</code>.</p><p class="small muted mb0">Most common. Simple, cacheable, works everywhere.</p></div>
+      <div class="card"><h3>🥗 GraphQL</h3><p>A build-your-own-plate counter: the client asks for <b>exactly</b> the fields it wants, from many things, in one trip.</p><p class="small muted mb0">Great for mobile apps & complex screens. Harder to cache.</p></div>
+      <div class="card tilt-r"><h3>📟 gRPC</h3><p>Walkie-talkies between kitchens: tiny binary messages (Protocol Buffers), super fast, strict contracts, streaming.</p><p class="small muted mb0">Best for service-to-service calls inside a company.</p></div>
+    </div>
+    <div class="two mt2">
+      <div class="card">
+        <h3>🍕 A REST API for a pizza shop</h3>
+        <div class="endpoint"><span class="verb get">GET</span><code>/pizzas</code><span class="small muted">list the menu</span></div>
+        <div class="endpoint"><span class="verb get">GET</span><code>/pizzas/42</code><span class="small muted">one pizza</span></div>
+        <div class="endpoint"><span class="verb post">POST</span><code>/orders</code><span class="small muted">place an order</span></div>
+        <div class="endpoint"><span class="verb patch">PATCH</span><code>/orders/7</code><span class="small muted">change toppings</span></div>
+        <div class="endpoint"><span class="verb del">DELETE</span><code>/orders/7</code><span class="small muted">cancel</span></div>
+        <div class="endpoint"><span class="verb get">GET</span><code>/orders?status=baking&amp;page=2</code><span class="small muted">filter + paginate</span></div>
+        <div class="callout pro"><span class="lbl">🧠 Good API habits</span>
+          <ul class="mb0"><li>Nouns in URLs, verbs in methods</li><li><b>Paginate</b> big lists (cursor &gt; page numbers)</li><li><b>Version</b> it: <code>/v1/orders</code></li><li>Make retries safe with an <b>idempotency key</b></li><li>Return clear errors &amp; status codes</li></ul></div>
+      </div>
+      <div>
+        <h3>Status codes as emoji 😄</h3>
+        <div class="status">
+          <div class="s2"><span class="e">✅</span><span class="code">200</span>OK</div>
+          <div class="s2"><span class="e">🎉</span><span class="code">201</span>Created</div>
+          <div><span class="e">↪️</span><span class="code">301</span>Moved forever</div>
+          <div class="s4"><span class="e">🙅</span><span class="code">400</span>Bad request</div>
+          <div class="s4"><span class="e">🔐</span><span class="code">401</span>Who are you?</div>
+          <div class="s4"><span class="e">⛔</span><span class="code">403</span>Not allowed</div>
+          <div class="s4"><span class="e">🔍</span><span class="code">404</span>Not found</div>
+          <div class="s4"><span class="e">🐢</span><span class="code">429</span>Too many requests</div>
+          <div class="s5"><span class="e">💥</span><span class="code">500</span>Server broke</div>
+          <div class="s5"><span class="e">🚧</span><span class="code">503</span>Unavailable</div>
+        </div>
+        <p class="mt small muted">2xx = success · 3xx = go elsewhere · 4xx = <b>your</b> mistake · 5xx = <b>our</b> mistake.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="realtime">
+    <div class="sec-head"><span class="sec-num">2.5</span><h2><span class="em">📡</span>Getting live updates: 5 ways</h2></div>
+    <p class="lead">How does a chat app show a new message instantly? Pick a technique and watch the messages fly between <b>client</b> and <b>server</b>.</p>
+    <div class="diagram">
+      <div class="chips" id="rtChips" style="justify-content:center;margin:6px 0 10px"></div>
+      <div id="rtSeq"></div>
+      <p class="cap" id="rtCap"></p>
+    </div>
+    <div class="table-wrap mt"><table class="sk">
+      <tr><th>Technique</th><th>Direction</th><th>Good for</th><th>Watch out</th></tr>
+      <tr><td>🔁 Short polling</td><td>client asks</td><td>Simple dashboards</td><td>Wasted requests, delay</td></tr>
+      <tr><td>⏳ Long polling</td><td>client asks, server waits</td><td>Notifications, fallback</td><td>Holds connections open</td></tr>
+      <tr><td>🔌 WebSocket</td><td>both ways ↔</td><td>Chat, games, collaboration</td><td>Stateful, harder to scale</td></tr>
+      <tr><td>📻 Server-Sent Events</td><td>server → client</td><td>Live scores, feeds, AI text streaming</td><td>One direction only</td></tr>
+      <tr><td>📞 Webhook</td><td>server → server</td><td>“Payment finished!” callbacks</td><td>Must verify & retry</td></tr>
+    </table></div>
+  </section>
+
+  <section class="sec" id="proxy">
+    <div class="sec-head"><span class="sec-num">2.6</span><h2><span class="em">🕴️</span>Forward proxy vs Reverse proxy</h2></div>
+    <div class="two">
+      <div class="diagram"><div id="fwdFlow"></div><p class="cap">Forward proxy = <b>your</b> assistant. Websites see the proxy, not you.</p></div>
+      <div class="diagram"><div id="revFlow"></div><p class="cap">Reverse proxy = the <b>company's</b> receptionist. You never see the servers behind it.</p></div>
+    </div>
+    <div class="callout pro"><span class="lbl">🧠 Why reverse proxies are everywhere</span><p>They hide internal servers, terminate HTTPS, compress, cache, block attacks, and load-balance. NGINX, Envoy and HAProxy are popular ones. A load balancer is basically a smart reverse proxy!</p></div>
+  </section>
+
+</main>
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"></script>
+<script src="js/app.js"></script>
+<script src="js/toolbox.js"></script>
+</body>
+</html>

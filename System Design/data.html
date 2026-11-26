@@ -1,0 +1,211 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data Land</title>
+<meta name="description" content="SQL vs NoSQL, database types, indexes, ACID, replication, sharding, consistent hashing, CAP theorem and quorums — interactive.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗄️</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script>try{var t=localStorage.getItem('sd-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<style>
+  .books { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; }
+  .book { aspect-ratio: 1; border: 2px solid var(--ink); border-radius: 4px 8px 4px 7px; display: grid; place-items: center; font-family: var(--f-mono); font-size: .72rem; background: var(--card-2); transition: background .15s, transform .15s; }
+  .book.look { background: var(--sticky-y); color: #1f2430; transform: scale(1.1); }
+  .book.seen { opacity: .35; }
+  .book.found { background: var(--green); color: #fff; transform: scale(1.18); opacity: 1; }
+  .counter { font-family: var(--f-head); font-size: 1.6rem; }
+  .ring-ctrl { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .cap-node { text-align: center; }
+  .cap-node .val { font-family: var(--f-head); font-size: 2.2rem; display: block; }
+  .quorum { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin: 12px 0; }
+  .qn { width: 56px; height: 56px; border-radius: 50%; border: 2.5px solid var(--ink); display: grid; place-items: center; font-size: 1.3rem; background: var(--card-2); position: relative; }
+  .qn.w { background: var(--sticky-p); } .qn.r { background: var(--sticky-b); } .qn.w.r { background: linear-gradient(90deg, var(--sticky-p) 50%, var(--sticky-b) 50%); outline: 3px solid var(--green); outline-offset: 2px; }
+  .ladder { display: grid; gap: 8px; }
+  .rung { display: grid; grid-template-columns: 170px 1fr; gap: 12px; align-items: center; padding: 10px 14px; border: 2px solid var(--ink); border-radius: var(--radius-card); background: var(--card); }
+  @media (max-width: 600px) { .rung { grid-template-columns: 1fr; } }
+  .rung b { font-family: var(--f-head); font-weight: 400; }
+  .sheet { width: 100%; border-collapse: collapse; font-size: .95rem; }
+  .sheet td, .sheet th { border: 1.5px solid var(--ink); padding: 3px 6px; }
+  .sheet th { background: var(--sticky-b); color: #1f2430; font-weight: 400; font-family: var(--f-head); }
+</style>
+</head>
+<body data-page="data">
+<main class="wrap">
+
+  <section class="hero">
+    <span class="chapter-tag">Chapter 5 · Data Land</span>
+    <h1>Where the data lives 🗄️</h1>
+    <p class="lead">Servers come and go, but <b>data is forever</b>. Choosing how to store, copy and split it is the most important — and hardest to undo — decision in system design.</p>
+    <ul class="toc">
+      <li><a class="chip" href="#sqlnosql">📊 SQL vs NoSQL</a></li>
+      <li><a class="chip" href="#types">🗂️ DB types</a></li>
+      <li><a class="chip" href="#index">📑 Indexes</a></li>
+      <li><a class="chip" href="#acid">🏦 ACID</a></li>
+      <li><a class="chip" href="#repl">📠 Replication</a></li>
+      <li><a class="chip" href="#shard">🍕 Sharding</a></li>
+      <li><a class="chip" href="#ring">💍 Consistent hashing</a></li>
+      <li><a class="chip" href="#cap">🔺 CAP</a></li>
+      <li><a class="chip" href="#quorum">🗳️ Quorum</a></li>
+    </ul>
+  </section>
+
+  <section class="sec" id="sqlnosql">
+    <div class="sec-head"><span class="sec-num">5.1</span><h2><span class="em">📊</span>SQL vs NoSQL</h2></div>
+    <div class="two">
+      <div class="card tilt-l">
+        <h3>📊 SQL (relational)</h3>
+        <p>Data in <b>tables</b> with fixed columns, linked by IDs. Like a binder of tidy spreadsheets.</p>
+        <table class="sheet"><tr><th>id</th><th>name</th><th>city</th></tr><tr><td>1</td><td>Ana</td><td>Lima</td></tr><tr><td>2</td><td>Bo</td><td>Oslo</td></tr></table>
+        <table class="sheet mt"><tr><th>order</th><th>user_id</th><th>item</th></tr><tr><td>77</td><td>1</td><td>🍕</td></tr><tr><td>78</td><td>1</td><td>🥤</td></tr></table>
+        <p class="small mt mb0"><span class="tag g">JOINs</span><span class="tag g">transactions</span><span class="tag g">strong rules</span><span class="tag r">harder to spread across machines</span></p>
+      </div>
+      <div class="card tilt-r">
+        <h3>📦 NoSQL (non-relational)</h3>
+        <p>Data in flexible <b>documents, keys or columns</b>. Like labeled boxes — each can hold different things.</p>
+        <div class="pre">{ "id": 1, "name": "Ana",
+  "city": "Lima",
+  "orders": [ {"item": "🍕"}, {"item": "🥤"} ],
+  "pets": ["🐱"]   ← only Ana has pets! }</div>
+        <p class="small mt mb0"><span class="tag g">flexible shape</span><span class="tag g">scales out easily</span><span class="tag g">fast simple lookups</span><span class="tag r">fewer JOINs</span><span class="tag r">often eventually consistent</span></p>
+      </div>
+    </div>
+    <div class="callout pro"><span class="lbl">🧠 How to choose</span><p><b>Default to SQL</b> (e.g. PostgreSQL) — it handles more than people think. Choose NoSQL when you have <b>massive scale with simple access patterns</b> (look up by key), very flexible data, or need writes spread across many machines/regions.</p></div>
+  </section>
+
+  <section class="sec" id="types">
+    <div class="sec-head"><span class="sec-num">5.2</span><h2><span class="em">🗂️</span>A zoo of databases</h2></div>
+    <div class="grid" id="dbTypes"></div>
+  </section>
+
+  <section class="sec" id="index">
+    <div class="sec-head"><span class="sec-num">5.3</span><h2><span class="em">📑</span>Indexes: the book's index for your data</h2></div>
+    <p class="lead">Find the book with a number in a messy pile (no index) vs a sorted, indexed shelf. Who wins?</p>
+    <div class="row"><button class="btn primary" id="findBtn">🔍 Find a random book</button><span class="note-font" id="findTarget"></span></div>
+    <div class="two mt">
+      <div class="card"><h3>🐌 No index: full table scan</h3><div class="books" id="scanBooks"></div><p class="mt mb0">Looked at: <span class="counter" id="scanN">0</span> books</p></div>
+      <div class="card"><h3>⚡ With index (sorted / B-tree)</h3><div class="books" id="idxBooks"></div><p class="mt mb0">Looked at: <span class="counter" id="idxN">0</span> books</p></div>
+    </div>
+    <div class="grid mt">
+      <div class="sticky"><b>📈 Why it's fast:</b> each look cuts the search in half. 1 billion rows need only ~30 looks!</div>
+      <div class="sticky p"><b>💸 The cost:</b> every insert must also update every index. Too many indexes = slow writes + more storage.</div>
+      <div class="sticky b"><b>🌳 B-tree</b> (most SQL DBs): great for reads & ranges. <b>📚 LSM-tree</b> (Cassandra, RocksDB): append-first, great for heavy writes.</div>
+    </div>
+  </section>
+
+  <section class="sec" id="acid">
+    <div class="sec-head"><span class="sec-num">5.4</span><h2><span class="em">🏦</span>Transactions &amp; ACID: moving money safely</h2></div>
+    <p class="lead">Ana sends Bo $10. Two steps: <b>take $10 from Ana</b>, <b>give $10 to Bo</b>. What if the power cuts in between? 😱 ACID saves us:</p>
+    <div class="grid">
+      <div class="card tilt-l"><h3>⚛️ Atomic</h3><p class="mb0">All steps happen, or <b>none</b>. No “money vanished” halfway.</p></div>
+      <div class="card"><h3>✅ Consistent</h3><p class="mb0">Rules always hold (balance ≥ 0, total money unchanged).</p></div>
+      <div class="card tilt-r"><h3>🙈 Isolated</h3><p class="mb0">Others can't peek at half-done work. Two transfers don't trip over each other.</p></div>
+      <div class="card"><h3>💾 Durable</h3><p class="mb0">Once it says “done”, it stays done — even after a crash.</p></div>
+    </div>
+    <div class="callout"><span class="lbl">🌊 BASE: the relaxed cousin</span><p><b>B</b>asically <b>A</b>vailable, <b>S</b>oft state, <b>E</b>ventually consistent. Many NoSQL systems choose this: always answer quickly, and let copies catch up a moment later. Fine for “likes”, not for bank balances.</p></div>
+  </section>
+
+  <section class="sec" id="repl">
+    <div class="sec-head"><span class="sec-num">5.5</span><h2><span class="em">📠</span>Replication: keep copies of your data</h2></div>
+    <p class="lead">Copies on several machines give you <b>safety</b> (one dies, others live) and <b>speed</b> (spread out the reads). But copies take time to sync…</p>
+    <div class="diagram" id="replBox">
+      <div class="scroll-x"><div id="replFlow"></div></div>
+      <p class="cap"></p>
+      <div class="row" style="justify-content:center"><button class="btn primary sm" data-act="play">▶ Play</button><button class="btn sm" data-act="next">⏭ Step</button><button class="btn sm" data-act="reset">↺ Reset</button></div>
+    </div>
+    <div class="grid mt">
+      <div class="card"><h4>🔒 Synchronous</h4><p class="mb0">Leader waits for followers to confirm. No data loss, but slower and stuck if a follower is down.</p></div>
+      <div class="card"><h4>📨 Asynchronous</h4><p class="mb0">Leader answers immediately, followers catch up. Fast, but recent writes can be lost if the leader dies.</p></div>
+      <div class="card"><h4>👑 Leader–follower</h4><p class="mb0">One writer, many readers. Simple and most common.</p></div>
+      <div class="card"><h4>👑👑 Multi-leader</h4><p class="mb0">Writers in each region. Fast local writes, but conflicts must be resolved.</p></div>
+      <div class="card"><h4>🤝 Leaderless</h4><p class="mb0">Write to several nodes, read from several (quorums). Dynamo/Cassandra style.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="shard">
+    <div class="sec-head"><span class="sec-num">5.6</span><h2><span class="em">🍕</span>Sharding: slice the data like a pizza</h2></div>
+    <div class="two">
+      <div>
+        <p class="lead">When data is too big (or too busy) for one machine, split it into <b>shards</b>. Each shard holds a slice and lives on its own server.</p>
+        <div class="callout kid"><span class="lbl">👶 Like you're 5</span><p>One library is overflowing. Build 3 libraries: names A–H go to library 1, I–P to library 2, Q–Z to library 3. Each one is smaller and quicker!</p></div>
+      </div>
+      <div class="diagram"><div id="shardFlow"></div><p class="cap">A router uses the <b>shard key</b> to find the right slice</p></div>
+    </div>
+    <div class="grid mt">
+      <div class="card"><h4>📏 Range sharding</h4><p class="mb0">A–H, I–P, Q–Z or by date. Range queries are easy, but some ranges get crowded (hot spots).</p></div>
+      <div class="card"><h4>#️⃣ Hash sharding</h4><p class="mb0">hash(user_id) % N. Spreads evenly, but range queries hit every shard.</p></div>
+      <div class="card"><h4>📒 Directory</h4><p class="mb0">A lookup table says where each key lives. Flexible; the directory must be fast and safe.</p></div>
+      <div class="card"><h4>🌍 Geo</h4><p class="mb0">EU users → EU shard. Fast & helps with data laws; uneven sizes.</p></div>
+    </div>
+    <div class="callout warn"><span class="lbl">⚠️ Sharding pains</span><p>Cross-shard JOINs and transactions get hard, <b>re-sharding</b> moves lots of data, and a bad shard key (like a celebrity's ID) creates a <b>hot shard</b>. Pick a key with many values that spreads load evenly — and shard only when you must.</p></div>
+  </section>
+
+  <section class="sec" id="ring">
+    <div class="sec-head"><span class="sec-num">5.7</span><h2><span class="em">💍</span>Consistent hashing — the magic ring</h2></div>
+    <p class="lead">With <code>hash(key) % N</code>, adding one server moves <b>almost every key</b>. Consistent hashing puts servers and keys on a <b>ring</b>: each key belongs to the next server clockwise. Add or remove a server and only its neighbors' keys move!</p>
+    <div class="two wide-l">
+      <div class="diagram"><div id="ringSvg"></div></div>
+      <div class="stack">
+        <div class="ring-ctrl"><button class="btn primary sm" id="addNode">➕ Add server</button><button class="btn sm" id="rmNode">➖ Remove server</button></div>
+        <label class="field"><span>Virtual nodes per server <b id="vnV">1</b></span><input type="range" id="vn" min="1" max="12" value="1"></label>
+        <div class="card flat">
+          <div class="stat-row"><div class="stat"><span class="v" id="movedRing">–</span><span class="k">💍 keys moved (ring)</span></div><div class="stat"><span class="v" id="movedMod">–</span><span class="k">➗ would move with % N</span></div></div>
+        </div>
+        <div class="legend" id="ringLegend"></div>
+        <p class="small muted mb0">💡 <b>Virtual nodes</b>: each server appears many times on the ring, so the slices even out. Turn it up and watch the colors balance!</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="cap">
+    <div class="sec-head"><span class="sec-num">5.8</span><h2><span class="em">🔺</span>The CAP theorem — cut the cable!</h2></div>
+    <div class="two">
+      <div>
+        <p class="lead">A distributed system can't promise all three when the network breaks:</p>
+        <ul><li><b>C</b>onsistency — everyone reads the latest value</li><li><b>A</b>vailability — every request gets an answer</li><li><b>P</b>artition tolerance — keeps going when the network splits</li></ul>
+        <p>Networks <b>will</b> break, so P is a must. The real choice: during a split, <b>refuse</b> (CP) or <b>answer with maybe-old data</b> (AP)?</p>
+      </div>
+      <div class="card">
+        <div class="row" style="justify-content:center"><span>Mode:</span><button class="chip on" id="modeCP">🛡️ CP (bank)</button><button class="chip" id="modeAP">🏃 AP (likes)</button></div>
+        <div class="mt"><div id="capSvg"></div></div>
+        <div class="row" style="justify-content:center">
+          <button class="btn sm" id="capCut">✂️ Cut cable</button>
+          <button class="btn sm primary" id="capWrite">✍️ Write to NYC</button>
+          <button class="btn sm" id="capRead">👀 Read from London</button>
+        </div>
+        <p class="note-font center mt mb0" id="capMsg">Try: cut the cable, write, then read!</p>
+      </div>
+    </div>
+    <div class="callout pro"><span class="lbl">🧠 PACELC — the full story</span><p>If there's a <b>P</b>artition: choose <b>A</b> or <b>C</b>. <b>E</b>lse (normal times): choose <b>L</b>atency or <b>C</b>onsistency — because waiting for all copies to agree is slower even when nothing is broken.</p></div>
+    <h3 class="mt2">🪜 The consistency ladder</h3>
+    <div class="ladder">
+      <div class="rung"><b>💎 Strong / linearizable</b><span>Everyone sees the latest write instantly, as if there's one copy. Bank balances, inventory counts. Slowest.</span></div>
+      <div class="rung"><b>🔗 Causal</b><span>Replies always show after the message they answer. Comments, chat threads.</span></div>
+      <div class="rung"><b>🪞 Read-your-writes</b><span>You always see your own changes (others may lag). Profile edits.</span></div>
+      <div class="rung"><b>🌊 Eventual</b><span>Copies agree… eventually (usually in ms–seconds). Like counts, view counts, feeds. Fastest.</span></div>
+    </div>
+  </section>
+
+  <section class="sec" id="quorum">
+    <div class="sec-head"><span class="sec-num">5.9</span><h2><span class="em">🗳️</span>Quorums: how many copies must agree?</h2></div>
+    <p class="lead">Keep <b>N</b> copies. Wait for <b>W</b> to confirm each write and ask <b>R</b> when reading. If <b>R + W &gt; N</b>, every read overlaps at least one copy with the latest write ✅.</p>
+    <div class="card">
+      <div class="grid sm">
+        <label class="field"><span>N copies <b id="qNV">3</b></span><input type="range" id="qN" min="1" max="7" value="3"></label>
+        <label class="field"><span>W write acks <b id="qWV">2</b></span><input type="range" id="qW" min="1" max="7" value="2"></label>
+        <label class="field"><span>R read asks <b id="qRV">2</b></span><input type="range" id="qR" min="1" max="7" value="2"></label>
+      </div>
+      <div class="quorum" id="qNodes"></div>
+      <div class="legend" style="justify-content:center"><span><i style="background:var(--sticky-p)"></i>got the write</span><span><i style="background:var(--sticky-b)"></i>asked on read</span><span><i style="background:var(--green)"></i>overlap!</span></div>
+      <p class="big center mt mb0" id="qVerdict"></p>
+    </div>
+  </section>
+
+</main>
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"></script>
+<script src="js/app.js"></script>
+<script src="js/data.js"></script>
+</body>
+</html>

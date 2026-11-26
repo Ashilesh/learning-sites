@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Glossary &amp; Quiz</title>
+<meta name="description" content="Every system design term explained in kid-friendly words, a one-page cheat sheet, and a fun quiz to test yourself.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🎓</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@500;700&family=Patrick+Hand&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script>try{var t=localStorage.getItem('sd-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<style>
+  .gl-tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+  .gl-tools input { flex: 1; min-width: 200px; font-size: 1.15rem; }
+  .gl { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 14px; }
+  .gl .card { padding: 12px 14px; box-shadow: 3px 3px 0 var(--shadow); }
+  .gl h4 { margin-bottom: 4px; }
+  .gl .where { font-size: .9rem; }
+  .quiz-q { font-size: 1.35rem; margin-bottom: 12px; }
+  .opts { display: grid; gap: 8px; }
+  .opt { font: inherit; text-align: left; color: var(--ink); background: var(--card); border: 2.5px solid var(--ink); border-radius: var(--radius-card); padding: 10px 14px; cursor: pointer; transition: background .2s, transform .15s; }
+  .opt:hover:not([disabled]) { transform: translateX(4px); background: var(--hl); }
+  .opt.right { background: var(--hl-green); border-color: var(--green); }
+  .opt.wrong { background: var(--hl-pink); border-color: var(--red); }
+  .opt[disabled] { cursor: default; }
+  .qbar { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 12px; }
+  .qbar i { width: 18px; height: 8px; border-radius: 4px; background: var(--card-2); border: 1.5px solid var(--ink); }
+  .qbar i.r { background: var(--green); } .qbar i.w { background: var(--red); } .qbar i.c { background: var(--yellow); }
+  .explain { margin-top: 12px; }
+  .cheat { columns: 2 300px; column-gap: 22px; }
+  .cheat .card { break-inside: avoid; margin-bottom: 18px; }
+  .cheat table { width: 100%; font-size: 1rem; border-collapse: collapse; }
+  .cheat td { padding: 2px 4px; border-bottom: 1px dashed color-mix(in srgb, var(--ink) 25%, transparent); }
+  .cheat td:last-child { text-align: right; font-family: var(--f-mono); font-size: .85rem; }
+  .big-score { font-family: var(--f-head); font-size: 3.4rem; }
+</style>
+</head>
+<body data-page="review">
+<main class="wrap">
+
+  <section class="hero">
+    <span class="chapter-tag">Chapter 12 · Glossary &amp; Quiz</span>
+    <h1>Check what you've learned 🎓</h1>
+    <p class="lead">Look up any word, keep the one-page cheat sheet handy, and take the quiz. Get 80% or more right and you earn the <span class="hl">System Design Explorer</span> badge! 🏅</p>
+    <ul class="toc"><li><a class="chip" href="#glossary">📖 Glossary</a></li><li><a class="chip" href="#cheat">🧾 Cheat sheet</a></li><li><a class="chip" href="#quiz">🧠 Quiz</a></li></ul>
+  </section>
+
+  <section class="sec" id="glossary">
+    <div class="sec-head"><span class="sec-num">12.1</span><h2><span class="em">📖</span>Glossary (in plain words)</h2></div>
+    <div class="gl-tools"><input type="text" id="glSearch" placeholder="🔍 Search a word, e.g. cache, p99, shard…" aria-label="Search glossary"><span class="muted" id="glCount"></span></div>
+    <div class="chips mt" id="glFilter"></div>
+    <div class="gl" id="glList"></div>
+  </section>
+
+  <section class="sec" id="cheat">
+    <div class="sec-head"><span class="sec-num">12.2</span><h2><span class="em">🧾</span>One-page cheat sheet</h2></div>
+    <div class="row mb0"><button class="btn sm" onclick="window.print()">🖨️ Print this page</button></div>
+    <div class="cheat mt">
+      <div class="card"><h3>🐌 Latency ladder</h3><table>
+        <tr><td>L1 cache</td><td>~1 ns</td></tr><tr><td>RAM read</td><td>~100 ns</td></tr><tr><td>SSD random read</td><td>~100 µs</td></tr>
+        <tr><td>Same-DC round trip</td><td>~0.5 ms</td></tr><tr><td>HDD seek</td><td>~5 ms</td></tr><tr><td>Cross-ocean round trip</td><td>~150 ms</td></tr></table></div>
+      <div class="card"><h3>🟢 The nines (per year)</h3><table>
+        <tr><td>99%</td><td>3.65 days</td></tr><tr><td>99.9%</td><td>8.77 hours</td></tr><tr><td>99.99%</td><td>52.6 min</td></tr><tr><td>99.999%</td><td>5.26 min</td></tr></table>
+        <p class="small mb0">Series: A×B (worse). Parallel: 1−(1−A)(1−B) (better).</p></div>
+      <div class="card"><h3>🧮 Napkin math</h3><table>
+        <tr><td>Seconds per day</td><td>86,400 ≈ 10⁵</td></tr><tr><td>1M/day</td><td>≈ 12 /s</td></tr><tr><td>1B/day</td><td>≈ 12K /s</td></tr>
+        <tr><td>KB→MB→GB→TB→PB</td><td>×1000</td></tr><tr><td>Peak traffic</td><td>2–3× avg</td></tr><tr><td>Little's law</td><td>L = λ × W</td></tr></table></div>
+      <div class="card"><h3>📏 Rules of thumb</h3><ul class="mb0">
+        <li>Quorum: <b>R + W &gt; N</b> → reads see latest writes</li><li>80/20: cache the hot 20%</li><li>Watch <b>p99</b>, not averages</li><li>Partition happens → pick C or A (CAP)</li><li>Else → pick latency or consistency (PACELC)</li></ul></div>
+      <div class="card"><h3>🧱 Go-to building blocks</h3><ul class="mb0">
+        <li>Slow reads → cache / replica / CDN</li><li>Slow work → queue + workers</li><li>Too much data → shard</li><li>Too much traffic → LB + stateless servers</li><li>Live updates → WebSockets / SSE</li><li>Big files → object storage + CDN</li></ul></div>
+      <div class="card"><h3>🛡️ Reliability kit</h3><ul class="mb0">
+        <li>Timeouts everywhere</li><li>Retries + backoff + jitter</li><li>Idempotency keys</li><li>Circuit breakers, bulkheads</li><li>Rate limits, load shedding</li><li>Multi-AZ, backups (tested!)</li></ul></div>
+    </div>
+  </section>
+
+  <section class="sec" id="quiz">
+    <div class="sec-head"><span class="sec-num">12.3</span><h2><span class="em">🧠</span>The quiz</h2></div>
+    <div class="card" id="quizBox"></div>
+  </section>
+
+</main>
+<script src="https://cdn.jsdelivr.net/npm/roughjs@4.6.6/bundled/rough.js"></script>
+<script src="js/app.js"></script>
+<script src="js/review.js"></script>
+</body>
+</html>
