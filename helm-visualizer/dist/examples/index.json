@@ -1,0 +1,12 @@
+[
+  {
+    "id": "storefront",
+    "file": "storefront.tgz",
+    "name": "Storefront (multi-namespace demo)",
+    "description": "Web, API, data and observability tiers in five namespaces, wired with Gateway API, NetworkPolicy, Istio, RBAC, cert-manager and service DNS names.",
+    "suggested": {
+      "releaseName": "shop",
+      "namespace": "shop-web"
+    }
+  }
+]

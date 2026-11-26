@@ -28,6 +28,11 @@ Cybersecurity/      Cyber Sketchbook (single page + styles.css/app.js/labs.js). 
 System Design/      System Design Sketchbook (index + 14 chapter pages + css/ + js/). Folder name has a space, so
                     links use System%20Design/. Top bar + chapter menu are built by js/app.js (SD.CHAPTERS):
                     the dashed .home-link lives there, not in each page.
+helm-visualizer/    Helm Topology (interactive tool: real Helm compiled to WebAssembly renders a chart in the browser,
+                    then the resource graph is drawn). Only dist/ is in the repo (built elsewhere), so edit dist/ directly.
+                    Needs http(s): ES modules + a Web Worker + fetch of helm/helm.wasm.gz (~14 MB) do NOT work over file://.
+                    index.html has a strict CSP with a sha256 hash of the inline importmap: changing the importmap
+                    means recomputing that hash. Home link is a dashed .home-link first in .topbar.
 <TOPIC>/            ← new sub-sites go in their own top-level folder
 ```
 

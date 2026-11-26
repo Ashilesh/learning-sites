@@ -301,5 +301,19 @@ window.SITES = [
     minutes: 180,
   },
 
+  {
+    id: "helm-topology",
+    title: "Helm Topology",
+    path: "helm-visualizer/dist/index.html",
+    category: "cloud",
+    topic: "Kubernetes",
+    format: "Interactive tool",
+    description:
+      "Drop in a Helm chart and see how it is wired. Real Helm runs in your browser via WebAssembly, then every link between resources is traced " +
+      "(selectors, mounts, routes, RBAC, certificates, network policies, service DNS) and cross-namespace links are highlighted. Nothing is uploaded.",
+    tags: ["helm", "kubernetes", "k8s", "helm chart", "helm template", "visualizer", "topology", "graph", "manifests", "yaml", "namespaces", "rbac", "networkpolicy", "gateway api", "istio", "cert-manager", "webassembly", "wasm", "devops", "tool"],
+    added: "2026-11-27",
+  },
+
   // ↓↓↓ ADD NEW SITES HERE ↓↓↓
 ];

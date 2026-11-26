@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Helm Topology — see how your chart is wired</title>
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'sha256-aNQuqeXuQoRyS3Ee1LX4SsUJagv8rSiMoOP87W9fvHA='; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; connect-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/app.css">
+  <script type="importmap">{"imports":{"js-yaml":"./vendor/js-yaml.mjs","cytoscape":"./vendor/cytoscape.esm.mjs"}}</script>
+  <script src="vendor/layout-base.js" defer></script>
+  <script src="vendor/cose-base.js" defer></script>
+  <script src="vendor/cytoscape-fcose.js" defer></script>
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="home-link" href="../../index.html" title="All explainers">← <span>All explainers</span></a>
+    <a class="brand" href="./" aria-label="Helm Topology home">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><circle cx="6" cy="6" r="3"/><circle cx="18" cy="7" r="3"/><circle cx="12" cy="18" r="3"/><path d="M8.6 7.2 15.2 7M7.4 8.6l3.4 7M16.7 9.7l-3.3 5.8" fill="none" stroke-width="1.6"/></svg>
+      <span>Helm Topology</span>
+    </a>
+    <div class="chart-pill" id="chartPill" hidden></div>
+    <nav class="tabs" id="tabs" role="tablist" hidden>
+      <button role="tab" data-view="graph" aria-selected="true">Graph</button>
+      <button role="tab" data-view="namespaces">Namespaces</button>
+      <button role="tab" data-view="connections">Connections <span class="count" id="countConnections"></span></button>
+      <button role="tab" data-view="findings">Findings <span class="count" id="countFindings"></span></button>
+    </nav>
+    <div class="topbar-actions" id="topActions" hidden>
+      <div class="menu">
+        <button class="btn btn-ghost" id="exportBtn" aria-haspopup="true" aria-expanded="false">Export ▾</button>
+        <div class="menu-list" id="exportMenu" hidden>
+          <button data-export="png">Graph as PNG</button>
+          <button data-export="csv">Connections as CSV</button>
+          <button data-export="json">Analysis as JSON</button>
+          <button data-export="yaml">Rendered manifests (YAML)</button>
+        </div>
+      </div>
+      <button class="btn" id="newBtn">New chart</button>
+    </div>
+  </header>
+
+  <!-- Landing -->
+  <main class="landing" id="landing">
+    <section class="hero">
+      <h1>See how your Helm chart is wired</h1>
+      <p class="lede">Drop in a chart. Helm renders it right here in your browser, then every reference between its resources is traced: selectors, mounts, routes, RBAC, certificates, network policies and service DNS names. Links that cross namespaces are highlighted. Nothing is uploaded.</p>
+
+      <div class="source-tabs" role="tablist">
+        <button role="tab" data-source="upload" aria-selected="true">Upload a chart</button>
+        <button role="tab" data-source="paste">Paste rendered YAML</button>
+      </div>
+
+      <div class="source-pane" id="sourceUpload">
+        <div class="dropzone" id="dropzone" tabindex="0">
+          <svg viewBox="0 0 24 24" width="36" height="36" aria-hidden="true"><path d="M12 15V4m0 0L8 8m4-4 4 4" fill="none" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 14v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4" fill="none" stroke-width="1.7" stroke-linecap="round"/></svg>
+          <p class="dz-title">Drop a chart folder, <code>.tgz</code> or <code>.zip</code> here</p>
+          <p class="dz-sub">The folder that contains <code>Chart.yaml</code>, with every dependency already in its <code>charts/</code> folder.<br>Run <code>helm dependency build</code> first if they come from a repository: this page cannot download them.</p>
+          <div class="dz-actions">
+            <button class="btn btn-primary" id="pickFolder">Choose folder</button>
+            <button class="btn" id="pickArchive">Choose archive</button>
+          </div>
+          <input type="file" id="folderInput" webkitdirectory directory multiple hidden>
+          <input type="file" id="archiveInput" accept=".tgz,.gz,.tar,.zip" hidden>
+        </div>
+        <p class="helm-status" id="helmStatus"></p>
+      </div>
+
+      <div class="source-pane" id="sourcePaste" hidden>
+        <label class="field">
+          <span>Output of <code>helm template</code> or <code>kubectl get -o yaml</code></span>
+          <textarea id="pasteInput" spellcheck="false" placeholder="---&#10;# Source: mychart/templates/deployment.yaml&#10;apiVersion: apps/v1&#10;kind: Deployment&#10;..."></textarea>
+        </label>
+        <div class="paste-row">
+          <label class="field inline"><span>Namespace for objects without one</span><input id="pasteNamespace" value="default" spellcheck="false"></label>
+          <button class="btn btn-primary" id="analyzePaste">Analyze</button>
+        </div>
+        <p class="hint">Pasted YAML is analysed in your browser and is not sent anywhere.</p>
+      </div>
+
+      <div class="examples" id="examples" hidden>
+        <span>Or try an example:</span>
+        <div id="exampleList"></div>
+      </div>
+      <div class="alert error" id="landingError" hidden></div>
+    </section>
+  </main>
+
+  <!-- Workspace -->
+  <div class="workspace" id="workspace" hidden>
+    <aside class="sidebar" id="sidebar">
+      <section class="panel" id="renderPanel">
+        <header class="panel-head">
+          <h2>Render</h2>
+          <button class="icon-btn" id="collapseRender" aria-label="Collapse render settings" title="Collapse">–</button>
+        </header>
+        <div class="panel-body" id="renderBody"></div>
+      </section>
+      <section class="panel" id="filterPanel">
+        <header class="panel-head"><h2>Filter</h2><button class="link-btn" id="resetFilters">Reset</button></header>
+        <div class="panel-body" id="filterBody"></div>
+      </section>
+    </aside>
+
+    <main class="main" id="main">
+      <div class="view view-graph" id="viewGraph">
+        <div class="cy" id="cy"></div>
+        <div class="canvas-toolbar">
+          <div class="search">
+            <svg viewBox="0 0 24 24" width="15" height="15" aria-hidden="true"><circle cx="11" cy="11" r="6.5" fill="none" stroke-width="1.8"/><path d="m16 16 4 4" stroke-width="1.8" stroke-linecap="round"/></svg>
+            <input id="search" type="search" placeholder="Find a resource…" spellcheck="false" autocomplete="off">
+          </div>
+          <div class="seg" id="groupSeg" role="group" aria-label="Group resources by" hidden>
+            <button data-group="namespace" aria-pressed="false" title="One box per namespace">Group: namespace</button>
+            <button data-group="subchart" aria-pressed="true" title="Also box each subchart inside its namespace">+ subchart</button>
+          </div>
+          <div class="seg" role="group" aria-label="Color links by">
+            <button data-color="scope" aria-pressed="true" title="Same namespace / cross-namespace / cluster-scoped">Color: scope</button>
+            <button data-color="category" aria-pressed="false" title="Traffic, config, identity, policy, PKI…">relationship</button>
+          </div>
+          <div class="seg" id="layoutSeg" role="group" aria-label="Layout">
+            <button data-layout="tidy" aria-pressed="true" title="Boxes never overlap; resources are grouped in tidy rows">Layout: tidy</button>
+            <button data-layout="organic" aria-pressed="false" title="One force-directed layout for everything; linked resources pull together across boxes">organic</button>
+          </div>
+          <button class="btn btn-sm" id="relayout" title="Re-run the layout">Re-layout</button>
+          <button class="btn btn-sm" id="fit" title="Fit to screen">Fit</button>
+        </div>
+        <div class="legend" id="legend"></div>
+        <div class="notice" id="notice" hidden>
+          <span id="noticeText"></span>
+          <button class="link-btn" id="noticeShow">Show them</button>
+          <button class="icon-btn" id="noticeClose" aria-label="Dismiss">×</button>
+        </div>
+        <div class="busy" id="graphBusy" hidden><span class="spinner"></span><span>Laying out…</span></div>
+        <div class="empty-note" id="graphEmpty" hidden>Nothing matches the current filters.</div>
+      </div>
+      <div class="view" id="viewNamespaces" hidden>
+        <div class="cy" id="cyNs"></div>
+        <div class="ns-caption">Each box is a namespace. Arrows show how many references go from one namespace to another; the number inside counts links that stay within the namespace.</div>
+      </div>
+      <div class="view view-scroll" id="viewConnections" hidden></div>
+      <div class="view view-scroll" id="viewFindings" hidden></div>
+    </main>
+
+    <aside class="details" id="details" hidden>
+      <button class="icon-btn details-close" id="closeDetails" aria-label="Close details">×</button>
+      <div id="detailsBody"></div>
+    </aside>
+  </div>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+</body>
+</html>
