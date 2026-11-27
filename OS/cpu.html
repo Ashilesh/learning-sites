@@ -1,0 +1,218 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How the CPU Runs Code · OS Sketchbook</title>
+<meta name="description" content="How a CPU fetches, decodes and executes instructions, where instructions come from (ELF, execve, page faults, caches), pipelines, and how the OS keeps control — with a step-through toy CPU.">
+<script>try{var t=localStorage.getItem('os-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/pages.css">
+</head>
+<body data-page="cpu">
+<main class="wrap">
+  <header class="ch-hero">
+    <span class="ch-num">Chapter 4</span>
+    <h1 class="ch-title">How the CPU <span class="hl">Runs Code</span> 🔁</h1>
+    <p class="ch-lead">Every program — a game, a browser, Linux itself — is just a long list of tiny instructions. The CPU reads them and does them, one after another, billions of times a second. But who hands the CPU those instructions? The OS? <i>Not quite…</i> 🤔</p>
+    <div class="eli5"><b>🧸 In one sentence:</b> the CPU is a super-fast chef reading a recipe one line at a time 👩‍🍳 — a bookmark called the <b>program counter</b> remembers which line is next. The OS is the head chef who puts the recipe on the stand and rings a bell ⏰ when it's someone else's turn.</div>
+  </header>
+  <nav class="toc"></nav>
+
+  <section class="sec" id="instr">
+    <h2 class="sec-title" data-short="What's an instruction?">🧩 What is an instruction?</h2>
+    <p class="lead">You write code in a language for humans. A <b>compiler</b> turns it into tiny commands the CPU understands — <b>machine code</b>: just numbers (bytes) in memory.</p>
+    <div id="instrD"></div>
+    <div class="grid-2">
+      <div class="note kid"><div class="note-h">🧸 Tiny, tiny steps</div><p>A CPU can't "make a game". It can only do baby steps: <b>copy</b> a number, <b>add</b> two numbers, <b>compare</b>, <b>jump</b> to another line. Billions of baby steps per second add up to everything you see on screen. 🐜🐜🐜</p></div>
+      <div class="term" data-title="see the machine code yourself"><pre>$ objdump -d --no-show-raw-insn /usr/bin/ls | sed -n '8,12p'
+    6ab0:  endbr64
+    6ab4:  xor    ebp,ebp
+    6ab6:  mov    r9,rdx
+    6ab9:  pop    rsi
+    6aba:  mov    rdx,rsp
+# 6ab0 is ls's very first instruction: its "entry point"</pre></div>
+    </div>
+  </section>
+
+  <section class="sec" id="cycle">
+    <h2 class="sec-title" data-short="Fetch → decode → execute">🔁 The heartbeat: fetch → decode → execute</h2>
+    <div class="grid-3">
+      <div class="card c-y"><span class="big-ic">🔎</span><h4>1. Fetch</h4><p>Read the instruction at the address in the <b>program counter</b> (on x86-64 it's called <code>RIP</code>). Move the counter to the next one.</p></div>
+      <div class="card c-b"><span class="big-ic">🧩</span><h4>2. Decode</h4><p>The <b>control unit</b> figures out what the bytes mean: "ah, <i>add</i> these two".</p></div>
+      <div class="card c-p"><span class="big-ic">⚙️</span><h4>3. Execute</h4><p>The <b>ALU</b> (math unit) does it, or memory is read/written, or the program counter jumps somewhere else.</p></div>
+    </div>
+    <div class="note tip"><div class="note-h">💡 That's all a CPU ever does</div><p>Fetch, decode, execute, repeat — from the moment it powers on (starting at the <b>reset vector</b> in the firmware, Chapter 2) until it's switched off. A 4 GHz CPU ticks 4 billion times per second, and modern cores finish several instructions per tick.</p></div>
+  </section>
+
+  <section class="sec" id="chip3d">
+    <h2 class="sec-title" data-short="Inside a CPU (3D)">🔬 Zoom inside a real CPU (3D)</h2>
+    <p class="lead">Shrink down 10,000× and walk through one core: caches, fetch unit, branch predictor, decoder, ALUs and registers — and see the timer hand control to the kernel. Drag to spin, press <b>▶ Play</b>.</p>
+    <div id="labChip"></div>
+  </section>
+
+  <section class="sec" id="toycpu">
+    <h2 class="sec-title" data-short="Toy CPU lab">🕹️ Lab: run a program on a tiny CPU</h2>
+    <p class="lead">Meet <b>Sketchy-8</b>: a toy CPU with 16 memory boxes and one main register (<b>A</b>). Press <b>⏭ step</b> to go one phase at a time and watch the program counter move. Watch for the moments when the <b>OS</b> steps in! 👑</p>
+    <div class="sim" id="toy">
+      <div class="row">
+        <label>program <select id="tProg">
+          <option value="count">🔢 count down 3, 2, 1</option>
+          <option value="add">➕ add two numbers</option>
+          <option value="loop">♾️ endless loop (watch the timer!)</option>
+        </select></label>
+        <button class="btn yellow" id="tStep" type="button">⏭ step</button>
+        <button class="btn" id="tRun" type="button">▶ run</button>
+        <button class="btn sm" id="tReset" type="button">↺ reset</button>
+        <label class="small">speed <input type="range" id="tSpeed" min="150" max="1200" value="650" style="width:110px" aria-label="Run speed"></label>
+      </div>
+      <div class="toy-grid">
+        <div class="toy-cpu">
+          <div class="toy-mode" id="tMode">👤 user mode</div>
+          <div class="toy-phases"><span data-ph="fetch">🔎 FETCH</span><span data-ph="decode">🧩 DECODE</span><span data-ph="execute">⚙️ EXECUTE</span></div>
+          <div class="toy-regs">
+            <div><small>PC <i>(program counter)</i></small><b id="rPC">0</b></div>
+            <div><small>IR <i>(instruction)</i></small><b id="rIR">—</b></div>
+            <div><small>A <i>(register)</i></small><b id="rA">0</b></div>
+            <div><small>instructions <i>done</i></small><b id="rCyc">0</b></div>
+          </div>
+          <div class="toy-cu" id="tCU" aria-live="polite">Press ⏭ step to start.</div>
+          <div class="small muted">🖥️ screen (stdout)</div>
+          <div class="sim-out" id="tOut" style="min-height:36px"></div>
+        </div>
+        <div class="toy-bus"><span id="busA">address ➜</span><span id="busD">⬅ data</span></div>
+        <div><b>🧮 Memory</b><table class="mtab toy-mem" id="tMem"></table></div>
+      </div>
+      <div class="small muted" style="margin-top:8px">Instructions: <code>LOAD x</code> A←mem[x] · <code>ADD x</code> A←A+mem[x] · <code>SUB x</code> A←A−mem[x] · <code>STORE x</code> mem[x]←A · <code>JMP x</code> go to x · <code>JNZ x</code> go to x if A≠0 · <code>PRINT</code> and <code>EXIT</code> are <b>system calls</b> (they ask the OS).</div>
+    </div>
+  </section>
+
+  <section class="sec" id="fromdisk">
+    <h2 class="sec-title" data-short="From file to fetch">📦➡️🧠 Where do the instructions come from?</h2>
+    <p class="lead">Your program sits on the SSD as an <b>ELF file</b>. How do its bytes end up inside the CPU? Follow one instruction on its trip. Press <b>▶ Play</b>.</p>
+    <div id="tripD"></div>
+  </section>
+
+  <section class="sec" id="who">
+    <h2 class="sec-title" data-short="Does the OS fetch?">👑 So… does the OS fetch the instructions?</h2>
+    <div class="grid-2">
+      <div class="note kid"><div class="note-h">🧸 The teacher and the worksheet</div><p><b>No!</b> The OS is like a teacher: it hands a kid (the CPU) a worksheet (the program), points to the first question (sets the program counter) and sets a kitchen timer ⏰. The kid does every question <b>alone</b>, super fast. The teacher only comes back when the timer rings, when the kid raises a hand (a system call), or when something goes wrong (a fault).</p></div>
+      <div class="note linux"><div class="note-h">🐧 Why it must be this way</div><p>If the kernel had to hand over each instruction, every instruction would cost hundreds of extra instructions — your computer would be 100× slower. So the CPU fetches on its own, and hardware (the MMU) checks every single access against the page tables the kernel prepared. The kernel sets the rules once; the hardware enforces them billions of times per second.</p></div>
+    </div>
+    <div class="tbl-wrap"><table class="sk">
+      <tr><th>Job</th><th>🧠 CPU hardware</th><th>🐧 Linux kernel</th></tr>
+      <tr><td>Fetch, decode, execute each instruction</td><td>✅ by itself, every cycle</td><td>❌ never (far too slow)</td></tr>
+      <tr><td>Translate virtual → physical addresses</td><td>✅ MMU + TLB, on every access</td><td>Builds the page tables</td></tr>
+      <tr><td>Get the program's code into RAM</td><td>Raises a page fault when it's missing</td><td>✅ <code>execve()</code> + page-fault handler load it</td></tr>
+      <tr><td>Point the CPU at the first instruction</td><td>Jumps when told</td><td>✅ sets <code>RIP</code> = entry point, returns to user mode</td></tr>
+      <tr><td>Stop a program that never gives up the CPU</td><td>Timer chip fires an interrupt</td><td>✅ scheduler picks who runs next</td></tr>
+      <tr><td>Block forbidden instructions / memory</td><td>✅ checks privilege ring + page bits</td><td>Decides the rules, kills offenders (SIGSEGV, SIGILL)</td></tr>
+    </table></div>
+    <h3 class="sub-title">🔔 The 4 ways the kernel gets the CPU back</h3>
+    <div class="grid-4">
+      <div class="card c-y"><span class="big-ic">⏰</span><h4>Timer interrupt</h4><p>A hardware timer rings every few milliseconds. That's how Linux stops endless loops from freezing your computer.</p></div>
+      <div class="card c-p"><span class="big-ic">🚪</span><h4>System call</h4><p>The program asks for help (<code>read</code>, <code>write</code>, <code>exit</code>…) with the <code>syscall</code> instruction.</p></div>
+      <div class="card c-r"><span class="big-ic">💥</span><h4>Exception / fault</h4><p>Page fault, divide by zero, illegal instruction. The CPU jumps to the kernel to fix it — or to stop the program.</p></div>
+      <div class="card c-b"><span class="big-ic">🔔</span><h4>Device interrupt</h4><p>A key was pressed, a disk read finished, a network packet arrived.</p></div>
+    </div>
+    <div class="term"><pre>$ cat /proc/interrupts | grep -E 'LOC|RES'
+ LOC:  48211934  47120558  Local timer interrupts
+ RES:   1203118   1187440  Rescheduling interrupts
+$ grep 'CONFIG_HZ=' /boot/config-$(uname -r)
+CONFIG_HZ=250          # timer up to 250×/s per core (Linux skips ticks when idle)</pre></div>
+  </section>
+
+  <section class="sec" id="pipeline">
+    <h2 class="sec-title" data-short="Pipelines">🏎️ Going faster: the pipeline</h2>
+    <div class="grid-2">
+      <div class="note kid"><div class="note-h">🧺 The laundry trick</div><p>Washing, drying and folding one load before starting the next is slow. Smart way: while load 1 is drying, load 2 is already washing! CPUs do the same with instructions — each step (fetch, decode, execute…) works on a different instruction at the same time.</p></div>
+      <div class="sim" style="margin:0">
+        <div class="btn-row"><button class="btn sm" id="pNo" type="button">🐢 one at a time</button><button class="btn sm green" id="pYes" type="button">🏎️ pipelined</button><span class="badge" id="pCyc">cycles: –</span></div>
+        <div class="repl-grid" id="pipeGrid"></div>
+        <div class="legend"><span><i style="background:var(--yellow)"></i>F fetch</span><span><i style="background:var(--blue)"></i>D decode</span><span><i style="background:var(--pink)"></i>E execute</span><span><i style="background:var(--green)"></i>M memory</span><span><i style="background:var(--purple)"></i>W write back</span></div>
+      </div>
+    </div>
+    <h3 class="sub-title">🏭 The pipeline factory (3D)</h3>
+    <div id="labPipe"></div>
+    <div class="grid-3">
+      <div class="card c-v"><h4>🔮 Branch prediction</h4><p>At an <code>if</code>, the CPU <b>guesses</b> which way the program will go and starts fetching from there before it knows. Modern guessers are right ~95%+ of the time. A wrong guess = throw away the work (a "branch miss").</p></div>
+      <div class="card c-t"><h4>🔀 Out-of-order</h4><p>If an instruction is waiting for slow memory, the CPU runs later, independent instructions first — then puts the results back in the right order.</p></div>
+      <div class="card c-o"><h4>🛣️ Superscalar</h4><p>Several pipelines side by side: a modern core can start 4–8 instructions per cycle.</p></div>
+    </div>
+    <details class="deep"><summary>🔬 Deep dive: when guessing goes wrong — Spectre &amp; Meltdown</summary>
+      <p>In 2018, researchers showed that work done on a <b>wrong guess</b> (speculative execution) leaves traces in the caches that a clever program can measure to read secrets. Linux added mitigations, like <b>KPTI</b> (separate page tables for kernel and user) and <b>retpolines</b>. You can see which ones your machine uses:</p>
+      <div class="term"><pre>$ grep . /sys/devices/system/cpu/vulnerabilities/* | cut -d/ -f7
+meltdown:Not affected
+spectre_v1:Mitigation: usercopy/swapgs barriers and __user pointer sanitization
+spectre_v2:Mitigation: Enhanced / Automatic IBRS; IBPB: conditional
+$ perf stat -e cycles,instructions,branch-misses ls > /dev/null
+     2,114,903  cycles
+     2,843,107  instructions      #  1.34  insn per cycle
+        16,032  branch-misses</pre></div>
+    </details>
+  </section>
+
+  <section class="sec" id="caches">
+    <h2 class="sec-title" data-short="Caches">⚡ Caches: keeping instructions close</h2>
+    <p class="lead">RAM is ~100× slower than the CPU. So every core has small, super-fast <b>caches</b>. Instructions travel from RAM in chunks of <b>64 bytes</b> (a "cache line") and land in a special <b>L1 instruction cache</b>.</p>
+    <div id="cacheD"></div>
+    <div class="grid-2">
+      <div class="term"><pre>$ lscpu | grep -i cache
+L1d cache:   256 KiB (8 instances)
+L1i cache:   256 KiB (8 instances)
+L2 cache:    8 MiB (8 instances)
+L3 cache:    16 MiB (1 instance)
+$ getconf LEVEL1_DCACHE_LINESIZE
+64</pre></div>
+      <div class="note tip"><div class="note-h">💡 Why loops are fast</div><p>Code runs mostly in order, and loops repeat the same few instructions. After the first trip, they're already in L1 — the CPU hardly ever waits. Programmers call this <b>locality</b>. (Memory hierarchy with real speeds → <a href="memory.html#hierarchy">Chapter 5</a>.)</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="elf">
+    <h2 class="sec-title" data-short="ELF files">🧝 ELF: how Linux stores programs</h2>
+    <div class="grid-2">
+      <div>
+        <p>Linux programs are <b>ELF</b> files (Executable and Linkable Format). Inside: a <b>header</b> ("I'm for x86-64, start at address 0x6ab0"), <b>segments</b> to map into memory (code = read+execute, data = read+write), and the name of a helper — the <b>dynamic loader</b> <code>ld-linux.so</code>, which runs first to hook up shared libraries like libc.</p>
+        <div class="note kid"><div class="note-h">🧸 A recipe book with a table of contents</div><p>The header is the table of contents: "recipes start on page 6ab0". <code>execve()</code> reads it and tells the CPU where to start.</p></div>
+      </div>
+      <div class="term"><pre>$ file /usr/bin/ls
+/usr/bin/ls: ELF 64-bit LSB pie executable, x86-64, dynamically linked
+$ readelf -h /usr/bin/ls | grep -E 'Machine|Entry'
+  Machine:                           Advanced Micro Devices X86-64
+  Entry point address:               0x6ab0
+$ readelf -lW /usr/bin/ls | grep -E 'INTERP|LOAD'
+  INTERP  … [Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]
+  LOAD    0x000000 … R   0x1000
+  LOAD    0x004000 … R E 0x1000      # code: Read + Execute
+  LOAD    0x017000 … R   0x1000
+  LOAD    0x01ffd0 … RW  0x1000      # data: Read + Write
+$ grep r-xp /proc/self/maps | head -1
+5626a1a02000-5626a1a17000 r-xp 00002000 103:02 1311  /usr/bin/cat</pre></div>
+    </div>
+    <h3 class="sub-title">🌍 CPUs speak different languages</h3>
+    <div class="grid-3">
+      <div class="card c-b"><h4>x86-64</h4><p>Intel &amp; AMD PCs and servers. Instructions are 1–15 bytes long (CISC).</p><p><code>uname -m</code> → <code>x86_64</code></p></div>
+      <div class="card c-g"><h4>ARM64 (AArch64)</h4><p>Phones, Apple M-chips, Raspberry Pi, many cloud servers. Every instruction is 4 bytes (RISC).</p><p><code>uname -m</code> → <code>aarch64</code></p></div>
+      <div class="card c-o"><h4>RISC-V</h4><p>An open, free instruction set anyone can build. Growing fast in boards and chips.</p><p><code>uname -m</code> → <code>riscv64</code></p></div>
+    </div>
+    <div class="note linux"><div class="note-h">🐧 One kernel, many CPUs</div><p>Linux runs on all of them. CPU-specific code lives in <code>arch/x86</code>, <code>arch/arm64</code>, <code>arch/riscv</code>…; everything else is shared. A program must be compiled for your CPU's language — that's why downloads say "x86_64" or "arm64".</p></div>
+  </section>
+
+  <section class="sec" id="lab3d">
+    <h2 class="sec-title" data-short="Fetch in 3D">🖥️ Watch an instruction travel in 3D</h2>
+    <div id="lab"></div>
+  </section>
+
+  <section class="sec" id="quiz">
+    <h2 class="sec-title" data-short="Quiz">⭐ CPU quiz</h2>
+    <div id="quizBox"></div>
+  </section>
+</main>
+<script src="js/core.js"></script>
+<script src="js/sketch.js"></script>
+<script src="vendor/three.min.js"></script>
+<script src="js/lab3d.js"></script>
+<script src="js/pages/cpu.js"></script>
+</body>
+</html>

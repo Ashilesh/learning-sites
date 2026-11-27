@@ -33,6 +33,8 @@ helm-visualizer/    Helm Topology (interactive tool: real Helm compiled to WebAs
                     Needs http(s): ES modules + a Web Worker + fetch of helm/helm.wasm.gz (~14 MB) do NOT work over file://.
                     index.html has a strict CSP with a sha256 hash of the inline importmap: changing the importmap
                     means recomputing that hash. Home link is a dashed .home-link first in .topbar.
+OS/                 OS Sketchbook (index + 12 chapter pages + css/ + js/, three.js vendored). Header + chapter drawer
+                    are built by js/core.js (CHAPTERS): the dashed .home-link lives there, not in each page.
 <TOPIC>/            ← new sub-sites go in their own top-level folder
 ```
 

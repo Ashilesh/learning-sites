@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kernel, Syscalls &amp; Devices · OS Sketchbook</title>
+<meta name="description" content="Kernel mode vs user mode, system calls, interrupts, DMA, device drivers and kernel modules, monolithic vs microkernel, and the Linux network stack — visual and interactive.">
+<script>try{var t=localStorage.getItem('os-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/pages.css">
+<style>
+  .enc{display:grid; place-items:center; padding:10px; min-height:260px}
+  .enc .lay{border:3px solid var(--ink); border-radius:12px; padding:8px 10px 10px; transition:all .45s cubic-bezier(.3,1.3,.5,1); min-width:0; max-width:100%}
+  .enc .lay > .hd{font-family:var(--font-mono); font-size:12.5px; margin-bottom:6px; display:flex; flex-wrap:wrap; gap:4px; align-items:center}
+  .enc .lay > .hd b{font-family:var(--font-title); font-size:22px; margin-right:4px}
+  .enc .lay > .hd span{border:1.5px solid var(--ink); border-radius:5px; padding:0 5px; background:var(--card)}
+  .enc .lay.off{border-color:transparent; padding:0; background:transparent!important}
+  .enc .lay.off > .hd{display:none}
+  .enc .data{font-family:var(--font-mono); font-size:14px; background:var(--card); border:2px dashed var(--ink); border-radius:8px; padding:8px 12px}
+</style>
+</head>
+<body data-page="kernel">
+<main class="wrap">
+  <header class="ch-hero">
+    <span class="ch-num">Chapter 7</span>
+    <h1 class="ch-title">Kernel, Syscalls <span class="hl">&amp;</span> Devices ⚙️</h1>
+    <p class="ch-lead">The kernel is the heart of the OS: the one program trusted to touch the hardware. Let's see how apps talk to it, how hardware gets its attention, and how it's built.</p>
+    <div class="eli5"><b>🧸 In one sentence:</b> the kernel is like a bank vault with a teller window 🏦 — you can't walk into the vault, but you can ask the teller (a <b>system call</b>), and the alarm bell (an <b>interrupt</b>) can always get the teller's attention.</div>
+  </header>
+  <nav class="toc"></nav>
+
+  <section class="sec" id="rings">
+    <h2 class="sec-title" data-short="User vs kernel mode">🛡️ Two modes: user and kernel</h2>
+    <div class="split">
+      <div id="ringsD"></div>
+      <div>
+        <div class="note kid"><div class="note-h">🧸 Kid version</div><p>The CPU has a <b>grown-up mode</b> and a <b>kid mode</b>. Apps always run in kid mode: they can do math and use their own memory, but can't touch the hardware or other apps' stuff. Only the kernel runs in grown-up mode.</p></div>
+        <div class="note linux"><div class="note-h">🐧 In Linux (x86)</div><p>The CPU has 4 privilege <b>rings</b>, but Linux uses only two: <b>ring 0</b> (kernel mode) and <b>ring 3</b> (user mode). ARM calls them exception levels (EL1 kernel, EL0 user). Forbidden instructions in ring 3 cause a trap → the kernel usually kills the app.</p></div>
+        <div class="term"><pre>$ time ls > /dev/null
+real  0m0.003s
+user  0m0.001s     # time spent in user mode
+sys   0m0.002s     # time spent in the kernel for us</pre></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="syscall">
+    <h2 class="sec-title" data-short="System calls">🚪 A system call, step by step</h2>
+    <p class="lead">You write <code>print("hi")</code>. How does it reach the screen? Follow the call through the teller window.</p>
+    <div id="sysD"></div>
+    <div class="grid-2">
+      <div class="term" data-title="strace — spy on system calls"><pre>$ strace -e trace=openat,read,write,close cat hello.txt
+openat(AT_FDCWD, "hello.txt", O_RDONLY) = 3
+read(3, "hi from a file\n", 131072)    = 15
+write(1, "hi from a file\n", 15)       = 15
+hi from a file
+read(3, "", 131072)                    = 0
+close(3)                               = 0
+$ strace -c ls > /dev/null     # summary: count every syscall</pre></div>
+      <div class="tbl-wrap"><table class="sk">
+        <tr><th>Kind</th><th>Popular system calls</th></tr>
+        <tr><td>🏃 Processes</td><td><code>clone</code> <code>fork</code> <code>execve</code> <code>exit_group</code> <code>wait4</code> <code>kill</code></td></tr>
+        <tr><td>📁 Files</td><td><code>openat</code> <code>read</code> <code>write</code> <code>close</code> <code>stat</code> <code>getdents64</code></td></tr>
+        <tr><td>🧮 Memory</td><td><code>mmap</code> <code>munmap</code> <code>brk</code> <code>mprotect</code></td></tr>
+        <tr><td>🌐 Network</td><td><code>socket</code> <code>connect</code> <code>accept4</code> <code>sendto</code> <code>recvfrom</code></td></tr>
+        <tr><td>🔌 Devices</td><td><code>ioctl</code> (the "everything else" door)</td></tr>
+        <tr><td>⏱️ Time</td><td><code>clock_gettime</code> <code>nanosleep</code></td></tr>
+      </table></div>
+    </div>
+    <details class="deep"><summary>🔬 Deep dive: making system calls cheaper</summary>
+      <ul class="sk-list"><li><b>vDSO</b>: some calls like <code>clock_gettime()</code> don't even enter the kernel — the kernel maps a tiny read-only page of code+data into every process.</li><li><b>Buffering</b>: glibc's <code>printf</code> collects text and calls <code>write()</code> once per line/buffer instead of per character.</li><li><b>io_uring</b> (since 5.1): apps put many I/O requests into a shared ring buffer; the kernel picks them up in batches — very few system calls for lots of I/O.</li><li><b>eBPF</b>: safe little programs you load <i>into</i> the kernel to filter packets, trace events or enforce security — without writing a kernel module.</li></ul>
+    </details>
+  </section>
+
+  <section class="sec" id="interrupts">
+    <h2 class="sec-title" data-short="Interrupts">🔔 Interrupts: the doorbell</h2>
+    <div class="grid-3">
+      <div class="card"><span class="big-ic">🚪👀</span><h4>Polling</h4><p>Walk to the door every 10 seconds to check for a visitor. Wastes your time.</p><p class="small muted">CPU keeps asking the device "done yet?"</p></div>
+      <div class="card c-y"><span class="big-ic">🔔</span><h4>Interrupts</h4><p>Get on with life; the doorbell rings when someone arrives.</p><p class="small muted">Device signals the CPU when it needs attention.</p></div>
+      <div class="card c-g"><span class="big-ic">📦🤖</span><h4>DMA</h4><p>The delivery robot carries the boxes inside itself and only rings to say "done!".</p><p class="small muted">Device copies data straight into RAM, then interrupts.</p></div>
+    </div>
+    <div id="irqD"></div>
+    <div class="grid-2">
+      <div class="term"><pre>$ cat /proc/interrupts | head -5
+           CPU0     CPU1     CPU2     CPU3
+  1:      9921        0        0        0  IO-APIC  1-edge   i8042
+  8:         0        0        0        1  IO-APIC  8-edge   rtc0
+128:         0   448113        0        0  PCI-MSIX nvme0q1
+131:    211534        0     4212        0  PCI-MSIX eth0-rx-0</pre></div>
+      <div class="note linux"><div class="note-h">🐧 Top half &amp; bottom half</div><p>Interrupt handlers must be <b>super quick</b> (other interrupts may be waiting!). So Linux splits work: the <b>top half</b> grabs the data and says "got it", and the slower <b>bottom half</b> (softirqs, tasklets, workqueues, threaded IRQs) finishes later. Under heavy network load, Linux switches from interrupts to polling (<b>NAPI</b>) — the best of both.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="drivers">
+    <h2 class="sec-title" data-short="Drivers & modules">🔌 Drivers &amp; kernel modules</h2>
+    <div class="grid-2">
+      <div class="note kid"><div class="note-h">🧸 Translators</div><p>Every printer, Wi-Fi chip and graphics card speaks its own secret language. A <b>driver</b> is a translator that knows that language and offers a standard one to the rest of the kernel. Most of Linux's code is drivers!</p></div>
+      <div class="note linux"><div class="note-h">🐧 Loadable modules</div><p>Drivers can be compiled into the kernel or loaded later as <b>modules</b> (<code>.ko</code> files in <code>/lib/modules/$(uname -r)/</code>). udev loads the right module automatically when hardware appears.</p></div>
+    </div>
+    <div class="grid-2">
+      <div class="term"><pre>$ lsmod | head -4
+Module                  Size  Used by
+nvme                   61440  3
+iwlwifi               622592  1 iwlmvm
+snd_hda_intel          61440  4
+$ lspci -k | grep -A2 -i ethernet
+02:00.0 Ethernet controller: Intel I225-V
+        Kernel driver in use: igc
+$ sudo modprobe -r igc && sudo modprobe igc   # unload & reload</pre></div>
+      <div class="term" data-title="hello.c — the smallest kernel module"><pre>#include &lt;linux/module.h&gt;
+#include &lt;linux/init.h&gt;
+
+static int __init hello_init(void) {
+    pr_info("hello: the kernel says hi! 👋\n");
+    return 0;
+}
+static void __exit hello_exit(void) {
+    pr_info("hello: bye!\n");
+}
+module_init(hello_init);
+module_exit(hello_exit);
+MODULE_LICENSE("GPL");
+# build with a tiny Makefile, then:  sudo insmod hello.ko ; sudo dmesg | tail -1</pre></div>
+    </div>
+    <div class="note warn"><div class="note-h">⚠️ With great power…</div><p>A module runs in ring 0 with full power. A bug in a driver can crash the whole machine (a <b>kernel panic</b>, or an "oops"). That's the main argument for microkernels — next section.</p></div>
+  </section>
+
+  <section class="sec" id="arch">
+    <h2 class="sec-title" data-short="Kernel designs">🏗️ How kernels are built: three designs</h2>
+    <div class="grid-3">
+      <div><div id="monoD"></div><div class="card c-y"><h4>Monolithic <span class="badge y">Linux</span></h4><p>Everything (scheduler, memory, file systems, network, drivers) in one big kernel program.</p><p>✅ fast: parts call each other directly<br>⚠️ one buggy driver can crash it all</p></div></div>
+      <div><div id="microD"></div><div class="card c-v"><h4>Microkernel <span class="badge">MINIX, seL4, QNX</span></h4><p>A tiny kernel does just the basics; drivers and file systems run as separate user-space servers.</p><p>✅ crash-proof &amp; secure (a driver can restart)<br>⚠️ slower: lots of messages (IPC)</p></div></div>
+      <div><div id="hybridD"></div><div class="card c-b"><h4>Hybrid <span class="badge">Windows NT, macOS XNU</span></h4><p>Microkernel ideas, but performance-critical parts moved back into kernel space.</p><p>✅ a pragmatic middle ground<br>⚠️ "a monolith with good manners" — critics</p></div></div>
+    </div>
+    <div class="note fun"><div class="note-h">🥊 The famous debate (1992)</div><p>Professor Andrew Tanenbaum (creator of MINIX) told young Linus Torvalds that monolithic kernels were obsolete. Linus disagreed. Decades later: Linux (monolithic, but <b>modular</b>) runs most of the world, while microkernels shine where safety is everything — cars, planes, phones' secure chips (seL4 is even mathematically proven correct!).</p></div>
+    <h3 class="sub-title">🗂️ A map of the Linux source code</h3>
+    <div class="grid-4">
+      <div class="card"><h4><code>kernel/</code></h4><p>scheduler, signals, timers, fork</p></div>
+      <div class="card"><h4><code>mm/</code></h4><p>memory management, page cache, OOM</p></div>
+      <div class="card"><h4><code>fs/</code></h4><p>VFS + ext4, btrfs, xfs, proc…</p></div>
+      <div class="card"><h4><code>net/</code></h4><p>sockets, TCP/IP, netfilter</p></div>
+      <div class="card c-y"><h4><code>drivers/</code></h4><p>the biggest folder by far — GPUs, network, USB, sound…</p></div>
+      <div class="card"><h4><code>arch/</code></h4><p>CPU-specific code: x86, arm64, riscv…</p></div>
+      <div class="card"><h4><code>security/</code></h4><p>SELinux, AppArmor, Landlock</p></div>
+      <div class="card"><h4><code>init/</code> <code>ipc/</code> <code>block/</code></h4><p>boot, inter-process communication, block I/O</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="net">
+    <h2 class="sec-title" data-short="Network stack">🌐 The network stack: envelopes in envelopes</h2>
+    <div class="note kid"><div class="note-h">🧸 Russian dolls 🪆</div><p>To send a message, each layer puts it in its own envelope and writes its address on the outside. The receiver opens the envelopes one by one. Press the buttons!</p></div>
+    <div class="sim">
+      <div class="btn-row"><button class="btn yellow" id="wrapB" type="button">✉️ wrap one layer (send)</button><button class="btn" id="unwrapB" type="button">📬 unwrap one layer (receive)</button><span class="small muted" id="encInfo"></span></div>
+      <div class="enc" id="enc"></div>
+    </div>
+    <div id="netD"></div>
+    <div class="grid-2">
+      <div class="term"><pre>$ ip -br addr
+lo      UNKNOWN  127.0.0.1/8
+eth0    UP       192.168.1.42/24
+$ ip route
+default via 192.168.1.1 dev eth0
+$ ss -tlnp
+LISTEN 0 128  0.0.0.0:22   users:(("sshd",pid=1042))</pre></div>
+      <div class="term"><pre>$ ping -c1 example.com
+64 bytes from 93.184.215.14: icmp_seq=1 ttl=56 time=12.3 ms
+$ sudo nft list ruleset | head -4     # the firewall (netfilter)
+table inet filter {
+  chain input {
+    type filter hook input priority 0; policy drop;
+$ sudo tcpdump -i eth0 -c 2 port 443  # watch real packets</pre></div>
+    </div>
+  </section>
+
+  <section class="sec" id="lab3d">
+    <h2 class="sec-title" data-short="In 3D">🖥️ The kernel in 3D</h2>
+    <div id="lab"></div>
+  </section>
+
+  <section class="sec" id="quiz">
+    <h2 class="sec-title" data-short="Quiz">⭐ Kernel quiz</h2>
+    <div id="quizBox"></div>
+  </section>
+</main>
+<script src="js/core.js"></script>
+<script src="js/sketch.js"></script>
+<script src="vendor/three.min.js"></script>
+<script src="js/lab3d.js"></script>
+<script src="js/pages/kernel.js"></script>
+</body>
+</html>

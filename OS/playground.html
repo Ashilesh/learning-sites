@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Terminal Playground · OS Sketchbook</title>
+<meta name="description" content="A safe pretend Linux terminal in your browser: explore the folder tree, read /proc, use pipes and complete missions.">
+<script>try{var t=localStorage.getItem('os-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/pages.css">
+</head>
+<body data-page="playground">
+<main class="wrap">
+  <header class="ch-hero">
+    <span class="ch-num">Chapter 11</span>
+    <h1 class="ch-title">Terminal <span class="hl">Playground</span> ⌨️</h1>
+    <p class="ch-lead">A pretend Linux computer living inside this page. Type real commands, explore the folder tree, read <code>/proc</code> — you can't break anything here, so go wild! 🎉</p>
+    <div class="eli5"><b>🧸 How to:</b> click the black box and type a command, then press <kbd>Enter</kbd>. Try <code>help</code>. <kbd>Tab</kbd> finishes names for you, <kbd>↑</kbd> brings back old commands. On a phone, tap the green buttons.</div>
+  </header>
+  <nav class="toc"></nav>
+
+  <section class="sec" id="term">
+    <h2 class="sec-title" data-short="The terminal">🐚 Your shell</h2>
+    <div class="split">
+      <div>
+        <div class="pg-term" id="pg">
+          <div class="term-h"><i></i><i></i><i></i><span>kid@sketchbook: ~ — bash (pretend)</span></div>
+          <div class="pg-out" id="pgOut" aria-live="polite"></div>
+          <div class="pg-in"><label class="pg-ps" for="pgIn" id="pgPs">kid@sketchbook:~$</label><input id="pgIn" autocomplete="off" autocapitalize="off" spellcheck="false" aria-label="Type a command"></div>
+        </div>
+        <div class="quick" id="quick"></div>
+      </div>
+      <div>
+        <h3 class="sub-title" style="margin-top:0">🎯 Missions <span class="badge y" id="mCount">0/12</span></h3>
+        <div class="missions" id="missions"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="cheat">
+    <h2 class="sec-title" data-short="Cheat sheet">📋 Cheat sheet</h2>
+    <div class="grid-3">
+      <div class="card c-y"><h4>🧭 Moving around</h4><ul class="sk-list"><li><code>pwd</code> — where am I?</li><li><code>ls -la</code> — what's here (all + details)</li><li><code>cd /etc</code> — go somewhere</li><li><code>cd ..</code> — up one · <code>cd ~</code> — home</li><li><code>tree</code> — draw the tree</li></ul></div>
+      <div class="card c-g"><h4>📄 Files</h4><ul class="sk-list"><li><code>cat f</code> — show a file</li><li><code>touch f</code> · <code>mkdir d</code> — create</li><li><code>rm f</code> · <code>rmdir d</code> — remove</li><li><code>echo hi &gt; f</code> — write · <code>&gt;&gt;</code> append</li><li><code>stat f</code> · <code>chmod 755 f</code></li></ul></div>
+      <div class="card c-p"><h4>🔍 Finding</h4><ul class="sk-list"><li><code>grep word f</code> — lines with "word"</li><li><code>head -n 3 f</code> · <code>tail f</code></li><li><code>wc -l f</code> — count lines</li><li><code>sort</code> — sort lines</li><li><code>which ls</code> — where's a program?</li></ul></div>
+      <div class="card c-b"><h4>🏃 Processes</h4><ul class="sk-list"><li><code>ps aux</code> · <code>top</code></li><li><code>kill PID</code></li><li><code>uptime</code></li></ul></div>
+      <div class="card c-v"><h4>🧮 System</h4><ul class="sk-list"><li><code>free -h</code> · <code>df -h</code> · <code>lsblk</code></li><li><code>uname -a</code> · <code>neofetch</code></li><li><code>cat /proc/cpuinfo</code></li></ul></div>
+      <div class="card c-o"><h4>🧩 Combine</h4><ul class="sk-list"><li><code>ls /dev | grep tty</code></li><li><code>cat /etc/passwd | wc -l</code></li><li><code>ps | sort</code></li><li><code>history</code></li></ul></div>
+    </div>
+    <div class="note warn"><div class="note-h">⚠️ On a REAL Linux machine</div><p>Be careful with <code>rm</code> (there's no recycle bin!) and especially with <code>sudo</code>. Never run commands you don't understand, especially ones copied from strangers on the internet.</p></div>
+  </section>
+</main>
+<script src="js/core.js"></script>
+<script src="js/pages/playground.js"></script>
+</body>
+</html>

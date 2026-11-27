@@ -315,5 +315,20 @@ window.SITES = [
     added: "2026-11-27",
   },
 
+  {
+    id: "os-sketchbook",
+    title: "OS Sketchbook",
+    path: "OS/index.html",
+    category: "systems",
+    topic: "OS",
+    format: "Interactive guide · 13 chapters",
+    description:
+      "Operating systems, hand-drawn and explained with Linux: boot, processes and scheduling, how the CPU runs code, virtual memory and page faults, " +
+      "files, the kernel and syscalls, locks and IPC, permissions, and how containers really work. With a 3D Linux PC lab, a pretend shell with missions and a final quiz.",
+    tags: ["os", "operating system", "linux", "kernel", "boot", "systemd", "processes", "threads", "scheduling", "cpu", "memory", "virtual memory", "page fault", "ram", "vram", "files", "inode", "syscalls", "interrupts", "drivers", "concurrency", "locks", "ipc", "permissions", "namespaces", "cgroups", "containers", "docker", "shell"],
+    added: "2026-11-27",
+    minutes: 240,
+  },
+
   // ↓↓↓ ADD NEW SITES HERE ↓↓↓
 ];

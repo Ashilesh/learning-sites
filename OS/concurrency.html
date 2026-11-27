@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Teamwork: Locks &amp; IPC · OS Sketchbook</title>
+<meta name="description" content="Race conditions, mutexes, semaphores, deadlock and the dining philosophers, plus pipes, signals, shared memory and sockets in Linux — interactive.">
+<script>try{var t=localStorage.getItem('os-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/pages.css">
+</head>
+<body data-page="concurrency">
+<main class="wrap">
+  <header class="ch-hero">
+    <span class="ch-num">Chapter 8</span>
+    <h1 class="ch-title">Teamwork: Locks <span class="hl">&amp;</span> IPC 🤝</h1>
+    <p class="ch-lead">Many threads and processes, one computer. When they share things, chaos is one tiny timing accident away. And when they need to talk, the kernel carries their messages.</p>
+    <div class="eli5"><b>🧸 In one sentence:</b> two kids writing on the same whiteboard at the same time make a mess — so they pass a <b>talking stick</b> (a lock) 🪄, and when they want to send notes, they use the class <b>mailbox</b> (IPC) 📬.</div>
+  </header>
+  <nav class="toc"></nav>
+
+  <section class="sec" id="race">
+    <h2 class="sec-title" data-short="Race condition">🏎️ Lab: a race condition</h2>
+    <p class="lead">Two threads each add 1 to a shared counter. Easy: the answer is 2… right? But <code>counter++</code> is really <b>three</b> steps for the CPU. Pick an order and step through it.</p>
+    <div class="sim" id="raceLab">
+      <div class="btn-row">
+        <label>order: <select id="raceSched"><option value="lucky">😊 lucky (A then B)</option><option value="bad" selected>😱 unlucky (interleaved)</option><option value="lock">🔒 with a lock</option></select></label>
+        <button class="btn yellow" id="raceStep" type="button">▶ step</button>
+        <button class="btn sm" id="raceRst" type="button">↺</button>
+      </div>
+      <div class="lanes">
+        <div class="thread" id="thA"><h5>🧵 Thread A</h5><ol></ol><div class="reg">register: <b data-r>–</b></div></div>
+        <div class="shared"><div class="small muted">shared counter</div><span class="num-big" id="ctr">0</span><span class="lockicon" id="lockIc">🔓</span></div>
+        <div class="thread" id="thB"><h5>🧵 Thread B</h5><ol></ol><div class="reg">register: <b data-r>–</b></div></div>
+      </div>
+      <div class="note tip" id="raceMsg" style="margin-bottom:0">Press <b>▶ step</b>.</div>
+    </div>
+    <div class="sim">
+      <div class="sim-h"><h4>🎲 Now do it 100,000 times each</h4></div>
+      <div class="btn-row"><button class="btn pink" id="bulkNo" type="button">🏃 run without a lock</button><button class="btn green" id="bulkYes" type="button">🔒 run with a mutex</button></div>
+      <div class="sim-out" id="bulkOut">expected: 200000</div>
+    </div>
+    <div class="note warn"><div class="note-h">😱 Why races are evil</div><p>They happen only <i>sometimes</i>, depending on exact timing. Your program passes every test, then fails once a week in production. The part of code that touches shared data is the <b>critical section</b> — only one thread may be inside at a time.</p></div>
+  </section>
+
+  <section class="sec" id="locks">
+    <h2 class="sec-title" data-short="Locks">🔒 The toolbox of locks</h2>
+    <div class="grid-3">
+      <div class="card c-y"><span class="big-ic">🚻🔑</span><h4>Mutex</h4><p>One key for the bathroom. Take the key → go in → give the key back. Others <b>sleep</b> while waiting.</p><p><code>pthread_mutex_lock()</code></p></div>
+      <div class="card c-o"><span class="big-ic">🔁⏳</span><h4>Spinlock</h4><p>Wait by spinning in a loop, staring at the door. Wasteful, but great when the wait is a few nanoseconds (inside the kernel).</p><p><code>spin_lock()</code></p></div>
+      <div class="card c-b"><span class="big-ic">📖👀</span><h4>Read-write lock</h4><p>Many readers at once, OR one writer alone. Perfect for "read often, change rarely".</p><p><code>pthread_rwlock_*</code></p></div>
+      <div class="card c-g"><span class="big-ic">🅿️3️⃣</span><h4>Semaphore</h4><p>A counter: "3 parking spots left". <code>wait()</code> takes one (or sleeps), <code>post()</code> returns one.</p><p><code>sem_wait()</code> / <code>sem_post()</code></p></div>
+      <div class="card c-p"><span class="big-ic">🛎️</span><h4>Condition variable</h4><p>"Wake me up when the pizza is ready." Sleep until another thread signals that something changed.</p><p><code>pthread_cond_wait()</code></p></div>
+      <div class="card c-v"><span class="big-ic">⚛️</span><h4>Atomic operations</h4><p>Special CPU instructions that do read-add-write as <b>one</b> unbreakable step. No lock needed for simple counters.</p><p><code>atomic_fetch_add()</code></p></div>
+    </div>
+    <div class="sim">
+      <div class="sim-h"><h4>🅿️ Semaphore parking lot</h4><span class="badge y" id="semVal">sem = 3</span></div>
+      <div class="btn-row"><button class="btn sm yellow" id="carIn" type="button">🚗 car arrives — sem_wait()</button><button class="btn sm" id="carOut" type="button">🚙 a car leaves — sem_post()</button><button class="btn sm" id="carRst" type="button">↺</button></div>
+      <div class="row"><div class="park" id="park"></div><div><div class="small muted">waiting (asleep 😴)</div><div class="queue" id="carQ"></div></div></div>
+      <div class="log" id="semLog" aria-live="polite"></div>
+    </div>
+    <div class="note linux"><div class="note-h">🐧 Linux's trick: the futex</div><p>Most of the time a lock is free. So glibc's mutex first tries an <b>atomic</b> instruction in user space — no system call at all! Only if the lock is busy does it call <code>futex()</code> to ask the kernel to put the thread to sleep. Fast path in user space, slow path in the kernel. 🏎️</p></div>
+  </section>
+
+  <section class="sec" id="deadlock">
+    <h2 class="sec-title" data-short="Deadlock">🍝 Deadlock: the dining philosophers</h2>
+    <div class="grid-2">
+      <div class="note kid"><div class="note-h">🧸 The spaghetti puzzle</div><p>Five friends sit at a round table with one fork between each pair. To eat spaghetti you need <b>two</b> forks. If everyone grabs their left fork at the same moment… everybody waits forever for the right one. Nobody eats. That's a <b>deadlock</b>. 😩</p></div>
+      <div>
+        <div class="btn-row"><button class="btn red" id="phNaive" type="button">😈 everyone grabs LEFT first</button><button class="btn green" id="phFix" type="button">😇 fix: lower-numbered fork first</button></div>
+        <div class="small" id="phMsg">Pick a strategy.</div>
+      </div>
+    </div>
+    <div class="philo"><svg id="philo" viewBox="0 0 400 400" role="img" aria-label="Dining philosophers"></svg></div>
+    <h3 class="sub-title">🧩 The 4 ingredients of a deadlock (remove any one!)</h3>
+    <div class="tbl-wrap"><table class="sk">
+      <tr><th>Ingredient (Coffman condition)</th><th>Meaning</th><th>How to break it</th></tr>
+      <tr><td>1. Mutual exclusion</td><td>A fork can be held by only one person</td><td>Make things shareable (rarely possible)</td></tr>
+      <tr><td>2. Hold and wait</td><td>Hold one fork while waiting for another</td><td>Grab everything at once, or nothing</td></tr>
+      <tr><td>3. No preemption</td><td>Nobody can snatch a fork from you</td><td>Give up and retry (try-lock + back off)</td></tr>
+      <tr><td>4. Circular wait</td><td>A waits for B waits for C … waits for A</td><td>✅ <b>Always lock in the same global order</b></td></tr>
+    </table></div>
+    <div class="note linux"><div class="note-h">🐧 lockdep</div><p>The Linux kernel has a built-in deadlock detective called <b>lockdep</b>. In debug builds it records the order in which every lock is taken and screams the first time two code paths take the same locks in opposite orders — even if a deadlock never actually happened yet.</p></div>
+  </section>
+
+  <section class="sec" id="ipc">
+    <h2 class="sec-title" data-short="IPC">📬 IPC: how processes talk</h2>
+    <p class="lead">Processes can't peek into each other's memory (Chapter 5). To cooperate they use <b>Inter-Process Communication</b>, provided by the kernel.</p>
+    <h3 class="sub-title">🚰 Pipes: the Unix superpower</h3>
+    <div id="pipeD"></div>
+    <h3 class="sub-title">📣 Signals: tapping a process on the shoulder</h3>
+    <div class="sim">
+      <div class="sigproc">
+        <div class="sigface" id="sigFace">🙂</div>
+        <div style="flex:1;min-width:220px"><b>my_app</b> <span class="muted">(PID 4242)</span><div id="sigState" class="small">state: running</div><div class="note tip" id="sigMsg" style="margin:6px 0 0">Send it a signal 👇</div></div>
+      </div>
+      <div class="btn-row" id="sigBtns">
+        <button class="btn sm" data-sig="INT" type="button">⌨️ SIGINT (2) · Ctrl+C</button>
+        <button class="btn sm" data-sig="TERM" type="button">🙏 SIGTERM (15)</button>
+        <button class="btn sm red" data-sig="KILL" type="button">💀 SIGKILL (9)</button>
+        <button class="btn sm" data-sig="STOP" type="button">🧊 SIGSTOP (19)</button>
+        <button class="btn sm" data-sig="CONT" type="button">▶️ SIGCONT (18)</button>
+        <button class="btn sm" data-sig="HUP" type="button">🔄 SIGHUP (1)</button>
+        <button class="btn sm" data-sig="SEGV" type="button">💥 SIGSEGV (11)</button>
+        <button class="btn sm green" data-sig="RESTART" type="button">↺ restart app</button>
+      </div>
+      <div class="term"><pre>$ kill -TERM 4242      # same as: kill 4242
+$ kill -9 4242         # SIGKILL: cannot be caught or ignored
+$ kill -l | head -2
+ 1) SIGHUP   2) SIGINT   3) SIGQUIT  4) SIGILL   5) SIGTRAP
+ 6) SIGABRT  7) SIGBUS   8) SIGFPE   9) SIGKILL 10) SIGUSR1</pre></div>
+    </div>
+    <h3 class="sub-title">🧰 All the ways to talk</h3>
+    <div class="tbl-wrap"><table class="sk">
+      <tr><th>Method</th><th>Like…</th><th>Good for</th><th>Linux bits</th></tr>
+      <tr><td>🚰 Pipe</td><td>A tube between two cups</td><td>One-way stream, parent ↔ child</td><td><code>pipe()</code>, <code>|</code> in the shell</td></tr>
+      <tr><td>🚰 Named pipe (FIFO)</td><td>A tube with a name tag</td><td>Unrelated processes, simple streams</td><td><code>mkfifo</code></td></tr>
+      <tr><td>📣 Signals</td><td>A tap on the shoulder</td><td>Tiny notifications (stop! reload!)</td><td><code>kill</code>, <code>sigaction()</code></td></tr>
+      <tr><td>🧠 Shared memory</td><td>A shared whiteboard</td><td>Fastest: big data, no copying (needs locks!)</td><td><code>shm_open()</code>, <code>/dev/shm</code>, <code>mmap</code></td></tr>
+      <tr><td>📨 Message queue</td><td>A mailbox with slots</td><td>Separate messages with priorities</td><td><code>mq_open()</code>, <code>ipcs</code></td></tr>
+      <tr><td>📞 Unix socket</td><td>An intercom in the same house</td><td>Two-way, local, can pass file descriptors</td><td><code>/run/docker.sock</code>, <code>ss -x</code></td></tr>
+      <tr><td>🌐 TCP/UDP socket</td><td>A phone call</td><td>Across machines (or locally)</td><td><code>socket()</code>, <code>ss -t</code></td></tr>
+      <tr><td>🚌 D-Bus</td><td>A town bulletin board</td><td>Desktop &amp; system services talking</td><td><code>busctl</code></td></tr>
+    </table></div>
+  </section>
+
+  <section class="sec" id="kernel-locks">
+    <h2 class="sec-title" data-short="Inside the kernel">⚙️ Inside the kernel: locking at scale</h2>
+    <div class="grid-2">
+      <div class="card"><h4>🏰 The Big Kernel Lock (gone!)</h4><p>When Linux first ran on multiple CPUs (1996), one giant lock protected almost everything — only one CPU could be in the kernel at a time. Over 15 years it was replaced by thousands of small, fine-grained locks, and finally removed in 2011 (kernel 2.6.39). <b>Lesson:</b> start simple, then split locks where it hurts.</p></div>
+      <div class="card c-y"><h4>📰 RCU: Read-Copy-Update</h4><p>Readers never wait. To change data, a writer makes a <b>copy</b>, edits it, and swaps one pointer. Old readers keep using the old version; it's freed only after all of them are done (a "grace period"). Used all over Linux for routing tables, file lookups and more.</p></div>
+    </div>
+    <div class="term"><pre>// kernel-style locking (C)
+spin_lock(&dev->lock);          // short, can't sleep inside
+dev->count++;
+spin_unlock(&dev->lock);
+
+mutex_lock(&inode->i_rwsem);    // may sleep while waiting
+...
+mutex_unlock(&inode->i_rwsem);</pre></div>
+  </section>
+
+  <section class="sec" id="quiz">
+    <h2 class="sec-title" data-short="Quiz">⭐ Teamwork quiz</h2>
+    <div id="quizBox"></div>
+  </section>
+</main>
+<script src="js/core.js"></script>
+<script src="js/sketch.js"></script>
+<script src="js/pages/concurrency.js"></script>
+</body>
+</html>

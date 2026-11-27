@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Waking Up (Boot) · OS Sketchbook</title>
+<meta name="description" content="How a Linux computer boots: power, UEFI, GRUB, the kernel, initramfs and systemd — drawn step by step.">
+<script>try{var t=localStorage.getItem('os-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/pages.css">
+</head>
+<body data-page="boot">
+<main class="wrap">
+  <header class="ch-hero">
+    <span class="ch-num">Chapter 2</span>
+    <h1 class="ch-title">Waking Up: <span class="hl">Booting</span> ⏰</h1>
+    <p class="ch-lead">When you press the power button, the computer knows <i>nothing</i>. RAM is empty. How does it end up running Linux a few seconds later? It pulls itself up by its own bootstraps — that's why it's called <b>booting</b>.</p>
+    <div class="eli5"><b>🧸 In one sentence:</b> booting is like your morning: the alarm rings (power), you open your eyes (firmware), remember who you are (boot loader), get dressed (kernel) and start your day's jobs (systemd).</div>
+  </header>
+  <nav class="toc"></nav>
+
+  <section class="sec" id="chain">
+    <h2 class="sec-title" data-short="The boot chain">🔗 The boot chain, step by step</h2>
+    <p class="lead">Each step is a small program whose only job is to load the next, bigger one. Press <b>▶ Play</b>.</p>
+    <div id="bootChain"></div>
+  </section>
+
+  <section class="sec" id="morning">
+    <h2 class="sec-title" data-short="Morning routine">🌅 Same thing, as a morning routine</h2>
+    <div class="grid-4">
+      <div class="card c-y"><span class="big-ic">⏰</span><h4>Alarm rings</h4><p>Power on. The CPU wakes and runs the firmware.</p></div>
+      <div class="card c-o"><span class="big-ic">👀</span><h4>Open eyes</h4><p>UEFI checks: arms? legs? (RAM, keyboard, disks — POST)</p></div>
+      <div class="card c-p"><span class="big-ic">🪪</span><h4>Remember who you are</h4><p>GRUB loads the kernel and its tiny backpack (initramfs).</p></div>
+      <div class="card c-g"><span class="big-ic">📋</span><h4>Start the to-do list</h4><p>systemd (PID 1) starts every service, then the login screen.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="log">
+    <h2 class="sec-title" data-short="Watch it boot">📜 Watch Linux boot (the real messages)</h2>
+    <p class="lead">This is what the kernel and systemd print while booting (normally hidden behind a logo). You can read yours anytime with <code>dmesg</code> and <code>journalctl -b</code>.</p>
+    <div class="btn-row"><button class="btn yellow" id="replayLog" type="button">▶ Boot it!</button><span class="muted small">timestamps = seconds since the kernel started</span></div>
+    <div class="term" data-title="tty1 — booting"><pre id="bootLog" style="height:330px;overflow:auto"></pre></div>
+  </section>
+
+  <section class="sec" id="firmware">
+    <h2 class="sec-title" data-short="BIOS vs UEFI">🧾 Firmware: BIOS vs UEFI</h2>
+    <div class="grid-2">
+      <div class="card"><h3>👴 Legacy BIOS + MBR</h3>
+        <ul class="sk-list"><li>From 1981 (the original IBM PC)</li><li>Reads the first 512 bytes of the disk — the <b>MBR</b> — and runs it</li><li>Only 446 bytes for boot code! So it loads a bigger loader in stages</li><li>MBR partitions: max 4 primary, max 2 TiB disks</li></ul></div>
+      <div class="card c-y"><h3>😎 UEFI + GPT (today)</h3>
+        <ul class="sk-list check"><li>Understands file systems (FAT32) — reads a real file: <code>EFI/ubuntu/grubx64.efi</code></li><li>Lives on the <b>EFI System Partition</b>, mounted at <code>/boot/efi</code></li><li><b>Secure Boot</b>: only runs signed boot loaders (via <code>shim</code>)</li><li>GPT partitions: 128 partitions, enormous disks</li></ul></div>
+    </div>
+    <div class="term"><pre>$ ls /sys/firmware/efi && echo "Booted with UEFI"
+config_table  efivars  esrt  fw_platform_size  runtime  systab
+Booted with UEFI
+$ efibootmgr
+BootCurrent: 0001
+BootOrder: 0001,0000
+Boot0001* ubuntu   HD(1,GPT,…)/File(\EFI\ubuntu\shimx64.efi)</pre></div>
+  </section>
+
+  <section class="sec" id="grub">
+    <h2 class="sec-title" data-short="GRUB & kernel">🥾 GRUB and the kernel</h2>
+    <div class="split">
+      <div>
+        <p><b>GRUB</b> (GRand Unified Bootloader) shows the boot menu, then loads two files from <code>/boot</code> into RAM and jumps into the kernel, passing it a <b>command line</b> of settings.</p>
+        <div class="term"><pre>$ ls /boot
+config-6.8.0-45-generic   initrd.img-6.8.0-45-generic
+grub/                     vmlinuz-6.8.0-45-generic
+efi/                      System.map-6.8.0-45-generic
+$ cat /proc/cmdline
+BOOT_IMAGE=/vmlinuz-6.8.0-45-generic root=UUID=3f2a… ro quiet splash</pre></div>
+      </div>
+      <div class="note kid"><div class="note-h">🧸 What's "vmlinuz"?</div><p>It's the Linux kernel itself, squished (compressed — that's the <b>z</b>) so it loads faster. The very first thing it does is unsquish itself into memory. 🗜️</p>
+        <p><b>Kernel's first jobs</b> (<code>start_kernel()</code> in <code>init/main.c</code>):</p>
+        <ul class="sk-list"><li>set up memory &amp; page tables</li><li>set up interrupts &amp; timers</li><li>start the scheduler and wake all CPU cores</li><li>start <code>kthreadd</code> (PID 2, parent of kernel threads)</li><li>run <code>/init</code> from the initramfs</li></ul></div>
+    </div>
+  </section>
+
+  <section class="sec" id="initramfs">
+    <h2 class="sec-title" data-short="initramfs">🎒 The initramfs: a chicken-and-egg fix</h2>
+    <div class="grid-2">
+      <div class="note kid"><div class="note-h">🐔🥚 The puzzle</div><p>The kernel needs the <b>disk driver</b> to read the disk… but the driver is stored <b>on the disk</b>! It's like your house key being locked inside your house.</p><p><b>The fix:</b> GRUB also loads a tiny backpack 🎒 — the <b>initramfs</b> — straight into RAM. It has just enough tools (drivers, maybe a password prompt for encrypted disks) to open the real disk.</p></div>
+      <div id="initD"></div>
+    </div>
+    <div class="term"><pre>$ lsinitramfs /boot/initrd.img-$(uname -r) | head
+.
+init
+usr/lib/modules/6.8.0-45-generic/kernel/drivers/nvme/host/nvme.ko
+usr/lib/modules/6.8.0-45-generic/kernel/fs/ext4/ext4.ko
+usr/bin/busybox
+# the initramfs mounts the real root, then:  switch_root /root /sbin/init</pre></div>
+  </section>
+
+  <section class="sec" id="systemd">
+    <h2 class="sec-title" data-short="systemd (PID 1)">👑 systemd: process number 1</h2>
+    <p class="lead">The kernel starts exactly <b>one</b> user program: <code>/sbin/init</code>. On most distros that's <b>systemd</b>. Everything else you'll ever run is its child, grandchild, great-grandchild…</p>
+    <div class="grid-2">
+      <div>
+        <div class="note linux"><div class="note-h">🐧 Units &amp; targets</div>
+          <p>systemd manages <b>units</b>: services (<code>ssh.service</code>), mounts, timers, sockets… A <b>target</b> is a group of units = a "goal state", like <code>multi-user.target</code> (server, text login) or <code>graphical.target</code> (desktop).</p>
+          <p>Units declare dependencies (<code>Wants=</code>, <code>Requires=</code>, <code>After=</code>), so systemd can start things <b>in parallel</b> safely.</p>
+        </div>
+        <div class="tbl-wrap"><table class="sk">
+          <tr><th>Old runlevel</th><th>systemd target</th></tr>
+          <tr><td>0</td><td><code>poweroff.target</code></td></tr>
+          <tr><td>1</td><td><code>rescue.target</code></td></tr>
+          <tr><td>3</td><td><code>multi-user.target</code></td></tr>
+          <tr><td>5</td><td><code>graphical.target</code></td></tr>
+          <tr><td>6</td><td><code>reboot.target</code></td></tr>
+        </table></div>
+      </div>
+      <div id="unitsD"></div>
+    </div>
+    <div class="term"><pre>$ systemctl get-default
+graphical.target
+$ systemctl status ssh
+● ssh.service - OpenBSD Secure Shell server
+     Loaded: loaded (/usr/lib/systemd/system/ssh.service; enabled)
+     Active: active (running) since Mon 09:12:04; 2h ago
+   Main PID: 1042 (sshd)
+$ systemd-analyze blame | head -3
+3.104s NetworkManager-wait-online.service
+ 812ms snapd.service
+ 402ms dev-nvme0n1p2.device</pre></div>
+  </section>
+
+  <section class="sec" id="tree">
+    <h2 class="sec-title" data-short="Family tree">🌳 The process family tree</h2>
+    <p class="lead">Every process has a parent. If you follow the parents up, you always reach PID 1. Try <code>pstree</code>!</p>
+    <div id="pstreeD"></div>
+    <div class="term"><pre>$ pstree -p | head -8
+systemd(1)─┬─NetworkManager(812)
+           ├─gdm3(1120)───gdm-session-wor(1302)───gnome-shell(1410)───firefox(2211)
+           ├─sshd(1042)
+           ├─systemd-journal(301)
+           └─systemd(1355)───gnome-terminal-(2034)───bash(2050)───pstree(2290)</pre></div>
+  </section>
+
+  <section class="sec" id="lab3d">
+    <h2 class="sec-title" data-short="Boot in 3D">🖥️ Boot it in 3D</h2>
+    <div id="lab"></div>
+  </section>
+
+  <section class="sec" id="shutdown">
+    <h2 class="sec-title" data-short="Shutting down">🌙 And at bedtime: shutdown</h2>
+    <div class="grid-3">
+      <div class="card"><span class="big-ic">📣</span><h4>1. Ask nicely</h4><p>systemd sends <code>SIGTERM</code> ("please finish up") to services, in reverse dependency order.</p></div>
+      <div class="card"><span class="big-ic">⏳</span><h4>2. Then insist</h4><p>Anything still running after a timeout gets <code>SIGKILL</code>. File systems are synced and unmounted.</p></div>
+      <div class="card"><span class="big-ic">🔌</span><h4>3. Lights out</h4><p>The kernel tells the firmware (via ACPI) to cut the power. 💤</p></div>
+    </div>
+    <div class="note warn"><div class="note-h">⚠️ Why not just pull the plug?</div><p>Some of your data is still only in RAM (the page cache — Chapter 5). Pulling the plug loses it. Journaling file systems keep the disk <i>consistent</i>, but recent changes can still vanish.</p></div>
+  </section>
+
+  <section class="sec" id="quiz">
+    <h2 class="sec-title" data-short="Quiz">⭐ Boot quiz</h2>
+    <div id="quizBox"></div>
+  </section>
+</main>
+<script src="js/core.js"></script>
+<script src="js/sketch.js"></script>
+<script src="vendor/three.min.js"></script>
+<script src="js/lab3d.js"></script>
+<script src="js/pages/boot.js"></script>
+</body>
+</html>

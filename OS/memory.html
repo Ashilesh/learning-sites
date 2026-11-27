@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Memory, RAM &amp; VRAM · OS Sketchbook</title>
+<meta name="description" content="How Linux manages RAM: the memory hierarchy, virtual memory, paging, TLB, page faults, page replacement, page cache, swap, the OOM killer, copy-on-write and the buddy allocator.">
+<script>try{var t=localStorage.getItem('os-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/pages.css">
+</head>
+<body data-page="memory">
+<main class="wrap">
+  <header class="ch-hero">
+    <span class="ch-num">Chapter 5</span>
+    <h1 class="ch-title">Memory, RAM <span class="hl">&amp; VRAM</span> 🧮</h1>
+    <p class="ch-lead">Every running program needs memory. There's never enough of the fast kind. The OS plays a clever game of musical chairs — and lies to every program about how much it has. 🤫</p>
+    <div class="eli5"><b>🧸 In one sentence:</b> RAM is your <b>desk</b> (small, fast, cleared every night), the disk is the <b>bookshelf</b> (big, slow, permanent), and the OS is the librarian who decides which books sit on the desk.</div>
+  </header>
+  <nav class="toc"></nav>
+
+  <section class="sec" id="hierarchy">
+    <h2 class="sec-title" data-short="Fast vs big">🏔️ Fast and small vs big and slow</h2>
+    <p class="lead">Computer memory comes in layers. Click a layer — the times are scaled up so that <b>1 nanosecond = 1 second</b>.</p>
+    <div class="split">
+      <div class="pyr" id="pyr"></div>
+      <div class="card tape" id="pyrInfo" aria-live="polite"></div>
+    </div>
+    <div class="note fun"><div class="note-h">🤯 Why it matters</div><p>If the CPU had to wait for the SSD on every step, a 1-second job would take days. So the OS keeps <b>hot</b> data in RAM and the CPU keeps the <b>hottest</b> data in its caches. Most of memory management is about guessing what you'll need next.</p></div>
+  </section>
+
+  <section class="sec" id="virtual">
+    <h2 class="sec-title" data-short="Virtual memory">🪄 Virtual memory: the great illusion</h2>
+    <div class="grid-2">
+      <div class="note kid"><div class="note-h">🧸 Every kid gets a "whole house"</div><p>Each program is told: <i>"You own the whole house! Rooms 0 to a zillion!"</i> But really, the OS secretly maps each of its rooms to a real room somewhere in the hotel (RAM) — or to the storage shed (disk). Programs can't even <i>name</i> another program's rooms, so they can't mess with them. 🔒</p></div>
+      <div class="note linux"><div class="note-h">🐧 In Linux</div><p>Memory is cut into <b>pages</b> (4 KB). Each process has a <b>page table</b> that maps its virtual pages → physical <b>frames</b>. The CPU's <b>MMU</b> chip does the translation on every memory access. On x86-64, page tables have 4 levels (5 on huge servers).</p></div>
+    </div>
+    <p class="center small muted">👇 Click any virtual page to see where it really lives.</p>
+    <div id="vmD"></div>
+  </section>
+
+  <section class="sec" id="layout">
+    <h2 class="sec-title" data-short="A process's memory">🗺️ What's inside a process's memory</h2>
+    <div class="split">
+      <div id="layoutD"></div>
+      <div class="stack">
+        <div class="card c-o"><h4>📜 text</h4><p>The program's machine code. Read-only + executable.</p></div>
+        <div class="card c-y"><h4>📦 data &amp; bss</h4><p>Global variables (initialized / zero-filled).</p></div>
+        <div class="card c-g"><h4>⛰️ heap ↑</h4><p><code>malloc()</code> memory. Grows up via <code>brk()</code> or <code>mmap()</code>.</p></div>
+        <div class="card c-b"><h4>📚 mmap area</h4><p>Shared libraries (libc.so), mapped files.</p></div>
+        <div class="card c-p"><h4>🥞 stack ↓</h4><p>Function calls &amp; local variables. Grows down. Too deep → <i>stack overflow</i>!</p></div>
+        <div class="card c-v"><h4>👑 kernel</h4><p>Mapped in every process, but locked: touching it from user mode = crash.</p></div>
+      </div>
+    </div>
+    <div class="term"><pre>$ cat /proc/self/maps
+55d4c6e00000-55d4c6e02000 r--p 00000000 103:02 1311  /usr/bin/cat
+55d4c6e02000-55d4c6e07000 r-xp 00002000 103:02 1311  /usr/bin/cat      # text
+55d4c84a1000-55d4c84c2000 rw-p 00000000 00:00 0      [heap]
+7f2b1a800000-7f2b1a828000 r--p 00000000 103:02 4207  /usr/lib/x86_64-linux-gnu/libc.so.6
+7ffc3b6e1000-7ffc3b702000 rw-p 00000000 00:00 0      [stack]
+# addresses change every run: that's ASLR (address space layout randomization)</pre></div>
+  </section>
+
+  <section class="sec" id="translate">
+    <h2 class="sec-title" data-short="Translation lab">🔎 Lab: translate an address</h2>
+    <p class="lead">A tiny computer: <b>16 virtual pages</b>, <b>8 physical frames</b>, pages of 4 KB (0x1000). In this toy, the <b>first hex digit</b> of an address is the page number; the other three are the offset inside the page.</p>
+    <div class="sim" id="xlate">
+      <div class="sim-h"><h4>🔎 MMU simulator</h4><span class="badge" id="xStats">TLB hits 0 · misses 0 · page faults 0</span></div>
+      <div class="row">
+        <label>virtual address <input type="text" id="vaIn" value="0x1A2B" maxlength="6" style="width:110px" aria-label="Virtual address in hex"></label>
+        <button class="btn yellow" id="vaGo" type="button">▶ Translate</button>
+        <button class="btn sm" data-va="0x1A2B" type="button">0x1A2B</button>
+        <button class="btn sm" data-va="0x2F00" type="button">0x2F00 💤</button>
+        <button class="btn sm" data-va="0xC123" type="button">0xC123 🚫</button>
+        <button class="btn sm" id="vaRand" type="button">🎲</button>
+        <button class="btn sm" id="vaReset" type="button">↺</button>
+      </div>
+      <div class="row" style="margin:12px 0"><div class="va-bits" id="vaBits"><span class="vpn">page ?</span><span class="off">offset ???</span></div><b id="vaArrow">→</b><div class="va-bits"><span class="vpn" id="paOut" style="background:var(--green-t)">physical: ?</span></div></div>
+      <div class="xlate-grid">
+        <div><b>⚡ TLB</b> <span class="small muted">(tiny cache of recent translations)</span><table class="mtab" id="tlbT"></table></div>
+        <div><b>📒 Page table</b> <span class="small muted">(one per process, in RAM)</span><div style="max-height:330px;overflow:auto"><table class="mtab" id="ptT"></table></div></div>
+        <div><b>🧮 Physical RAM</b><div class="frames" id="frT"></div><p class="small muted" style="margin-top:8px">💤 = page is on disk (swap) · 🚫 = not mapped at all</p></div>
+      </div>
+      <div class="log" id="xLog" style="margin-top:10px" aria-live="polite"></div>
+    </div>
+    <details class="deep"><summary>🔬 Deep dive: real x86-64 page tables</summary>
+      <p>A real 48-bit virtual address is split into <b>5 parts</b>: four 9-bit indexes (PGD → PUD → PMD → PTE) and a 12-bit offset. Each level is a 4 KB table of 512 entries. A TLB miss means up to <b>4 memory reads</b> just to find one address — that's why the TLB matters so much. <b>Huge pages</b> (2 MB or 1 GB) skip levels and cover more memory per TLB entry: great for databases. Linux can do this automatically with <b>Transparent Huge Pages</b>.</p>
+      <div class="term"><pre>$ cat /sys/kernel/mm/transparent_hugepage/enabled
+always [madvise] never
+$ grep -i huge /proc/meminfo | head -3
+AnonHugePages:    614400 kB
+HugePages_Total:       0
+Hugepagesize:       2048 kB</pre></div>
+    </details>
+  </section>
+
+  <section class="sec" id="pagefault">
+    <h2 class="sec-title" data-short="Page faults">💥 Page faults, step by step</h2>
+    <div class="grid-2">
+      <div class="note kid"><div class="note-h">🧸 "That page isn't on my desk!"</div><p>You open your book to page 57 — but it's not on your desk. Maybe it's on the shelf behind you (quick: <b>minor</b> fault). Maybe it's at the library across town (slow: <b>major</b> fault). Or maybe page 57 doesn't exist at all (😱 <b>segmentation fault</b>). The librarian (the kernel) sorts it out while you wait.</p></div>
+      <div class="note linux"><div class="note-h">🐧 Not an error — mostly!</div><p>A page fault is the CPU saying "I can't use this address right now, kernel please help". Linux uses them on purpose for <b>lazy allocation</b>, <b>loading programs</b>, <b>swap</b> and <b>copy-on-write</b>. Only a fault on an address the program doesn't own becomes a crash.</p></div>
+    </div>
+    <p class="center"><b>Pick what the program does:</b></p>
+    <div class="btn-row" id="pfBtns" style="justify-content:center">
+      <button class="btn sm" type="button" data-pf="hit">⚡ normal access (no fault)</button>
+      <button class="btn sm" type="button" data-pf="zero">🆕 first touch of new memory</button>
+      <button class="btn sm" type="button" data-pf="cache">📄 code that's already cached</button>
+      <button class="btn sm" type="button" data-pf="disk">💤 page that's on disk</button>
+      <button class="btn sm" type="button" data-pf="cow">🐄 write after fork()</button>
+      <button class="btn sm red" type="button" data-pf="segv">💥 NULL pointer</button>
+    </div>
+    <div class="row" style="justify-content:center; margin-bottom:6px"><span class="badge">minor faults: <b id="pfMin">0</b></span><span class="badge">major faults: <b id="pfMaj">0</b></span><span class="badge">crashes: <b id="pfSeg">0</b></span></div>
+    <div id="pfD"></div>
+    <h3 class="sub-title">🎬 The same journey in 3D</h3>
+    <div id="labPf"></div>
+    <div class="tbl-wrap"><table class="sk">
+      <tr><th>Kind</th><th>What happened</th><th>Kernel does</th><th>Cost</th></tr>
+      <tr><td>⚡ none (TLB / page table hit)</td><td>page already mapped</td><td>nothing — pure hardware</td><td>~1 ns</td></tr>
+      <tr><td>🆕 minor</td><td>first touch of malloc'd / stack memory</td><td>grab a free frame, fill with zeros, map it</td><td>~0.2–1 µs</td></tr>
+      <tr><td>📄 minor</td><td>file page already in the page cache</td><td>just map the existing frame</td><td>~0.2–1 µs</td></tr>
+      <tr><td>💤 <b>major</b></td><td>page is on disk (swap or not-yet-read file)</td><td>start disk I/O, process sleeps, then map</td><td>~50 µs (SSD) – 10 ms (HDD)</td></tr>
+      <tr><td>🐄 copy-on-write</td><td>writing a page shared after fork()</td><td>copy the page, map the private copy</td><td>~1–2 µs</td></tr>
+      <tr><td>💥 invalid</td><td>no mapping, or forbidden (write to code, user → kernel)</td><td>send <b>SIGSEGV</b> → "Segmentation fault"</td><td>program dies</td></tr>
+    </table></div>
+    <div class="grid-2">
+      <div class="term"><pre>$ /usr/bin/time -v ls > /dev/null 2> t.txt; grep -i fault t.txt
+	Major (requiring I/O) page faults: 0
+	Minor (reclaiming a frame) page faults: 104
+$ ps -o pid,min_flt,maj_flt,comm -p $(pgrep -o firefox)
+    PID  MINFL  MAJFL COMMAND
+   2211 913840   1312 firefox</pre></div>
+      <div class="term"><pre>$ perf stat -e page-faults,major-faults ./my_game
+        48,213      page-faults
+            37      major-faults
+$ sar -B 1 1        # system-wide fault rate (sysstat)
+  pgpgin/s pgpgout/s   fault/s  majflt/s
+      0.00     24.00   1830.00      0.00</pre></div>
+    </div>
+    <details class="deep"><summary>🔬 Deep dive: what the CPU and Linux actually do</summary>
+      <ul class="sk-list"><li>The CPU raises <b>exception 14</b> (#PF) on x86, saving the faulting address in register <b>CR2</b> and an error code (read/write? user/kernel? present?).</li><li>Linux's <code>exc_page_fault()</code> → <code>handle_mm_fault()</code> finds the <b>VMA</b> (the process's list of valid regions, the lines in <code>/proc/PID/maps</code>) containing the address.</li><li>No VMA, or the access breaks its permissions → <code>SIGSEGV</code>. Otherwise it fills the page-table entry (anonymous zero page, page-cache page, swap-in, or COW copy).</li><li>Returning from the exception <b>re-runs the same instruction</b>, which now succeeds. The program never notices — except for the time it took.</li><li>Major faults can be avoided for important programs with <code>mlock()</code>, prefetching (<code>madvise(MADV_WILLNEED)</code>), or enough RAM so nothing is swapped.</li></ul>
+    </details>
+  </section>
+
+  <section class="sec" id="replace">
+    <h2 class="sec-title" data-short="Page replacement">🔄 Lab: who gets kicked out?</h2>
+    <div class="note kid"><div class="note-h">🧸 Only 3 seats at the table</div><p>Pages keep arriving and there are only a few seats (frames). When someone new comes and all seats are full, someone has to leave. Who? The one who came first (<b>FIFO</b>)? The one who hasn't been used for the longest (<b>LRU</b>)? Or the one who won't be needed for the longest time — if you could see the future (<b>OPT</b>)?</p></div>
+    <div class="sim">
+      <div class="sim-h"><h4>🔄 Replacement simulator</h4><span class="badge" id="rpScore">faults: –</span></div>
+      <div class="row">
+        <label>pages asked for <input type="text" id="rpRef" value="7 0 1 2 0 3 0 4 2 3 0 3 2" style="width:min(320px,100%)" aria-label="Reference string"></label>
+        <label>frames <select id="rpFr"><option>2</option><option selected>3</option><option>4</option><option>5</option></select></label>
+        <label>rule <select id="rpAlg"><option value="fifo">FIFO</option><option value="lru" selected>LRU</option><option value="opt">OPT (psychic)</option></select></label>
+        <button class="btn yellow" id="rpGo" type="button">▶ Run</button>
+        <button class="btn sm" id="rpBelady" type="button">🧩 Belady's puzzle</button>
+      </div>
+      <div class="repl-grid" id="rpGrid"></div>
+      <div id="rpCompare" class="small" style="margin-top:8px"></div>
+    </div>
+    <div class="note linux"><div class="note-h">🐧 What Linux does</div><p>True LRU is too expensive to track for millions of pages, so Linux approximates it with <b>active</b> and <b>inactive</b> lists (and, since 6.1, the <b>multi-gen LRU</b>). The CPU sets an "accessed" bit when a page is touched; the kernel checks these bits to see what's hot. 🌡️</p></div>
+  </section>
+
+  <section class="sec" id="pressure">
+    <h2 class="sec-title" data-short="RAM pressure game">🎮 Game: fill up the RAM</h2>
+    <p class="lead">This computer has <b>8 GB RAM</b> and <b>2 GB swap</b>. Launch apps and read files, and watch how Linux juggles: page cache → swap → OOM killer.</p>
+    <div class="sim" id="ramGame">
+      <div class="btn-row" id="appBtns"></div>
+      <div class="small muted">RAM (8 GB)</div>
+      <div class="meter" id="ramBar" style="height:34px"></div>
+      <div class="small muted" style="margin-top:6px">Swap on SSD (2 GB)</div>
+      <div class="meter" id="swapBar"></div>
+      <div class="legend"><span><i style="background:var(--purple)"></i>kernel</span><span><i style="background:var(--teal-t)" class="hatch"></i>page cache (buff/cache)</span><span><i style="background:var(--card-2)"></i>free</span><span>🐢 = partly swapped out (click it to use it again)</span></div>
+      <div class="apps-row" id="running"></div>
+      <div class="grid-2">
+        <div class="sim-out" id="freeOut"></div>
+        <div class="log" id="ramLog" aria-live="polite"></div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card c-t"><h4>📄 Page cache</h4><p>"Free RAM is wasted RAM." Linux fills spare RAM with copies of files you read. That's the <b>buff/cache</b> column — it's given back instantly when apps need it.</p></div>
+      <div class="card c-p"><h4>💤 Swap</h4><p>When RAM is tight, rarely-used app pages are written to disk. Slow to bring back, but better than crashing. <code>vm.swappiness</code> (default 60) tunes how eager Linux is.</p></div>
+      <div class="card c-r"><h4>💥 OOM killer</h4><p>Out of RAM <i>and</i> swap? Linux kills the process with the highest <code>oom_score</code> (mostly: the biggest). Protect important ones with <code>oom_score_adj</code>.</p></div>
+    </div>
+    <div class="note warn"><div class="note-h">🤔 Wait — Linux promises more memory than it has?</div><p>Yes! <b>Overcommit</b>: <code>malloc(1 GB)</code> usually succeeds instantly because Linux only hands out real frames when pages are first <i>touched</i> (demand paging). Most programs never touch everything they ask for. The OOM killer is the price of this optimism. (<code>vm.overcommit_memory</code> = 0 heuristic, 1 always, 2 strict.)</p></div>
+  </section>
+
+  <section class="sec" id="cow">
+    <h2 class="sec-title" data-short="Copy-on-write">🐄 Copy-on-write: why fork() is cheap</h2>
+    <p class="lead">Copying a 2 GB process on every <code>fork()</code> would be slow. Linux cheats — beautifully.</p>
+    <div id="cowD"></div>
+  </section>
+
+  <section class="sec" id="alloc">
+    <h2 class="sec-title" data-short="Buddy allocator">🧱 Inside the kernel: the buddy allocator</h2>
+    <div class="grid-2">
+      <div class="note kid"><div class="note-h">🧸 Chocolate bar splitting</div><p>The kernel keeps free memory in chunks of 1, 2, 4, 8, 16… pages. Need 2 pages but only have a 16? Snap it in half (8+8), half again (4+4), again (2+2) → take one 2. When you give it back, it re-joins its "buddy" half to make big pieces again. 🍫</p></div>
+      <div class="note linux"><div class="note-h">🐧 Two-level allocation</div><p><b>Buddy allocator</b>: hands out whole pages in power-of-two blocks (see <code>/proc/buddyinfo</code>). <b>SLUB</b> allocator: carves pages into small, same-sized objects (inodes, task_structs…) — see <code>slabtop</code>. User programs use <code>malloc()</code> in glibc on top of <code>brk</code>/<code>mmap</code>.</p></div>
+    </div>
+    <div class="sim">
+      <div class="sim-h"><h4>🍫 Buddy allocator (16 pages)</h4><span class="badge" id="bdInfo"></span></div>
+      <div class="btn-row"><button class="btn sm pink" data-bd="0" type="button">alloc 1 page</button><button class="btn sm blue" data-bd="1" type="button">alloc 2</button><button class="btn sm green" data-bd="2" type="button">alloc 4</button><button class="btn sm orange" data-bd="3" type="button">alloc 8</button><button class="btn sm" id="bdFree" type="button">free one</button><button class="btn sm" id="bdReset" type="button">↺</button></div>
+      <div class="buddy" id="buddy"></div>
+      <div class="log" id="bdLog" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="sec" id="ramchips">
+    <h2 class="sec-title" data-short="How RAM chips work">🔬 How RAM chips really work</h2>
+    <div class="grid-2">
+      <div class="note kid"><div class="note-h">🧸 Millions of leaky buckets</div><p>A RAM chip is a giant grid of microscopic <b>buckets</b> (capacitors) that hold a tiny bit of electricity. Full bucket = <b>1</b>, empty = <b>0</b>. But the buckets <b>leak</b>! So the memory controller refills every bucket about 16 times a second (<b>refresh</b>). Switch the power off and they all drain — that's why RAM forgets everything. 🪣💧</p></div>
+      <div class="note linux"><div class="note-h">🔧 The real numbers</div><ul class="sk-list"><li>1 bit = 1 transistor (the tap) + 1 capacitor (the bucket): that's <b>DRAM</b>.</li><li>Cells are arranged in <b>rows × columns</b> inside <b>banks</b>; a read opens a whole row into the "row buffer".</li><li>Every row must be refreshed within <b>64 ms</b>.</li><li>A DDR5 stick has 8–16 chips; two channels give ~60–90 GB/s.</li><li>CPU caches use <b>SRAM</b>: 6 transistors per bit, no leaking, much faster — but big and expensive.</li></ul></div>
+    </div>
+    <div class="sim" id="dramSim">
+      <div class="sim-h"><h4>🪣 A tiny DRAM chip (8 rows × 16 bits)</h4><span class="badge" id="drStatus">refresh: on</span></div>
+      <div class="row">
+        <label>row <select id="drRow"></select></label>
+        <button class="btn sm yellow" id="drRead" type="button">👀 read row</button>
+        <label>write <input type="text" id="drText" maxlength="2" value="OS" style="width:58px" aria-label="Two characters to write"></label>
+        <button class="btn sm blue" id="drWrite" type="button">✏️ write</button>
+        <button class="btn sm" id="drAll" type="button">📖 read everything</button>
+        <label><input type="checkbox" id="drAuto" checked> auto-refresh</label>
+        <button class="btn sm red" id="drPower" type="button">🔌 power off</button>
+        <button class="btn sm" id="drReset" type="button">↺</button>
+      </div>
+      <div class="dram" id="dram"></div>
+      <div class="amp" id="amp"></div>
+      <div class="sim-out" id="drOut" style="margin-top:8px"></div>
+      <p class="small muted">Turn <b>auto-refresh</b> off and wait a few seconds: the buckets leak until 1s read back as 0s. Real chips leak far more slowly (milliseconds), but the idea is the same.</p>
+    </div>
+    <h3 class="sub-title">🔬 Zoom into a real RAM chip (3D)</h3>
+    <div id="labDram"></div>
+    <div class="term"><pre>$ sudo dmidecode -t memory | grep -E '^\s+(Size|Type|Speed|Locator):' | head -4
+	Size: 16 GB
+	Locator: DIMM 0
+	Type: DDR5
+	Speed: 5600 MT/s
+$ lsmem --summary
+Memory block size:       128M
+Total online memory:      16G</pre></div>
+    <details class="deep"><summary>🔬 Deep dive: Rowhammer — when buckets disturb their neighbours</summary>
+      <p>Opening one DRAM row again and again, very fast, can leak charge into the <b>neighbouring rows</b> and flip their bits — even rows belonging to other programs or the kernel. This "Rowhammer" effect has been used in real attacks. Defences: ECC memory, more frequent refresh, and in-chip "target row refresh". A great example of hardware physics becoming an OS security problem!</p>
+    </details>
+  </section>
+
+  <section class="sec" id="vram">
+    <h2 class="sec-title" data-short="RAM vs VRAM">🎨 RAM vs VRAM: two kinds of fast memory</h2>
+    <div class="grid-2">
+      <div class="note kid"><div class="note-h">🧸 The kitchen and the artist's palette</div><p><b>RAM</b> is the big kitchen counter everyone uses. <b>VRAM</b> (video RAM) is the artist's own paint palette, glued right next to the easel (the GPU). The artist paints super fast from the palette — but new paint first has to be carried down the hallway (the <b>PCIe bus</b>) from the kitchen. 🎨🏃</p></div>
+      <div class="note linux"><div class="note-h">🐧 Who manages what</div><p>The kernel's memory manager (this whole chapter) manages <b>RAM</b>. <b>VRAM</b> is managed by the <b>GPU driver</b> (amdgpu, i915/xe, nouveau or NVIDIA's) through the kernel's <b>DRM</b> graphics layer: it hands out "buffer objects", gives the GPU its own page tables, and can even move buffers from VRAM back to RAM when VRAM is full.</p></div>
+    </div>
+    <div id="vramD"></div>
+    <h3 class="sub-title">🎮 Inside a graphics card (3D)</h3>
+    <div id="labGpu"></div>
+    <div class="tbl-wrap"><table class="sk">
+      <tr><th></th><th>🧮 RAM (system memory)</th><th>🎨 VRAM (graphics memory)</th></tr>
+      <tr><td>Who uses it</td><td>CPU: programs, the kernel, page cache</td><td>GPU: textures, 3D models, framebuffers, AI weights</td></tr>
+      <tr><td>Where it lives</td><td>DIMM sticks on the motherboard</td><td>chips soldered around the GPU on the graphics card</td></tr>
+      <tr><td>Type</td><td>DDR4 / DDR5</td><td>GDDR6 / GDDR6X / HBM</td></tr>
+      <tr><td>Design goal</td><td>low <b>latency</b> (answer one question fast)</td><td>huge <b>bandwidth</b> (move tons of data at once)</td></tr>
+      <tr><td>Bandwidth (typical)</td><td>~60–100 GB/s</td><td>~300–1000+ GB/s</td></tr>
+      <tr><td>Size (typical)</td><td>8–64 GB</td><td>4–24 GB</td></tr>
+      <tr><td>Managed by</td><td>Linux memory manager (pages, swap, OOM)</td><td>GPU driver via DRM (GEM/TTM buffer objects)</td></tr>
+    </table></div>
+    <div class="grid-3">
+      <div class="card c-v"><span class="big-ic">🎮</span><h4>Dedicated GPU</h4><p>Its own VRAM on the card. Data is copied RAM → VRAM over PCIe by the GPU's DMA engine. Fastest for games and AI.</p></div>
+      <div class="card c-b"><span class="big-ic">💻</span><h4>Integrated GPU</h4><p>No VRAM at all! The GPU inside the CPU <b>shares normal RAM</b>. The firmware may reserve a slice ("UMA frame buffer"), so <code>free</code> shows a bit less RAM.</p></div>
+      <div class="card c-g"><span class="big-ic">🍏</span><h4>Unified memory</h4><p>Apple M-chips and game consoles: one big fast pool used by CPU and GPU together — no copying needed.</p></div>
+    </div>
+    <h3 class="sub-title">🖼️ How much VRAM does one picture need?</h3>
+    <div class="sim">
+      <div class="row">
+        <label>screen <select id="fbRes"><option value="1280x720">720p (1280×720)</option><option value="1920x1080" selected>1080p (1920×1080)</option><option value="2560x1440">1440p (2560×1440)</option><option value="3840x2160">4K (3840×2160)</option><option value="7680x4320">8K (7680×4320)</option></select></label>
+        <label>refresh <select id="fbHz"><option>60</option><option>120</option><option selected>144</option><option>240</option></select> Hz</label>
+        <label>buffers <select id="fbBuf"><option value="2">2 (double)</option><option value="3" selected>3 (triple)</option></select></label>
+      </div>
+      <div class="fbcalc" id="fbOut"></div>
+      <p class="small muted">Each pixel = 4 bytes (red, green, blue, alpha). The GPU draws the next frame into a "back buffer" while the screen shows the "front buffer", then they swap — so you never see half-drawn pictures.</p>
+    </div>
+    <div class="grid-2">
+      <div class="term"><pre>$ lspci | grep -iE 'vga|3d'
+01:00.0 VGA compatible controller: AMD/ATI Navi 23 [Radeon RX 6600]
+$ cat /sys/class/drm/card*/device/mem_info_vram_total   # amdgpu
+8573157376
+$ cat /sys/class/drm/card*/device/mem_info_vram_used
+1210982400</pre></div>
+      <div class="term"><pre>$ nvidia-smi --query-gpu=name,memory.total,memory.used --format=csv
+name, memory.total [MiB], memory.used [MiB]
+NVIDIA GeForce RTX 4070, 12282 MiB, 1834 MiB
+$ glxinfo -B | grep -i 'video memory'
+    Dedicated video memory: 8192 MB
+$ ls /dev/dri
+card1  renderD128</pre></div>
+    </div>
+    <details class="deep"><summary>🔬 Deep dive: GPUs have page tables and page faults too</summary>
+      <ul class="sk-list"><li>Modern GPUs have their own <b>MMU</b>: each app gets a GPU virtual address space, managed by the driver — just like a process gets one on the CPU.</li><li>When VRAM is full, the driver (via <b>TTM</b>) evicts buffers to system RAM, and moves them back when needed. Running out of VRAM = stuttering games.</li><li><b>Resizable BAR</b> lets the CPU see all of VRAM at once through PCIe instead of a 256 MB window.</li><li><b>DMA-BUF</b> lets devices share buffers without copying: camera → GPU → display.</li><li><b>KMS</b> (kernel mode setting) is the part of DRM that sets resolution and refresh rate and tells the display engine which framebuffer to "scan out".</li></ul>
+    </details>
+  </section>
+
+  <section class="sec" id="tools">
+    <h2 class="sec-title" data-short="Memory tools">🧰 Memory tools you can try</h2>
+    <div class="grid-2">
+      <div class="term"><pre>$ free -h
+               total   used   free  shared  buff/cache  available
+Mem:            15Gi  4.1Gi  6.2Gi   312Mi       5.4Gi       11Gi
+Swap:          2.0Gi     0B  2.0Gi
+# "available" = what apps can still get (free + reclaimable cache)</pre></div>
+      <div class="term"><pre>$ vmstat 1 3
+procs ---memory--------- --swap-- ---io---- -cpu-
+ r  b  swpd   free  cache   si  so   bi   bo  us sy id
+ 1  0     0 6412k  5536k    0   0    3   21   6  2 92
+# si/so = swap in/out per second. Non-zero all the time = trouble</pre></div>
+      <div class="term"><pre>$ pmap -x $(pgrep -o firefox) | tail -1
+total kB  4183920  612480  98112
+$ cat /proc/$(pgrep -o firefox)/oom_score
+712</pre></div>
+      <div class="term"><pre>$ sysctl vm.swappiness
+vm.swappiness = 60
+$ sudo sync; echo 3 | sudo tee /proc/sys/vm/drop_caches
+# empties the page cache (only for experiments!)</pre></div>
+    </div>
+  </section>
+
+  <section class="sec" id="lab3d">
+    <h2 class="sec-title" data-short="In 3D">🖥️ RAM &amp; VRAM in 3D</h2>
+    <div id="lab"></div>
+  </section>
+
+  <section class="sec" id="quiz">
+    <h2 class="sec-title" data-short="Quiz">⭐ Memory quiz</h2>
+    <div id="quizBox"></div>
+  </section>
+</main>
+<script src="js/core.js"></script>
+<script src="js/sketch.js"></script>
+<script src="vendor/three.min.js"></script>
+<script src="js/lab3d.js"></script>
+<script src="js/pages/memory.js"></script>
+</body>
+</html>

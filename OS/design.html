@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Design Decisions &amp; Final Quiz · OS Sketchbook</title>
+<meta name="description" content="Operating system design trade-offs and the choices Linux made, core OS design principles, best practices for users and programmers, the big picture, a glossary and the final quiz.">
+<script>try{var t=localStorage.getItem('os-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/pages.css">
+<style>
+  @media print { body *{visibility:hidden} #cert, #cert *{visibility:visible} #cert{position:absolute; left:0; top:0; width:100%} }
+</style>
+</head>
+<body data-page="design">
+<main class="wrap">
+  <header class="ch-hero">
+    <span class="ch-num">Chapter 12</span>
+    <h1 class="ch-title">Design Decisions <span class="hl">&amp;</span> Final Quiz 🏆</h1>
+    <p class="ch-lead">Every OS is a pile of trade-offs: speed vs safety, simple vs flexible, fair vs fast. Here are the big choices, what Linux picked and <i>why</i> — then the ideas that tie the whole sketchbook together.</p>
+    <div class="eli5"><b>🧸 In one sentence:</b> designing an OS is like designing a city 🏙️ — there's no perfect plan, only good trade-offs for the people who live there.</div>
+  </header>
+  <nav class="toc"></nav>
+
+  <section class="sec" id="tradeoffs">
+    <h2 class="sec-title" data-short="Trade-offs">⚖️ The big trade-offs (and Linux's choice)</h2>
+    <div class="stack" id="seesaws"></div>
+  </section>
+
+  <section class="sec" id="principles">
+    <h2 class="sec-title" data-short="Principles">💡 14 design principles behind every good OS</h2>
+    <div class="grid-auto" id="principlesGrid"></div>
+  </section>
+
+  <section class="sec" id="practices">
+    <h2 class="sec-title" data-short="Best practices">✅ Best practices</h2>
+    <div class="grid-2">
+      <div class="card c-g"><h3>🧑‍💻 Using &amp; running Linux</h3><ul class="sk-list check">
+        <li>Work as a normal user; <code>sudo</code> only the command that needs it.</li>
+        <li>Update often (<code>apt upgrade</code> / <code>dnf upgrade</code>); reboot for kernel fixes.</li>
+        <li>Read <code>available</code> in <code>free -h</code>, not <code>free</code> — cache is good!</li>
+        <li>Know your load average vs CPU count (<code>nproc</code>).</li>
+        <li>Run services as <b>systemd units</b> with limits: <code>MemoryMax=</code>, <code>CPUQuota=</code>, <code>Restart=on-failure</code>.</li>
+        <li>Check logs first: <code>journalctl -b -p warning</code>, <code>dmesg</code>.</li>
+        <li>Watch disks: <code>df -h</code> and inodes <code>df -i</code>; keep free space.</li>
+        <li>Keep a little swap (or zram) to soften memory spikes.</li>
+        <li>Back up with the 3-2-1 rule (3 copies, 2 media, 1 offsite) — and test restores.</li>
+        <li>Containers: set limits, run as non-root, pin image versions.</li>
+      </ul></div>
+      <div class="card c-b"><h3>👩‍🔧 Writing programs that play nice with the OS</h3><ul class="sk-list check">
+        <li>Always check system call results and <code>errno</code> — disks fill up, networks fail.</li>
+        <li>Close what you open; use <code>O_CLOEXEC</code> so file descriptors don't leak into children.</li>
+        <li>Never busy-wait. Block, or use <code>epoll</code> / <code>io_uring</code> for many connections.</li>
+        <li>Keep critical sections tiny; always take locks in the same order.</li>
+        <li>Processes for isolation, threads for shared-memory speed.</li>
+        <li>Handle <code>SIGTERM</code>: finish work, flush, exit cleanly.</li>
+        <li><code>fsync()</code> when data must survive a crash (and the directory for new files).</li>
+        <li>Batch I/O: fewer big reads/writes beat many tiny ones.</li>
+        <li>Drop privileges early; ask for capabilities, not root.</li>
+        <li>Measure before optimizing: <code>strace</code>, <code>perf</code>, <code>bpftrace</code>.</li>
+      </ul></div>
+    </div>
+  </section>
+
+  <section class="sec" id="bigpicture">
+    <h2 class="sec-title" data-short="The big picture">🧩 The big picture: one click, every chapter</h2>
+    <p class="lead">You click the Firefox icon and open a website. Watch how <b>every chapter</b> of this sketchbook joins in.</p>
+    <div id="bigD"></div>
+  </section>
+
+  <section class="sec" id="glossary">
+    <h2 class="sec-title" data-short="Glossary">📖 Glossary</h2>
+    <div class="row"><input type="text" id="gq" placeholder="🔎 search a word… (e.g. inode, fork, cgroup)" aria-label="Search glossary" style="font-family:var(--font-hand);font-size:19px;padding:8px 12px;border:2.5px solid var(--ink);border-radius:10px;background:var(--card);color:var(--ink);width:min(460px,100%)"><span class="small muted" id="gCount"></span></div>
+    <div class="gloss" id="gloss" style="margin-top:12px"></div>
+  </section>
+
+  <section class="sec" id="final">
+    <h2 class="sec-title" data-short="Final quiz">🏆 The final quiz</h2>
+    <p class="lead">12 questions from all chapters. Get 9 or more right to unlock your <b>OS Wizard certificate</b>. 🧙</p>
+    <div id="quizBox"></div>
+    <div id="certWrap" hidden>
+      <div class="row" style="justify-content:center;margin-top:16px"><label>Your name for the certificate: <input type="text" id="certName" maxlength="40" style="font-family:var(--font-hand);font-size:19px;padding:4px 10px;border:2.5px solid var(--ink);border-radius:8px;background:var(--card);color:var(--ink)"></label><button class="btn yellow" id="certPrint" type="button">🖨️ print / save as PDF</button></div>
+      <div class="cert" id="cert">
+        <div style="font-size:60px">🧙🐧</div>
+        <h3>Certified OS Wizard</h3>
+        <p>This certifies that</p>
+        <p class="num-big" id="certWho">You</p>
+        <p>understands how an Operating System manages processes, memory, files, devices, security and containers — the Linux way.</p>
+        <p class="small muted" id="certDate"></p>
+        <span class="stamp">OS SKETCHBOOK ✔</span>
+      </div>
+    </div>
+  </section>
+</main>
+<script src="js/core.js"></script>
+<script src="js/sketch.js"></script>
+<script src="js/pages/design.js"></script>
+</body>
+</html>

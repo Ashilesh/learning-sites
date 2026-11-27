@@ -1,0 +1,205 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OS Sketchbook · What is an Operating System?</title>
+<meta name="description" content="A fun, visual, hand-drawn guide to Operating Systems explained with Linux — from what an OS is to processes, memory, files, the kernel, security and Docker containers. With a 3D Linux PC lab.">
+<script>try{var t=localStorage.getItem('os-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/pages.css">
+</head>
+<body data-page="index">
+<main class="wrap">
+
+  <section class="hero">
+    <div>
+      <span class="ch-num">✏️ A hand-drawn guide · ages 8 to 80</span>
+      <h1>How does a computer <span class="hl pink">think?</span></h1>
+      <p>Meet the <b>Operating System</b> — the invisible manager inside every computer, phone and smart TV. We'll draw it, poke it, and look inside a real <b>Linux</b> machine in 3D. 🐧</p>
+      <div class="btn-row">
+        <a class="btn lg yellow" href="#what">Start learning ✏️</a>
+        <a class="btn lg" href="lab.html">Open the 3D Lab 🖥️</a>
+      </div>
+      <p class="small muted">13 chapters · basic → advanced · every chapter has a quiz sticker ⭐ to collect</p>
+    </div>
+    <div class="hero-art" aria-hidden="true">
+      <svg viewBox="0 0 440 380">
+        <text class="bob" x="30" y="70" font-size="40" style="animation-delay:-1s">⚙️</text>
+        <text class="bob" x="370" y="62" font-size="36" style="animation-delay:-2.2s">📁</text>
+        <text class="bob" x="382" y="250" font-size="32">🧠</text>
+        <text class="bob" x="12" y="236" font-size="34" style="animation-delay:-1.6s">💾</text>
+        <text class="bob" x="200" y="34" font-size="28" style="animation-delay:-.6s">📦</text>
+        <path d="M96 52 h236 a18 18 0 0 1 18 18 v136 a18 18 0 0 1 -18 18 h-236 a18 18 0 0 1 -18 -18 v-136 a18 18 0 0 1 18 -18z" fill="var(--yellow)" stroke="var(--ink)" stroke-width="4"/>
+        <rect x="100" y="72" width="228" height="134" rx="10" fill="#1f1c2e" stroke="var(--ink)" stroke-width="3"/>
+        <g class="hero-eyes"><ellipse cx="172" cy="124" rx="12" ry="17" fill="#5cf0a8"/><ellipse cx="256" cy="124" rx="12" ry="17" fill="#5cf0a8"/></g>
+        <circle cx="146" cy="160" r="10" fill="#ff4f8b" opacity=".55"/><circle cx="282" cy="160" r="10" fill="#ff4f8b" opacity=".55"/>
+        <path d="M178 162 Q214 190 250 162" stroke="#5cf0a8" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <path d="M196 224 L186 266 L244 266 L234 224" fill="var(--card)" stroke="var(--ink)" stroke-width="4" stroke-linejoin="round"/>
+        <rect x="146" y="264" width="138" height="16" rx="8" fill="var(--card)" stroke="var(--ink)" stroke-width="4"/>
+        <rect x="96" y="300" width="236" height="44" rx="9" fill="var(--card)" stroke="var(--ink)" stroke-width="4"/>
+        <path d="M112 314 h200 M112 328 h200 M150 300 v44 M190 300 v44 M230 300 v44 M270 300 v44" stroke="var(--ink-faint)" stroke-width="2"/>
+        <!-- penguin -->
+        <g transform="translate(336 236)">
+          <ellipse cx="34" cy="68" rx="40" ry="54" fill="#2b2a33" stroke="var(--ink)" stroke-width="3"/>
+          <ellipse cx="34" cy="80" rx="26" ry="38" fill="#fff"/>
+          <circle cx="34" cy="22" r="30" fill="#2b2a33" stroke="var(--ink)" stroke-width="3"/>
+          <ellipse cx="34" cy="30" rx="20" ry="17" fill="#fff"/>
+          <circle cx="26" cy="22" r="5" fill="#2b2a33"/><circle cx="42" cy="22" r="5" fill="#2b2a33"/>
+          <circle cx="27" cy="20" r="1.8" fill="#fff"/><circle cx="43" cy="20" r="1.8" fill="#fff"/>
+          <path d="M26 32 L34 42 L42 32 Z" fill="#ffbf1f" stroke="#2b2a33" stroke-width="2" stroke-linejoin="round"/>
+          <path class="hero-wing" d="M-2 60 Q-26 40 -20 18" stroke="#2b2a33" stroke-width="12" fill="none" stroke-linecap="round"/>
+          <ellipse cx="18" cy="122" rx="14" ry="6" fill="#ffbf1f" stroke="#2b2a33" stroke-width="2"/><ellipse cx="50" cy="122" rx="14" ry="6" fill="#ffbf1f" stroke="#2b2a33" stroke-width="2"/>
+        </g>
+        <text x="300" y="214" font-family="Caveat" font-size="26" fill="var(--pink)" transform="rotate(-8 300 214)">hi! I'm Linux 👋</text>
+      </svg>
+    </div>
+  </section>
+
+  <nav class="toc"></nav>
+
+  <section class="sec" id="what">
+    <h2 class="sec-title" data-short="What is an OS?">🧠 What is an Operating System?</h2>
+    <div class="grid-2">
+      <div>
+        <div class="note kid"><div class="note-h">🧸 Kid version</div>
+          <p>Imagine a busy restaurant. 🍝 <b>You</b> are the customer, the <b>apps</b> are waiters, and the <b>kitchen</b> (stove, fridge, counter) is the computer's hardware. Somebody has to run the kitchen so waiters don't crash into each other — that's the <b>manager</b>. In a computer, that manager is the <span class="hl">Operating System</span>.</p>
+        </div>
+      </div>
+      <div>
+        <div class="card tape tilt-l">
+          <h3>The grown-up definition</h3>
+          <p>An <b>Operating System (OS)</b> is the software that <span class="hl">manages the hardware</span> and lets all your other programs <span class="hl pink">share it safely and fairly</span>.</p>
+          <ul class="sk-list check">
+            <li><b>Manages</b> — decides who uses the CPU, RAM, disk, screen…</li>
+            <li><b>Shares</b> — 100 programs, 1 computer, no fighting.</li>
+            <li><b>Protects</b> — one buggy app can't break the others.</li>
+            <li><b>Simplifies</b> — apps say "save this file", not "move disk head to sector 9,482".</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div id="restaurant"></div>
+  </section>
+
+  <section class="sec" id="without">
+    <h2 class="sec-title" data-short="Without an OS">💥 What if there was NO operating system?</h2>
+    <p class="lead">Flip the switch and see what happens when apps talk to hardware directly.</p>
+    <div class="btn-row" role="group" aria-label="Operating system switch">
+      <button class="btn green on" id="osOn" type="button">🐧 OS: ON</button>
+      <button class="btn" id="osOff" type="button">😵 OS: OFF</button>
+    </div>
+    <div id="dOn"></div>
+    <div id="dOff" hidden></div>
+    <div class="note warn" id="offNote" hidden><div class="note-h">😵 Total chaos!</div>
+      <p>The game and the music app grab the speaker at the same time 🔊💥. The browser never gives the CPU back. A buggy app overwrites another app's memory — or wipes the whole disk. Every app would also need code for <i>every</i> kind of hardware ever made. That's how very early computers worked: one program at a time!</p>
+    </div>
+    <div class="note tip" id="onNote"><div class="note-h">🐧 Calm and tidy</div>
+      <p>Every app asks the OS. The OS takes turns, keeps memory separate, checks permissions and uses one <b>driver</b> per device. Apps get <i>simple</i> requests like <code>open()</code>, <code>read()</code>, <code>write()</code>.</p>
+    </div>
+  </section>
+
+  <section class="sec" id="jobs">
+    <h2 class="sec-title" data-short="8 big jobs">🎪 The 8 big jobs of an OS</h2>
+    <p class="lead">Tap a card to flip it and see how <b>Linux</b> does that job.</p>
+    <div class="grid-4">
+      <div class="flip"><div class="flip-in">
+        <div class="card flip-f c-p"><span class="big-ic">🤹</span><h4>Process juggler</h4><p>Runs many programs "at once" by switching between them super fast.</p><div class="tap">tap to flip ↻</div></div>
+        <div class="card flip-b c-p"><h4>In Linux</h4><p>The <b>scheduler</b> picks who runs next, thousands of times a second. Each running program is a <b>process</b> with a PID.</p><p><code>ps aux</code> · <code>top</code></p><p><a href="processes.html">Chapter 3 →</a></p></div>
+      </div></div>
+      <div class="flip"><div class="flip-in">
+        <div class="card flip-f c-g"><span class="big-ic">🧮</span><h4>Memory manager</h4><p>Gives every program its own private space in RAM.</p><div class="tap">tap to flip ↻</div></div>
+        <div class="card flip-b c-g"><h4>In Linux</h4><p>Virtual memory + page tables. RAM handed out in 4 KB pages. Spare RAM becomes a file cache.</p><p><code>free -h</code></p><p><a href="memory.html">Chapter 5 →</a></p></div>
+      </div></div>
+      <div class="flip"><div class="flip-in">
+        <div class="card flip-f c-y"><span class="big-ic">🗂️</span><h4>File keeper</h4><p>Organizes data into files and folders, so you can find it later.</p><div class="tap">tap to flip ↻</div></div>
+        <div class="card flip-b c-y"><h4>In Linux</h4><p>One big tree from <code>/</code>. File systems like ext4, btrfs. And… <b>everything is a file!</b></p><p><code>ls /</code></p><p><a href="files.html">Chapter 6 →</a></p></div>
+      </div></div>
+      <div class="flip"><div class="flip-in">
+        <div class="card flip-f c-o"><span class="big-ic">🔌</span><h4>Device translator</h4><p>Talks to keyboards, screens, Wi-Fi, printers — in each one's language.</p><div class="tap">tap to flip ↻</div></div>
+        <div class="card flip-b c-o"><h4>In Linux</h4><p><b>Drivers</b> live in the kernel (often as loadable modules). Devices appear as files in <code>/dev</code>.</p><p><code>lsusb</code> · <code>lspci -k</code></p><p><a href="kernel.html">Chapter 7 →</a></p></div>
+      </div></div>
+      <div class="flip"><div class="flip-in">
+        <div class="card flip-f c-r"><span class="big-ic">🛡️</span><h4>Security guard</h4><p>Users, passwords, who can open which file.</p><div class="tap">tap to flip ↻</div></div>
+        <div class="card flip-b c-r"><h4>In Linux</h4><p>Users &amp; groups, <code>rwx</code> permissions, root, sudo, capabilities, SELinux/AppArmor.</p><p><code>whoami</code> · <code>ls -l</code></p><p><a href="security.html">Chapter 9 →</a></p></div>
+      </div></div>
+      <div class="flip"><div class="flip-in">
+        <div class="card flip-f c-b"><span class="big-ic">📮</span><h4>Network mail carrier</h4><p>Sends and receives data over the internet.</p><div class="tap">tap to flip ↻</div></div>
+        <div class="card flip-b c-b"><h4>In Linux</h4><p>A full TCP/IP stack inside the kernel; programs use <b>sockets</b>.</p><p><code>ip addr</code> · <code>ping</code></p><p><a href="kernel.html#net">Chapter 7 →</a></p></div>
+      </div></div>
+      <div class="flip"><div class="flip-in">
+        <div class="card flip-f c-v"><span class="big-ic">🤝</span><h4>Teamwork referee</h4><p>Lets programs talk and share without stepping on each other.</p><div class="tap">tap to flip ↻</div></div>
+        <div class="card flip-b c-v"><h4>In Linux</h4><p>Pipes <code>|</code>, signals, shared memory, sockets, locks (futex).</p><p><code>ls | grep txt</code></p><p><a href="concurrency.html">Chapter 8 →</a></p></div>
+      </div></div>
+      <div class="flip"><div class="flip-in">
+        <div class="card flip-f c-t"><span class="big-ic">⏰</span><h4>Alarm clock &amp; face</h4><p>Wakes the computer up (boot) and gives you a way to talk to it.</p><div class="tap">tap to flip ↻</div></div>
+        <div class="card flip-b c-t"><h4>In Linux</h4><p>UEFI → GRUB → kernel → <b>systemd</b>. You talk to it via a <b>shell</b> (bash) or a desktop (GNOME, KDE).</p><p><code>echo $SHELL</code></p><p><a href="boot.html">Chapter 2 →</a></p></div>
+      </div></div>
+    </div>
+  </section>
+
+  <section class="sec" id="around">
+    <h2 class="sec-title" data-short="OSes around you">🌍 Operating systems are everywhere</h2>
+    <div class="grid-auto">
+      <div class="card"><span class="big-ic">🪟</span><h4>Windows</h4><p>Most home &amp; office PCs. Kernel: Windows NT (hybrid).</p></div>
+      <div class="card"><span class="big-ic">🍎</span><h4>macOS / iOS</h4><p>Apple computers &amp; iPhones. Kernel: XNU (hybrid, Unix-like).</p></div>
+      <div class="card c-y"><span class="big-ic">🐧</span><h4>Linux</h4><p>Most web servers, the cloud, Chromebooks, Steam Deck — and all of the world's top-500 supercomputers.</p></div>
+      <div class="card"><span class="big-ic">🤖</span><h4>Android</h4><p>The most-used OS on Earth. Under the hood: the <b>Linux kernel</b>!</p></div>
+      <div class="card"><span class="big-ic">📺</span><h4>Embedded</h4><p>Smart TVs, Wi-Fi routers, cars, fridges, cameras — very often Linux.</p></div>
+      <div class="card"><span class="big-ic">🚀</span><h4>Real-time (RTOS)</h4><p>Pacemakers, airbags, drones, Mars rovers: must answer <i>on time</i>, every time.</p></div>
+    </div>
+    <div class="note fun"><div class="note-h">🤯 Fun fact</div><p>Linux started in 1991 when a 21-year-old student, Linus Torvalds, posted that he was making a free OS "just a hobby, won't be big and professional." Today thousands of people and companies build it together, and anyone can read every line of its code.</p></div>
+  </section>
+
+  <section class="sec" id="cake">
+    <h2 class="sec-title" data-short="The layer cake">🎂 The layer cake: where the OS lives</h2>
+    <p class="lead">A computer is built in layers. <b>Click any layer</b> to learn what it does.</p>
+    <div class="split">
+      <div id="cakeD"></div>
+      <div class="card tape" id="cakeInfo" aria-live="polite"></div>
+    </div>
+    <div class="grid-2">
+      <div class="note kid"><div class="note-h">🛝 Playground vs teachers' room</div><p>Apps live in the <b>playground</b> (<i>user space</i>). The kernel lives in the <b>teachers' room</b> (<i>kernel space</i>). Kids can't walk in — they ask through a little window. That window is a <b>system call</b>.</p></div>
+      <div class="note linux"><div class="note-h">🐧 In Linux</div><p>The CPU itself enforces this: user programs run in a restricted mode (<b>ring 3</b>); the kernel runs in privileged mode (<b>ring 0</b>). If an app tries to touch hardware directly, the CPU stops it and the kernel kills the app (you'll see <code>Segmentation fault</code>).</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="peek">
+    <h2 class="sec-title" data-short="Peek inside (3D)">🔍 Peek inside a real computer (3D)</h2>
+    <p class="lead">Spin it, zoom it, and press <b>▶ Play</b>. Want all seventeen 3D stories? Visit the <a href="lab.html">3D Lab</a>.</p>
+    <div id="lab"></div>
+  </section>
+
+  <section class="sec" id="types">
+    <h2 class="sec-title" data-short="Types of OS">🧪 Kinds of operating systems</h2>
+    <div class="tbl-wrap"><table class="sk">
+      <tr><th>Kind</th><th>Big idea</th><th>Like…</th><th>Example</th></tr>
+      <tr><td>📦 Batch</td><td>Run jobs one after another, no talking to people.</td><td>A laundromat queue</td><td>1960s mainframes</td></tr>
+      <tr><td>⏱️ Time-sharing / multitasking</td><td>Switch between many users &amp; apps quickly so all feel "live".</td><td>A teacher answering 30 kids in turns</td><td>Linux, Windows, macOS</td></tr>
+      <tr><td>🚨 Real-time (RTOS)</td><td>Guarantee an answer before a deadline.</td><td>A goalkeeper — late = goal</td><td>FreeRTOS, Zephyr, Linux PREEMPT_RT</td></tr>
+      <tr><td>📱 Mobile</td><td>Touch, battery saving, app sandboxes.</td><td>A tiny, careful assistant</td><td>Android, iOS</td></tr>
+      <tr><td>🔌 Embedded</td><td>One job, tiny hardware, runs for years.</td><td>A toaster's brain</td><td>Embedded Linux, Zephyr</td></tr>
+      <tr><td>☁️ Distributed / cloud</td><td>Many machines acting like one big computer.</td><td>An ant colony</td><td>Kubernetes clusters (on Linux)</td></tr>
+    </table></div>
+  </section>
+
+  <section class="sec" id="map">
+    <h2 class="sec-title" data-short="Learning map">🗺️ Your learning map</h2>
+    <p class="lead">Go in order (basic → advanced) or jump around. Pass each chapter's quiz to earn its ⭐ sticker.</p>
+    <div class="map-grid" id="chapMap"></div>
+  </section>
+
+  <section class="sec" id="quiz">
+    <h2 class="sec-title" data-short="Quiz">⭐ Quick quiz</h2>
+    <div id="quizBox"></div>
+  </section>
+</main>
+
+<script src="js/core.js"></script>
+<script src="js/sketch.js"></script>
+<script src="vendor/three.min.js"></script>
+<script src="js/lab3d.js"></script>
+<script src="js/pages/home.js"></script>
+</body>
+</html>

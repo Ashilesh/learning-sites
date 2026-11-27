@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>3D Linux Lab · OS Sketchbook</title>
+<meta name="description" content="Explore a 3D Linux computer: watch it boot, run a command, manage RAM, save files, send network packets and run Docker containers.">
+<script>try{var t=localStorage.getItem('os-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/pages.css">
+</head>
+<body data-page="lab">
+<main class="wrap">
+  <header class="ch-hero">
+    <span class="ch-num">Chapter 1</span>
+    <h1 class="ch-title">The 3D Linux <span class="hl">Lab</span> 🖥️</h1>
+    <p class="ch-lead">A whole Linux computer you can spin around. Pick a story, press <b>▶ Play</b>, and watch the glowing packets show how data really moves.</p>
+    <div class="eli5"><b>🧸 How to use it:</b> pick a chip on top (like <i>Boot Linux</i>), then press ▶ Play. Drag to spin. Click the scene, then scroll to zoom (pinch on a phone). ⛶ = full screen, 🎯 = reset view.</div>
+  </header>
+  <nav class="toc"></nav>
+
+  <section class="sec" id="lab3d">
+    <h2 class="sec-title" data-short="The lab">🧪 Seventeen stories to explore</h2>
+    <div id="lab"></div>
+  </section>
+
+  <section class="sec" id="guide">
+    <h2 class="sec-title" data-short="Story guide">🗺️ Story guide</h2>
+    <p class="lead">Each 3D story matches a chapter. Watch it here, then read the chapter to go deeper.</p>
+    <div class="grid-3">
+      <div class="card c-y"><span class="big-ic">🔍</span><h4>Tour the PC</h4><p>Meet the hardware: CPU, RAM, SSD, GPU, network card — and where Linux fits.</p><a href="index.html#jobs">Chapter 0 →</a></div>
+      <div class="card c-v"><span class="big-ic">🎂</span><h4>Linux Layer Cake</h4><p>Hardware → kernel → system calls → libraries → apps. Watch the layers come apart.</p><a href="kernel.html">Chapter 7 →</a></div>
+      <div class="card c-o"><span class="big-ic">⏰</span><h4>Boot Linux</h4><p>Power button → UEFI → GRUB → kernel → initramfs → systemd → login.</p><a href="boot.html">Chapter 2 →</a></div>
+      <div class="card c-p"><span class="big-ic">▶️</span><h4>Run a Command</h4><p>Interrupt → shell → fork() → execve() → scheduler → write() → screen.</p><a href="processes.html">Chapter 3 →</a></div>
+      <div class="card c-v"><span class="big-ic">🔬</span><h4>Inside the CPU</h4><p>Zoom 10,000× into a chip: L3 → L2 → L1i → fetch → decode → ALUs → registers, and the timer interrupt.</p><a href="cpu.html#chip3d">Chapter 4 →</a></div>
+      <div class="card c-o"><span class="big-ic">🏭</span><h4>Pipeline Factory</h4><p>Five stations on a conveyor belt: one-at-a-time vs pipelined vs a wrong branch guess.</p><a href="cpu.html#pipeline">Chapter 4 →</a></div>
+      <div class="card c-v"><span class="big-ic">🔁</span><h4>Fetch an Instruction</h4><p>ELF on SSD → execve() → page fault → cache line → decode → execute — and the timer that gives the OS control back.</p><a href="cpu.html">Chapter 4 →</a></div>
+      <div class="card c-r"><span class="big-ic">💥</span><h4>Page Fault Journey</h4><p>TLB miss → 4-level page-table walk → fault → kernel → SSD → retry. Plus minor faults and SIGSEGV.</p><a href="memory.html#pagefault">Chapter 5 →</a></div>
+      <div class="card c-g"><span class="big-ic">🧮</span><h4>RAM &amp; Paging</h4><p>Page frames, virtual memory, shared pages, page cache, swap and the OOM killer.</p><a href="memory.html">Chapter 5 →</a></div>
+      <div class="card c-b"><span class="big-ic">🪣</span><h4>Inside a RAM Chip</h4><p>Buckets of charge, word lines, sense amps, leaking and refresh — and why RAM forgets.</p><a href="memory.html#ramchips">Chapter 5 →</a></div>
+      <div class="card c-p"><span class="big-ic">🎮</span><h4>Inside a Graphics Card</h4><p>GPU cores paint a framebuffer in VRAM, the display engine scans it out; integrated vs dedicated.</p><a href="memory.html#vram">Chapter 5 →</a></div>
+      <div class="card c-o"><span class="big-ic">🎨</span><h4>RAM vs VRAM</h4><p>Textures travel SSD → RAM → PCIe → VRAM → GPU → framebuffer → screen.</p><a href="memory.html#vram">Chapter 5 →</a></div>
+      <div class="card c-y"><span class="big-ic">📄</span><h4>Everything is a File</h4><p>Real Linux paths pinned onto the hardware: <code>/dev</code>, <code>/proc</code>, <code>/sys</code>.</p><a href="files.html">Chapter 6 →</a></div>
+      <div class="card c-t"><span class="big-ic">🌳</span><h4>Linux Folder Tree</h4><p>The one big tree that starts at <code>/</code>, in 3D.</p><a href="files.html#fhs">Chapter 6 →</a></div>
+      <div class="card c-b"><span class="big-ic">💾</span><h4>Save a File</h4><p>write() → VFS → ext4 → page cache → journal → DMA → SSD.</p><a href="files.html#journal">Chapter 6 →</a></div>
+      <div class="card c-b"><span class="big-ic">🌐</span><h4>Network Request</h4><p>Sockets, DNS, the TCP handshake, envelopes in envelopes, interrupts &amp; NAPI.</p><a href="kernel.html#net">Chapter 7 →</a></div>
+      <div class="card c-p"><span class="big-ic">📦</span><h4>Containers</h4><p>One shared kernel, namespaces as walls, cgroups as leashes, overlay layers, and <code>docker run</code>.</p><a href="containers.html">Chapter 10 →</a></div>
+    </div>
+    <div class="note tip"><div class="note-h">💡 Why do the colors glow?</div><p>A glowing part is <b>busy</b> in that step. Moving balls are <b>data</b> (or signals) traveling between parts. The little tag on a ball says what it is — like <code>IRQ</code> (an interrupt), <code>DMA</code> (a device copying memory by itself) or a system call name.</p></div>
+  </section>
+
+  <section class="sec" id="quiz">
+    <h2 class="sec-title" data-short="Quiz">⭐ Lab quiz</h2>
+    <div id="quizBox"></div>
+  </section>
+</main>
+<script src="js/core.js"></script>
+<script src="js/sketch.js"></script>
+<script src="vendor/three.min.js"></script>
+<script src="js/lab3d.js"></script>
+<script>
+  (function () {
+    var start = (location.search.match(/[?&]s=(\w+)/) || [])[1];
+    OSLab.mount(document.getElementById('lab'), { start: start });
+    Core.quiz('#quizBox', [
+      { q: 'During boot, which program does the Linux kernel start first (PID 1)?', a: ['bash', 'systemd (init)', 'GRUB', 'Firefox'], c: 1, why: 'The kernel starts /sbin/init — on most distros that is systemd — as PID 1. Everything else descends from it.' },
+      { q: 'When you save a file, where does the data go FIRST?', a: ['Straight to the SSD', 'The page cache in RAM (marked dirty)', 'The GPU', 'The internet'], c: 1, why: 'write() copies data into the page cache and returns. Flusher threads write dirty pages to disk later (or now, if you call fsync()).' },
+      { q: 'What tells the CPU "a key was pressed!"?', a: ['An interrupt (IRQ)', 'A cookie', 'The GPU', 'Swap'], c: 0, why: 'Devices raise interrupts so the CPU stops what it is doing and runs the kernel\'s handler.' },
+      { q: 'In the containers story, how many kernels do three containers use?', a: ['Three', 'Two', 'One shared kernel', 'None'], c: 2, why: 'Containers are isolated processes on ONE shared host kernel. Virtual machines are the ones with their own kernels.' },
+      { q: 'When RAM gets full, what does Linux usually give up FIRST?', a: ['The kernel', 'Page cache (copies of files)', 'Your desktop', 'The CPU'], c: 1, why: 'Clean page-cache pages are just copies of files on disk, so they can be dropped cheaply. Swap and the OOM killer come later.' }
+    ]);
+  })();
+</script>
+</body>
+</html>

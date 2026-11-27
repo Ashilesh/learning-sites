@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Users &amp; Security · OS Sketchbook</title>
+<meta name="description" content="Linux users and groups, rwx permissions calculator, setuid and sticky bits, sudo, capabilities, SELinux/AppArmor, seccomp and ASLR — explained visually.">
+<script>try{var t=localStorage.getItem('os-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/pages.css">
+</head>
+<body data-page="security">
+<main class="wrap">
+  <header class="ch-hero">
+    <span class="ch-num">Chapter 9</span>
+    <h1 class="ch-title">Users <span class="hl">&amp;</span> Security 🔐</h1>
+    <p class="ch-lead">Many people and programs share one computer. The OS decides who may read, change or run what — and builds walls so that one bad program can't take over everything.</p>
+    <div class="eli5"><b>🧸 In one sentence:</b> every file has a lock with three keyholes — one for its <b>owner</b>, one for their <b>group</b>, one for <b>everyone else</b> — and each keyhole can allow <b>reading</b>, <b>writing</b> and <b>running</b>. 🔑🔑🔑</div>
+  </header>
+  <nav class="toc"></nav>
+
+  <section class="sec" id="users">
+    <h2 class="sec-title" data-short="Users & groups">👥 Users and groups</h2>
+    <div class="grid-2">
+      <div class="note kid"><div class="note-h">🧸 Name badges</div><p>Every person (and many programs) gets a <b>user</b> account with a number — the <b>UID</b>. Users can be in <b>groups</b> (like "teachers" or "art club") to share things. The super-boss is <b>root</b>, UID 0, who can do <i>anything</i>. 👑</p></div>
+      <div class="term"><pre>$ id
+uid=1000(kid) gid=1000(kid) groups=1000(kid),27(sudo),998(docker)
+$ getent passwd root www-data
+root:x:0:0:root:/root:/bin/bash
+www-data:x:33:33:www-data:/var/www:/usr/sbin/nologin</pre></div>
+    </div>
+    <p class="lead">Each line in <code>/etc/passwd</code> describes one user. Tap the pieces:</p>
+    <div class="lsl" id="pwd"></div>
+    <div class="note tip" id="pwdInfo">👆 Tap a part above.</div>
+    <div class="grid-3">
+      <div class="card c-y"><h4>👑 root (UID 0)</h4><p>Bypasses all permission checks. Use it as little as possible!</p></div>
+      <div class="card"><h4>🤖 system users (1–999)</h4><p>For services like <code>www-data</code>, <code>postgres</code>. They usually can't log in (<code>nologin</code> shell).</p></div>
+      <div class="card c-p"><h4>🙋 humans (1000+)</h4><p>Normal accounts. Passwords are stored hashed in <code>/etc/shadow</code>, readable only by root.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="perm">
+    <h2 class="sec-title" data-short="Permissions calculator">🧮 Lab: the permission calculator</h2>
+    <div class="sim">
+      <div class="btn-row"><span class="small muted">presets:</span>
+        <button class="btn sm" data-p="644" type="button">📄 644 normal file</button><button class="btn sm" data-p="755" type="button">🚀 755 program</button><button class="btn sm" data-p="600" type="button">🤫 600 secret</button><button class="btn sm" data-p="777" type="button">😱 777</button><button class="btn sm" data-p="1777" type="button">🗒️ 1777 /tmp</button><button class="btn sm" data-p="4755" type="button">🦸 4755 passwd</button>
+      </div>
+      <div class="split">
+        <div>
+          <div class="perm-grid" id="pgrid"></div>
+          <div class="row" style="margin-top:10px"><label><input type="checkbox" id="sSuid"> setuid (s)</label><label><input type="checkbox" id="sSgid"> setgid (s)</label><label><input type="checkbox" id="sSticky"> sticky (t)</label></div>
+          <div class="row" style="margin-top:10px"><label>or type octal: <input type="text" id="octIn" maxlength="4" style="width:80px" aria-label="Octal permissions"></label></div>
+        </div>
+        <div>
+          <div class="perm-out"><span id="pOct">0644</span><span id="pSym">-rw-r--r--</span></div>
+          <div class="sim-out" id="pCmd"></div>
+          <ul class="sk-list" id="pEng"></ul>
+        </div>
+      </div>
+    </div>
+    <div class="grid-3">
+      <div class="card"><h4>📄 For files</h4><p><b>r</b> read contents · <b>w</b> change contents · <b>x</b> run it as a program</p></div>
+      <div class="card"><h4>📁 For folders</h4><p><b>r</b> list names · <b>w</b> create/delete/rename inside · <b>x</b> enter it (<code>cd</code>) and reach things inside</p></div>
+      <div class="card c-y"><h4>🔢 The math</h4><p>r = 4, w = 2, x = 1. Add them per group: rwx = 7, r-x = 5, r-- = 4. So <code>chmod 750</code> = rwx for owner, r-x for group, nothing for others.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="special">
+    <h2 class="sec-title" data-short="Special bits">✨ Special bits</h2>
+    <div class="grid-3">
+      <div class="card c-p"><span class="big-ic">🦸</span><h4>setuid (4)</h4><p>The program runs as its <b>owner</b>, not as you. That's how <code>passwd</code> (owned by root) can update <code>/etc/shadow</code> for you.</p><div class="term"><pre>$ ls -l /usr/bin/passwd
+-rwsr-xr-x 1 root root 64152 /usr/bin/passwd</pre></div></div>
+      <div class="card c-b"><span class="big-ic">👨‍👩‍👧</span><h4>setgid (2)</h4><p>On a folder: new files inherit the folder's group. Great for shared team folders.</p><div class="term"><pre>$ chmod g+s /srv/team
+$ ls -ld /srv/team
+drwxrwsr-x 2 root devs /srv/team</pre></div></div>
+      <div class="card c-y"><span class="big-ic">📌</span><h4>sticky (1)</h4><p>On a shared folder: you can only delete <b>your own</b> files. That's why everyone can use <code>/tmp</code> safely.</p><div class="term"><pre>$ ls -ld /tmp
+drwxrwxrwt 18 root root /tmp</pre></div></div>
+    </div>
+    <div class="note warn"><div class="note-h">⚠️ setuid is powerful</div><p>A bug in a setuid-root program means an attacker can become root. Modern Linux prefers giving programs just the specific <b>capabilities</b> they need instead (below).</p></div>
+  </section>
+
+  <section class="sec" id="sudo">
+    <h2 class="sec-title" data-short="sudo">🦸 sudo: borrowing the crown for a moment</h2>
+    <div id="sudoD"></div>
+    <div class="term"><pre>$ apt install cowsay
+E: Could not open lock file /var/lib/dpkg/lock - open (13: Permission denied)
+$ sudo apt install cowsay
+[sudo] password for kid:
+$ sudo -l | tail -1      # what am I allowed to do?
+    (ALL : ALL) ALL</pre></div>
+  </section>
+
+  <section class="sec" id="layers">
+    <h2 class="sec-title" data-short="Layers of defense">🧅 Layers of defense</h2>
+    <p class="lead">Good security is an onion: if one layer fails, the next still protects you. <b>Click a layer.</b></p>
+    <div class="split">
+      <div id="onionD"></div>
+      <div class="card tape" id="onionInfo" aria-live="polite"></div>
+    </div>
+  </section>
+
+  <section class="sec" id="caps">
+    <h2 class="sec-title" data-short="Capabilities">🎫 Capabilities: root, sliced into pieces</h2>
+    <div class="note kid"><div class="note-h">🧸 A key ring instead of a master key</div><p>Instead of giving a program the master key to the whole building (root), Linux can hand it just the one key it needs — e.g. "may open ports below 1024" — and nothing else.</p></div>
+    <div class="grid-4">
+      <div class="card"><h4><code>CAP_NET_BIND_SERVICE</code></h4><p>use ports below 1024 (a web server on port 80)</p></div>
+      <div class="card"><h4><code>CAP_NET_ADMIN</code></h4><p>change network settings, firewall</p></div>
+      <div class="card"><h4><code>CAP_SYS_TIME</code></h4><p>set the system clock</p></div>
+      <div class="card"><h4><code>CAP_KILL</code></h4><p>send signals to anyone's processes</p></div>
+      <div class="card"><h4><code>CAP_CHOWN</code></h4><p>change file owners</p></div>
+      <div class="card"><h4><code>CAP_SYS_PTRACE</code></h4><p>debug other processes</p></div>
+      <div class="card c-r"><h4><code>CAP_SYS_ADMIN</code></h4><p>the "new root" — far too many powers in one. Avoid!</p></div>
+      <div class="card c-y"><h4>~40 in total</h4><p><code>man 7 capabilities</code></p></div>
+    </div>
+    <div class="term"><pre>$ getcap /usr/bin/ping
+/usr/bin/ping cap_net_raw=ep
+$ sudo setcap cap_net_bind_service=+ep ./my-web-server   # port 80 without root!
+$ docker run --cap-drop=ALL --cap-add=NET_BIND_SERVICE nginx</pre></div>
+  </section>
+
+  <section class="sec" id="memsec">
+    <h2 class="sec-title" data-short="Memory protections">🎰 Lab: ASLR — hide and seek with addresses</h2>
+    <div class="grid-2">
+      <div class="note kid"><div class="note-h">🧸 Moving the treasure</div><p>Attackers often need to know <i>where</i> things are in memory. So every time a program starts, Linux puts its stack, heap and libraries at <b>random</b> places. Like a hide-and-seek game where the hiding spots change every round. 🙈</p></div>
+      <div class="sim" style="margin:0">
+        <div class="btn-row"><button class="btn yellow" id="aslrRun" type="button">▶ run program again</button><label><input type="checkbox" id="aslrOn" checked> ASLR on</label></div>
+        <div class="sim-out" id="aslrOut"></div>
+      </div>
+    </div>
+    <div class="grid-4">
+      <div class="card"><h4>🎰 ASLR</h4><p>Random addresses. <code>/proc/sys/kernel/randomize_va_space</code> = 2</p></div>
+      <div class="card"><h4>🚫 NX bit</h4><p>Memory is either writable OR executable, never both. Injected data can't run as code.</p></div>
+      <div class="card"><h4>🐤 Stack canaries</h4><p>A secret value before the return address; if it changes, the program stops before damage.</p></div>
+      <div class="card"><h4>👑 KASLR &amp; more</h4><p>The kernel randomizes itself too, and refuses to run user memory in kernel mode (SMEP/SMAP).</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="practices">
+    <h2 class="sec-title" data-short="Best practices">✅ Security best practices (tick them off!)</h2>
+    <div class="missions" id="secList"></div>
+  </section>
+
+  <section class="sec" id="quiz">
+    <h2 class="sec-title" data-short="Quiz">⭐ Security quiz</h2>
+    <div id="quizBox"></div>
+  </section>
+</main>
+<script src="js/core.js"></script>
+<script src="js/sketch.js"></script>
+<script src="js/pages/security.js"></script>
+</body>
+</html>

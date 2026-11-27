@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Containers &amp; Docker · OS Sketchbook</title>
+<meta name="description" content="How Docker containers really work on Linux: namespaces, cgroups, OverlayFS image layers, docker run under the hood, container networking, and building a container by hand with unshare.">
+<script>try{var t=localStorage.getItem('os-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/pages.css">
+<style>
+  .meter .lim{position:absolute; top:-4px; bottom:-4px; width:0; border-left:3px dashed var(--red); z-index:2}
+  .meter .lim::after{content:"limit"; position:absolute; top:-18px; left:-14px; font-size:12px; color:var(--red)}
+  .cg-box .row{gap:6px}
+  .nsview .sim-out{min-height:150px}
+</style>
+</head>
+<body data-page="containers">
+<main class="wrap">
+  <header class="ch-hero">
+    <span class="ch-num">Chapter 10</span>
+    <h1 class="ch-title">Containers <span class="hl">&amp;</span> Docker 📦</h1>
+    <p class="ch-lead">Docker feels like magic: a whole "mini computer" starts in under a second. The secret? There's no mini computer. A container is a normal Linux process wearing three gadgets: <b>namespaces</b>, <b>cgroups</b> and a <b>layered file system</b>.</p>
+    <div class="eli5"><b>🧸 In one sentence:</b> containers are like <b>apartments</b> 🏢 in one building — everyone shares the same foundation and plumbing (the kernel), but each apartment has its own walls and door (<b>namespaces</b>), its own water &amp; power limit (<b>cgroups</b>), and furniture from a stack of see-through catalogs (<b>image layers</b>).</div>
+  </header>
+  <nav class="toc"></nav>
+
+  <section class="sec" id="what">
+    <h2 class="sec-title" data-short="Just a process">🧐 A container is just a process</h2>
+    <div id="recipeD"></div>
+    <div class="term"><pre>$ docker run -d --name web nginx
+$ docker top web                     # processes inside, as the HOST sees them
+UID    PID     PPID   CMD
+root   4123    4101   nginx: master process
+101    4150    4123   nginx: worker process
+$ ps -p 4123 -o pid,comm             # it's right there in the host's ps!
+    PID COMMAND
+   4123 nginx
+$ sudo ls -l /proc/4123/ns | head -4  # …with its own namespaces
+lrwxrwxrwx  ipc -> 'ipc:[4026532771]'
+lrwxrwxrwx  mnt -> 'mnt:[4026532769]'
+lrwxrwxrwx  net -> 'net:[4026532774]'
+lrwxrwxrwx  pid -> 'pid:[4026532772]'</pre></div>
+  </section>
+
+  <section class="sec" id="vm">
+    <h2 class="sec-title" data-short="VM vs container">⚖️ Virtual machine vs container</h2>
+    <div class="vmct">
+      <div class="card">
+        <h3>🖥️ Virtual machines</h3>
+        <div class="stackcol">
+          <div class="row3"><div style="background:var(--pink-t)">app</div><div style="background:var(--pink-t)">app</div><div style="background:var(--pink-t)">app</div></div>
+          <div class="row3"><div style="background:var(--teal-t)">libs</div><div style="background:var(--teal-t)">libs</div><div style="background:var(--teal-t)">libs</div></div>
+          <div class="row3"><div style="background:var(--purple-t)"><b>guest OS kernel</b></div><div style="background:var(--purple-t)"><b>guest OS kernel</b></div><div style="background:var(--purple-t)"><b>guest OS kernel</b></div></div>
+          <div style="background:var(--orange-t)">hypervisor (KVM, VMware, Hyper-V)</div>
+          <div style="background:var(--purple-t)">host OS</div>
+          <div style="background:var(--gray-t)">hardware</div>
+        </div>
+        <ul class="sk-list"><li>Each VM boots a <b>whole OS</b> with its own kernel</li><li>Gigabytes, boots in tens of seconds</li><li>Very strong isolation (separate kernels)</li><li>Can run Windows on Linux</li></ul>
+      </div>
+      <div class="card c-y">
+        <h3>📦 Containers</h3>
+        <div class="stackcol">
+          <div class="row3"><div style="background:var(--pink-t)">app</div><div style="background:var(--pink-t)">app</div><div style="background:var(--pink-t)">app</div></div>
+          <div class="row3"><div style="background:var(--teal-t)">libs</div><div style="background:var(--teal-t)">libs</div><div style="background:var(--teal-t)">libs</div></div>
+          <div style="background:var(--blue-t)">container runtime (Docker / containerd / runc)</div>
+          <div style="background:var(--purple-t)"><b>ONE shared Linux kernel</b></div>
+          <div style="background:var(--gray-t)">hardware</div>
+        </div>
+        <ul class="sk-list check"><li>No guest OS — processes on the host kernel</li><li>Megabytes, starts in milliseconds</li><li>Pack hundreds on one machine</li><li>Isolation is weaker (shared kernel) — so harden it</li></ul>
+      </div>
+    </div>
+    <div class="note linux"><div class="note-h">🐧 Linux does both!</div><p><b>KVM</b> is built into the Linux kernel: it turns Linux into a hypervisor (<code>/dev/kvm</code>). And "Docker Desktop" on Mac/Windows secretly runs a small Linux VM, because containers need a Linux kernel. Cloud services even mix them: tiny "micro-VMs" (like Firecracker) give each container its own kernel for extra safety.</p></div>
+  </section>
+
+  <section class="sec" id="ns">
+    <h2 class="sec-title" data-short="Namespaces">🙈 Gadget 1: namespaces (what you can SEE)</h2>
+    <p class="lead">A namespace gives a process its own private copy of some global thing. Toggle them and watch what the process inside can see.</p>
+    <div class="sim">
+      <div class="nstoggles" id="nsT"></div>
+      <div class="nsview">
+        <div><b>🏠 The host sees</b><div class="sim-out" id="nsHost"></div></div>
+        <div><b>📦 The process inside sees</b><div class="sim-out" id="nsIn"></div></div>
+      </div>
+      <div class="note tip" id="nsMsg" style="margin-bottom:0"></div>
+    </div>
+    <div class="tbl-wrap"><table class="sk">
+      <tr><th>Namespace</th><th>Isolates</th><th>Since</th><th>Kid version</th></tr>
+      <tr><td><code>mnt</code></td><td>mount points, the file tree</td><td>2002 (2.4.19)</td><td>📁 my own house plan</td></tr>
+      <tr><td><code>uts</code></td><td>hostname</td><td>2006</td><td>🏷️ my own name tag</td></tr>
+      <tr><td><code>ipc</code></td><td>shared memory, message queues</td><td>2006</td><td>📨 my own mailbox</td></tr>
+      <tr><td><code>pid</code></td><td>process IDs</td><td>2008</td><td>🔢 I'm number 1 here!</td></tr>
+      <tr><td><code>net</code></td><td>network cards, IPs, ports, firewall</td><td>2009</td><td>🌐 my own phone line</td></tr>
+      <tr><td><code>user</code></td><td>user &amp; group IDs</td><td>2013 (3.8)</td><td>👑 king inside, nobody outside</td></tr>
+      <tr><td><code>cgroup</code></td><td>view of the cgroup tree</td><td>2016 (4.6)</td><td>🙈 can't see others' limits</td></tr>
+      <tr><td><code>time</code></td><td>boot &amp; monotonic clocks</td><td>2020 (5.6)</td><td>⏰ my own uptime</td></tr>
+    </table></div>
+  </section>
+
+  <section class="sec" id="cgroups">
+    <h2 class="sec-title" data-short="cgroups">🦮 Gadget 2: cgroups (what you can USE)</h2>
+    <div class="grid-2">
+      <div class="note kid"><div class="note-h">🧸 Allowance</div><p>Namespaces hide things, but a hidden greedy process could still eat <b>all</b> the CPU and RAM. <b>Control groups</b> give each group of processes an allowance: "you get half a CPU and 256 MB, no more."</p></div>
+      <div class="note linux"><div class="note-h">🐧 It's files, of course</div><p>cgroups v2 lives at <code>/sys/fs/cgroup</code>. Each folder is a group; write numbers into files like <code>cpu.max</code>, <code>memory.max</code>, <code>pids.max</code>, <code>io.max</code>. Docker and systemd just create folders and write files!</p></div>
+    </div>
+    <div class="sim" id="cgSim">
+      <div class="sim-h"><h4>🦮 cgroups simulator</h4><span class="badge">host: 4 CPUs · 4 GB RAM</span></div>
+      <div class="grid-3" id="cgBoxes"></div>
+      <div class="grid-2" style="margin-top:12px">
+        <div class="sim-out" id="cgStats"></div>
+        <div class="log" id="cgLog" aria-live="polite"></div>
+      </div>
+    </div>
+    <div class="term"><pre>$ docker run -d --name db --memory=512m --cpus=1.5 --pids-limit=200 postgres
+$ cat /sys/fs/cgroup/system.slice/docker-3f2a….scope/memory.max
+536870912
+$ cat /sys/fs/cgroup/system.slice/docker-3f2a….scope/cpu.max
+150000 100000          # 150 ms of CPU time every 100 ms = 1.5 CPUs
+$ systemd-cgls | head -5    # the whole cgroup tree</pre></div>
+  </section>
+
+  <section class="sec" id="overlay">
+    <h2 class="sec-title" data-short="Image layers">🥞 Gadget 3: image layers (OverlayFS)</h2>
+    <div class="grid-2">
+      <div class="note kid"><div class="note-h">🧸 Stacked see-through sheets</div><p>Imagine drawing on stacked transparent sheets. Looking from the top, you see all the drawings combined. Bottom sheets are <b>locked</b> (read-only, shared by everyone). Each container gets one fresh <b>top sheet</b> to scribble on. Want to "change" a locked drawing? Copy it up to your sheet and change the copy!</p></div>
+      <div class="term" data-title="Dockerfile → layers"><pre>FROM ubuntu:24.04                   # layer 1: base OS files
+RUN apt-get install -y python3      # layer 2: + python
+COPY app.py config.yml /app/        # layer 3: + your code
+CMD ["python3", "/app/app.py"]      # metadata only, no layer
+$ docker history myapp:1.0          # see the layers
+$ docker info | grep Storage
+ Storage Driver: overlay2</pre></div>
+    </div>
+    <div class="sim" id="ovlSim">
+      <div class="sim-h"><h4>🥞 OverlayFS lab</h4><span class="badge y">click a file in the merged view</span></div>
+      <div class="btn-row"><button class="btn sm green" id="ovNew" type="button">➕ create /app/log.txt</button><button class="btn sm orange" id="ovRecreate" type="button">🔁 docker rm + docker run again</button><button class="btn sm" id="ovReset" type="button">↺ reset</button></div>
+      <div class="ovl" id="ovl"></div>
+      <div class="log" id="ovLog" style="margin-top:10px" aria-live="polite"></div>
+    </div>
+    <div class="note warn"><div class="note-h">⚠️ The container layer is temporary!</div><p>When the container is removed, its writable layer is deleted. Store anything important (databases, uploads) in a <b>volume</b> (<code>-v dbdata:/var/lib/postgresql/data</code>), which lives outside the layers.</p></div>
+  </section>
+
+  <section class="sec" id="run">
+    <h2 class="sec-title" data-short="docker run, inside">🚀 What <code>docker run</code> really does</h2>
+    <div id="runD"></div>
+  </section>
+
+  <section class="sec" id="diy">
+    <h2 class="sec-title" data-short="DIY container">🛠️ Build a container by hand (no Docker!)</h2>
+    <p class="lead">Every gadget is a normal Linux feature you can use yourself. Try these on a Linux machine (or VM):</p>
+    <div class="grid-2">
+      <div class="term" data-title="1. namespaces with unshare"><pre>$ sudo unshare --pid --fork --mount-proc --uts --net bash
+# now we're "inside"!
+$ hostname my-container && hostname
+my-container
+$ ps aux
+USER  PID COMMAND
+root    1 bash
+root    9 ps aux
+$ ip addr
+1: lo: &lt;LOOPBACK&gt; mtu 65536 state DOWN
+$ exit</pre></div>
+      <div class="term" data-title="2. a cgroup by hand"><pre>$ sudo mkdir /sys/fs/cgroup/demo
+$ echo 100M | sudo tee /sys/fs/cgroup/demo/memory.max
+$ echo "50000 100000" | sudo tee /sys/fs/cgroup/demo/cpu.max
+$ echo $$ | sudo tee /sys/fs/cgroup/demo/cgroup.procs
+# this shell (and its children) now get max 0.5 CPU, 100 MB</pre></div>
+      <div class="term" data-title="3. overlay by hand"><pre>$ mkdir lower upper work merged
+$ echo "from the image" > lower/hello.txt
+$ sudo mount -t overlay overlay -o lowerdir=lower,upperdir=upper,workdir=work merged
+$ echo "changed!" | sudo tee merged/hello.txt
+$ cat lower/hello.txt
+from the image
+$ cat upper/hello.txt
+changed!</pre></div>
+      <div class="term" data-title="4. peek at a real container"><pre>$ PID=$(docker inspect -f '{{.State.Pid}}' web)
+$ sudo nsenter -t $PID --uts --net hostname
+3f2a9c1b7d0e
+$ sudo nsenter -t $PID --net ip -br addr
+eth0@if12   UP   172.17.0.2/16
+$ lsns -t pid | head -3</pre></div>
+    </div>
+  </section>
+
+  <section class="sec" id="network">
+    <h2 class="sec-title" data-short="Container networking">🔌 How containers get a network</h2>
+    <div id="netD"></div>
+    <div class="term"><pre>$ docker run -d -p 8080:80 nginx     # host port 8080 → container port 80 (a DNAT rule)
+$ ip -br link | grep -E 'docker0|veth'
+docker0        UP   02:42:8c:…
+veth3a1b2c@if11 UP
+$ sudo iptables -t nat -L DOCKER -n | tail -1
+DNAT  tcp  --  0.0.0.0/0  0.0.0.0/0  tcp dpt:8080 to:172.17.0.2:80</pre></div>
+  </section>
+
+  <section class="sec" id="lab3d">
+    <h2 class="sec-title" data-short="In 3D">🖥️ Containers in 3D</h2>
+    <div id="lab"></div>
+  </section>
+
+  <section class="sec" id="best">
+    <h2 class="sec-title" data-short="Best practices">✅ Container best practices</h2>
+    <div class="grid-3">
+      <div class="card"><h4>🪶 Small images</h4><p>Use slim/alpine/distroless bases and <b>multi-stage builds</b>. Less stuff = faster pulls, fewer security holes.</p></div>
+      <div class="card"><h4>🙅 Don't run as root</h4><p><code>USER 1000</code> in the Dockerfile, or rootless Docker/Podman with user namespaces.</p></div>
+      <div class="card"><h4>🦮 Always set limits</h4><p><code>--memory</code>, <code>--cpus</code>, <code>--pids-limit</code>. One leaky container shouldn't sink the host.</p></div>
+      <div class="card"><h4>🧱 Drop what you don't need</h4><p><code>--cap-drop=ALL</code>, keep the default seccomp profile, <code>--read-only</code> root FS, never <code>--privileged</code> casually.</p></div>
+      <div class="card"><h4>💾 Data in volumes</h4><p>Containers are cattle, not pets: they can be deleted anytime. Keep state in volumes or databases.</p></div>
+      <div class="card"><h4>📌 Pin versions</h4><p><code>postgres:16.4</code> not <code>postgres:latest</code>. Same image → same behavior, every time.</p></div>
+      <div class="card"><h4>1️⃣ One job per container</h4><p>One main process (PID 1) per container. Make sure it handles SIGTERM, or use <code>--init</code>.</p></div>
+      <div class="card"><h4>🩺 Health checks &amp; logs</h4><p>Add <code>HEALTHCHECK</code>; log to stdout/stderr so <code>docker logs</code> works.</p></div>
+      <div class="card c-y"><h4>☸️ At scale: Kubernetes</h4><p>Orchestrates thousands of containers across many machines — still using the same namespaces &amp; cgroups (via containerd or CRI-O).</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="quiz">
+    <h2 class="sec-title" data-short="Quiz">⭐ Containers quiz</h2>
+    <div id="quizBox"></div>
+  </section>
+</main>
+<script src="js/core.js"></script>
+<script src="js/sketch.js"></script>
+<script src="vendor/three.min.js"></script>
+<script src="js/lab3d.js"></script>
+<script src="js/pages/containers.js"></script>
+</body>
+</html>

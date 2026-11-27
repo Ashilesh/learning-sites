@@ -1,0 +1,189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Everything is a File · OS Sketchbook</title>
+<meta name="description" content="Linux's 'everything is a file' idea, the folder structure (FHS), file types, file descriptors, inodes, hard and soft links, VFS, mounting and journaling — interactive.">
+<script>try{var t=localStorage.getItem('os-theme');if(t)document.documentElement.setAttribute('data-theme',t)}catch(e){}</script>
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/pages.css">
+</head>
+<body data-page="files">
+<main class="wrap">
+  <header class="ch-hero">
+    <span class="ch-num">Chapter 6</span>
+    <h1 class="ch-title">Everything is a <span class="hl">File</span> 📁</h1>
+    <p class="ch-lead">Linux's biggest, simplest idea: almost everything — documents, keyboards, disks, running programs, network settings — shows up as a <b>file</b>. Learn to read and write files, and you can talk to the whole computer.</p>
+    <div class="eli5"><b>🧸 In one sentence:</b> in Linux, a "file" is any box with a name that you can <b>open</b>, <b>read</b> from, <b>write</b> to, and <b>close</b> — even if what's inside the box is your keyboard! ⌨️📦</div>
+  </header>
+  <nav class="toc"></nav>
+
+  <section class="sec" id="idea">
+    <h2 class="sec-title" data-short="Everything is a file">✨ Tap anything — it's a file!</h2>
+    <p class="lead">Each button is a part of the computer. Tap it to see its Linux file path and a real command that uses it.</p>
+    <div class="eiaf" id="eiaf"></div>
+    <div class="card" style="margin-top:14px" id="eiafOut" aria-live="polite"></div>
+    <div class="note linux"><div class="note-h">🐧 Why is this genius?</div><p>Because the <b>same four system calls</b> — <code>open()</code>, <code>read()</code>, <code>write()</code>, <code>close()</code> — work on everything, tiny tools like <code>cat</code>, <code>echo</code> and <code>grep</code> can work with disks, devices, processes and settings without knowing anything special about them. Fewer special cases = simpler, more powerful system.</p></div>
+  </section>
+
+  <section class="sec" id="types">
+    <h2 class="sec-title" data-short="File types & ls -l">🔤 Reading <code>ls -l</code> like a pro</h2>
+    <p class="lead">Hover or tap each part of this line:</p>
+    <div class="lsl" id="lsl"></div>
+    <div class="note tip" id="lslInfo">👆 Tap a part above.</div>
+    <div class="tbl-wrap"><table class="sk">
+      <tr><th>First letter</th><th>Type</th><th>Example</th></tr>
+      <tr><td><code>-</code></td><td>📄 regular file</td><td><code>-rw-r--r-- notes.txt</code></td></tr>
+      <tr><td><code>d</code></td><td>📁 directory (a file listing names → inodes)</td><td><code>drwxr-xr-x Documents</code></td></tr>
+      <tr><td><code>l</code></td><td>↪️ symbolic link (a shortcut)</td><td><code>lrwxrwxrwx bin -> usr/bin</code></td></tr>
+      <tr><td><code>c</code></td><td>⌨️ character device (byte stream)</td><td><code>crw-rw-rw- /dev/null</code></td></tr>
+      <tr><td><code>b</code></td><td>💾 block device (fixed-size chunks)</td><td><code>brw-rw---- /dev/nvme0n1</code></td></tr>
+      <tr><td><code>p</code></td><td>🚰 named pipe (FIFO)</td><td><code>prw-r--r-- mypipe</code></td></tr>
+      <tr><td><code>s</code></td><td>📞 socket</td><td><code>srw-rw---- /run/docker.sock</code></td></tr>
+    </table></div>
+  </section>
+
+  <section class="sec" id="fhs">
+    <h2 class="sec-title" data-short="Folder structure">🏠 The Linux house: folder structure</h2>
+    <p class="lead">There's no <code>C:\</code> in Linux. Everything lives in <b>one tree</b> starting at <code>/</code>. Think of it as a house — click the rooms!</p>
+    <div class="fhs">
+      <div class="fhs-tree" id="fhsTree" role="listbox" aria-label="Linux top-level folders"></div>
+      <div class="card tape" id="fhsInfo" aria-live="polite"></div>
+    </div>
+    <details class="deep"><summary>🔬 Deep dive: why /bin and /usr/bin are the same thing now</summary>
+      <p>In the 1970s, the first disk was tiny, so essential tools went in <code>/bin</code> and the rest in <code>/usr/bin</code> on a second disk. That split stopped making sense. Most modern distros did the <b>/usr merge</b>: <code>/bin</code>, <code>/sbin</code> and <code>/lib</code> are now just symlinks into <code>/usr</code>.</p>
+      <div class="term"><pre>$ ls -l / | grep -- '->'
+lrwxrwxrwx   1 root root     7 Apr 22 bin -> usr/bin
+lrwxrwxrwx   1 root root     7 Apr 22 lib -> usr/lib
+lrwxrwxrwx   1 root root     8 Apr 22 sbin -> usr/sbin</pre></div>
+    </details>
+  </section>
+
+  <section class="sec" id="fd">
+    <h2 class="sec-title" data-short="File descriptors">🎟️ File descriptors: your ticket numbers</h2>
+    <div class="grid-2">
+      <div class="note kid"><div class="note-h">🧸 Coat-check tickets</div><p>When a program opens a file, the kernel keeps the real thing and hands back a little <b>ticket number</b> — a <b>file descriptor</b>. Later the program just says "read from ticket 3". Every program starts with three tickets already: <b>0</b> = keyboard in, <b>1</b> = screen out, <b>2</b> = errors out.</p></div>
+      <div class="term"><pre>$ ls -l /proc/self/fd
+lrwx------ 0 -> /dev/pts/0
+lrwx------ 1 -> /dev/pts/0
+lrwx------ 2 -> /dev/pts/0
+lr-x------ 3 -> /proc/48211/fd
+$ ulimit -n          # max open files per process
+1024</pre></div>
+    </div>
+    <div id="fdD"></div>
+    <h3 class="sub-title">🔀 Redirection = swapping the tickets</h3>
+    <div class="grid-2">
+      <div class="term"><pre>$ ls > list.txt            # fd 1 → list.txt
+$ ls /nope 2> errors.txt   # fd 2 → errors.txt
+$ make > build.log 2>&1    # fd 2 → wherever fd 1 goes
+$ sort < names.txt         # fd 0 ← names.txt</pre></div>
+      <div class="term"><pre>$ ls /etc | grep ssh | wc -l   # pipes connect 1 → 0
+3
+$ echo "hi" > /dev/null        # throw output away
+$ cat /dev/urandom | head -c 4 | xxd
+00000000: 9f3a c1e7</pre></div>
+    </div>
+  </section>
+
+  <section class="sec" id="inode">
+    <h2 class="sec-title" data-short="Inodes & links">🧾 Inodes: a file's real identity</h2>
+    <div class="grid-2">
+      <div class="note kid"><div class="note-h">🧸 Name tag vs the actual kid</div><p>A file's <b>name</b> is just a name tag. The real "kid" is the <b>inode</b> — a numbered record that knows who owns the file, its size, when it changed, and where its data blocks are on the disk. A folder is just a list of name tags pointing to inode numbers. One kid can wear <b>two</b> name tags (a hard link)!</p></div>
+      <div class="term"><pre>$ ls -i notes.txt
+1311 notes.txt
+$ stat notes.txt
+  File: notes.txt
+  Size: 13          Blocks: 8      IO Block: 4096  regular file
+Device: 259,2      Inode: 1311   Links: 1
+Access: (0644/-rw-r--r--)  Uid: (1000/kid)  Gid: (1000/kid)
+Modify: 2026-11-27 10:15:02</pre></div>
+    </div>
+    <div id="inodeD"></div>
+    <div class="sim" id="inodeLab">
+      <div class="sim-h"><h4>🔬 Link lab</h4><span class="badge y">hard links vs symlinks</span></div>
+      <div class="btn-row">
+        <button class="btn sm yellow" data-il="create" type="button">📝 create notes.txt</button>
+        <button class="btn sm blue" data-il="hard" type="button">🔗 ln notes.txt backup.txt</button>
+        <button class="btn sm purple" data-il="soft" type="button">↪️ ln -s notes.txt shortcut.txt</button>
+        <button class="btn sm green" data-il="append" type="button">✏️ edit backup.txt</button>
+        <button class="btn sm red" data-il="rm" type="button">🗑️ rm notes.txt</button>
+        <button class="btn sm" data-il="cat" type="button">👀 cat all</button>
+        <button class="btn sm" data-il="reset" type="button">↺</button>
+      </div>
+      <div class="inode-lab">
+        <div><b>📁 Directory /home/kid</b><table class="mtab" id="ilDir" style="width:100%"></table></div>
+        <div><b>🧾 Inode table</b><table class="mtab" id="ilIno" style="width:100%"></table></div>
+        <div><b>💾 Disk blocks</b><div class="blocks" id="ilBlk"></div></div>
+      </div>
+      <div class="log" id="ilLog" style="margin-top:10px" aria-live="polite"></div>
+    </div>
+    <div class="grid-2">
+      <div class="card c-b"><h4>🔗 Hard link</h4><p>A second name for the <b>same inode</b>. Delete either name: the data lives on until the <b>link count</b> hits 0. Can't cross file systems or point to folders.</p></div>
+      <div class="card c-v"><h4>↪️ Symbolic (soft) link</h4><p>A tiny file that stores a <b>path</b>. Works across disks and for folders, but breaks ("dangling") if the target is removed or moved.</p></div>
+    </div>
+  </section>
+
+  <section class="sec" id="vfs">
+    <h2 class="sec-title" data-short="VFS">🔌 VFS: one plug, many sockets</h2>
+    <p class="lead">Your apps don't care whether a file is on an SSD, a USB stick, a network server or invented by the kernel. The <b>Virtual File System</b> gives them one interface.</p>
+    <div id="vfsD"></div>
+    <div class="tbl-wrap"><table class="sk">
+      <tr><th>File system</th><th>Good at</th><th>Where you meet it</th></tr>
+      <tr><td><b>ext4</b></td><td>Rock-solid, journaling, the classic default</td><td>Ubuntu, Debian root disks</td></tr>
+      <tr><td><b>XFS</b></td><td>Huge files, parallel I/O</td><td>RHEL/Fedora servers</td></tr>
+      <tr><td><b>btrfs</b></td><td>Copy-on-write, snapshots, checksums, compression</td><td>Fedora, openSUSE, Steam Deck</td></tr>
+      <tr><td><b>ZFS</b></td><td>Pools, snapshots, end-to-end data integrity</td><td>NAS boxes, big storage</td></tr>
+      <tr><td><b>tmpfs</b></td><td>Lives in RAM — super fast, gone at reboot</td><td><code>/run</code>, <code>/dev/shm</code>, often <code>/tmp</code></td></tr>
+      <tr><td><b>proc / sysfs</b></td><td>Not storage at all: kernel info as files</td><td><code>/proc</code>, <code>/sys</code></td></tr>
+      <tr><td><b>overlayfs</b></td><td>Stacks folders in layers</td><td>Docker images → <a href="containers.html#overlay">Chapter 10</a></td></tr>
+      <tr><td><b>FAT32 / exFAT</b></td><td>Works everywhere</td><td>USB sticks, SD cards, the EFI partition</td></tr>
+    </table></div>
+  </section>
+
+  <section class="sec" id="mount">
+    <h2 class="sec-title" data-short="Mounting">🧷 Mounting: grafting a disk onto the tree</h2>
+    <div id="mountD"></div>
+    <div class="grid-2">
+      <div class="term"><pre>$ lsblk
+NAME        SIZE TYPE MOUNTPOINTS
+nvme0n1     512G disk
+├─nvme0n1p1   1G part /boot/efi
+└─nvme0n1p2 511G part /
+sdb          32G disk
+└─sdb1       32G part /media/kid/USB</pre></div>
+      <div class="term"><pre>$ df -h /
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/nvme0n1p2  502G  121G  356G  26% /
+$ cat /etc/fstab        # what to mount at boot
+UUID=3f2a…  /          ext4  defaults  0 1
+UUID=9C1B…  /boot/efi  vfat  umask=0077 0 1</pre></div>
+    </div>
+  </section>
+
+  <section class="sec" id="journal">
+    <h2 class="sec-title" data-short="Journaling">📒 Journaling: surviving a power cut</h2>
+    <div class="note kid"><div class="note-h">🧸 Write the to-do list first</div><p>Before cleaning your room, you write on a notepad: "1. move books to shelf 2. put toys in box". If mom calls you mid-way, you can look at the notepad and finish (or undo) cleanly. A <b>journal</b> is that notepad for the file system.</p></div>
+    <div id="journalD"></div>
+    <div class="note linux"><div class="note-h">🐧 ext4's three modes</div><ul class="sk-list"><li><b>ordered</b> (default): file data is written <i>before</i> the metadata is committed to the journal.</li><li><b>journal</b>: data AND metadata go through the journal (safest, slower).</li><li><b>writeback</b>: only metadata journaled (fastest, old data may show up after a crash).</li></ul><p>Copy-on-write file systems (btrfs, ZFS) take a different path: they never overwrite in place — they write new blocks, then flip a pointer. 🔀</p></div>
+  </section>
+
+  <section class="sec" id="lab3d">
+    <h2 class="sec-title" data-short="In 3D">🖥️ Files in 3D</h2>
+    <div id="lab"></div>
+  </section>
+
+  <section class="sec" id="quiz">
+    <h2 class="sec-title" data-short="Quiz">⭐ Files quiz</h2>
+    <div id="quizBox"></div>
+  </section>
+</main>
+<script src="js/core.js"></script>
+<script src="js/sketch.js"></script>
+<script src="vendor/three.min.js"></script>
+<script src="js/lab3d.js"></script>
+<script src="js/pages/files.js"></script>
+</body>
+</html>
