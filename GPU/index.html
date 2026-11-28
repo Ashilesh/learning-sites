@@ -1,0 +1,1060 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>GPU Sketchbook</title>
+<meta name="description" content="A fun, visual, sketchbook-style guide to GPUs — computers, operating systems, graphics, CUDA, AI and chip design, with a 3D model in every chapter.">
+<script>
+  // set theme before paint (no flash)
+  (function () {
+    try {
+      var t = localStorage.getItem('gpu-theme');
+      if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch (e) { document.documentElement.setAttribute('data-theme', 'light'); }
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=JetBrains+Mono:wght@400;600&family=Patrick+Hand&family=Permanent+Marker&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect x='14' y='14' width='72' height='72' rx='14' fill='%23ff3d8b' stroke='%2324243a' stroke-width='6'/%3E%3Ccircle cx='38' cy='46' r='7' fill='%23fff'/%3E%3Ccircle cx='62' cy='46' r='7' fill='%23fff'/%3E%3Cpath d='M38 62q12 10 24 0' stroke='%2324243a' stroke-width='5' fill='none'/%3E%3C/svg%3E">
+</head>
+<body>
+
+<!-- ===== SVG sprite: mascot + sketchy filter ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="rough" x="-5%" y="-5%" width="110%" height="110%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3" result="n"/>
+      <feDisplacementMap in="SourceGraphic" in2="n" scale="3.2"/>
+    </filter>
+    <marker id="arr" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="currentColor"/>
+    </marker>
+  </defs>
+  <symbol id="chippy" viewBox="0 0 120 120">
+    <g stroke="var(--ink)" stroke-width="3.5" stroke-linecap="round" fill="none">
+      <path d="M40 6v14M54 6v14M68 6v14M82 6v14M40 100v14M54 100v14M68 100v14M82 100v14M6 40h14M6 54h14M6 68h14M6 82h14M100 40h14M100 54h14M100 68h14M100 82h14"/>
+    </g>
+    <rect x="20" y="20" width="80" height="80" rx="16" fill="var(--pink)" stroke="var(--ink)" stroke-width="3.5"/>
+    <rect x="30" y="30" width="60" height="60" rx="10" fill="var(--face)" stroke="var(--ink)" stroke-width="2.5"/>
+    <circle cx="47" cy="55" r="8" fill="#fff" stroke="var(--ink)" stroke-width="2.5"/>
+    <circle cx="73" cy="55" r="8" fill="#fff" stroke="var(--ink)" stroke-width="2.5"/>
+    <circle cx="49" cy="56" r="3.8" fill="#24243a"/><circle cx="75" cy="56" r="3.8" fill="#24243a"/>
+    <circle cx="50.5" cy="54.5" r="1.3" fill="#fff"/><circle cx="76.5" cy="54.5" r="1.3" fill="#fff"/>
+    <path d="M49 70q11 10 22 0" stroke="var(--ink)" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+    <circle cx="38" cy="68" r="4.5" fill="var(--pink)" opacity=".55"/><circle cx="82" cy="68" r="4.5" fill="var(--pink)" opacity=".55"/>
+    <path d="M28 28l8 0M28 28l0 8" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".7"/>
+  </symbol>
+</svg>
+
+<!-- ===== top bar ===== -->
+<header class="topbar">
+  <div class="inner">
+    <a class="home-link" href="../index.html">← All explainers</a>
+    <a class="logo" href="#top" aria-label="GPU Sketchbook home"><svg><use href="#chippy"/></svg><span><b>GPU</b> Sketchbook</span></a>
+    <div class="spacer"></div>
+    <button class="tb-btn" id="openToc" aria-label="Open chapter list"><span class="emoji">📚</span><span class="txt">Chapters</span></button>
+    <button class="tb-btn theme-btn" id="themeBtn" aria-label="Toggle night theme"><span class="sun emoji">☀️</span><span class="moon emoji">🌙</span></button>
+  </div>
+  <div class="progress" id="progress"></div>
+</header>
+
+<aside class="drawer" id="drawer" aria-label="Chapters">
+  <header><h3>📚 Chapters</h3><button class="tb-btn" id="closeToc" aria-label="Close">✕</button></header>
+  <ol id="tocList"></ol>
+</aside>
+<div class="drawer-bg" id="drawerBg"></div>
+
+<main id="top">
+<!-- ===== HERO ===== -->
+<section class="hero wrap">
+  <div class="hero-grid">
+    <div>
+      <span class="kicker">✏️ a sketchbook guide for everyone — ages 8 to 108</span>
+      <h1>
+        <span class="l" style="color:var(--pink)">G</span><span class="l" style="color:var(--cyan)">P</span><span class="l" style="color:var(--yellow)">U</span>
+        <span class="row2">Sketch<span style="color:var(--green)">book</span></span>
+      </h1>
+      <p class="sub">The fun, visual, crayon-powered guide to <mark>Graphics Processing Units</mark> — from “what even is a computer?” all the way to CUDA, AI and chip design.</p>
+      <div class="cta">
+        <a class="btn c-pink" href="#ch1">Start the adventure 🚀</a>
+        <a class="btn alt c-cyan" href="#map">See the map 🗺️</a>
+      </div>
+      <div class="how">
+        <span>🖱️ drag 3D models to spin</span><span>👆 tap parts to learn</span><span>🧸 kid version</span><span>🤓 nerd corner</span><span>🌙 night mode, top right</span>
+      </div>
+    </div>
+    <div class="mascot-box">
+      <div class="bubble">Hi! I’m <b>Chippy</b> 👋 — a GPU! I’m basically <mark>thousands of tiny painters</mark> living on one chip. Come see how I work!</div>
+      <svg class="mascot-big" viewBox="0 0 120 120" role="img" aria-label="Chippy the GPU mascot"><use href="#chippy"/></svg>
+      <span class="doodle" style="left:4%;top:20%">⭐</span>
+      <span class="doodle" style="right:6%;bottom:12%;animation-delay:-2s">⚡</span>
+      <span class="doodle" style="left:12%;bottom:6%;animation-delay:-4s">🎨</span>
+      <span class="doodle" style="right:30%;top:-4%;animation-delay:-1s">✨</span>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat card c-pink" style="--rot:-1.5deg"><b>13</b>chapters</div>
+    <div class="stat card c-cyan" style="--rot:1deg"><b>14</b>3D models</div>
+    <div class="stat card c-yellow" style="--rot:-.5deg"><b>10+</b>toys to play with</div>
+    <div class="stat card c-green" style="--rot:1.5deg"><b>1</b>final quiz 🏆</div>
+  </div>
+
+  <h2 class="map-title" id="map">🗺️ Your learning adventure map</h2>
+  <p class="muted">Go in order like a game — basics first, pro level last. Visited levels get a ✅.</p>
+  <ol class="map" id="mapList"></ol>
+</section>
+
+<div class="wrap">
+
+<!-- ============ PART 1 ============ -->
+<div class="part-banner"><h2>Part 1 · The Basics</h2><p>Computers, bosses and brains 🧠</p></div>
+
+<!-- ===== CH 1 ===== -->
+<section class="chapter c-pink" id="ch1" data-icon="🖥️" data-short="Meet the Computer" data-level="basic">
+  <div class="ch-head">
+    <div class="ch-num">1</div>
+    <h2>Meet the <span class="sq">Computer</span></h2>
+    <p class="tag"><span class="lvl basic">Basic</span> Before we meet the GPU, let’s meet its whole family!</p>
+  </div>
+  <div class="eli5"><svg><use href="#chippy"/></svg>
+    <div class="bubble"><b class="who">🧸 KID VERSION</b>A computer is like a busy house 🏠. There’s a <b>thinker</b> (CPU), a <b>desk</b> for today’s stuff (RAM), a <b>bookshelf</b> that remembers everything (SSD), a <b>power plant</b> (PSU), <b>roads</b> connecting every room (motherboard)… and a giant <b>art studio full of painters</b> — that’s me, the GPU!</div>
+  </div>
+  <div class="ch-grid">
+    <div class="ch-body">
+      <div class="card">
+        <h4>🏠 The family of parts</h4>
+        <p>Every part has one job. Together they turn your clicks into games, videos and AI answers. In the 3D lab, <b>tap each part</b> to meet it, then hit <b>▶ Play the data journey</b> to watch a game picture get made.</p>
+      </div>
+      <div class="auto-grid">
+        <div class="part-card"><span class="em emoji">🧠</span><h4>CPU</h4><span class="like">is like… the brain / boss</span><p>Super smart, super quick — but does tricky things mostly one after another.</p></div>
+        <div class="part-card"><span class="em emoji">🎨</span><h4>GPU</h4><span class="like">is like… an art studio</span><p>Thousands of small workers doing simple jobs <b>at the same time</b>.</p></div>
+        <div class="part-card"><span class="em emoji">📝</span><h4>RAM</h4><span class="like">is like… your desk</span><p>Holds what you’re working on <i>right now</i>. Forgets everything when power is off.</p></div>
+        <div class="part-card"><span class="em emoji">📚</span><h4>SSD</h4><span class="like">is like… a bookshelf</span><p>Keeps games, photos & apps forever (even when off). Slower than the desk.</p></div>
+        <div class="part-card"><span class="em emoji">🛣️</span><h4>Motherboard</h4><span class="like">is like… city roads</span><p>A big board of copper roads connecting every part.</p></div>
+        <div class="part-card"><span class="em emoji">⚡</span><h4>PSU</h4><span class="like">is like… a power plant</span><p>Turns wall electricity into the gentle power the parts need.</p></div>
+      </div>
+    </div>
+    <div class="ch-stage"><div class="stage-wrap"><div class="stage" data-scene="pc" data-badge="3D lab · a real PC"></div></div></div>
+  </div>
+  <div class="ch-full">
+    <div>
+      <h3 class="doodle-h">What happens when you press ▶ in a game?</h3>
+      <div class="comic">
+        <div class="panel"><div class="art emoji">📚➡️📝</div><h5>Load</h5><p>The game is copied from the SSD bookshelf onto the RAM desk.</p></div>
+        <div class="panel"><div class="art emoji">🧠💭</div><h5>Think</h5><p>The CPU works out the rules: who moved? what got hit? what should be drawn?</p></div>
+        <div class="panel"><div class="art emoji">📋🛣️</div><h5>Send</h5><p>It sends a “to-draw list” to the GPU over the PCIe highway.</p></div>
+        <div class="panel"><div class="art emoji">🎨🎨🎨</div><h5>Paint</h5><p>The GPU’s thousands of cores color millions of pixels at once.</p></div>
+        <div class="panel"><div class="art emoji">🖥️😍</div><h5>Show</h5><p>The finished picture (a <b>frame</b>) zooms down the cable to your screen.</p></div>
+      </div>
+      <p class="comic-cap">…and this whole trip happens <mark>60 to 240 times every second!</mark> 🤯</p>
+    </div>
+    <div class="grid-2">
+      <details class="nerd"><summary>🤓 Nerd corner <span class="pill">GPU vs graphics card</span></summary><div class="in">
+        <ul>
+          <li><b>The GPU is the chip.</b> The <b>graphics card</b> is the whole board: GPU + its own memory (VRAM) + power parts + cooler + fans.</li>
+          <li><b>Integrated GPU:</b> built into the same chip as the CPU (most laptops, phones, Macs). <b>Discrete/dedicated GPU:</b> a separate chip or card with its own memory (gaming PCs, data centers).</li>
+          <li><b>PCIe</b> is the highway slot. PCIe 4.0 ×16 moves about <b>32 GB/s</b> each way; PCIe 5.0 doubles it to about <b>64 GB/s</b>.</li>
+          <li>A <b>frame</b> is one finished picture. <b>FPS</b> = frames per second.</li>
+        </ul></div></details>
+      <div class="remember"><h4>Remember</h4><ul>
+        <li>CPU = brain 🧠, GPU = army of painters 🎨.</li>
+        <li>RAM is fast but forgetful; SSD is slow but remembers.</li>
+        <li>Data travels SSD → RAM → CPU → GPU → screen.</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CH 2 ===== -->
+<section class="chapter c-purple" id="ch2" data-icon="🧑‍🏫" data-short="The Operating System" data-level="basic">
+  <div class="ch-head">
+    <div class="ch-num">2</div>
+    <h2>The <span class="sq">Operating System</span></h2>
+    <p class="tag"><span class="lvl basic">Basic</span> The boss who keeps every app (and the GPU) in line.</p>
+  </div>
+  <div class="eli5"><svg><use href="#chippy"/></svg>
+    <div class="bubble"><b class="who">🧸 KID VERSION</b>The <b>Operating System (OS)</b> is like a school principal 🧑‍🏫. Apps are students who all want stuff: time with the teacher (CPU), a desk (memory), the art room (GPU). The principal makes a fair schedule so <b>nobody fights</b> and nobody breaks anything!</div>
+  </div>
+  <div class="ch-grid">
+    <div class="ch-body">
+      <div class="card">
+        <h4>🏢 The OS is a building with floors</h4>
+        <p>Apps live on the <b>top floor</b>. They can’t touch the hardware directly — they must ask the floors below. Each request travels <b>down</b>: app → libraries/APIs → <b>kernel</b> (the OS’s heart) → <b>driver</b> (translator) → hardware. Then the answer travels back <b>up</b>.</p>
+        <p>Try the buttons in the 3D lab to send a request!</p>
+      </div>
+      <div class="chips"><span class="chip c">🪟 Windows</span><span class="chip c">🍎 macOS</span><span class="chip c">🐧 Linux</span><span class="chip c">🤖 Android</span><span class="chip c">📱 iOS</span><span class="chip c">🎮 console OSes</span></div>
+      <div class="auto-grid">
+        <div class="part-card"><span class="em emoji">⏱️</span><h4>Scheduler</h4><p>Gives each app tiny turns on the CPU (and GPU) so they all seem to run at once.</p></div>
+        <div class="part-card"><span class="em emoji">🗄️</span><h4>Memory manager</h4><p>Gives every app its own private “room” in RAM.</p></div>
+        <div class="part-card"><span class="em emoji">📁</span><h4>File system</h4><p>The librarian: knows where every file lives on the SSD.</p></div>
+        <div class="part-card"><span class="em emoji">🔌</span><h4>Drivers</h4><p>Translators that speak each device’s secret language — like the GPU driver.</p></div>
+        <div class="part-card"><span class="em emoji">🛡️</span><h4>Security guard</h4><p>Stops apps from peeking into each other or breaking the machine.</p></div>
+        <div class="part-card"><span class="em emoji">🖱️</span><h4>User interface</h4><p>Windows, buttons, touch and sound — the part you actually see.</p></div>
+      </div>
+    </div>
+    <div class="ch-stage"><div class="stage-wrap"><div class="stage" data-scene="os" data-badge="3D lab · OS tower"></div></div></div>
+  </div>
+  <div class="ch-full">
+    <div class="toy">
+      <div class="toy-h"><span class="toy-tag">TOY</span><h4>⏱️ Taking turns (time-slicing)</h4><span class="lvl basic">Basic</span></div>
+      <p>Your computer runs dozens of apps but has only a few CPU cores. The trick? The OS switches between them <b>thousands of times per second</b>. Turn apps on/off and watch the timeline:</p>
+      <div class="sched-apps" id="schedApps"></div>
+      <div class="sched-cpu"><div class="sched-core" id="schedCore">😴<small>CPU core</small></div><div class="out" id="schedTxt">Press an app to start!</div></div>
+      <div class="timeline" id="schedLine" aria-label="timeline"></div>
+      <p class="muted" style="margin-top:8px">Each colored block = one tiny turn (in real life about 1–10 milliseconds). Too fast for humans to notice — so it <i>feels</i> like everything runs at once!</p>
+    </div>
+    <div>
+      <h3 class="doodle-h">What happens when you double-click an app?</h3>
+      <div class="comic">
+        <div class="panel"><div class="art emoji">🖱️✨</div><h5>Click!</h5><p>You double-click. The OS notices instantly.</p></div>
+        <div class="panel"><div class="art emoji">📁➡️📝</div><h5>Load</h5><p>The file system finds the app on the SSD; it’s copied into RAM.</p></div>
+        <div class="panel"><div class="art emoji">🗄️⏱️</div><h5>Give room & time</h5><p>The OS gives it a private memory room and turns on the CPU.</p></div>
+        <div class="panel"><div class="art emoji">🪟🎨</div><h5>Draw!</h5><p>The app asks “please draw my window”. The OS + GPU driver tell the GPU to paint it.</p></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <details class="nerd"><summary>🤓 Nerd corner <span class="pill">kernel & GPU scheduling</span></summary><div class="in"><ul>
+        <li><b>User mode vs kernel mode:</b> apps run in a safe “user mode”. Only the kernel (and drivers) run in privileged “kernel mode”. Apps cross the wall with <b>system calls</b>.</li>
+        <li><b>Virtual memory:</b> each app sees its own fake address space; page tables map it to real RAM. The GPU has its own MMU and page tables too.</li>
+        <li><b>Preemptive multitasking:</b> a timer interrupt lets the kernel pause an app mid-task (a <b>context switch</b>) and run another.</li>
+        <li><b>GPU work is queued:</b> apps record <b>command buffers</b> through an API (DirectX, Vulkan, Metal); the driver turns them into GPU machine code and the OS’s GPU scheduler time-slices the GPU between apps.</li>
+      </ul></div></details>
+      <div class="remember"><h4>Remember</h4><ul>
+        <li>The OS is the boss: time, memory, files, devices, safety.</li>
+        <li>Apps never touch the GPU directly — they go through the API → OS → <b>driver</b>.</li>
+        <li>“Running at once” is really super-fast turn-taking.</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CH 3 ===== -->
+<section class="chapter c-blue" id="ch3" data-icon="⚔️" data-short="CPU vs GPU" data-level="basic">
+  <div class="ch-head">
+    <div class="ch-num">3</div>
+    <h2>CPU <span class="sq">vs</span> GPU</h2>
+    <p class="tag"><span class="lvl basic">Basic</span> One genius… or a thousand helpers?</p>
+  </div>
+  <div class="eli5"><svg><use href="#chippy"/></svg>
+    <div class="bubble"><b class="who">🧸 KID VERSION</b>Imagine 1,000 sheets of easy sums. Would you rather have <b>1 genius professor</b> 👩‍🏫 or <b>1,000 kids</b> 🧒 each doing one sheet? The kids finish way first — that’s a GPU! But for <b>one</b> super-tricky puzzle where each step needs the last one, the professor wins — that’s a CPU.</div>
+  </div>
+  <div class="ch-grid">
+    <div class="ch-body">
+      <div class="vs-row">
+        <div class="card vs-card"><div class="big-em emoji">👩‍🏫</div><h4>CPU</h4><p>A few <b>big, clever</b> cores. Great at decisions & step-by-step work.</p></div>
+        <div class="vs">VS</div>
+        <div class="card vs-card"><div class="emoji-army emoji" id="kidArmy"></div><h4>GPU</h4><p>Thousands of <b>small, simple</b> cores. Great at doing the <b>same</b> thing to lots of data.</p></div>
+      </div>
+      <div class="card">
+        <h4>🧪 Try the 3D race</h4>
+        <p><b>🧱 Big repeated job:</b> paint a 1,024-tile picture. The CPU’s 8 fast cores take turns. The GPU’s 1,024 small cores each paint one tile <b>at the same time</b>.</p>
+        <p><b>🧩 Step-by-step puzzle:</b> each step needs the answer of the step before. Now extra workers can’t help — the fast CPU core wins!</p>
+      </div>
+    </div>
+    <div class="ch-stage"><div class="stage-wrap"><div class="stage" data-scene="cpuvsgpu" data-badge="3D lab · the big race"></div></div></div>
+  </div>
+  <div class="ch-full">
+    <div class="toy">
+      <div class="toy-h"><span class="toy-tag">TOY</span><h4>🏎️ Sports car vs 🚌 school buses</h4><span class="lvl basic">Basic</span></div>
+      <p>The CPU is a <b>sports car</b> (2 seats, super fast). The GPU is a <b>fleet of buses</b> (slower, but thousands of seats). How many kids need a ride to the zoo?</p>
+      <div class="row"><label for="rideN">Kids: <b id="rideNv">10</b></label><input type="range" id="rideN" min="1" max="5000" value="10" style="width:min(380px,100%)"></div>
+      <div class="race" style="margin-top:12px">
+        <div class="race-row"><div class="em emoji">🏎️</div><div class="race-track"><span class="race-runner emoji" id="carRun">🏎️</span></div><div class="t" id="carT">–</div></div>
+        <div class="race-row"><div class="em emoji">🚌</div><div class="race-track"><span class="race-runner emoji" id="busRun">🚌</span></div><div class="t" id="busT">–</div></div>
+      </div>
+      <p class="out" id="rideWin" style="margin-top:8px"></p>
+      <p class="muted">Car: 2 seats, 10 min per trip. Buses: 50 buses × 40 seats, 30 min per trip. This is <b>latency</b> (how fast ONE trip is) vs <b>throughput</b> (how many get there per hour).</p>
+    </div>
+    <div class="table-scroll"><table class="sk-table">
+      <thead><tr><th></th><th>🧠 CPU</th><th>🎨 GPU</th></tr></thead>
+      <tbody>
+        <tr><td>Cores</td><td>A handful of big, smart cores (about 4–24 on a PC)</td><td>Thousands of small, simple cores (about 2,000–20,000+)</td></tr>
+        <tr><td>Is like</td><td>A genius professor · a sports car</td><td>A school of kids · a fleet of buses</td></tr>
+        <tr><td>Great at</td><td>Tricky, branchy, step-by-step jobs; running the OS</td><td>Same simple step on huge piles of data</td></tr>
+        <tr><td>Speed style</td><td><b>Low latency</b>: one task finished fast</td><td><b>High throughput</b>: tons of tasks per second</td></tr>
+        <tr><td>Chip space spent on</td><td>Big caches, branch prediction, out-of-order tricks</td><td>As many math units (ALUs) as possible</td></tr>
+        <tr><td>Examples</td><td>Opening apps, game rules, spreadsheets, web pages</td><td>Graphics, AI, video, physics & science simulations</td></tr>
+      </tbody>
+    </table></div>
+    <div class="grid-2">
+      <details class="nerd"><summary>🤓 Nerd corner <span class="pill">Amdahl’s law</span></summary><div class="in">
+        <p>GPUs only help with the part of a job that can be split up. <b>Amdahl’s law:</b> if 10% of a program must run step-by-step, the best possible speed-up is <b>10×</b> — even with a million cores!</p>
+        <ul><li><b>SIMD/SIMT:</b> one instruction, many data — GPUs run one instruction on a whole team of threads.</li>
+        <li>CPUs also have small SIMD units (AVX, NEON), so they’re a little bit parallel too.</li>
+        <li>The real world uses <b>both</b>: the CPU organizes, the GPU crunches.</li></ul></div></details>
+      <div class="remember"><h4>Remember</h4><ul>
+        <li>CPU = few fast smart cores (low latency).</li>
+        <li>GPU = many simple cores (high throughput).</li>
+        <li>Lots of independent work → GPU. Step-by-step → CPU.</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CH 4 ===== -->
+<section class="chapter c-orange" id="ch4" data-icon="🌍" data-short="What Can GPUs Do?" data-level="basic">
+  <div class="ch-head">
+    <div class="ch-num">4</div>
+    <h2>What Can GPUs <span class="sq">Do?</span></h2>
+    <p class="tag"><span class="lvl basic">Basic</span> Way more than games!</p>
+  </div>
+  <div class="eli5"><svg><use href="#chippy"/></svg>
+    <div class="bubble"><b class="who">🧸 KID VERSION</b>Anything that needs the <b>same simple step done millions of times</b> — coloring pixels, multiplying numbers, moving raindrops — is GPU heaven! Spin the 3D wheel to see where GPUs work every day.</div>
+  </div>
+  <div class="ch-grid">
+    <div class="ch-body">
+      <div class="auto-grid" style="grid-template-columns:repeat(auto-fill,minmax(min(100%,200px),1fr))">
+        <div class="part-card"><span class="em emoji">🎮</span><h4>Games</h4><p>Draws every frame: 3D worlds, lights, shadows, reflections.</p></div>
+        <div class="part-card"><span class="em emoji">🤖</span><h4>AI helpers</h4><p>Chatbots, translators & voice assistants are trained and run on GPUs.</p></div>
+        <div class="part-card"><span class="em emoji">🎬</span><h4>Movies</h4><p>Animated films & special effects: one frame can take hours to render.</p></div>
+        <div class="part-card"><span class="em emoji">🧬</span><h4>Medicine</h4><p>Predicting protein shapes, finding new medicines, reading scans.</p></div>
+        <div class="part-card"><span class="em emoji">🚗</span><h4>Robots & cars</h4><p>Seeing the road through cameras, many times per second.</p></div>
+        <div class="part-card"><span class="em emoji">🌦️</span><h4>Weather</h4><p>Simulating billions of bits of air and water to forecast storms.</p></div>
+        <div class="part-card"><span class="em emoji">🎨</span><h4>Art & video</h4><p>Photo filters, video editing, streaming, AI image making.</p></div>
+        <div class="part-card"><span class="em emoji">🪐</span><h4>Space & physics</h4><p>Colliding galaxies, black holes, crash tests — all simulated.</p></div>
+      </div>
+    </div>
+    <div class="ch-stage"><div class="stage-wrap"><div class="stage" data-scene="uses" data-badge="3D lab · wheel of wonders"></div></div></div>
+  </div>
+  <div class="ch-full">
+    <div class="fact">A 4K screen has <b class="big">8.3 million</b> pixels. At 60 frames per second, a GPU colors about <b class="big">500 million pixels every second</b>. If you colored one pixel per second, a <i>single</i> 4K frame would take you about <b class="big">96 days</b>! 😵</div>
+    <div>
+      <h3 class="doodle-h">A tiny history of the GPU</h3>
+      <div class="comic">
+        <div class="panel"><div class="art emoji">🕹️</div><h5>1970s–90s</h5><p>Special chips help draw simple 2D game graphics.</p></div>
+        <div class="panel"><div class="art emoji">🧊</div><h5>1999</h5><p>The word “GPU” becomes popular: one chip that handles 3D shapes and lighting.</p></div>
+        <div class="panel"><div class="art emoji">🖌️</div><h5>2001</h5><p>Programmable <b>shaders</b>: artists can write tiny programs for pixels.</p></div>
+        <div class="panel"><div class="art emoji">🧮</div><h5>2007</h5><p><b>CUDA</b> lets anyone use GPUs for any math, not just pictures.</p></div>
+        <div class="panel"><div class="art emoji">🧠</div><h5>2012 →</h5><p>AI takes off: a famous image-recognizer (AlexNet) trains on 2 GPUs. Today: huge AI on thousands of GPUs.</p></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <details class="nerd"><summary>🤓 Nerd corner <span class="pill">why it fits</span></summary><div class="in"><ul>
+        <li>These jobs are <b>data-parallel</b>: the same math applied to millions of independent items (pixels, matrix cells, grid points, particles).</li>
+        <li>They’re also <b>throughput-hungry</b>: nobody cares if one pixel is late by a microsecond, only that the whole frame is ready in time.</li>
+        <li>Using GPUs for non-graphics work is called <b>GPGPU</b> (General-Purpose computing on GPUs).</li>
+      </ul></div></details>
+      <div class="remember"><h4>Remember</h4><ul>
+        <li>Same step × millions of items = GPU job.</li>
+        <li>Games, AI, movies, science, cars, weather, art.</li>
+        <li>GPUs grew from picture-drawers into general math machines.</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PART 2 ============ -->
+<div class="part-banner"><h2>Part 2 · Inside the GPU</h2><p>Open it up and look inside 🔧</p></div>
+
+<!-- ===== CH 5 ===== -->
+<section class="chapter c-green" id="ch5" data-icon="🥪" data-short="Anatomy of a Graphics Card" data-level="mid">
+  <div class="ch-head">
+    <div class="ch-num">5</div>
+    <h2>Anatomy of a <span class="sq">Graphics Card</span></h2>
+    <p class="tag"><span class="lvl mid">Intermediate</span> Let’s take one apart (safely, in 3D!)</p>
+  </div>
+  <div class="eli5"><svg><use href="#chippy"/></svg>
+    <div class="bubble"><b class="who">🧸 KID VERSION</b>A graphics card is like a <b>sandwich</b> 🥪: a board in the middle with the GPU chip & its memory, a metal cooler on top to soak up heat, fans to blow the heat away, and a metal plate on the bottom. Slide the <b>explode</b> slider to pull it apart!</div>
+  </div>
+  <div class="ch-grid">
+    <div class="ch-body">
+      <div class="card"><h4>👆 Tap a part (here or in 3D)</h4>
+        <div class="legend-chips" id="cardLegend">
+          <button data-part="die">🔲 GPU chip</button><button data-part="vram">🟫 VRAM</button><button data-part="vrm">⚡ VRM</button>
+          <button data-part="pcb">🟩 Circuit board</button><button data-part="pcie">🟨 PCIe fingers</button><button data-part="ports">🔌 Display ports</button>
+          <button data-part="power">🔋 Power plug</button><button data-part="heatsink">🧊 Heatsink</button><button data-part="pipes">🟠 Heat pipes</button>
+          <button data-part="fans">🌀 Fans</button><button data-part="backplate">🛡️ Backplate</button>
+        </div>
+      </div>
+      <div class="card">
+        <h4>🌡️ Why so much cooler?</h4>
+        <p>A big GPU can use <b>300–600 watts</b> — like 5 old light bulbs squeezed into a postage stamp! All that energy turns into heat. Press <b>🔥 Show heat</b> to watch it flow: chip → copper base → heat pipes → fins → fans → out.</p>
+      </div>
+      <div class="fact" style="--accent:var(--green)">One high-end gaming chip (RTX 4090) packs about <b class="big">76 billion</b> transistors, <b class="big">16,384</b> CUDA cores and <b class="big">24 GB</b> of VRAM moving about <b class="big">1 TB</b> of data per second.</div>
+    </div>
+    <div class="ch-stage"><div class="stage-wrap"><div class="stage" data-scene="card" data-badge="3D lab · exploded card"></div></div></div>
+  </div>
+  <div class="ch-full">
+    <div class="grid-2">
+      <details class="nerd"><summary>🤓 Nerd corner <span class="pill">power, memory, binning</span></summary><div class="in"><ul>
+        <li><b>VRM phases:</b> many small regulators take turns supplying ~1 volt at hundreds of amps — smoother, cooler power.</li>
+        <li><b>GDDR vs HBM:</b> gaming cards place GDDR6/GDDR6X/GDDR7 chips around the GPU. Data-center GPUs (H100, B200) stack <b>HBM</b> memory towers right next to the chip on a silicon interposer for huge bandwidth.</li>
+        <li><b>Binning:</b> chips with a few defects get some units switched off and are sold as cheaper models.</li>
+        <li><b>Thermal throttling:</b> if the chip gets too hot, it lowers its clock speed to protect itself.</li>
+        <li><b>TGP/TBP:</b> the total power the board is designed to draw.</li>
+      </ul></div></details>
+      <div class="remember"><h4>Remember</h4><ul>
+        <li>GPU chip in the middle, VRAM around it.</li>
+        <li>VRM feeds clean power; heatsink + fans remove heat.</li>
+        <li>PCIe fingers = road to the CPU; ports = road to the screen.</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CH 6 ===== -->
+<section class="chapter c-cyan" id="ch6" data-icon="🏙️" data-short="Inside the GPU Chip" data-level="mid">
+  <div class="ch-head">
+    <div class="ch-num">6</div>
+    <h2>Inside the <span class="sq">GPU Chip</span></h2>
+    <p class="tag"><span class="lvl mid">Intermediate</span> A whole city on a fingernail.</p>
+  </div>
+  <div class="eli5"><svg><use href="#chippy"/></svg>
+    <div class="bubble"><b class="who">🧸 KID VERSION</b>Zoom into the chip and you find a <b>city</b> 🏙️: neighborhoods (GPCs), factories (SMs), and inside each factory, rows of workers (CUDA cores) plus special machines — <b>Tensor cores</b> for AI math and <b>RT cores</b> for light rays.</div>
+  </div>
+  <div class="ch-grid">
+    <div class="ch-body">
+      <div class="card">
+        <h4>🔍 The zoom ladder (RTX 4090 example)</h4>
+        <div class="comic" style="grid-template-columns:repeat(auto-fit,minmax(110px,1fr))">
+          <div class="panel"><div class="art emoji">🔲</div><h5>1 chip</h5><p>the GPU die</p></div>
+          <div class="panel"><div class="art emoji">🏘️</div><h5>11 GPCs</h5><p>neighborhoods</p></div>
+          <div class="panel"><div class="art emoji">🏭</div><h5>128 SMs</h5><p>factories</p></div>
+          <div class="panel"><div class="art emoji">👷</div><h5>16,384</h5><p>CUDA cores</p></div>
+        </div>
+      </div>
+      <div class="card">
+        <h4>🏭 Inside one SM (Streaming Multiprocessor)</h4>
+        <p>Each SM has <b>4 teams</b>. Each team has a <b>warp scheduler</b> (the boss with a megaphone 📣), <b>32 CUDA-core lanes</b>, a <b>Tensor core</b>, and a big <b>register file</b> (tiny super-fast lockers). The whole SM shares <b>L1 / shared memory</b>, texture units and an <b>RT core</b>.</p>
+        <p>Switch the 3D lab to <b>🏭 One SM</b> and watch warps fire!</p>
+      </div>
+    </div>
+    <div class="ch-stage"><div class="stage-wrap"><div class="stage" data-scene="chip" data-badge="3D lab · chip city"></div></div></div>
+  </div>
+  <div class="ch-full">
+    <div class="card">
+      <h3 class="doodle-h">📣 Warps: teams of 32 that march together</h3>
+      <div class="grid-2" style="align-items:center">
+        <div><p>Threads are grouped into teams of <b>32</b> called a <b>warp</b>. One boss shouts one instruction — <i>“add!”</i> — and all 32 do it at the same time, each on its <b>own</b> number. This is called <b>SIMT</b>: Single Instruction, Multiple Threads.</p>
+        <p>The clever trick: when a warp is waiting for data from memory, the scheduler <b>instantly switches</b> to another warp that’s ready. No time wasted! That’s called <mark>latency hiding</mark>.</p></div>
+        <div id="warpDoodle" class="sketch-svg" aria-label="warp diagram"></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <details class="nerd"><summary>🤓 Nerd corner <span class="pill">SM numbers</span></summary><div class="in"><ul>
+        <li>Ada Lovelace SM (RTX 40): 128 FP32 lanes, 4 Tensor cores, 1 RT core, 4 warp schedulers, 64K × 32-bit registers (256 KB), 128 KB L1/shared memory.</li>
+        <li>An SM can hold many warps at once (up to 48 on Ada). <b>Occupancy</b> = active warps ÷ max warps.</li>
+        <li>Other names: AMD says <b>Compute Units</b> and <b>wavefronts</b> (32 or 64 wide); Apple says <b>GPU cores</b> and <b>SIMD-groups</b> (32 wide); Intel says <b>Xe-cores</b>.</li>
+        <li>Fixed-function helpers live outside the SMs too: video encoders/decoders (NVENC/NVDEC), display engine, copy engines.</li>
+      </ul></div></details>
+      <div class="remember"><h4>Remember</h4><ul>
+        <li>Chip → GPCs → SMs → cores.</li>
+        <li>Warp = 32 threads doing the same instruction.</li>
+        <li>Tensor cores = AI math; RT cores = light rays.</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CH 7 ===== -->
+<section class="chapter c-yellow" id="ch7" data-icon="🎮" data-short="How Games Get Drawn" data-level="mid">
+  <div class="ch-head">
+    <div class="ch-num">7</div>
+    <h2>How Games Get <span class="sq">Drawn</span></h2>
+    <p class="tag"><span class="lvl mid">Intermediate</span> The graphics pipeline: dots → triangles → pixels → wow.</p>
+  </div>
+  <div class="eli5"><svg><use href="#chippy"/></svg>
+    <div class="bubble"><b class="who">🧸 KID VERSION</b>Every game picture starts as <b>dots</b> → the dots connect into <b>triangles</b> → triangles get <b>colored in</b> → add <b>light & shadow</b> → show it! It’s a super-fast coloring book 📒🖍️ — done up to hundreds of times a second.</div>
+  </div>
+  <div class="ch-grid">
+    <div class="ch-body">
+      <div class="card">
+        <h4>🎬 Step through the pipeline</h4>
+        <p>In the 3D lab, press <b>Next ▶</b>. The little island is the 3D world. The camera 📷 looks at it, and the <b>screen</b> on the right shows what the GPU makes at each step — even the chunky pixels!</p>
+      </div>
+      <div class="comic" style="grid-template-columns:repeat(auto-fit,minmax(120px,1fr))">
+        <div class="panel"><div class="art">⋰⋱</div><h5>Vertices</h5><p>corner points</p></div>
+        <div class="panel"><div class="art">△</div><h5>Triangles</h5><p>connect the dots</p></div>
+        <div class="panel"><div class="art emoji">📷</div><h5>Vertex shader</h5><p>move to camera view</p></div>
+        <div class="panel"><div class="art emoji">🟥</div><h5>Rasterize</h5><p>which pixels?</p></div>
+        <div class="panel"><div class="art emoji">🖍️</div><h5>Pixel shader</h5><p>color + light</p></div>
+        <div class="panel"><div class="art emoji">🖼️</div><h5>Frame!</h5><p>show it</p></div>
+      </div>
+    </div>
+    <div class="ch-stage"><div class="stage-wrap"><div class="stage" data-scene="pipeline" data-badge="3D lab · graphics pipeline"></div></div></div>
+  </div>
+  <div class="ch-full">
+    <div>
+      <h3 class="doodle-h">🎬 Slow motion: inside ONE frame</h3>
+      <p>Now let’s really zoom in. Follow a cube and a pyramid through <b>every</b> step a GPU takes: <mark>matrix math</mark> → <mark>vertex shader</mark> → <mark>rasterization</mark> → <mark>depth test</mark> → <mark>pixel shader</mark>. Press <b>▶ Play all</b>, or go one step at a time with <b>Next ▶</b>. The card in the corner shows the <i>real</i> numbers — at the end, a tiny software “GPU” renders the scene live.</p>
+    </div>
+    <div class="stage-wrap wide"><div class="stage" data-scene="render" data-badge="3D lab · one frame, slow motion"></div></div>
+    <div class="grid-3">
+      <div class="card"><h4>🧮 Matrices</h4><p>A 4×4 grid of numbers that can <b>move, turn, scale and squish</b> points in one multiply. Three of them — <b>Model</b>, <b>View</b>, <b>Projection</b> — carry each corner from “inside the object” to “on your screen”. Multiplying them is exactly the math GPUs (and AI chips) are built for.</p></div>
+      <div class="card"><h4>🖌️ Shaders</h4><p>Tiny programs the GPU runs thousands of times <b>at the same time</b>: the <b>vertex shader</b> once per corner, the <b>pixel (fragment) shader</b> once per pixel. Game artists write them to create water, fur, fire, toon outlines…</p></div>
+      <div class="card"><h4>🟥 Rasterization</h4><p>Turning triangles into pixels: test every pixel center, interpolate depth and texture position, keep only the <b>nearest</b> fragment with the <b>depth buffer</b>, then hand each one to the pixel shader.</p></div>
+    </div>
+    <div class="grid-2">
+      <div>
+        <span class="code-title">Vertex shader (GLSL) · once per corner</span>
+<pre class="code-sk"><span class="k">uniform</span> <span class="k">mat4</span> model, view, projection;
+<span class="k">in</span>  <span class="k">vec3</span> position;   <span class="c">// e.g. (-1, -1, 1)</span>
+<span class="k">in</span>  <span class="k">vec3</span> normal;
+<span class="k">in</span>  <span class="k">vec2</span> uv;
+<span class="k">out</span> <span class="k">vec3</span> vNormal;
+<span class="k">out</span> <span class="k">vec2</span> vUv;
+
+<span class="k">void</span> <span class="f">main</span>() {
+  vNormal = <span class="k">mat3</span>(model) * normal;
+  vUv     = uv;
+  <span class="c">// ① model  ② view  ③ projection</span>
+  gl_Position = projection * view * model
+              * <span class="k">vec4</span>(position, <span class="n">1.0</span>);
+}</pre>
+        <p class="anno" style="margin-top:8px">↑ steps ①–④ of the slow-motion lab</p>
+      </div>
+      <div>
+        <span class="code-title">Fragment / pixel shader (GLSL) · once per pixel</span>
+<pre class="code-sk"><span class="k">uniform</span> <span class="k">sampler2D</span> tex;       <span class="c">// the picture to paint on</span>
+<span class="k">uniform</span> <span class="k">vec3</span> lightDir;
+<span class="k">in</span>  <span class="k">vec3</span> vNormal;              <span class="c">// interpolated by the</span>
+<span class="k">in</span>  <span class="k">vec2</span> vUv;                  <span class="c">// rasterizer!</span>
+<span class="k">out</span> <span class="k">vec4</span> color;
+
+<span class="k">void</span> <span class="f">main</span>() {
+  <span class="k">vec3</span>  base  = <span class="f">texture</span>(tex, vUv).rgb;
+  <span class="k">float</span> light = <span class="f">max</span>(<span class="f">dot</span>(<span class="f">normalize</span>(vNormal), lightDir), <span class="n">0.0</span>);
+  color = <span class="k">vec4</span>(base * (<span class="n">0.3</span> + <span class="n">0.7</span> * light), <span class="n">1.0</span>);
+}</pre>
+        <p class="anno" style="margin-top:8px">↑ step ⑦ — texture × light, for every fragment</p>
+      </div>
+    </div>
+    <div class="grid-2">
+      <div class="toy">
+        <div class="toy-h"><span class="toy-tag">TOY</span><h4>🟥 Be the rasterizer!</h4></div>
+        <p>Drag the 3 corners. The GPU checks the <b>center of every pixel</b>: inside the triangle? Color it!</p>
+        <canvas id="rasterToy" width="480" height="320" aria-label="rasterizer toy"></canvas>
+        <p class="out" id="rasterOut" style="margin-top:6px"></p>
+      </div>
+      <div class="toy">
+        <div class="toy-h"><span class="toy-tag">TOY</span><h4>⏱️ The frame budget</h4></div>
+        <p>To hit a frame rate, every frame must be finished in time. Pick a screen and speed:</p>
+        <div class="row" style="margin-bottom:8px">
+          <div class="seg" id="resSeg"></div>
+        </div>
+        <div class="row"><label>FPS: <b id="fpsV">60</b></label><input type="range" id="fpsR" min="30" max="240" step="10" value="60"></div>
+        <div id="budgetBar" style="margin:12px 0 8px"></div>
+        <p class="out" id="budgetOut"></p>
+      </div>
+    </div>
+    <div class="card">
+      <h3 class="doodle-h">Rasterization vs ray tracing</h3>
+      <svg class="sketch-svg" viewBox="0 0 760 250" role="img" aria-label="Rasterization projects triangles onto pixels; ray tracing shoots rays from the eye that bounce to the light">
+        <g class="rough" stroke="var(--ink)" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+          <!-- raster -->
+          <rect x="20" y="40" width="130" height="150" rx="6"/>
+          <path d="M20 70h130M20 100h130M20 130h130M20 160h130M46 40v150M72 40v150M98 40v150M124 40v150" stroke-width="1.2" opacity=".5"/>
+          <rect x="46" y="100" width="26" height="30" fill="var(--yellow)" opacity=".8"/><rect x="72" y="70" width="26" height="60" fill="var(--yellow)" opacity=".8"/><rect x="98" y="100" width="26" height="30" fill="var(--yellow)" opacity=".8"/><rect x="72" y="130" width="26" height="30" fill="var(--yellow)" opacity=".8"/>
+          <path d="M255 75 L330 175 L215 165 Z" fill="var(--pink)" fill-opacity=".55"/>
+          <path d="M255 75 L95 85 M330 175 L120 150 M215 165 L70 150" stroke-dasharray="6 6" stroke="var(--blue)"/>
+          <!-- ray tracing -->
+          <circle cx="430" cy="130" r="18" fill="var(--card)"/><circle cx="436" cy="128" r="6" fill="var(--ink)"/>
+          <rect x="500" y="55" width="16" height="150" rx="3" fill="var(--cyan)" fill-opacity=".35"/>
+          <circle cx="640" cy="160" r="42" fill="var(--green)" fill-opacity=".55"/>
+          <circle cx="700" cy="40" r="20" fill="var(--yellow)"/>
+          <path d="M716 24l10-10M722 42h12M704 58l6 10M684 22l-6-10" stroke="var(--orange)"/>
+          <path d="M450 128 L605 140" stroke="var(--orange)" marker-end="url(#arr)" color="var(--orange)"/>
+          <path d="M605 140 L688 56" stroke="var(--yellow)" stroke-dasharray="7 6"/>
+          <path d="M450 135 L620 205" stroke="var(--orange)"/><path d="M620 205 L740 230" stroke="var(--purple)" stroke-dasharray="5 6"/>
+          <path d="M450 122 L740 70" stroke="var(--blue)" stroke-dasharray="3 6"/>
+        </g>
+        <text x="20" y="25" class="tt" font-size="26">Rasterization</text>
+        <text x="20" y="222" font-size="17">pixels on screen</text><text x="215" y="205" font-size="17">triangle in 3D</text>
+        <text x="20" y="244" font-size="16" opacity=".8">“Which pixels does this triangle cover?” → super fast</text>
+        <text x="420" y="25" class="tt" font-size="26">Ray tracing</text>
+        <text x="408" y="170" font-size="17">eye 👁</text><text x="478" y="222" font-size="17">screen</text><text x="650" y="84" font-size="16">light</text>
+        <text x="420" y="244" font-size="16" opacity=".8">“Follow light rays as they bounce” → super realistic</text>
+      </svg>
+      <p>Most games <b>rasterize</b> (fast!) and add a sprinkle of <b>ray tracing</b> for reflections and shadows. <b>RT cores</b> speed up “does this ray hit a triangle?” checks. <b>Upscaling</b> (DLSS, FSR, XeSS, MetalFX) draws a smaller image and uses smart math or AI to fill in the details.</p>
+    </div>
+    <div class="grid-2">
+      <details class="nerd"><summary>🤓 Nerd corner <span class="pill">shaders & buffers</span></summary><div class="in"><ul>
+        <li><b>Shaders</b> are tiny programs run by thousands of threads: vertex shaders (per corner), pixel/fragment shaders (per pixel), compute shaders (anything).</li>
+        <li><b>Depth buffer (z-buffer):</b> remembers how far each pixel is so near things hide far things.</li>
+        <li><b>Textures & mipmaps:</b> pictures wrapped onto triangles, with pre-shrunk copies for far-away objects.</li>
+        <li><b>Draw call:</b> one “please draw this” command from the CPU. Too many = CPU bottleneck.</li>
+        <li><b>Double buffering & V-Sync:</b> draw the next frame while showing the current one, swap when the screen refreshes.</li>
+        <li><b>APIs:</b> DirectX 12, Vulkan, Metal, OpenGL, WebGL/WebGPU (this page uses WebGL!).</li>
+      </ul></div></details>
+      <div class="remember"><h4>Remember</h4><ul>
+        <li>Vertices → triangles → pixels → shading → frame.</li>
+        <li>60 FPS means each frame has just 16.7 ms.</li>
+        <li>Raster = fast, ray tracing = realistic.</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ PART 3 ============ -->
+<div class="part-banner"><h2>Part 3 · Pro Level</h2><p>Programming, AI and chip design 🚀</p></div>
+
+<!-- ===== CH 8 ===== -->
+<section class="chapter c-purple" id="ch8" data-icon="🧵" data-short="CUDA: Bossing the Army" data-level="pro">
+  <div class="ch-head">
+    <div class="ch-num">8</div>
+    <h2>CUDA: Bossing <span class="sq">the Army</span></h2>
+    <p class="tag"><span class="lvl pro">Advanced</span> How programmers talk to thousands of GPU threads.</p>
+  </div>
+  <div class="eli5"><svg><use href="#chippy"/></svg>
+    <div class="bubble"><b class="who">🧸 KID VERSION</b><b>CUDA</b> is NVIDIA’s way of bossing around the GPU army. You write instructions for <b>ONE</b> worker, then shout <i>“Launch a million of these!”</i> — and every worker does the same job on <b>its own</b> piece of data.</div>
+  </div>
+  <div class="ch-grid">
+    <div class="ch-body">
+      <div class="card">
+        <h4>📦 Grid → Blocks → Threads</h4>
+        <div id="gridDoodle"></div>
+        <p>A launch makes a <b>grid</b> of <b>blocks</b>. Each block is a team of <b>threads</b> that can share fast memory and wait for each other. The GPU sends blocks to free <b>SMs</b> — in any order.</p>
+        <p>In the 3D lab, press <b>🚀 Launch kernel</b>, then switch to the <b>big GPU</b>. Same code — finishes way faster! That’s CUDA’s superpower: <mark>it scales automatically</mark>.</p>
+      </div>
+    </div>
+    <div class="ch-stage"><div class="stage-wrap"><div class="stage" data-scene="cuda" data-badge="3D lab · kernel launch"></div></div></div>
+  </div>
+  <div class="ch-full">
+    <div class="grid-2">
+      <div>
+        <span class="code-title">CPU way 🐢</span>
+<pre class="code-sk"><span class="c">// one worker does every item, one by one</span>
+<span class="k">for</span> (<span class="k">int</span> i = <span class="n">0</span>; i &lt; n; i++) {
+    c[i] = a[i] + b[i];
+}</pre>
+        <p class="anno" style="margin-top:8px">↑ a million items = a million loop turns</p>
+        <span class="code-title" style="margin-top:12px">Python + PyTorch (uses CUDA for you) 🐍</span>
+<pre class="code-sk"><span class="k">import</span> torch
+a = torch.rand(<span class="n">1_000_000</span>, device=<span class="s">"cuda"</span>)
+b = torch.rand(<span class="n">1_000_000</span>, device=<span class="s">"cuda"</span>)
+c = a + b   <span class="c"># runs as a CUDA kernel on the GPU!</span></pre>
+      </div>
+      <div>
+        <span class="code-title">CUDA way ⚡</span>
+<pre class="code-sk"><span class="c">// write the job for ONE thread...</span>
+<span class="k">__global__</span> <span class="k">void</span> <span class="f">add</span>(<span class="k">float</span> *a, <span class="k">float</span> *b, <span class="k">float</span> *c, <span class="k">int</span> n) {
+    <span class="k">int</span> i = blockIdx.x * blockDim.x + threadIdx.x;
+    <span class="k">if</span> (i &lt; n) c[i] = a[i] + b[i];  <span class="c">// my item!</span>
+}
+
+<span class="c">// ...then launch a million of them</span>
+<span class="k">int</span> threads = <span class="n">256</span>;
+<span class="k">int</span> blocks  = (n + threads - <span class="n">1</span>) / threads;
+<span class="f">add</span>&lt;&lt;&lt;blocks, threads&gt;&gt;&gt;(d_a, d_b, d_c, n);</pre>
+        <p class="anno" style="margin-top:8px">↑ every thread computes its own number <b>i</b></p>
+      </div>
+    </div>
+    <div class="toy">
+      <div class="toy-h"><span class="toy-tag">TOY</span><h4>🔢 “What’s my number?” calculator</h4><span class="lvl pro">Advanced</span></div>
+      <p>Every thread finds its item with <code>i = blockIdx.x × blockDim.x + threadIdx.x</code>. Here each block has <b>8</b> threads:</p>
+      <div class="row">
+        <label>blockIdx.x: <b id="biV">2</b></label><input type="range" id="biR" min="0" max="3" value="2">
+        <label>threadIdx.x: <b id="tiV">5</b></label><input type="range" id="tiR" min="0" max="7" value="5">
+      </div>
+      <p class="out" id="tidOut" style="margin-top:8px"></p>
+      <div class="tidx" id="tidGrid"></div>
+    </div>
+    <div>
+      <h3 class="doodle-h">The 5-step CUDA recipe</h3>
+      <div class="comic">
+        <div class="panel"><div class="art emoji">📦</div><h5>cudaMalloc</h5><p>Rent space in the GPU’s memory.</p></div>
+        <div class="panel"><div class="art emoji">🚚➡️</div><h5>cudaMemcpy</h5><p>Ship input data CPU → GPU.</p></div>
+        <div class="panel"><div class="art emoji">🚀</div><h5>kernel&lt;&lt;&lt; &gt;&gt;&gt;</h5><p>Launch thousands of threads!</p></div>
+        <div class="panel"><div class="art emoji">⬅️🚚</div><h5>cudaMemcpy</h5><p>Ship results GPU → CPU.</p></div>
+        <div class="panel"><div class="art emoji">🧹</div><h5>cudaFree</h5><p>Give the space back.</p></div>
+      </div>
+    </div>
+    <div class="card">
+      <h4>🧰 The toolbox (you rarely start from zero)</h4>
+      <div class="chips" style="margin-bottom:10px"><span class="chip c">cuBLAS · matrix math</span><span class="chip c">cuDNN · neural nets</span><span class="chip c">CUTLASS · fast kernels</span><span class="chip c">Thrust · sort/scan</span><span class="chip c">NCCL · multi-GPU</span><span class="chip c">TensorRT · fast AI</span><span class="chip c">PyTorch · JAX</span></div>
+      <p><b>Not NVIDIA?</b> Same ideas, other names: <b>ROCm/HIP</b> (AMD), <b>Metal</b> (Apple), <b>oneAPI/SYCL</b> (Intel), and cross-vendor <b>OpenCL</b>, <b>Vulkan compute</b>, <b>WebGPU</b>, and <b>Triton</b> (write GPU kernels in Python).</p>
+    </div>
+    <div class="grid-2">
+      <details class="nerd"><summary>🤓 Nerd corner <span class="pill">blocks & sync</span></summary><div class="in"><ul>
+        <li>Blocks must be <b>independent</b> — that’s why the hardware can run them in any order on any number of SMs.</li>
+        <li>Threads in a block share <b>__shared__</b> memory and can wait for each other with <b>__syncthreads()</b>.</li>
+        <li>Block size is usually a multiple of 32 (a warp), often 128–256.</li>
+        <li><b>Streams</b> let copies and kernels overlap. <b>Unified Memory</b> (<code>cudaMallocManaged</code>) moves data automatically.</li>
+        <li>Always check errors and synchronize before timing — kernel launches are <b>asynchronous</b>!</li>
+      </ul></div></details>
+      <div class="remember"><h4>Remember</h4><ul>
+        <li>Kernel = a function every thread runs.</li>
+        <li>Grid of blocks of threads; blocks go to SMs.</li>
+        <li>Same code runs faster on a bigger GPU.</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CH 9 ===== -->
+<section class="chapter c-orange" id="ch9" data-icon="🎒" data-short="Memory: Need for Speed" data-level="pro">
+  <div class="ch-head">
+    <div class="ch-num">9</div>
+    <h2>Memory: <span class="sq">Need for Speed</span></h2>
+    <p class="tag"><span class="lvl pro">Advanced</span> The fastest worker is useless without ingredients.</p>
+  </div>
+  <div class="eli5"><svg><use href="#chippy"/></svg>
+    <div class="bubble"><b class="who">🧸 KID VERSION</b>Workers need ingredients (data) to cook. In your <b>hands</b> = instant. In your <b>backpack</b> = quick. On the <b>classroom shelf</b> = a few steps. In the <b>school library</b> = a walk. <b>Across town</b> = a long bus ride! Run the 3D race to see the difference.</div>
+  </div>
+  <div class="ch-grid">
+    <div class="ch-body">
+      <div class="table-scroll"><table class="sk-table">
+        <thead><tr><th>Level</th><th>Like…</th><th>Size</th><th>Wait</th></tr></thead>
+        <tbody>
+          <tr><td>🟥 Registers</td><td>✋ your hands</td><td>~256 KB per SM</td><td>~1 tick</td></tr>
+          <tr><td>🟧 L1 / Shared</td><td>🎒 backpack</td><td>~128–256 KB per SM</td><td>~30 ticks</td></tr>
+          <tr><td>🟨 L2 cache</td><td>🗄️ class shelf</td><td>~50–100 MB</td><td>~200 ticks</td></tr>
+          <tr><td>🟩 VRAM</td><td>🏫 school library</td><td>8–192 GB</td><td>~500 ticks</td></tr>
+          <tr><td>🟦 CPU RAM</td><td>🌉 across town</td><td>16 GB–TBs</td><td>way more (µs)</td></tr>
+        </tbody>
+      </table></div>
+      <p class="muted">“Ticks” are clock cycles (roughly 0.5 nanoseconds each). Numbers are approximate and vary by GPU.</p>
+      <div class="card">
+        <h4>📏 Latency vs 🚰 bandwidth</h4>
+        <p><b>Latency</b> = how <i>long</i> the pipe is (time for the first drop). <b>Bandwidth</b> = how <i>wide</i> the pipe is (how much flows per second). GPUs care most about <b>wide pipes</b> and hide the long wait by switching warps.</p>
+      </div>
+    </div>
+    <div class="ch-stage"><div class="stage-wrap"><div class="stage" data-scene="memory" data-badge="3D lab · memory tower"></div></div></div>
+  </div>
+  <div class="ch-full">
+    <div class="card">
+      <h3 class="doodle-h">🚰 How wide are the pipes? (memory bandwidth)</h3>
+      <div class="bars" id="bwBars"></div>
+      <p class="muted" style="margin-top:8px">Bar length uses a squished (square-root) scale so the small ones are still visible. GB/s = gigabytes per second. Approximate peak numbers.</p>
+    </div>
+    <div class="card">
+      <h3 class="doodle-h">GDDR vs HBM: two ways to place memory</h3>
+      <svg class="sketch-svg" viewBox="0 0 760 240" role="img" aria-label="GDDR chips sit around the GPU on the board; HBM stacks sit right beside the GPU on an interposer">
+        <g class="rough" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round">
+          <rect x="20" y="40" width="320" height="170" rx="10" fill="var(--green)" fill-opacity=".35"/>
+          <rect x="140" y="85" width="80" height="80" rx="6" fill="var(--pink)"/>
+          <g fill="#2b2e40"><rect x="50" y="60" width="44" height="34" rx="3"/><rect x="50" y="108" width="44" height="34" rx="3"/><rect x="50" y="156" width="44" height="34" rx="3"/><rect x="266" y="60" width="44" height="34" rx="3"/><rect x="266" y="108" width="44" height="34" rx="3"/><rect x="266" y="156" width="44" height="34" rx="3"/><rect x="158" y="48" width="44" height="26" rx="3"/><rect x="158" y="176" width="44" height="26" rx="3"/></g>
+          <g fill="none" stroke="var(--yellow)" stroke-width="2" class="flow-dash"><path d="M94 77 H140 M94 125 H140 M94 173 H140 M266 77 H220 M266 125 H220 M266 173 H220"/></g>
+          <rect x="420" y="150" width="320" height="34" rx="6" fill="var(--cyan)" fill-opacity=".45"/>
+          <rect x="530" y="90" width="100" height="60" rx="6" fill="var(--pink)"/>
+          <g fill="#2b2e40"><rect x="440" y="62" width="70" height="88" rx="4"/><rect x="650" y="62" width="70" height="88" rx="4"/></g>
+          <g stroke="var(--yellow)" stroke-width="2" fill="none"><path d="M440 80h70M440 98h70M440 116h70M440 134h70M650 80h70M650 98h70M650 116h70M650 134h70"/></g>
+          <path d="M510 120 H530 M630 120 H650" stroke="var(--yellow)" stroke-width="7"/>
+          <rect x="400" y="184" width="360" height="22" rx="4" fill="var(--green)" fill-opacity=".35"/>
+        </g>
+        <text x="20" y="28" class="tt" font-size="25">GDDR (gaming cards)</text>
+        <text x="152" y="130" font-size="20" fill="#fff" style="fill:#fff">GPU</text>
+        <text x="20" y="232" font-size="16">chips spread around the board · good & affordable</text>
+        <text x="420" y="28" class="tt" font-size="25">HBM (data-center GPUs)</text>
+        <text x="555" y="126" font-size="20" style="fill:#fff">GPU</text>
+        <text x="440" y="56" font-size="15">stacked towers</text><text x="580" y="176" font-size="15">silicon interposer</text>
+        <text x="420" y="232" font-size="16">memory stacked right next to the chip · super wide pipe</text>
+      </svg>
+    </div>
+    <div class="grid-2">
+      <details class="nerd"><summary>🤓 Nerd corner <span class="pill">the memory wall</span></summary><div class="in"><ul>
+        <li>GPU math speed has grown faster than memory speed — the <b>memory wall</b>. Many jobs are limited by bandwidth, not math.</li>
+        <li><b>Shared memory</b> is a programmer-controlled scratchpad. Load a tile once, reuse it many times (tiling).</li>
+        <li><b>Bank conflicts:</b> shared memory has 32 banks; if many threads hit the same bank, they queue up.</li>
+        <li>AI chatbots generating text read <b>all</b> their weights for every token — that’s why huge, fast memory (HBM) matters so much.</li>
+      </ul></div></details>
+      <div class="remember"><h4>Remember</h4><ul>
+        <li>Closer memory = faster but smaller.</li>
+        <li>Bandwidth (width) matters most for GPUs.</li>
+        <li>Crossing PCIe to CPU RAM is the slowest trip — avoid it!</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CH 10 ===== -->
+<section class="chapter c-blue" id="ch10" data-icon="🤖" data-short="AI & Matrix Magic" data-level="pro">
+  <div class="ch-head">
+    <div class="ch-num">10</div>
+    <h2>AI & <span class="sq">Matrix Magic</span></h2>
+    <p class="tag"><span class="lvl pro">Advanced</span> Why AI loves GPUs: multiply, add, repeat (a trillion times).</p>
+  </div>
+  <div class="eli5"><svg><use href="#chippy"/></svg>
+    <div class="bubble"><b class="who">🧸 KID VERSION</b>An AI brain is a giant machine with <b>billions of knobs</b> 🎛️. To make a guess, numbers flow through layers: <b>multiply by the knobs, add them up, repeat</b>. That’s <b>matrix multiplication</b> — and GPUs are matrix-multiplying monsters! 👾</div>
+  </div>
+  <div class="ch-grid">
+    <div class="ch-body">
+      <div class="card">
+        <h4>🧠 A neural network, sketched</h4>
+        <div id="netDoodle"></div>
+        <p>Each line is a knob (a <b>weight</b>). Each circle adds up “inputs × weights”. Do that for a whole layer at once and you have a <b>matrix multiply</b>.</p>
+      </div>
+      <div class="card">
+        <h4>🧊 Reading the 3D cube</h4>
+        <p><b>A</b> (left) = input numbers. <b>B</b> (top) = the AI’s knobs. <b>C</b> (front) = answers. Each answer cell = a <b>row of A</b> · a <b>column of B</b>. Watch the small cubes inside multiply and slide into C!</p>
+        <p>Try all three: <b>🐢 one at a time</b>, <b>⚡ all at once</b> (GPU threads) and <b>🧩 tensor-core tiles</b>.</p>
+      </div>
+    </div>
+    <div class="ch-stage"><div class="stage-wrap"><div class="stage" data-scene="matmul" data-badge="3D lab · matrix cube"></div></div></div>
+  </div>
+  <div class="ch-full">
+    <div class="toy">
+      <div class="toy-h"><span class="toy-tag">TOY</span><h4>✖️ Tap an answer cell</h4><span class="lvl mid">Intermediate</span></div>
+      <p>Tap any cell in <b>C</b>. Tap numbers in A or B to change them.</p>
+      <div class="mm" id="mmToy"></div>
+      <p class="out" id="mmOut" style="margin-top:10px">👆 Tap a cell in C</p>
+    </div>
+    <div class="fact" style="--accent:var(--blue)">If all <b class="big">8 billion</b> people on Earth each did one multiplication per second, it would take them about <b class="big">a day and a half</b> to do what a top AI GPU does in <b class="big">ONE second</b> (roughly 1,000 trillion low-precision operations).</div>
+    <div class="grid-2">
+      <div class="card">
+        <h4>🎓 Training vs 💬 inference</h4>
+        <div class="comic" style="grid-template-columns:1fr 1fr">
+          <div class="panel"><div class="art emoji">📚🔁</div><h5>Training</h5><p>Practice with the answer key. Guess → check → nudge the knobs. Billions of times. Thousands of GPUs, weeks.</p></div>
+          <div class="panel"><div class="art emoji">💬⚡</div><h5>Inference</h5><p>Using the trained brain to answer you. Fewer GPUs, needs to be fast.</p></div>
+        </div>
+      </div>
+      <div class="card">
+        <h4>📏 Number precision (fewer bits = faster)</h4>
+        <div class="bits" id="bitsViz"></div>
+        <p class="muted" style="margin-top:6px"><span style="color:var(--red)">■</span> sign <span style="color:var(--yellow)">■</span> exponent (size) <span style="color:var(--cyan)">■</span> mantissa (detail). AI is happy with fewer details → 2–8× faster math & less memory.</p>
+      </div>
+    </div>
+    <div>
+      <h3 class="doodle-h">When one GPU isn’t enough</h3>
+      <div class="comic">
+        <div class="panel"><div class="art emoji">📦📦📦</div><h5>Data parallel</h5><p>Every GPU has a full copy of the model, each learns from different examples, then they share notes.</p></div>
+        <div class="panel"><div class="art emoji">🧩🧩</div><h5>Tensor parallel</h5><p>Split each big matrix across GPUs; they work on pieces of the same layer.</p></div>
+        <div class="panel"><div class="art emoji">🏭➡️🏭</div><h5>Pipeline parallel</h5><p>GPU 1 does the first layers, GPU 2 the next… like a factory line.</p></div>
+        <div class="panel"><div class="art emoji">🔗⚡</div><h5>NVLink</h5><p>Super-fast cables between GPUs so they can share notes quickly.</p></div>
+      </div>
+    </div>
+    <div class="grid-2">
+      <details class="nerd"><summary>🤓 Nerd corner <span class="pill">tensor cores & FLOPs</span></summary><div class="in"><ul>
+        <li>A Tensor core computes a small tile <b>D = A×B + C</b> every few clock cycles — dozens to hundreds of multiply-adds at once.</li>
+        <li>A transformer needs roughly <b>2 × parameters</b> operations per token: a 70-billion-parameter model ≈ 140 billion operations per word piece.</li>
+        <li><b>Prefill</b> (reading your prompt) is compute-bound; <b>decode</b> (writing one token at a time) is usually memory-bound.</li>
+        <li><b>FlashAttention</b> keeps attention math in on-chip memory to avoid slow VRAM trips.</li>
+        <li><b>Quantization</b> stores weights in 8 or 4 bits to fit bigger models and run faster.</li>
+      </ul></div></details>
+      <div class="remember"><h4>Remember</h4><ul>
+        <li>AI = huge piles of multiply-and-add = matrix multiplication.</li>
+        <li>GPUs compute all answer cells in parallel; Tensor cores do whole tiles.</li>
+        <li>Lower precision = faster + smaller.</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CH 11 ===== -->
+<section class="chapter c-green" id="ch11" data-icon="🍏" data-short="NVIDIA vs Apple Silicon" data-level="mid">
+  <div class="ch-head">
+    <div class="ch-num">11</div>
+    <h2>NVIDIA <span class="sq">vs</span> Apple Silicon</h2>
+    <p class="tag"><span class="lvl mid">Intermediate</span> Two different ways to build a GPU — neither is “wrong”.</p>
+  </div>
+  <div class="eli5"><svg><use href="#chippy"/></svg>
+    <div class="bubble"><b class="who">🧸 KID VERSION</b><b>NVIDIA card:</b> a giant art studio <b>next door</b> 🏭 with its own supply room. Super powerful, but supplies must be carried over a bridge. <b>Apple Silicon:</b> the art studio is <b>inside the house</b> 🏠 and everyone shares ONE big supply room — less carrying, less energy, but a smaller studio.</div>
+  </div>
+  <div class="ch-grid">
+    <div class="ch-body">
+      <div class="card">
+        <h4>🚚 Separate vs 🤝 shared memory</h4>
+        <p><b>Discrete GPU (NVIDIA card):</b> CPU RAM and GPU VRAM are different places. Data must be <b>copied</b> over the PCIe bridge before the GPU can use it.</p>
+        <p><b>Unified memory (Apple M-series):</b> CPU, GPU and Neural Engine sit on one chip and read the <b>same</b> memory. No copying!</p>
+        <p>Press the buttons in the 3D lab to compare data trips, power and memory size.</p>
+      </div>
+      <div class="fact" style="--accent:var(--green)">“Cores” mean different things! One <b>NVIDIA CUDA core</b> = one math lane. One <b>Apple GPU core</b> = a bundle of about <b class="big">128</b> math lanes. So a 40-core Apple GPU has ~5,120 lanes. 🍎≠🍊</div>
+    </div>
+    <div class="ch-stage"><div class="stage-wrap"><div class="stage" data-scene="compare" data-badge="3D lab · side by side"></div></div></div>
+  </div>
+  <div class="ch-full">
+    <div class="table-scroll"><table class="sk-table">
+      <thead><tr><th></th><th>🟩 NVIDIA (GeForce / data center)</th><th>🍎 Apple Silicon (M-series)</th></tr></thead>
+      <tbody>
+        <tr><td>Where it lives</td><td>Separate card or chip (discrete)</td><td>Same chip as the CPU (system-on-a-chip)</td></tr>
+        <tr><td>Memory</td><td>Own VRAM (GDDR or HBM): super fast; 8–32 GB on gaming cards, 80–192 GB+ in data centers</td><td>Unified memory shared by everyone: up to 128 GB on M4 Max laptops (more on Ultra desktops)</td></tr>
+        <tr><td>Memory speed</td><td>~1–1.8 TB/s (top gaming), ~3–8 TB/s (data center)</td><td>~120–550 GB/s on laptop chips (Ultra chips go higher)</td></tr>
+        <tr><td>Power</td><td>Top gaming cards: 450–575 W by themselves</td><td>A whole laptop chip uses a small fraction of that</td></tr>
+        <tr><td>Drawing style</td><td>Immediate-mode rendering (with clever caches)</td><td>Tile-Based Deferred Rendering (TBDR)</td></tr>
+        <tr><td>Software</td><td>CUDA (huge ecosystem), DirectX, Vulkan, OptiX</td><td>Metal, Core ML, MLX</td></tr>
+        <tr><td>AI helpers</td><td>Tensor cores in every SM</td><td>Neural Engine; plus neural accelerators inside GPU cores from M5 (2025)</td></tr>
+        <tr><td>Upgrade?</td><td>Swap the card 🔧</td><td>Can’t — it’s part of the chip</td></tr>
+        <tr><td>Shines at</td><td>Raw power, AI training, ray tracing, PC gaming</td><td>Battery life, quiet laptops, big models in lots of memory, creative apps</td></tr>
+      </tbody>
+    </table></div>
+    <div class="card">
+      <h3 class="doodle-h">Two ways to paint a frame</h3>
+      <svg class="sketch-svg" viewBox="0 0 760 230" role="img" aria-label="Immediate mode draws triangles straight to memory; tile-based renders each tile on-chip then writes once">
+        <g class="rough" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round">
+          <rect x="20" y="45" width="190" height="130" rx="6" fill="var(--card)"/>
+          <path d="M40 160 L100 60 L150 150 Z" fill="var(--pink)" fill-opacity=".5"/><path d="M90 165 L170 70 L195 160 Z" fill="var(--cyan)" fill-opacity=".5"/>
+          <rect x="265" y="70" width="95" height="80" rx="8" fill="var(--green)" fill-opacity=".4"/>
+          <g fill="none" stroke="var(--orange)" stroke-width="2.2"><path d="M210 80 C235 70 245 80 265 85" marker-end="url(#arr)" color="var(--orange)"/><path d="M210 105 C235 98 245 105 265 105" marker-end="url(#arr)" color="var(--orange)"/><path d="M210 130 C235 126 245 130 265 125" marker-end="url(#arr)" color="var(--orange)"/><path d="M210 155 C235 152 245 150 265 142" marker-end="url(#arr)" color="var(--orange)"/></g>
+          <rect x="410" y="45" width="190" height="130" rx="6" fill="var(--card)"/>
+          <path d="M457 45v130M505 45v130M552 45v130M410 88h190M410 131h190" stroke-width="1.5" opacity=".6" fill="none"/>
+          <rect x="457" y="88" width="48" height="43" fill="var(--yellow)" fill-opacity=".8"/>
+          <rect x="625" y="80" width="50" height="40" rx="6" fill="var(--yellow)"/>
+          <path d="M505 108 C560 100 590 100 625 100" fill="none" stroke="var(--orange)" stroke-width="2.2" marker-end="url(#arr)" color="var(--orange)"/>
+          <rect x="690" y="140" width="60" height="52" rx="6" fill="var(--green)" fill-opacity=".4"/>
+          <path d="M675 110 C700 115 715 125 720 140" fill="none" stroke="var(--orange)" stroke-width="2.2" marker-end="url(#arr)" color="var(--orange)"/>
+        </g>
+        <text x="20" y="30" class="tt" font-size="24">Immediate mode (most PC GPUs)</text>
+        <text x="272" y="116" font-size="17">big VRAM</text>
+        <text x="20" y="206" font-size="16">draw each triangle straight into memory → many trips 🚚🚚🚚</text>
+        <text x="410" y="30" class="tt" font-size="24">Tile-based (Apple, phones)</text>
+        <text x="624" y="72" font-size="14">tiny on-chip</text><text x="626" y="104" font-size="14">tile</text><text x="694" y="172" font-size="14">memory</text>
+        <text x="410" y="206" font-size="16">finish one tile on-chip, then write once → saves power 🔋</text>
+      </svg>
+    </div>
+    <div class="grid-3">
+      <div class="card"><h4>🎮 Gaming PC / AI training</h4><p>Pick a discrete GPU (NVIDIA, or AMD Radeon). Most AI research code is written for CUDA first.</p></div>
+      <div class="card"><h4>💻 Laptop life & creators</h4><p>Apple Silicon: long battery, silent, big unified memory for photo/video and running local AI models.</p></div>
+      <div class="card"><h4>🏢 Data centers</h4><p>NVIDIA H100/B200-class, AMD Instinct, and AI chips like Google’s TPUs — thousands linked together.</p></div>
+    </div>
+    <div class="grid-2">
+      <details class="nerd"><summary>🤓 Nerd corner <span class="pill">the lines are blurring</span></summary><div class="in"><ul>
+        <li>NVIDIA also builds unified designs: <b>Grace Hopper</b> superchips, <b>Jetson</b> robot boards and the <b>DGX Spark</b> desktop share memory between CPU and GPU.</li>
+        <li>Apple’s TBDR also does <b>hidden surface removal</b> before shading, so hidden pixels are never painted.</li>
+        <li>Unified memory removes copies, but a top discrete GPU still has more raw bandwidth and math.</li>
+        <li>Others: <b>AMD</b> (Radeon, Instinct, ROCm), <b>Intel</b> (Arc, Xe), phone GPUs like <b>Qualcomm Adreno</b> and <b>Arm Mali</b> — mostly tile-based too.</li>
+      </ul></div></details>
+      <div class="remember"><h4>Remember</h4><ul>
+        <li>NVIDIA card = separate studio + own memory + bridge.</li>
+        <li>Apple = all-in-one chip + shared unified memory.</li>
+        <li>Power & raw speed vs efficiency & simplicity.</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CH 12 ===== -->
+<section class="chapter c-red" id="ch12" data-icon="🧠" data-short="Pro Tips & Design" data-level="pro">
+  <div class="ch-head">
+    <div class="ch-num">12</div>
+    <h2>Pro Tips & <span class="sq">Design Decisions</span></h2>
+    <p class="tag"><span class="lvl pro">Advanced</span> The secrets of the people who build and program GPUs.</p>
+  </div>
+  <div class="eli5"><svg><use href="#chippy"/></svg>
+    <div class="bubble"><b class="who">🧸 KID VERSION</b>Even an army needs good habits: <b>march together</b>, <b>grab supplies in one trip</b>, and <b>don’t make half the team wait</b>. In the 3D lab, 32 little robots (one warp) show you the good and the bad way!</div>
+  </div>
+  <div class="ch-grid">
+    <div class="ch-body">
+      <div class="card">
+        <h4>🚚 Coalescing: one trip, not 32</h4>
+        <p>When 32 neighbors in a warp read <b>neighboring</b> memory, the GPU grabs it all in one big scoop. If they read <b>random</b> places, it needs many separate trips — way slower.</p>
+      </div>
+      <div class="card">
+        <h4>🔀 Divergence: don’t split the team</h4>
+        <p>A warp shares one instruction. If half the team takes the <code>if</code> and half the <code>else</code>, the GPU runs <b>both paths one after the other</b> while each half waits. Same work, double time!</p>
+      </div>
+    </div>
+    <div class="ch-stage"><div class="stage-wrap"><div class="stage" data-scene="warp" data-badge="3D lab · one warp, 32 robots"></div></div></div>
+  </div>
+  <div class="ch-full">
+    <div>
+      <h3 class="doodle-h">⚖️ Big design decisions (simple → deep)</h3>
+      <div class="auto-grid" style="grid-template-columns:repeat(auto-fill,minmax(min(100%,270px),1fr));margin-top:16px">
+        <div class="card tradeoff"><span class="lvl basic">Simple</span><h4>Many small cores</h4><div class="seesaw"><div>🐜 lots of simple cores</div><span class="pivot">⚖️</span><div>🦁 few smart cores</div></div><p>GPUs pick <b>throughput</b>: tons of work per second, even if one task is slower.</p></div>
+        <div class="card tradeoff"><span class="lvl basic">Simple</span><h4>Wide memory pipes</h4><div class="seesaw"><div>🚰 huge bandwidth</div><span class="pivot">⚖️</span><div>⏱️ low latency</div></div><p>Wide buses and HBM feed thousands of cores; the wait is hidden by switching warps.</p></div>
+        <div class="card tradeoff"><span class="lvl mid">Medium</span><h4>Threads instead of big caches</h4><div class="seesaw"><div>🔁 swap warps while waiting</div><span class="pivot">⚖️</span><div>🗄️ giant caches</div></div><p>Huge register files keep many warps “parked” so switching is free.</p></div>
+        <div class="card tradeoff"><span class="lvl mid">Medium</span><h4>SIMT warps of 32</h4><div class="seesaw"><div>💰 one control unit per 32 lanes</div><span class="pivot">⚖️</span><div>🔀 divergence cost</div></div><p>Sharing instruction logic saves chip space and power — but branches hurt.</p></div>
+        <div class="card tradeoff"><span class="lvl mid">Medium</span><h4>Special-purpose units</h4><div class="seesaw"><div>⚡ Tensor/RT/video cores</div><span class="pivot">⚖️</span><div>🧰 general cores</div></div><p>Fixed-function hardware is 10× more efficient — but only for its one job.</p></div>
+        <div class="card tradeoff"><span class="lvl mid">Medium</span><h4>Lower precision</h4><div class="seesaw"><div>🏎️ FP8/FP4 speed</div><span class="pivot">⚖️</span><div>🎯 FP32/FP64 accuracy</div></div><p>AI tolerates rounding; science simulations often don’t.</p></div>
+        <div class="card tradeoff"><span class="lvl pro">Deep</span><h4>Discrete vs unified</h4><div class="seesaw"><div>🏭 own VRAM, more power</div><span class="pivot">⚖️</span><div>🏠 shared memory, efficiency</div></div><p>Copies over PCIe vs sharing one pool (Chapter 11).</p></div>
+        <div class="card tradeoff"><span class="lvl pro">Deep</span><h4>Chiplets & links</h4><div class="seesaw"><div>🧩 several dies + NVLink</div><span class="pivot">⚖️</span><div>🔲 one giant die</div></div><p>Huge dies have more defects; data-center GPUs like B200 join two dies, and racks link many GPUs.</p></div>
+        <div class="card tradeoff"><span class="lvl pro">Deep</span><h4>The power wall</h4><div class="seesaw"><div>🔥 higher clocks</div><span class="pivot">⚖️</span><div>🔋 perf per watt</div></div><p>Power grows fast with voltage and clock speed, so GPUs go wide-and-slower instead of narrow-and-fast.</p></div>
+      </div>
+    </div>
+    <div class="toy">
+      <div class="toy-h"><span class="toy-tag">TOY</span><h4>🏠 The roofline: math-bound or memory-bound?</h4><span class="lvl pro">Advanced</span></div>
+      <p><b>Arithmetic intensity</b> = math operations per byte of memory read. Slide it and see which “roof” limits your program:</p>
+      <div class="row"><label>FLOPs per byte: <b id="aiV">1</b></label><input type="range" id="aiR" min="0" max="100" value="30" style="width:min(380px,100%)"></div>
+      <div id="roofline"></div>
+      <p class="out" id="roofOut"></p>
+    </div>
+    <div class="toy" style="--accent:var(--cyan)">
+      <div class="toy-h"><span class="toy-tag">CHECKLIST</span><h4>✅ Best practices</h4></div>
+      <div class="tabs" id="bpTabs"></div>
+      <div id="bpPanels"></div>
+    </div>
+    <div class="grid-2">
+      <details class="nerd"><summary>🤓 Nerd corner <span class="pill">profiling tools</span></summary><div class="in"><ul>
+        <li><b>nvidia-smi</b>: is the GPU busy? how much memory? how hot?</li>
+        <li><b>Nsight Systems</b>: timeline of CPU, GPU, copies — find the gaps.</li>
+        <li><b>Nsight Compute</b>: deep-dive one kernel: occupancy, memory throughput, stalls.</li>
+        <li><b>PyTorch Profiler</b>, <b>RenderDoc</b>, <b>PIX</b>, <b>Xcode GPU tools</b> for games and Metal.</li>
+        <li>Golden rule: <b>measure first</b>, then optimize the biggest bar.</li>
+      </ul></div></details>
+      <div class="remember"><h4>Remember</h4><ul>
+        <li>Keep data on the GPU; read memory in neat neighbor order.</li>
+        <li>Keep warps together; give the GPU lots of work.</li>
+        <li>Profile, then fix the biggest bottleneck.</li>
+      </ul></div>
+    </div>
+  </div>
+</section>
+
+<!-- ===== CH 13 ===== -->
+<section class="chapter c-pink" id="ch13" data-icon="🏆" data-short="Graduation & Quiz" data-level="basic">
+  <div class="ch-head">
+    <div class="ch-num">13</div>
+    <h2>Graduation <span class="sq">Day!</span></h2>
+    <p class="tag"><span class="lvl basic">Everyone</span> Quiz, cheat sheet, glossary — and a trophy.</p>
+  </div>
+  <div class="eli5"><svg><use href="#chippy"/></svg>
+    <div class="bubble"><b class="who">🧸 KID VERSION</b>You made it! 🎉 Answer the 10 questions to fill the trophy with confetti. Stuck? Peek at the glossary — no shame, real engineers look things up all the time!</div>
+  </div>
+  <div class="ch-grid">
+    <div class="ch-body">
+      <div class="card">
+        <h4>📝 GPUs in 10 sentences</h4>
+        <ol style="margin:0;padding-left:24px">
+          <li>A GPU is a chip with thousands of simple cores that work at the same time.</li>
+          <li>The CPU is the clever boss; the GPU is the giant army.</li>
+          <li>The OS and drivers let apps safely send work to the GPU.</li>
+          <li>Games: vertices → triangles → pixels → shading → frame, 60+ times a second.</li>
+          <li>Inside: GPCs → SMs → warps of 32 threads → cores.</li>
+          <li>Memory is the bottleneck: closer = faster; wide pipes win.</li>
+          <li>CUDA: write a kernel for one thread, launch millions.</li>
+          <li>AI is mostly matrix multiplication; Tensor cores eat tiles of it.</li>
+          <li>NVIDIA cards have their own VRAM; Apple shares unified memory.</li>
+          <li>Pro habits: keep data on the GPU, coalesce, avoid divergence, profile.</li>
+        </ol>
+      </div>
+    </div>
+    <div class="ch-stage"><div class="stage-wrap"><div class="stage" data-scene="trophy" data-badge="3D lab · your trophy"></div></div></div>
+  </div>
+  <div class="ch-full">
+    <div>
+      <h3 class="doodle-h">🧩 The Final Quiz</h3>
+      <div id="quiz" style="display:grid;gap:14px"></div>
+      <div class="score-box" id="quizScore" style="margin-top:14px">Score: 0 / 10</div>
+    </div>
+    <div class="cert" id="cert">
+      <h4>🏅 Certificate of Awesomeness</h4>
+      <p>This certifies that</p>
+      <div class="nm" id="certName">Future GPU Wizard</div>
+      <p style="margin-top:10px">has explored the GPU Sketchbook and now knows how GPUs paint games, crunch AI and run thousands of threads at once. 🎨🧠⚡</p>
+      <p><label>Your name: <input id="nameIn" maxlength="30" placeholder="type your name"></label></p>
+      <p class="muted" id="certScore"></p>
+    </div>
+    <div>
+      <h3 class="doodle-h">📖 Glossary</h3>
+      <input class="glossary-search" id="glossQ" placeholder="🔎 search a word… (try “warp” or “VRAM”)" aria-label="Search glossary">
+      <div class="gloss" id="gloss"></div>
+    </div>
+  </div>
+</section>
+
+</div><!-- /wrap -->
+</main>
+
+<footer>
+  <div class="wrap">
+    <p>Made with ✏️, 🖍️ and lots of ☕ · Drawn for curious minds of every age.</p>
+    <p style="font-size:15px">Numbers are approximate and meant for learning. Product names belong to their owners. 3D made with three.js.</p>
+  </div>
+</footer>
+<button class="to-top" id="toTop" aria-label="Back to top">⬆</button>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/scenes/basics.js"></script>
+<script src="js/scenes/inside.js"></script>
+<script src="js/scenes/pro.js"></script>
+<script src="js/scenes/render.js"></script>
+<script src="js/demos.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

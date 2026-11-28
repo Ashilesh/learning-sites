@@ -330,5 +330,20 @@ window.SITES = [
     minutes: 240,
   },
 
+  {
+    id: "gpu-sketchbook",
+    title: "GPU Sketchbook",
+    path: "GPU/index.html",
+    category: "graphics",
+    topic: "GPU",
+    format: "Interactive guide · 13 chapters",
+    description:
+      "GPUs, hand-drawn and explained from the ground up: CPU vs GPU, what's on a graphics card and inside the chip, how games get drawn, " +
+      "CUDA threads and warps, memory bandwidth, AI and matrix math, NVIDIA vs Apple Silicon, and pro design tips. With a 3D model in every chapter and a final quiz.",
+    tags: ["gpu", "graphics card", "cpu vs gpu", "cuda", "nvidia", "apple silicon", "unified memory", "vram", "hbm", "sm", "cores", "warps", "threads", "rendering", "rasterization", "pipeline", "shaders", "ai", "matrix", "tensor cores", "parallel computing", "chip design", "3d"],
+    added: "2026-11-28",
+    minutes: 180,
+  },
+
   // ↓↓↓ ADD NEW SITES HERE ↓↓↓
 ];
